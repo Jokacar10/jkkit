@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-import { AuthState } from '../types';
 import { storage, STORAGE_KEYS, SimpleEncryption } from '../utils';
+import type { AuthState } from '../types/wallet';
 
 interface AuthStore extends AuthState {
     // Actions

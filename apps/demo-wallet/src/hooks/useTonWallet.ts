@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { mnemonicNew } from '@ton/crypto';
 
 import { useWalletStore, useAuthStore } from '../stores';
 
@@ -55,23 +56,7 @@ export const useTonWallet = (): UseTonWalletReturn => {
 
         try {
             setError(null);
-
-            // Mock mnemonic generation for demo purposes
-            const mockWords = [
-                'abandon',
-                'ability',
-                'able',
-                'about',
-                'above',
-                'absent',
-                'absorb',
-                'abstract',
-                'absurd',
-                'abuse',
-                'access',
-                'accident',
-            ];
-            const mnemonic = mockWords.slice(0, 12); // Use first 12 words as demo
+            const mnemonic = await mnemonicNew();
 
             // Create wallet with mnemonic
             await walletStore.createWallet(mnemonic);

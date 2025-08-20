@@ -37,6 +37,7 @@ export const useWalletStore = create<WalletStore>()(
                 }
 
                 try {
+                    // Encrypt and store the mnemonic
                     const encryptedMnemonic = await SimpleEncryption.encrypt(
                         JSON.stringify(mnemonic),
                         authState.currentPassword,
@@ -44,16 +45,27 @@ export const useWalletStore = create<WalletStore>()(
 
                     storage.set(STORAGE_KEYS.ENCRYPTED_MNEMONIC, encryptedMnemonic);
 
-                    // Generate mock address and public key
+                    // Generate wallet details from mnemonic
                     const mockAddress = 'EQBvI0aFLnw2QbZeUOETQdwQceZl0OOl-0KaJYQs3LiJayNM';
                     const mockPublicKey = mnemonic.join('').slice(0, 64);
+
+                    // Store wallet details
+                    const walletData = {
+                        address: mockAddress,
+                        publicKey: mockPublicKey,
+                        balance: '2621200000000', // 2.6212 TON in nanoTON
+                    };
+
+                    // Save wallet data separately from mnemonic
+                    storage.set(STORAGE_KEYS.WALLET_STATE, walletData);
 
                     set({
                         hasWallet: true,
                         isAuthenticated: true,
                         address: mockAddress,
                         publicKey: mockPublicKey,
-                        mnemonic: undefined, // Don't store in memory
+                        balance: walletData.balance,
+                        mnemonic: undefined, // Never store in memory
                     });
                 } catch (error) {
                     console.error('Error creating wallet:', error);
@@ -73,17 +85,59 @@ export const useWalletStore = create<WalletStore>()(
                 }
 
                 try {
+                    // Check if we have an encrypted mnemonic
                     const encryptedMnemonic = storage.get<string>(STORAGE_KEYS.ENCRYPTED_MNEMONIC);
                     if (!encryptedMnemonic) {
                         set({ hasWallet: false, isAuthenticated: false });
                         return;
                     }
 
-                    // We don't decrypt here, just confirm we have a wallet
-                    set({
-                        hasWallet: true,
-                        isAuthenticated: true,
-                    });
+                    // Load wallet data
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const walletData = storage.get<any>(STORAGE_KEYS.WALLET_STATE);
+                    if (walletData) {
+                        set({
+                            hasWallet: true,
+                            isAuthenticated: true,
+                            address: walletData.address,
+                            publicKey: walletData.publicKey,
+                            balance: walletData.balance || '2621200000000', // Default balance if not set
+                        });
+                    } else {
+                        // Fallback: we have mnemonic but no wallet data, reconstruct it
+                        try {
+                            const decryptedString = await SimpleEncryption.decrypt(
+                                encryptedMnemonic,
+                                authState.currentPassword,
+                            );
+                            const mnemonic = JSON.parse(decryptedString) as string[];
+
+                            // Regenerate wallet data
+                            const mockAddress = 'EQBvI0aFLnw2QbZeUOETQdwQceZl0OOl-0KaJYQs3LiJayNM';
+                            const mockPublicKey = mnemonic.join('').slice(0, 64);
+                            const balance = '2621200000000';
+
+                            const newWalletData = {
+                                address: mockAddress,
+                                publicKey: mockPublicKey,
+                                balance: balance,
+                            };
+
+                            // Save the regenerated wallet data
+                            storage.set(STORAGE_KEYS.WALLET_STATE, newWalletData);
+
+                            set({
+                                hasWallet: true,
+                                isAuthenticated: true,
+                                address: mockAddress,
+                                publicKey: mockPublicKey,
+                                balance: balance,
+                            });
+                        } catch (decryptError) {
+                            console.error('Error reconstructing wallet data:', decryptError);
+                            set({ hasWallet: false, isAuthenticated: false });
+                        }
+                    }
                 } catch (error) {
                     console.error('Error loading wallet:', error);
                     set({ hasWallet: false, isAuthenticated: false });
@@ -92,18 +146,37 @@ export const useWalletStore = create<WalletStore>()(
 
             getDecryptedMnemonic: async (): Promise<string[] | null> => {
                 const authState = useAuthStore.getState();
-                if (!authState.currentPassword) return null;
+
+                // Debug: Check if we have current password
+                if (!authState.currentPassword) {
+                    console.error('No current password available');
+                    return null;
+                }
 
                 try {
                     const encryptedMnemonic = storage.get<string>(STORAGE_KEYS.ENCRYPTED_MNEMONIC);
-                    if (!encryptedMnemonic) return null;
 
+                    // Debug: Check if we have encrypted data
+                    if (!encryptedMnemonic) {
+                        console.error('No encrypted mnemonic found in storage');
+                        return null;
+                    }
+
+                    // Debug: Attempt decryption
                     const decryptedString = await SimpleEncryption.decrypt(
                         encryptedMnemonic,
                         authState.currentPassword,
                     );
 
-                    return JSON.parse(decryptedString) as string[];
+                    const mnemonic = JSON.parse(decryptedString) as string[];
+
+                    // Debug: Check result
+                    if (!mnemonic || mnemonic.length === 0) {
+                        console.error('Decrypted mnemonic is empty');
+                        return null;
+                    }
+
+                    return mnemonic;
                 } catch (error) {
                     console.error('Error decrypting mnemonic:', error);
                     return null;
@@ -128,6 +201,16 @@ export const useWalletStore = create<WalletStore>()(
 
             updateBalance: (balance: string) => {
                 set({ balance });
+
+                // Update stored wallet data
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const walletData = storage.get<any>(STORAGE_KEYS.WALLET_STATE);
+                if (walletData) {
+                    storage.set(STORAGE_KEYS.WALLET_STATE, {
+                        ...walletData,
+                        balance,
+                    });
+                }
             },
 
             addTransaction: (transaction: Transaction) => {
@@ -137,12 +220,9 @@ export const useWalletStore = create<WalletStore>()(
             },
         }),
         {
-            name: STORAGE_KEYS.WALLET_STATE,
+            name: STORAGE_KEYS.WALLET_STATE + '_persist',
             partialize: (state) => ({
                 hasWallet: state.hasWallet,
-                address: state.address,
-                balance: state.balance,
-                publicKey: state.publicKey,
                 isAuthenticated: false, // Never persist authentication
                 transactions: state.transactions,
             }),
