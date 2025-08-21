@@ -1,15 +1,22 @@
 // Connect request handler
 
-import type { WalletInterface, EventConnectRequest } from '../types';
-import type { RawBridgeEvent, RequestContext, EventHandler, RawBridgeEventConnect } from '../types/internal';
+import type { EventConnectRequest } from '../types';
+import type { RawBridgeEvent, EventHandler, RawBridgeEventConnect } from '../types/internal';
 import { sanitizeString } from '../validation/sanitization';
+import { globalLogger } from '../core/Logger';
+import { BasicHandler } from './BasicHandler';
 
-export class ConnectHandler implements EventHandler<EventConnectRequest> {
-    canHandle(event: RawBridgeEvent): boolean {
+const log = globalLogger.createChild('ConnectHandler');
+
+export class ConnectHandler
+    extends BasicHandler<EventConnectRequest>
+    implements EventHandler<EventConnectRequest, RawBridgeEventConnect>
+{
+    canHandle(event: RawBridgeEvent): event is RawBridgeEventConnect {
         return event.method === 'startConnect';
     }
 
-    async handle(event: RawBridgeEventConnect, context: RequestContext): Promise<EventConnectRequest> {
+    async handle(event: RawBridgeEventConnect): Promise<EventConnectRequest> {
         // Extract manifest information
         const manifestUrl = this.extractManifestUrl(event);
         let manifest = null;
@@ -19,7 +26,7 @@ export class ConnectHandler implements EventHandler<EventConnectRequest> {
             try {
                 manifest = await this.fetchManifest(manifestUrl);
             } catch (error) {
-                console.warn('Failed to fetch manifest:', error);
+                log.warn('Failed to fetch manifest', { error });
             }
         }
 
@@ -30,7 +37,6 @@ export class ConnectHandler implements EventHandler<EventConnectRequest> {
             manifestUrl,
             request: event.params?.items || [],
             preview: this.createPreview(event, manifest),
-            wallet: context.wallet, // Don't assign a wallet yet - user will select one
         };
 
         return connectEvent;
@@ -43,7 +49,8 @@ export class ConnectHandler implements EventHandler<EventConnectRequest> {
     private extractDAppName(event: RawBridgeEvent, manifest?: any): string {
         const name =
             manifest?.name ||
-            event.params?.manifest?.name ||
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (event as any).params?.manifest?.name ||
             // event.params?.dAppName ||
             // event.params?.name ||
             'Unknown dApp';
@@ -92,19 +99,5 @@ export class ConnectHandler implements EventHandler<EventConnectRequest> {
             throw new Error(`Failed to fetch manifest: ${response.statusText}`);
         }
         return response.json();
-    }
-
-    /**
-     * Create placeholder wallet when no wallet is in context
-     */
-    private createPlaceholderWallet(): WalletInterface {
-        return {
-            publicKey: new Uint8Array(0),
-            version: '',
-            sign: async () => new Uint8Array(0),
-            getAddress: () => '',
-            getBalance: async () => BigInt(0),
-            getStateInit: async () => '',
-        };
     }
 }

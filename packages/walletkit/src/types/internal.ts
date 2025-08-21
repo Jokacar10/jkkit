@@ -1,7 +1,6 @@
 // Internal types for TonWalletKit modules
 
-import { ConnectItem, ConnectRequest, SendTransactionRpcRequest } from '@tonconnect/protocol';
-import { ExtraCurrency } from '@ton/core';
+import { ConnectItem, SendTransactionRpcRequest } from '@tonconnect/protocol';
 
 import type { WalletInterface } from './wallet';
 
@@ -43,12 +42,6 @@ export interface StorageAdapter {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface EventCallback<T = any> {
     (event: T): void | Promise<void>;
-}
-
-export interface RequestContext {
-    id: string;
-    sessionId?: string;
-    timestamp: Date;
 }
 
 export interface ValidationResult {
@@ -107,7 +100,8 @@ export type RawBridgeEvent = RawBridgeEventGeneric | RawBridgeEventConnect | Raw
 export type EventType = 'startConnect' | 'sendTransaction' | 'signData' | 'disconnect';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface EventHandler<T = any> {
-    canHandle(event: RawBridgeEvent): boolean;
-    handle(event: RawBridgeEvent, context: RequestContext): Promise<T>;
+export interface EventHandler<T = any, V extends RawBridgeEvent = RawBridgeEvent> {
+    canHandle(event: RawBridgeEvent): event is V;
+    handle(event: V): Promise<T>;
+    notify(event: T): Promise<void>;
 }

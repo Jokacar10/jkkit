@@ -1,23 +1,27 @@
 // Disconnect event handler
 
-import type { WalletInterface, EventDisconnect } from '../types';
-import type { RawBridgeEvent, RequestContext, EventHandler, RawBridgeEventGeneric } from '../types/internal';
+import type { EventDisconnect } from '../types';
+import type { RawBridgeEvent, EventHandler, RawBridgeEventGeneric } from '../types/internal';
+import { BasicHandler } from './BasicHandler';
 
-export class DisconnectHandler implements EventHandler<EventDisconnect> {
-    canHandle(event: RawBridgeEvent): boolean {
-        return (
-            event.method === 'disconnect' ||
-            event.method === 'tonconnect_disconnect' ||
-            event.method === 'wallet_disconnect'
-        );
+export class DisconnectHandler
+    extends BasicHandler<EventDisconnect>
+    implements EventHandler<EventDisconnect, RawBridgeEventGeneric>
+{
+    canHandle(event: RawBridgeEvent): event is RawBridgeEventGeneric {
+        return event.method === 'disconnect';
     }
 
-    async handle(event: RawBridgeEvent, context: RequestContext): Promise<EventDisconnect> {
+    async handle(event: RawBridgeEvent): Promise<EventDisconnect> {
+        if (!event.wallet) {
+            throw new Error('No wallet found in event');
+        }
+
         const reason = this.extractDisconnectReason(event);
 
         const disconnectEvent: EventDisconnect = {
             reason,
-            wallet: context.wallet || this.createPlaceholderWallet(),
+            wallet: event.wallet,
         };
 
         return disconnectEvent;
@@ -38,19 +42,5 @@ export class DisconnectHandler implements EventHandler<EventDisconnect> {
 
         // No specific reason provided
         return undefined;
-    }
-
-    /**
-     * Create placeholder wallet
-     */
-    private createPlaceholderWallet(): WalletInterface {
-        return {
-            publicKey: new Uint8Array(0),
-            version: '',
-            sign: async () => new Uint8Array(0),
-            getAddress: () => '',
-            getBalance: async () => BigInt(0),
-            getStateInit: async () => '',
-        };
     }
 }

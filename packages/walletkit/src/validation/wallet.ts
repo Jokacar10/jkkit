@@ -6,7 +6,7 @@ import type { ValidationResult, ValidationContext } from './types';
 /**
  * Validate wallet interface implementation
  */
-export function validateWallet(wallet: WalletInterface, context: ValidationContext = {}): ValidationResult {
+export function validateWallet(_wallet: WalletInterface, _context: ValidationContext = {}): ValidationResult {
     const errors: string[] = [];
     const warnings: string[] = [];
 

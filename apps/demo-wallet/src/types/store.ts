@@ -56,11 +56,11 @@ export interface MigrationState {
 
 export type MigrationFunction = (persistedState: unknown, version: number) => unknown;
 
-type DeepPartial<T> = T extends object
-    ? {
-          [P in keyof T]?: DeepPartial<T[P]>;
-      }
-    : T;
+// type DeepPartial<T> = T extends object
+//     ? {
+//           [P in keyof T]?: DeepPartial<T[P]>;
+//       }
+//     : T;
 
 export type SetState = {
     (state: AppState | Partial<AppState>): void;

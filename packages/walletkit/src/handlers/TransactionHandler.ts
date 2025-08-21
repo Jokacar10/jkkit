@@ -1,11 +1,9 @@
 // Transaction request handler
 
-import type { WalletInterface, EventTransactionRequest, HumanReadableTx, TonNetwork } from '../types';
+import type { WalletInterface, EventTransactionRequest, HumanReadableTx } from '../types';
 import type {
     RawBridgeEvent,
-    RequestContext,
     EventHandler,
-    RawBridgeEventGeneric,
     RawBridgeEventTransaction,
     ConnectTransactionParamContent,
     ValidationResult,
@@ -14,23 +12,27 @@ import { isValidNanotonAmount, validateTransactionMessages } from '../validation
 import { globalLogger } from '../core/Logger';
 import {} from '@tonconnect/protocol';
 import { isValidAddress } from '../utils/address';
+import { BasicHandler } from './BasicHandler';
 
 const log = globalLogger.createChild('TransactionHandler');
 
-export class TransactionHandler implements EventHandler<EventTransactionRequest> {
-    canHandle(event: RawBridgeEvent): boolean {
+export class TransactionHandler
+    extends BasicHandler<EventTransactionRequest>
+    implements EventHandler<EventTransactionRequest, RawBridgeEventTransaction>
+{
+    canHandle(event: RawBridgeEvent): event is RawBridgeEventTransaction {
         return event.method === 'sendTransaction';
     }
 
-    async handle(event: RawBridgeEventTransaction, context: RequestContext): Promise<EventTransactionRequest> {
+    async handle(event: RawBridgeEventTransaction): Promise<EventTransactionRequest> {
         if (!event.wallet) {
-            log.error('Wallet not found', { event, context });
+            log.error('Wallet not found', { event });
             throw new Error('Wallet not found');
         }
 
         const request = this.parseTransactionRequest(event);
         if (!request) {
-            log.error('Failed to parse transaction request', { event, context });
+            log.error('Failed to parse transaction request', { event });
             throw new Error('Failed to parse transaction request');
         }
 
@@ -221,7 +223,7 @@ export class TransactionHandler implements EventHandler<EventTransactionRequest>
      * Emulate transaction to get fees and balance changes
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private async emulateTransaction(request: any, wallet?: WalletInterface): Promise<any> {
+    private async emulateTransaction(_request: any, wallet?: WalletInterface): Promise<any> {
         // TODO: Implement transaction emulation using TON API
         // This would involve calling a TON Center API or similar service
 

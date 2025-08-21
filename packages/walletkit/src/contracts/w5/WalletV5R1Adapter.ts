@@ -11,7 +11,7 @@ import {
     storeStateInit,
 } from '@ton/core';
 import { TonClient } from '@ton/ton';
-import { KeyPair, keyPairFromSeed } from '@ton/crypto';
+import { keyPairFromSeed } from '@ton/crypto';
 import { external, internal } from '@ton/core';
 
 import type { TonNetwork, WalletInterface } from '../../types';

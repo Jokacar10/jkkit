@@ -1,17 +1,23 @@
 // Sign data request handler
 
-import type { WalletInterface, EventSignDataRequest } from '../types';
-import type { RawBridgeEvent, RequestContext, EventHandler, RawBridgeEventGeneric } from '../types/internal';
+import type { EventSignDataRequest } from '../types';
+import type { RawBridgeEvent, EventHandler, RawBridgeEventGeneric } from '../types/internal';
 import { sanitizeString } from '../validation/sanitization';
+import { BasicHandler } from './BasicHandler';
 
-export class SignDataHandler implements EventHandler<EventSignDataRequest> {
-    canHandle(event: RawBridgeEvent): boolean {
-        return (
-            event.method === 'signData' || event.method === 'personal_sign' || event.method === 'tonconnect_signData'
-        );
+export class SignDataHandler
+    extends BasicHandler<EventSignDataRequest>
+    implements EventHandler<EventSignDataRequest, RawBridgeEventGeneric>
+{
+    canHandle(event: RawBridgeEvent): event is RawBridgeEventGeneric {
+        return event.method === 'signData';
     }
 
-    async handle(event: RawBridgeEvent, context: RequestContext): Promise<EventSignDataRequest> {
+    async handle(event: RawBridgeEvent): Promise<EventSignDataRequest> {
+        if (!event.wallet) {
+            throw new Error('No wallet found in event');
+        }
+
         const data = this.parseDataToSign(event);
         const preview = this.createDataPreview(data, event);
 
@@ -19,7 +25,7 @@ export class SignDataHandler implements EventHandler<EventSignDataRequest> {
             id: event.id,
             data,
             preview,
-            wallet: context.wallet || this.createPlaceholderWallet(),
+            wallet: event.wallet,
         };
 
         return signEvent;
@@ -82,7 +88,7 @@ export class SignDataHandler implements EventHandler<EventSignDataRequest> {
      * Create human-readable preview of data to sign
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private createDataPreview(data: Uint8Array, event: RawBridgeEvent): any {
+    private createDataPreview(data: Uint8Array, _event: RawBridgeEvent): any {
         const preview = this.analyzeDataContent(data);
 
         return {
@@ -199,19 +205,5 @@ export class SignDataHandler implements EventHandler<EventSignDataRequest> {
         } catch {
             return false;
         }
-    }
-
-    /**
-     * Create placeholder wallet
-     */
-    private createPlaceholderWallet(): WalletInterface {
-        return {
-            publicKey: new Uint8Array(0),
-            version: '',
-            sign: async () => new Uint8Array(0),
-            getAddress: () => '',
-            getBalance: async () => BigInt(0),
-            getStateInit: async () => '',
-        };
     }
 }

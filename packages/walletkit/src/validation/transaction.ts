@@ -1,6 +1,6 @@
 // Transaction validation logic
 
-import type { ValidationResult, ValidationContext } from './types';
+import type { ValidationResult } from './types';
 import { validateTonAddress } from './address';
 import { isFriendlyTonAddress } from '../utils/address';
 
@@ -29,7 +29,7 @@ export interface HumanReadableTx {
  * Validate transaction messages array
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function validateTransactionMessages(messages: any[], context: ValidationContext = {}): ValidationResult {
+export function validateTransactionMessages(messages: any[]): ValidationResult {
     const errors: string[] = [];
 
     if (!Array.isArray(messages)) {
@@ -44,7 +44,7 @@ export function validateTransactionMessages(messages: any[], context: Validation
 
     // Validate each message
     messages.forEach((msg, index) => {
-        const msgErrors = validateTransactionMessage(msg, context).errors;
+        const msgErrors = validateTransactionMessage(msg).errors;
         msgErrors.forEach((error) => {
             errors.push(`message[${index}]: ${error}`);
         });
@@ -60,7 +60,7 @@ export function validateTransactionMessages(messages: any[], context: Validation
  * Validate individual transaction message
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function validateTransactionMessage(message: any, context: ValidationContext = {}): ValidationResult {
+export function validateTransactionMessage(message: any): ValidationResult {
     const errors: string[] = [];
 
     if (typeof message !== 'object') {
@@ -72,7 +72,7 @@ export function validateTransactionMessage(message: any, context: ValidationCont
     }
 
     // Object format - validate required fields
-    const objErrors = validateMessageObject(message, context).errors;
+    const objErrors = validateMessageObject(message).errors;
     errors.push(...objErrors);
 
     return {
@@ -85,7 +85,7 @@ export function validateTransactionMessage(message: any, context: ValidationCont
  * Validate message object structure
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function validateMessageObject(message: any, context: ValidationContext = {}): ValidationResult {
+export function validateMessageObject(message: any): ValidationResult {
     const errors: string[] = [];
 
     // Required fields

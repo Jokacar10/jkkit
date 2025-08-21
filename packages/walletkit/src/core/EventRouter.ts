@@ -1,20 +1,7 @@
 // Event routing and handler coordination
 
-import type {
-    WalletInterface,
-    EventConnectRequest,
-    EventTransactionRequest,
-    EventSignDataRequest,
-    EventDisconnect,
-} from '../types';
-import type {
-    RawBridgeEvent,
-    RequestContext,
-    EventHandler,
-    EventCallback,
-    RawBridgeEventConnect,
-    RawBridgeEventTransaction,
-} from '../types/internal';
+import type { EventConnectRequest, EventTransactionRequest, EventSignDataRequest, EventDisconnect } from '../types';
+import type { RawBridgeEvent, EventHandler, EventCallback } from '../types/internal';
 import { ConnectHandler } from '../handlers/ConnectHandler';
 import { TransactionHandler } from '../handlers/TransactionHandler';
 import { SignDataHandler } from '../handlers/SignDataHandler';
@@ -40,7 +27,7 @@ export class EventRouter {
     /**
      * Route incoming bridge event to appropriate handler
      */
-    async routeEvent(event: RawBridgeEvent, sessionId?: string): Promise<void> {
+    async routeEvent(event: RawBridgeEvent): Promise<void> {
         // Validate event structure
         const validation = validateBridgeEvent(event);
         if (!validation.isValid) {
@@ -48,35 +35,14 @@ export class EventRouter {
             return;
         }
 
-        // Create request context
-        const context: RequestContext = {
-            id: event.id,
-            sessionId,
-            timestamp: new Date(),
-        };
-
         try {
             // Find appropriate handler
-            const handler = this.handlers.find((h) => h.canHandle(event));
-
-            if (!handler) {
-                log.warn('No handler found for event', { method: event.method });
-                return;
-            }
-
-            // Handle the event based on its type
-            if (handler instanceof ConnectHandler) {
-                const connectEvent = await handler.handle(event as RawBridgeEventConnect, context);
-                this.notifyConnectRequestCallbacks(connectEvent);
-            } else if (handler instanceof TransactionHandler) {
-                const txEvent = await handler.handle(event as RawBridgeEventTransaction, context);
-                this.notifyTransactionRequestCallbacks(txEvent);
-            } else if (handler instanceof SignDataHandler) {
-                const signEvent = await handler.handle(event, context);
-                this.notifySignDataRequestCallbacks(signEvent);
-            } else if (handler instanceof DisconnectHandler) {
-                const disconnectEvent = await handler.handle(event, context);
-                this.notifyDisconnectCallbacks(disconnectEvent);
+            for (const handler of this.handlers) {
+                if (handler.canHandle(event)) {
+                    const result = await handler.handle(event);
+                    await handler.notify(result);
+                    break;
+                }
             }
         } catch (error) {
             log.error('Error routing event', { error });
@@ -149,10 +115,10 @@ export class EventRouter {
      */
     private setupHandlers(): void {
         this.handlers = [
-            new ConnectHandler(),
-            new TransactionHandler(),
-            new SignDataHandler(),
-            new DisconnectHandler(),
+            new ConnectHandler(this.notifyConnectRequestCallbacks),
+            new TransactionHandler(this.notifyTransactionRequestCallbacks),
+            new SignDataHandler(this.notifySignDataRequestCallbacks),
+            new DisconnectHandler(this.notifyDisconnectCallbacks),
         ];
     }
 

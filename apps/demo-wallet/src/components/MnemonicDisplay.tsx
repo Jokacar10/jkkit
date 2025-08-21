@@ -21,7 +21,7 @@ export const MnemonicDisplay: React.FC<MnemonicDisplayProps> = ({
             await navigator.clipboard.writeText(mnemonicString);
             setCopyFeedback('Copied to clipboard!');
             setTimeout(() => setCopyFeedback(''), 2000);
-        } catch (error) {
+        } catch (_) {
             setCopyFeedback('Failed to copy');
             setTimeout(() => setCopyFeedback(''), 2000);
         }

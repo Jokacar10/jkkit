@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
-import { useAuth, useStore, useWallet } from '../stores';
+import { useStore, useWallet } from '../stores';
 import { ProtectedRoute } from './ProtectedRoute';
 import { SetupPassword, UnlockWallet, SetupWallet, WalletDashboard, SendTransaction } from '../pages';
 

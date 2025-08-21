@@ -215,9 +215,7 @@ export class TonWalletKit implements ITonWalletKit {
                 throw new Error('Invalid TON Connect URL format');
             }
 
-            // Route the event through the normal event system
-            const wallet = this.walletManager.getWallets()[0]; // Use first available wallet
-            await this.eventRouter.routeEvent(bridgeEvent, wallet);
+            await this.eventRouter.routeEvent(bridgeEvent);
         } catch (error) {
             log.error('Failed to handle TON Connect URL', { error, url });
             throw error;
@@ -276,24 +274,6 @@ export class TonWalletKit implements ITonWalletKit {
         r: string;
         returnStrategy?: string;
     }): RawBridgeEventConnect | undefined {
-        // clientId =
-        // '39166d5445bcaca9499de367e4b113477e15347a7fbef0977494b4555e3dac65'
-        // id =
-        // '39166d5445bcaca9499de367e4b113477e15347a7fbef0977494b4555e3dac65'
-        // r =
-        // '{"manifestUrl":"https://ton-connect.github.io/demo-dapp-with-react-ui/tonconnect-manifest.json","items":[{"name":"ton_addr"},{"name":"ton_proof","payload":"80f1696bddc5e46a4136cb523483da58a0b4d525d781ecc5df55820930b4dbc2"}]}'
-        // requestId =
-        // '39166d5445bcaca9499de367e4b113477e15347a7fbef0977494b4555e3dac65'
-        // ret =
-        // 'none'
-        // returnStrategy =
-        // 'none'
-        // v =
-        // '2'
-        // version =
-        // '2'
-
-        // const clientId = parsed.searchParams.get('id') || ''; // '230f1e4df32364888a5dbd92a410266fcb974b73e30ff3e546a654fc8ee2c953'
         const rString = params.r;
         const r = rString ? (JSON.parse(rString) as ConnectRequest) : undefined;
 
@@ -301,6 +281,7 @@ export class TonWalletKit implements ITonWalletKit {
             return undefined;
         }
         return {
+            from: params.clientId,
             id: params.requestId,
             method: 'startConnect',
             params: {
