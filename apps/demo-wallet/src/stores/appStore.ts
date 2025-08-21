@@ -99,9 +99,9 @@ export const useStore = create<AppState>()(
 
 // Initialize wallet kit listeners on first load
 if (typeof window !== 'undefined') {
-    // Set up wallet kit listeners with the store's showConnectRequest method
+    // Set up wallet kit listeners with the store's request handlers
     const store = useStore.getState();
-    setupWalletKitListeners(store.showConnectRequest);
+    setupWalletKitListeners(store.showConnectRequest, store.showTransactionRequest);
 }
 
 // Helper hooks for accessing specific parts of the store
@@ -148,6 +148,18 @@ export const useTonConnect = () =>
             approveConnectRequest: state.approveConnectRequest,
             rejectConnectRequest: state.rejectConnectRequest,
             closeConnectModal: state.closeConnectModal,
+        })),
+    );
+
+export const useTransactionRequests = () =>
+    useStore(
+        useShallow((state) => ({
+            pendingTransactionRequest: state.wallet.pendingTransactionRequest,
+            isTransactionModalOpen: state.wallet.isTransactionModalOpen,
+            showTransactionRequest: state.showTransactionRequest,
+            approveTransactionRequest: state.approveTransactionRequest,
+            rejectTransactionRequest: state.rejectTransactionRequest,
+            closeTransactionModal: state.closeTransactionModal,
         })),
     );
 

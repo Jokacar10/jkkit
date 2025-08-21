@@ -1,7 +1,7 @@
 // Request approval and rejection processing
 
 import { Address } from '@ton/core';
-import { CHAIN } from '@tonconnect/protocol';
+import { CHAIN, SendTransactionRpcResponseSuccess } from '@tonconnect/protocol';
 
 import type { EventConnectRequest, EventTransactionRequest, EventSignDataRequest } from '../types';
 import type { SessionManager } from './SessionManager';
@@ -122,11 +122,12 @@ export class RequestProcessor {
             const signedBoc = await this.signTransaction(event);
 
             // Send approval response
-            const response = {
+            const response: SendTransactionRpcResponseSuccess = {
                 result: signedBoc,
+                id: event.id,
             };
 
-            await this.bridgeManager.sendResponse(event.id, event.id, response);
+            await this.bridgeManager.sendResponse(event.from, event.id, response);
 
             return { signedBoc };
         } catch (error) {

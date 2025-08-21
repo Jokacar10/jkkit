@@ -1,4 +1,10 @@
-import { TonWalletKit, WalletInitConfigMnemonic, type WalletInterface, type EventConnectRequest } from '@ton/walletkit';
+import {
+    TonWalletKit,
+    WalletInitConfigMnemonic,
+    type WalletInterface,
+    type EventConnectRequest,
+    type EventTransactionRequest,
+} from '@ton/walletkit';
 
 import { SimpleEncryption } from '../../utils';
 import { createComponentLogger } from '../../utils/logger';
@@ -28,6 +34,8 @@ export const createWalletSlice: WalletSliceCreator = (set: SetState, get) => ({
         currentWallet: undefined,
         pendingConnectRequest: undefined,
         isConnectModalOpen: false,
+        pendingTransactionRequest: undefined,
+        isTransactionModalOpen: false,
         encryptedMnemonic: undefined,
     },
 
@@ -300,22 +308,82 @@ export const createWalletSlice: WalletSliceCreator = (set: SetState, get) => ({
         });
     },
 
+    // Transaction request handling
+    showTransactionRequest: (request: EventTransactionRequest) => {
+        set((state) => {
+            state.wallet.pendingTransactionRequest = request;
+            state.wallet.isTransactionModalOpen = true;
+        });
+    },
+
+    approveTransactionRequest: async () => {
+        const state = get();
+        if (!state.wallet.pendingTransactionRequest) {
+            log.error('No pending transaction request to approve');
+            return;
+        }
+
+        try {
+            // Approve the transaction request with the wallet kit
+            await walletKit.approveTransactionRequest(state.wallet.pendingTransactionRequest);
+
+            // Close the modal and clear pending request
+            set((state) => {
+                state.wallet.pendingTransactionRequest = undefined;
+                state.wallet.isTransactionModalOpen = false;
+            });
+        } catch (error) {
+            log.error('Failed to approve transaction request:', error);
+            throw error;
+        }
+    },
+
+    rejectTransactionRequest: async (reason?: string) => {
+        const state = get();
+        if (!state.wallet.pendingTransactionRequest) {
+            log.error('No pending transaction request to reject');
+            return;
+        }
+
+        try {
+            await walletKit.rejectTransactionRequest(state.wallet.pendingTransactionRequest, reason);
+
+            // Close the modal and clear pending request
+            set((state) => {
+                state.wallet.pendingTransactionRequest = undefined;
+                state.wallet.isTransactionModalOpen = false;
+            });
+        } catch (error) {
+            log.error('Failed to reject transaction request:', error);
+            throw error;
+        }
+    },
+
+    closeTransactionModal: () => {
+        set((state) => {
+            state.wallet.isTransactionModalOpen = false;
+            state.wallet.pendingTransactionRequest = undefined;
+        });
+    },
+
     // Getters
     getAvailableWallets: () => {
         return walletKit.getWallets();
     },
 });
 
-// Set up connect request listener - this will be called from the appStore
-export const setupWalletKitListeners = (showConnectRequest: (request: EventConnectRequest) => void) => {
+// Set up connect and transaction request listeners - this will be called from the appStore
+export const setupWalletKitListeners = (
+    showConnectRequest: (request: EventConnectRequest) => void,
+    showTransactionRequest: (request: EventTransactionRequest) => void,
+) => {
     walletKit.onConnectRequest((event) => {
         log.info('Connect request received:', event);
         showConnectRequest(event);
     });
     walletKit.onTransactionRequest((event) => {
         log.info('Transaction request received:', event);
-
-        // showTransactionRequest(event);
+        showTransactionRequest(event);
     });
 };
 

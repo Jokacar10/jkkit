@@ -1,5 +1,5 @@
 import type { StateCreator } from 'zustand';
-import type { WalletInterface, EventConnectRequest } from '@ton/walletkit';
+import type { WalletInterface, EventConnectRequest, EventTransactionRequest } from '@ton/walletkit';
 
 import type { AuthState, WalletState, Transaction } from './wallet';
 
@@ -28,6 +28,12 @@ export interface WalletSlice extends WalletState {
     approveConnectRequest: (selectedWallet: WalletInterface) => Promise<void>;
     rejectConnectRequest: (reason?: string) => Promise<void>;
     closeConnectModal: () => void;
+
+    // Transaction request actions
+    showTransactionRequest: (request: EventTransactionRequest) => void;
+    approveTransactionRequest: () => Promise<void>;
+    rejectTransactionRequest: (reason?: string) => Promise<void>;
+    closeTransactionModal: () => void;
 
     // Getters
     getDecryptedMnemonic: () => Promise<string[] | null>;

@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { Layout, Button, Card, ConnectRequestModal } from '../components';
-import { useWallet, useTonConnect } from '../stores';
+import { Layout, Button, Card, ConnectRequestModal, TransactionRequestModal } from '../components';
+import { useWallet, useTonConnect, useTransactionRequests } from '../stores';
 import { useTonWallet } from '../hooks';
 import { createComponentLogger } from '../utils/logger';
 
@@ -24,6 +24,8 @@ export const WalletDashboard: React.FC = () => {
         approveConnectRequest,
         rejectConnectRequest,
     } = useTonConnect();
+    const { pendingTransactionRequest, isTransactionModalOpen, approveTransactionRequest, rejectTransactionRequest } =
+        useTransactionRequests();
     const { getBalance, error } = useTonWallet();
 
     const handleRefreshBalance = useCallback(async () => {
@@ -349,6 +351,16 @@ export const WalletDashboard: React.FC = () => {
                     isOpen={isConnectModalOpen}
                     onApprove={approveConnectRequest}
                     onReject={rejectConnectRequest}
+                />
+            )}
+
+            {/* Transaction Request Modal */}
+            {pendingTransactionRequest && (
+                <TransactionRequestModal
+                    request={pendingTransactionRequest}
+                    isOpen={isTransactionModalOpen}
+                    onApprove={approveTransactionRequest}
+                    onReject={rejectTransactionRequest}
                 />
             )}
         </Layout>

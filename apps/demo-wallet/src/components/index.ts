@@ -7,3 +7,4 @@ export * from './AppRouter';
 export * from './MnemonicDisplay';
 export * from './ImportWallet';
 export * from './ConnectRequestModal';
+export * from './TransactionRequestModal';
