@@ -26,7 +26,9 @@ export class ConnectHandler implements EventHandler<EventConnectRequest> {
         const connectEvent: EventConnectRequest = {
             id: event.id,
             dAppName: this.extractDAppName(event, manifest),
+            dAppUrl: manifest?.url || '',
             manifestUrl,
+            request: event.params?.items || [],
             preview: this.createPreview(event, manifest),
             wallet: context.wallet, // Don't assign a wallet yet - user will select one
         };

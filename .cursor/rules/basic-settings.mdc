@@ -6,4 +6,4 @@ alwaysApply: true
 
 When you're generating many updates for the same file, do that as single change in one diff.
 Use pnpm
-Apply pnpm lint:fix before trying to fix lint issuea.
+Apply `pnpm lint:fix` in the root directory before trying to fix lint issues.

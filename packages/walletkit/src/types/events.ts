@@ -16,9 +16,12 @@ export interface EventConnectRequest {
 
     /** dApp display name */
     dAppName: string;
+    dAppUrl: string;
 
     /** URL to dApp manifest */
     manifestUrl: string;
+
+    request: ConnectRequest['items'];
 
     /** Preview information for UI display */
     preview: ConnectPreview;

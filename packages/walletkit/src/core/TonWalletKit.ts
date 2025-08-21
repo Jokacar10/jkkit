@@ -144,7 +144,7 @@ export class TonWalletKit implements ITonWalletKit {
         }
     }
 
-    async listSessions(): Promise<{ sessionId: string; dAppName: string; wallet: WalletInterface }[]> {
+    async listSessions(): Promise<{ sessionId: string; dAppName: string; walletAddress: string }[]> {
         await this.ensureInitialized();
         return this.sessionManager.getSessionsForAPI();
     }

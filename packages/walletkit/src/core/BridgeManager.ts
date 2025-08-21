@@ -1,26 +1,30 @@
 // Bridge connection and communication management
 
 import { SessionCrypto } from '@tonconnect/protocol';
-import { BridgeProvider, WalletConsumer } from 'bridge-sdk';
+import { BridgeProvider, ClientConnection, WalletConsumer } from 'bridge-sdk';
+import { keyPairFromSecretKey, keyPairFromSeed } from '@ton/crypto';
 
 import type { BridgeConfig, RawBridgeEvent, EventCallback } from '../types/internal';
 import { logger } from './Logger';
+import { SessionManager } from './SessionManager';
 
 export class BridgeManager {
     private config: BridgeConfig;
     private bridgeProvider?: BridgeProvider<WalletConsumer>;
-    private sessions: Map<string, SessionCrypto> = new Map();
+    private sessionManager: SessionManager;
     private isConnected = false;
     private reconnectAttempts = 0;
     private eventCallback?: EventCallback<RawBridgeEvent>;
+    private lastEventId?: string;
 
-    constructor(config: BridgeConfig) {
+    constructor(config: BridgeConfig, sessionManager: SessionManager) {
         this.config = {
             heartbeatInterval: 5000,
             reconnectInterval: 15000,
             maxReconnectAttempts: 5,
             ...config,
         };
+        this.sessionManager = sessionManager;
     }
 
     /**
@@ -50,29 +54,47 @@ export class BridgeManager {
     /**
      * Create new session for a dApp connection
      */
-    async createSession(appSessionId: string): Promise<SessionCrypto> {
-        const walletSession = new SessionCrypto();
-        this.sessions.set(appSessionId, walletSession);
+    async createSession(appSessionId: string): Promise<void> {
+        // const walletSession = new SessionCrypto();
+        // this.sessions.set(appSessionId, walletSession);
+        logger.info('[BRIDGE] Creating session', { appSessionId });
 
-        // If bridge is already connected, add this client
-        if (this.bridgeProvider && this.isConnected) {
-            await this.addClientToBridge(walletSession, appSessionId);
+        const session = this.sessionManager.getSession(appSessionId);
+        if (!session) {
+            throw new Error(`Session ${appSessionId} not found`);
         }
 
-        return walletSession;
+        // const sessionCrypto = new SessionCrypto({
+        //     publicKey: session.publicKey,
+        //     secretKey: session.privateKey,
+        // });
+
+        // const walletSession = new SessionCrypto();
+        // this.sessions.set(appSessionId, walletSession);
+        // debugger;
+        // If bridge is already connected, add this client
+        if (this.bridgeProvider && this.isConnected) {
+            logger.info('[BRIDGE] Updating clients');
+            await this.updateClients();
+        }
+
+        // return walletSession;
     }
 
     /**
      * Remove session
      */
     async removeSession(appSessionId: string): Promise<void> {
-        const session = this.sessions.get(appSessionId);
-        if (!session) {
-            return;
+        // const session = this.sessions.get(appSessionId);
+        // if (!session) {
+        //     return;
+        // }
+
+        // this.sessions.delete(appSessionId);
+
+        if (this.bridgeProvider && this.isConnected) {
+            await this.updateClients();
         }
-
-        this.sessions.delete(appSessionId);
-
         // TODO: Remove client from bridge if possible
         // The bridge-sdk might not support removing individual clients
         logger.debug('Session removed', { appSessionId });
@@ -87,9 +109,27 @@ export class BridgeManager {
             throw new Error('Bridge not initialized');
         }
 
-        // TODO: Implement response sending via bridge
-        // This depends on the bridge-sdk API for sending responses
-        logger.debug('Sending response', { sessionId, requestId, response });
+        const session = await this.sessionManager.getSession(sessionId);
+        if (!session) {
+            throw new Error(`Session ${sessionId} not found`);
+        }
+
+        try {
+            const sessionCrypto = new SessionCrypto({
+                publicKey: session.publicKey,
+                secretKey: session.privateKey,
+            });
+            await this.bridgeProvider.send(response, sessionCrypto, sessionId);
+
+            logger.debug('Response sent successfully', { sessionId, requestId });
+        } catch (error) {
+            logger.error('Failed to send response through bridge', {
+                sessionId,
+                requestId,
+                error,
+            });
+            throw error;
+        }
     }
 
     /**
@@ -101,7 +141,7 @@ export class BridgeManager {
             this.bridgeProvider = undefined;
         }
 
-        this.sessions.clear();
+        // this.sessions.clear();
         this.isConnected = false;
         this.reconnectAttempts = 0;
     }
@@ -116,52 +156,73 @@ export class BridgeManager {
     /**
      * Get active session count
      */
-    getSessionCount(): number {
-        return this.sessions.size;
+    // getSessionCount(): number {
+    //     return this.sessions.size;
+    // }
+
+    private async getClients(): Promise<ClientConnection[]> {
+        return this.sessionManager.getSessions().map((session) => ({
+            session: new SessionCrypto({
+                publicKey: session.publicKey,
+                secretKey: session.privateKey.length > 64 ? session.privateKey.slice(0, 64) : session.privateKey,
+            }),
+            clientId: session.sessionId,
+        }));
     }
 
     /**
      * Connect to TON Connect bridge
      */
     private async connectToBridge(): Promise<void> {
-        // try {
-        //     // Prepare clients array for existing sessions
-        //     const clients = Array.from(this.sessions.entries()).map(([clientId, session]) => ({
-        //         session,
-        //         clientId,
-        //     }));
-        //     this.bridgeProvider = await BridgeProvider.open<WalletConsumer>({
-        //         bridgeUrl: this.config.bridgeUrl,
-        //         clients,
-        //         listener: this.handleBridgeEvent.bind(this),
-        //         options: {
-        //             heartbeatReconnectIntervalMs: this.config.reconnectInterval,
-        //         },
-        //     });
-        //     this.isConnected = true;
-        //     this.reconnectAttempts = 0;
-        //     logger.info('Bridge connected successfully');
-        // } catch (error) {
-        //     logger.error('Bridge connection failed', { error });
-        //     // Attempt reconnection if not at max attempts
-        //     if (this.reconnectAttempts < (this.config.maxReconnectAttempts || 5)) {
-        //         this.reconnectAttempts++;
-        //         logger.info('Bridge reconnection attempt', { attempt: this.reconnectAttempts });
-        //         setTimeout(() => {
-        //             this.connectToBridge().catch((error) => logger.error('Bridge reconnection failed', { error }));
-        //         }, this.config.reconnectInterval);
-        //     }
-        //     throw error;
-        // }
+        try {
+            // Prepare clients array for existing sessions
+            const clients = await this.getClients();
+            if (clients.length === 0) {
+                clients.push({
+                    clientId: '0',
+                    session: new SessionCrypto(),
+                });
+            }
+            this.bridgeProvider = await BridgeProvider.open<WalletConsumer>({
+                bridgeUrl: this.config.bridgeUrl,
+                clients,
+                listener: this.handleBridgeEvent.bind(this),
+                options: {
+                    // heartbeatReconnectIntervalMs: this.config.reconnectInterval,
+                },
+            });
+            this.isConnected = true;
+            this.reconnectAttempts = 0;
+            logger.info('Bridge connected successfully');
+        } catch (error) {
+            logger.error('Bridge connection failed', { error });
+            // Attempt reconnection if not at max attempts
+            if (this.reconnectAttempts < (this.config.maxReconnectAttempts || 5)) {
+                this.reconnectAttempts++;
+                logger.info('Bridge reconnection attempt', { attempt: this.reconnectAttempts });
+                setTimeout(() => {
+                    this.connectToBridge().catch((error) => logger.error('Bridge reconnection failed', { error }));
+                }, this.config.reconnectInterval);
+            }
+            throw error;
+        }
     }
 
     /**
      * Add client to existing bridge connection
      */
-    private async addClientToBridge(session: SessionCrypto, clientId: string): Promise<void> {
+    private async updateClients(): Promise<void> {
         // TODO: The bridge-sdk might not support adding clients dynamically
         // This would require closing and reopening the bridge with updated clients
-        logger.debug('Adding client to bridge', { clientId });
+        logger.debug('Updating clients');
+        if (this.bridgeProvider) {
+            const clients = await this.getClients();
+            logger.info('[BRIDGE] Restoring connection', { clients: clients.length });
+            // await this.bridgeProvider.close();
+            await this.bridgeProvider.restoreConnection(clients, {
+                lastEventId: this.lastEventId,
+            });
+        }
     }
 
     /**
@@ -183,6 +244,8 @@ export class BridgeManager {
             if (this.eventCallback) {
                 this.eventCallback(rawEvent);
             }
+
+            this.lastEventId = event?.lastEventId;
         } catch (error) {
             logger.error('Error handling bridge event', { error });
         }

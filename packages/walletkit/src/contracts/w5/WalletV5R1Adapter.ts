@@ -1,6 +1,6 @@
 // WalletV5R1 adapter that implements WalletInterface
 
-import { Dictionary } from '@ton/core';
+import { beginCell, Dictionary, StateInit, storeStateInit } from '@ton/core';
 import { TonClient } from '@ton/ton';
 import { keyPairFromSeed } from '@ton/crypto';
 
@@ -103,14 +103,10 @@ export class WalletV5R1Adapter implements WalletInterface {
             throw new Error('Wallet contract not properly initialized');
         }
 
-        return '';
-
-        // const stateInit = beginCell()
-        //     .store(this.walletContract.init.code)
-        //     .store(this.walletContract.init.data)
-        //     .endCell();
-
-        // return stateInit.toBoc().toString('base64');
+        const stateInit = beginCell()
+            .store(storeStateInit(this.walletContract.init as unknown as StateInit))
+            .endCell();
+        return stateInit.toBoc().toString('base64');
     }
 
     /**

@@ -81,14 +81,6 @@ export class Initializer {
                 storageAdapter,
             );
 
-            // 4. Initialize with provided wallets
-            if (options.wallets && options.wallets.length > 0) {
-                await this.initializeWallets(walletManager, {
-                    ...options,
-                    wallets: options.wallets,
-                });
-            }
-
             // 5. Initialize processors
             const { requestProcessor, responseHandler } = this.initializeProcessors(sessionManager, bridgeManager);
 
@@ -159,14 +151,27 @@ export class Initializer {
     }> {
         // Initialize managers
         const walletManager = new WalletManager(storageAdapter);
-        const sessionManager = new SessionManager(storageAdapter);
-        const bridgeManager = new BridgeManager({
-            bridgeUrl: options.bridgeUrl,
-        });
-        const eventRouter = new EventRouter();
+        await walletManager.initialize();
+        // 4. Initialize with provided wallets
+        if (options.wallets && options.wallets.length > 0) {
+            await this.initializeWallets(walletManager, {
+                ...options,
+                wallets: options.wallets,
+            });
+        }
 
-        // Initialize all managers in parallel
-        await Promise.all([walletManager.initialize(), sessionManager.initialize(), bridgeManager.initialize()]);
+        const sessionManager = new SessionManager(storageAdapter, walletManager);
+        await sessionManager.initialize();
+
+        const bridgeManager = new BridgeManager(
+            {
+                bridgeUrl: options.bridgeUrl,
+            },
+            sessionManager,
+        );
+        await bridgeManager.initialize();
+
+        const eventRouter = new EventRouter();
 
         return {
             walletManager,

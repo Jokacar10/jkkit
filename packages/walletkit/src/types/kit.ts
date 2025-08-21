@@ -83,7 +83,7 @@ export interface SessionInfo {
     dAppName: string;
 
     /** Associated wallet */
-    wallet: WalletInterface;
+    walletAddress: string;
 
     /** Session creation time */
     createdAt?: Date;

@@ -7,9 +7,22 @@ import type { WalletInterface } from './wallet';
 export interface SessionData {
     sessionId: string;
     dAppName: string;
-    wallet: WalletInterface;
+    walletAddress: string;
+    wallet?: WalletInterface;
     createdAt: Date;
     lastActivityAt: Date;
+    privateKey: string;
+    publicKey: string;
+}
+
+export interface SessionStorageData {
+    sessionId: string;
+    dAppName: string;
+    walletAddress: string;
+    createdAt: string;
+    lastActivityAt: string;
+    privateKey: string;
+    publicKey: string;
 }
 
 export interface BridgeConfig {

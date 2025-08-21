@@ -31,8 +31,8 @@ export class WalletManager {
     /**
      * Get wallet by public key
      */
-    getWallet(publicKey: string): WalletInterface | null {
-        return this.wallets.get(publicKey) || null;
+    getWallet(address: string): WalletInterface | undefined {
+        return this.wallets.get(address) || undefined;
     }
 
     /**
