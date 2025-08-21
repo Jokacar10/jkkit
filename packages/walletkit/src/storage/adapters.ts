@@ -1,7 +1,9 @@
 // Storage adapter implementations
 
 import type { StorageAdapter, StorageConfig } from './types';
-import { logger } from '../core/Logger';
+import { globalLogger } from '../core/Logger';
+
+const log = globalLogger.createChild('StorageAdapter');
 
 /**
  * localStorage adapter for web environments
@@ -150,11 +152,11 @@ export function createStorageAdapter(config: StorageConfig = {}): StorageAdapter
         try {
             return new LocalStorageAdapter(config);
         } catch (error) {
-            logger.warn('Failed to create LocalStorageAdapter, falling back to memory', { error });
+            log.warn('Failed to create LocalStorageAdapter, falling back to memory', { error });
         }
     }
 
     // Fallback to memory storage
-    logger.warn('Using MemoryStorageAdapter - data will not persist across sessions');
+    log.warn('Using MemoryStorageAdapter - data will not persist across sessions');
     return new MemoryStorageAdapter(config);
 }

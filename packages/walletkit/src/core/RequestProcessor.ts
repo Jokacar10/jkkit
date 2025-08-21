@@ -3,11 +3,13 @@
 import { Address } from '@ton/core';
 import { CHAIN } from '@tonconnect/protocol';
 
-import type { EventConnectRequest, EventTransactionRequest, EventSignDataRequest, TonNetwork } from '../types';
+import type { EventConnectRequest, EventTransactionRequest, EventSignDataRequest } from '../types';
 import type { SessionManager } from './SessionManager';
 import type { BridgeManager } from './BridgeManager';
-import { logger } from './Logger';
+import { globalLogger } from './Logger';
 import { CreateTonProofMessageBytes, createTonProofMessage } from '../utils/tonProof';
+
+const log = globalLogger.createChild('RequestProcessor');
 
 /**
  * TON Connect response types
@@ -88,7 +90,7 @@ export class RequestProcessor {
             const response = await this.createConnectApprovalResponse(event);
             await this.bridgeManager.sendResponse(newSession.sessionId, event.id, response.result);
         } catch (error) {
-            logger.error('Failed to approve connect request', { error });
+            log.error('Failed to approve connect request', { error });
             throw error;
         }
     }
@@ -98,7 +100,7 @@ export class RequestProcessor {
      */
     async rejectConnectRequest(event: EventConnectRequest, reason?: string): Promise<void> {
         try {
-            logger.info('Connect request rejected', {
+            log.info('Connect request rejected', {
                 id: event.id,
                 dAppName: event.dAppName,
                 reason: reason || 'User rejected connection',
@@ -106,7 +108,7 @@ export class RequestProcessor {
 
             // No response needed for rejections - just log and return
         } catch (error) {
-            logger.error('Failed to reject connect request', { error });
+            log.error('Failed to reject connect request', { error });
             throw error;
         }
     }
@@ -128,7 +130,7 @@ export class RequestProcessor {
 
             return { signedBoc };
         } catch (error) {
-            logger.error('Failed to approve transaction request', { error });
+            log.error('Failed to approve transaction request', { error });
             throw error;
         }
     }
@@ -145,7 +147,7 @@ export class RequestProcessor {
 
             await this.bridgeManager.sendResponse(event.id, event.id, response);
         } catch (error) {
-            logger.error('Failed to reject transaction request', { error });
+            log.error('Failed to reject transaction request', { error });
             throw error;
         }
     }
@@ -167,7 +169,7 @@ export class RequestProcessor {
 
             return { signature };
         } catch (error) {
-            logger.error('Failed to approve sign data request', { error });
+            log.error('Failed to approve sign data request', { error });
             throw error;
         }
     }
@@ -184,7 +186,7 @@ export class RequestProcessor {
 
             await this.bridgeManager.sendResponse(event.id, event.id, response);
         } catch (error) {
-            logger.error('Failed to reject sign data request', { error });
+            log.error('Failed to reject sign data request', { error });
             throw error;
         }
     }
@@ -260,7 +262,7 @@ export class RequestProcessor {
                     Value: dAppUrl.host,
                 };
             } catch (error) {
-                logger.error('Failed to parse domain', { error });
+                log.error('Failed to parse domain', { error });
             }
             // const walletKeyPair = secretKeyToED25519(decryptedData.seed);
 
@@ -304,7 +306,7 @@ export class RequestProcessor {
         // 3. Signing with the wallet's private key
         // 4. Encoding the result to BOC format
 
-        logger.debug('Signing transaction', {
+        log.debug('Signing transaction', {
             id: event.id,
             messagesCount: event.request.messages.length,
             from: event.request.from,

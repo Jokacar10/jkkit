@@ -12,16 +12,17 @@ import type {
     EventSignDataRequest,
     EventDisconnect,
     WalletInitConfig,
-    RawBridgeEvent,
 } from '../types';
 import { createWalletFromConfig, Initializer, type InitializationResult } from './Initializer';
-import { logger } from './Logger';
+import { globalLogger } from './Logger';
 import type { WalletManager } from './WalletManager';
 import type { SessionManager } from './SessionManager';
 import type { EventRouter } from './EventRouter';
 import type { RequestProcessor } from './RequestProcessor';
 import type { ResponseHandler } from './ResponseHandler';
 import { RawBridgeEventConnect } from '../types/internal';
+
+const log = globalLogger.createChild('TonWalletKit');
 
 /**
  * Minimal TonWalletKit implementation - pure orchestration
@@ -69,7 +70,7 @@ export class TonWalletKit implements ITonWalletKit {
             this.setupEventRouting();
             this.isInitialized = true;
         } catch (error) {
-            logger.error('TonWalletKit initialization failed', { error });
+            log.error('TonWalletKit initialization failed', { error });
             throw error;
         }
     }
@@ -107,7 +108,7 @@ export class TonWalletKit implements ITonWalletKit {
 
     getWallets(): WalletInterface[] {
         if (!this.isInitialized) {
-            logger.warn('TonWalletKit not yet initialized, returning empty array');
+            log.warn('TonWalletKit not yet initialized, returning empty array');
             return [];
         }
         return this.walletManager.getWallets();
@@ -218,7 +219,7 @@ export class TonWalletKit implements ITonWalletKit {
             const wallet = this.walletManager.getWallets()[0]; // Use first available wallet
             await this.eventRouter.routeEvent(bridgeEvent, wallet);
         } catch (error) {
-            logger.error('Failed to handle TON Connect URL', { error, url });
+            log.error('Failed to handle TON Connect URL', { error, url });
             throw error;
         }
     }
@@ -247,7 +248,7 @@ export class TonWalletKit implements ITonWalletKit {
 
             // Validate required parameters
             if (!params.v || !params.id || !params.r) {
-                logger.warn('Missing required TON Connect URL parameters');
+                log.warn('Missing required TON Connect URL parameters');
                 return null;
             }
 
@@ -260,7 +261,7 @@ export class TonWalletKit implements ITonWalletKit {
                 ...params,
             };
         } catch (error) {
-            logger.error('Failed to parse TON Connect URL', { error, url });
+            log.error('Failed to parse TON Connect URL', { error, url });
             return null;
         }
     }

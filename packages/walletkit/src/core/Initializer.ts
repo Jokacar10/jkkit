@@ -18,8 +18,10 @@ import { BridgeManager } from './BridgeManager';
 import { EventRouter } from './EventRouter';
 import { RequestProcessor } from './RequestProcessor';
 import { ResponseHandler } from './ResponseHandler';
-import { logger } from './Logger';
+import { globalLogger } from './Logger';
 import { createWalletV5R1 } from '../contracts/w5/WalletV5R1Adapter';
+
+const log = globalLogger.createChild('Initializer');
 
 /**
  * Initialization configuration
@@ -67,7 +69,7 @@ export class Initializer {
      */
     async initialize(options: TonWalletKitOptions): Promise<InitializationResult> {
         try {
-            logger.info('Initializing TonWalletKit...');
+            log.info('Initializing TonWalletKit...');
 
             // 1. Initialize TON client first (single provider for all downstream classes)
             this.tonClient = this.initializeTonClient(options);
@@ -87,7 +89,7 @@ export class Initializer {
             // 6. Configure event routing
             this.configureEventRouting(bridgeManager, eventRouter);
 
-            logger.info('TonWalletKit initialized successfully');
+            log.info('TonWalletKit initialized successfully');
 
             return {
                 walletManager,
@@ -100,7 +102,7 @@ export class Initializer {
                 tonClient: this.tonClient,
             };
         } catch (error) {
-            logger.error('Failed to initialize TonWalletKit', { error });
+            log.error('Failed to initialize TonWalletKit', { error });
             throw error;
         }
     }
@@ -207,7 +209,7 @@ export class Initializer {
         bridgeManager.setEventCallback(async (event) => {
             // The event routing will be handled by the main TonWalletKit class
             // This is just setting up the bridge callback
-            logger.debug('Bridge event received', { method: event.method });
+            log.debug('Bridge event received', { method: event.method });
         });
     }
 
@@ -225,7 +227,7 @@ export class Initializer {
 
                     const validation = validateWallet(wallet);
                     if (!validation.isValid) {
-                        logger.warn('Invalid wallet detected', {
+                        log.warn('Invalid wallet detected', {
                             publicKey: wallet.publicKey,
                             errors: validation.errors,
                         });
@@ -234,7 +236,7 @@ export class Initializer {
 
                     await walletManager.addWallet(wallet);
                 } catch (error) {
-                    logger.error('Failed to create wallet from config', { error });
+                    log.error('Failed to create wallet from config', { error });
                     throw error;
                 }
             }),
@@ -243,7 +245,7 @@ export class Initializer {
         const successful = results.filter((r) => r.status === 'fulfilled').length;
         const failed = results.filter((r) => r.status === 'rejected').length;
 
-        logger.info('Wallet initialization complete', { successful, failed });
+        log.info('Wallet initialization complete', { successful, failed });
     }
 
     /**
@@ -251,7 +253,7 @@ export class Initializer {
      */
     async cleanup(components: Partial<InitializationResult>): Promise<void> {
         try {
-            logger.info('Cleaning up TonWalletKit components...');
+            log.info('Cleaning up TonWalletKit components...');
 
             if (components.bridgeManager) {
                 await components.bridgeManager.close();
@@ -261,9 +263,9 @@ export class Initializer {
                 components.eventRouter.clearCallbacks();
             }
 
-            logger.info('TonWalletKit cleanup completed');
+            log.info('TonWalletKit cleanup completed');
         } catch (error) {
-            logger.error('Error during cleanup', { error });
+            log.error('Error during cleanup', { error });
         }
     }
 }

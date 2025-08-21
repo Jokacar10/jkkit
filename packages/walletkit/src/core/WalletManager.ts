@@ -3,7 +3,9 @@
 import type { WalletInterface } from '../types';
 import type { StorageAdapter } from '../types/internal';
 import { validateWallet } from '../validation';
-import { logger } from './Logger';
+import { globalLogger } from './Logger';
+
+const log = globalLogger.createChild('WalletManager');
 
 export class WalletManager {
     private wallets: Map<string, WalletInterface> = new Map();
@@ -98,7 +100,7 @@ export class WalletManager {
                     return wallet;
                 }
             } catch (error) {
-                logger.warn('Failed to get address for wallet', { publicKey: wallet.publicKey, error });
+                log.warn('Failed to get address for wallet', { publicKey: wallet.publicKey, error });
             }
         }
         return null;

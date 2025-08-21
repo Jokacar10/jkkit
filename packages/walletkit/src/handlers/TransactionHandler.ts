@@ -3,7 +3,9 @@
 import type { WalletInterface, EventTransactionRequest, HumanReadableTx, TonNetwork } from '../types';
 import type { RawBridgeEvent, RequestContext, EventHandler, RawBridgeEventGeneric } from '../types/internal';
 import { isValidNanotonAmount, validateTransactionMessages } from '../validation/transaction';
-import { logger } from '../core/Logger';
+import { globalLogger } from '../core/Logger';
+
+const log = globalLogger.createChild('TransactionHandler');
 
 export class TransactionHandler implements EventHandler<EventTransactionRequest> {
     canHandle(event: RawBridgeEvent): boolean {
@@ -145,7 +147,7 @@ export class TransactionHandler implements EventHandler<EventTransactionRequest>
 
             return parsed;
         } catch (error) {
-            logger.warn('Failed to parse message', { index, error });
+            log.warn('Failed to parse message', { index, error });
 
             // Fallback to raw display
             return {
@@ -173,7 +175,7 @@ export class TransactionHandler implements EventHandler<EventTransactionRequest>
             try {
                 balanceBefore = (await wallet.getBalance()).toString();
             } catch (error) {
-                logger.warn('Failed to get wallet balance', { error });
+                log.warn('Failed to get wallet balance', { error });
             }
         }
 
@@ -198,7 +200,7 @@ export class TransactionHandler implements EventHandler<EventTransactionRequest>
     private encodeMessageToBoc(message: any): string {
         // TODO: Implement proper message encoding to BOC
         // This is a placeholder
-        logger.warn('Message encoding not implemented, using placeholder BOC');
+        log.warn('Message encoding not implemented, using placeholder BOC');
         return 'te6ccgECFAEAAtQAART/APSkE/S88sgLAQIBYgIDAgLNBAUE';
     }
 

@@ -8,11 +8,13 @@ import type { TonNetwork, WalletInterface } from '../../types';
 import { WalletInitConfigMnemonic, WalletInitConfigPrivateKey } from '../../types';
 import { WalletV5, WalletId } from './WalletV5R1';
 import { WalletV5R1CodeCell } from './WalletV5R1.source';
-import { logger } from '../../core/Logger';
+import { globalLogger } from '../../core/Logger';
 import { DefaultSignature } from '../../utils/sign';
 import { formatWalletAddress } from '../../utils/address';
 import { MnemonicToKeyPair } from '../../utils/mnemonic';
 import { CallForSuccess } from '../../utils/retry';
+
+const log = globalLogger.createChild('WalletV5R1Adapter');
 
 /**
  * Configuration for creating a WalletV5R1 adapter
@@ -90,7 +92,7 @@ export class WalletV5R1Adapter implements WalletInterface {
             );
             return balance;
         } catch (error) {
-            logger.warn('Failed to get balance', { error });
+            log.warn('Failed to get balance', { error });
             throw error;
         }
     }
@@ -124,7 +126,7 @@ export class WalletV5R1Adapter implements WalletInterface {
             const provider = this.client.provider(this.walletContract.address);
             return await this.walletContract.getSeqno(provider);
         } catch (error) {
-            logger.warn('Failed to get seqno', { error });
+            log.warn('Failed to get seqno', { error });
             return 0;
         }
     }
@@ -137,7 +139,7 @@ export class WalletV5R1Adapter implements WalletInterface {
             const provider = this.client.provider(this.walletContract.address);
             return await this.walletContract.getWalletId(provider);
         } catch (error) {
-            logger.warn('Failed to get wallet ID', { error });
+            log.warn('Failed to get wallet ID', { error });
             return new WalletId({ subwalletNumber: this.config.walletId || 0 });
         }
     }
@@ -150,7 +152,7 @@ export class WalletV5R1Adapter implements WalletInterface {
             const state = await this.client.getContractState(this.walletContract.address);
             return state.state === 'active';
         } catch (error) {
-            logger.warn('Failed to check deployment status', { error });
+            log.warn('Failed to check deployment status', { error });
             return false;
         }
     }

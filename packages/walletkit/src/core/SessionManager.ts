@@ -1,12 +1,13 @@
 // Session tracking and lifecycle management
 
-import { keyPairFromSeed } from '@ton/crypto';
 import { SessionCrypto } from '@tonconnect/protocol';
 
 import type { WalletInterface } from '../types';
 import type { WalletManager } from '../core/WalletManager';
 import type { SessionData, SessionStorageData, StorageAdapter } from '../types/internal';
-import { logger } from './Logger';
+import { globalLogger } from './Logger';
+
+const log = globalLogger.createChild('SessionManager');
 
 export class SessionManager {
     private sessions: Map<string, SessionStorageData> = new Map();
@@ -209,10 +210,10 @@ export class SessionManager {
                     });
                     // }
                 }
-                logger.debug('Loaded session metadata', { count: sessionData.length });
+                log.debug('Loaded session metadata', { count: sessionData.length });
             }
         } catch (error) {
-            logger.warn('Failed to load sessions from storage', { error });
+            log.warn('Failed to load sessions from storage', { error });
         }
     }
 
@@ -234,7 +235,7 @@ export class SessionManager {
 
             await this.storageAdapter.set(this.storageKey, sessionMetadata);
         } catch (error) {
-            logger.warn('Failed to persist sessions to storage', { error });
+            log.warn('Failed to persist sessions to storage', { error });
         }
     }
 }

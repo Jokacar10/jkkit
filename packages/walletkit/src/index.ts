@@ -16,8 +16,8 @@ export { ResponseHandler } from './core/ResponseHandler';
 export { Initializer } from './core/Initializer';
 
 // Re-export logger for customization
-export { Logger, LogLevel, createLogger, logger } from './core/Logger';
-export type { LoggerConfig, LogContext } from './core/Logger';
+// export { Logger, LogLevel, createLogger } from './core/Logger';
+// export type { LoggerConfig, LogContext } from './core/Logger';
 
 // Re-export handlers for customization
 export { ConnectHandler } from './handlers/ConnectHandler';

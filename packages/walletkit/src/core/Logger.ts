@@ -1,4 +1,33 @@
 /**
+ * Logger module for TonWalletKit with hierarchical prefix support
+ *
+ * Features:
+ * - Configurable log levels (DEBUG, INFO, WARN, ERROR, NONE)
+ * - Hierarchical logger creation with prefix inheritance
+ * - Parent-child logger relationships
+ * - Structured logging with context support
+ * - Timestamp and stack trace options
+ *
+ * Example usage:
+ * ```typescript
+ * import { createLogger, LogLevel } from './Logger';
+ *
+ * // Create root logger
+ * const appLogger = createLogger({
+ *   level: LogLevel.DEBUG,
+ *   prefix: 'WalletKit'
+ * });
+ *
+ * // Create child loggers with inherited prefixes
+ * const connectionLogger = appLogger.createChild('Connection');
+ * const httpLogger = connectionLogger.createChild('HTTP');
+ *
+ * // Logs will show as: [WalletKit:Connection:HTTP] INFO: Request sent
+ * httpLogger.info('Request sent');
+ * ```
+ */
+
+/**
  * Log levels enum for controlling logger verbosity
  */
 export enum LogLevel {
@@ -17,6 +46,7 @@ export interface LoggerConfig {
     prefix?: string;
     enableTimestamp?: boolean;
     enableStackTrace?: boolean;
+    parent?: Logger;
 }
 
 /**
@@ -33,6 +63,7 @@ export interface LogContext {
  */
 export class Logger {
     private config: LoggerConfig;
+    private parent?: Logger;
     private static defaultConfig: LoggerConfig = {
         level: LogLevel.INFO,
         prefix: 'TonWalletKit',
@@ -41,7 +72,19 @@ export class Logger {
     };
 
     constructor(config?: Partial<LoggerConfig>) {
+        this.parent = config?.parent;
         this.config = { ...Logger.defaultConfig, ...config };
+
+        // If we have a parent, inherit its configuration and build hierarchical prefix
+        if (this.parent) {
+            // Inherit parent's config but allow overrides
+            this.config = {
+                ...this.parent.config,
+                ...config,
+                // Build hierarchical prefix
+                prefix: this.buildHierarchicalPrefix(config?.prefix),
+            };
+        }
     }
 
     /**
@@ -49,6 +92,47 @@ export class Logger {
      */
     configure(config: Partial<LoggerConfig>): void {
         this.config = { ...this.config, ...config };
+    }
+
+    /**
+     * Create a child logger with a prefix that inherits from this logger
+     */
+    createChild(prefix: string, config?: Partial<LoggerConfig>): Logger {
+        return new Logger({
+            ...config,
+            parent: this,
+            prefix,
+        });
+    }
+
+    /**
+     * Build hierarchical prefix by combining parent prefix with current prefix
+     */
+    private buildHierarchicalPrefix(currentPrefix?: string): string {
+        if (!this.parent || !currentPrefix) {
+            return currentPrefix || this.parent?.config.prefix || '';
+        }
+
+        const parentPrefix = this.parent.config.prefix;
+        if (!parentPrefix) {
+            return currentPrefix;
+        }
+
+        return `${parentPrefix}:${currentPrefix}`;
+    }
+
+    /**
+     * Get the full hierarchical prefix for this logger
+     */
+    getPrefix(): string {
+        return this.config.prefix || '';
+    }
+
+    /**
+     * Get the parent logger if it exists
+     */
+    getParent(): Logger | undefined {
+        return this.parent;
     }
 
     /**
@@ -142,7 +226,7 @@ export class Logger {
 /**
  * Default logger instance
  */
-export const logger = new Logger();
+export const globalLogger = new Logger();
 
 /**
  * Create a logger with custom configuration

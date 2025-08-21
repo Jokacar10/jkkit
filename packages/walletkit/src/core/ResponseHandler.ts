@@ -2,7 +2,9 @@
 
 import type { BridgeManager } from './BridgeManager';
 import type { SessionManager } from './SessionManager';
-import { logger } from './Logger';
+import { globalLogger } from './Logger';
+
+const log = globalLogger.createChild('ResponseHandler');
 
 /**
  * Response format types
@@ -119,7 +121,7 @@ export class ResponseHandler {
             // Log successful response
             this.logResponse(requestId, sessionId, response, true);
         } catch (error) {
-            logger.error('Failed to send response', {
+            log.error('Failed to send response', {
                 requestId,
                 sessionId,
                 response,
@@ -133,7 +135,7 @@ export class ResponseHandler {
                     reason: 'Failed to send original response',
                 });
             } catch (fallbackError) {
-                logger.error('Failed to send fallback error response', { error: fallbackError });
+                log.error('Failed to send fallback error response', { error: fallbackError });
             }
 
             throw error;
@@ -158,9 +160,9 @@ export class ResponseHandler {
         };
 
         if (success) {
-            logger.debug('Response sent successfully', logData);
+            log.debug('Response sent successfully', logData);
         } else {
-            logger.error('Failed to send response', logData);
+            log.error('Failed to send response', logData);
         }
     }
 

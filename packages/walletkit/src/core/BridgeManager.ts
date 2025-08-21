@@ -2,11 +2,12 @@
 
 import { SessionCrypto } from '@tonconnect/protocol';
 import { BridgeProvider, ClientConnection, WalletConsumer } from 'bridge-sdk';
-import { keyPairFromSecretKey, keyPairFromSeed } from '@ton/crypto';
 
 import type { BridgeConfig, RawBridgeEvent, EventCallback } from '../types/internal';
-import { logger } from './Logger';
+import { globalLogger } from './Logger';
 import { SessionManager } from './SessionManager';
+
+const log = globalLogger.createChild('BridgeManager');
 
 export class BridgeManager {
     private config: BridgeConfig;
@@ -39,14 +40,14 @@ export class BridgeManager {
      */
     async initialize(): Promise<void> {
         if (this.bridgeProvider) {
-            logger.warn('Bridge already initialized');
+            log.warn('Bridge already initialized');
             return;
         }
 
         try {
             await this.connectToBridge();
         } catch (error) {
-            logger.error('Failed to initialize bridge', { error });
+            log.error('Failed to initialize bridge', { error });
             throw error;
         }
     }
@@ -57,7 +58,7 @@ export class BridgeManager {
     async createSession(appSessionId: string): Promise<void> {
         // const walletSession = new SessionCrypto();
         // this.sessions.set(appSessionId, walletSession);
-        logger.info('[BRIDGE] Creating session', { appSessionId });
+        log.info('[BRIDGE] Creating session', { appSessionId });
 
         const session = this.sessionManager.getSession(appSessionId);
         if (!session) {
@@ -74,7 +75,7 @@ export class BridgeManager {
         // debugger;
         // If bridge is already connected, add this client
         if (this.bridgeProvider && this.isConnected) {
-            logger.info('[BRIDGE] Updating clients');
+            log.info('[BRIDGE] Updating clients');
             await this.updateClients();
         }
 
@@ -97,7 +98,7 @@ export class BridgeManager {
         }
         // TODO: Remove client from bridge if possible
         // The bridge-sdk might not support removing individual clients
-        logger.debug('Session removed', { appSessionId });
+        log.debug('Session removed', { appSessionId });
     }
 
     /**
@@ -121,9 +122,9 @@ export class BridgeManager {
             });
             await this.bridgeProvider.send(response, sessionCrypto, sessionId);
 
-            logger.debug('Response sent successfully', { sessionId, requestId });
+            log.debug('Response sent successfully', { sessionId, requestId });
         } catch (error) {
-            logger.error('Failed to send response through bridge', {
+            log.error('Failed to send response through bridge', {
                 sessionId,
                 requestId,
                 error,
@@ -193,15 +194,15 @@ export class BridgeManager {
             });
             this.isConnected = true;
             this.reconnectAttempts = 0;
-            logger.info('Bridge connected successfully');
+            log.info('Bridge connected successfully');
         } catch (error) {
-            logger.error('Bridge connection failed', { error });
+            log.error('Bridge connection failed', { error });
             // Attempt reconnection if not at max attempts
             if (this.reconnectAttempts < (this.config.maxReconnectAttempts || 5)) {
                 this.reconnectAttempts++;
-                logger.info('Bridge reconnection attempt', { attempt: this.reconnectAttempts });
+                log.info('Bridge reconnection attempt', { attempt: this.reconnectAttempts });
                 setTimeout(() => {
-                    this.connectToBridge().catch((error) => logger.error('Bridge reconnection failed', { error }));
+                    this.connectToBridge().catch((error) => log.error('Bridge reconnection failed', { error }));
                 }, this.config.reconnectInterval);
             }
             throw error;
@@ -214,10 +215,10 @@ export class BridgeManager {
     private async updateClients(): Promise<void> {
         // TODO: The bridge-sdk might not support adding clients dynamically
         // This would require closing and reopening the bridge with updated clients
-        logger.debug('Updating clients');
+        log.debug('Updating clients');
         if (this.bridgeProvider) {
             const clients = await this.getClients();
-            logger.info('[BRIDGE] Restoring connection', { clients: clients.length });
+            log.info('[BRIDGE] Restoring connection', { clients: clients.length });
             // await this.bridgeProvider.close();
             await this.bridgeProvider.restoreConnection(clients, {
                 lastEventId: this.lastEventId,
@@ -247,7 +248,7 @@ export class BridgeManager {
 
             this.lastEventId = event?.lastEventId;
         } catch (error) {
-            logger.error('Error handling bridge event', { error });
+            log.error('Error handling bridge event', { error });
         }
     }
 }
