@@ -2,6 +2,8 @@
 
 This guide shows how to integrate `@ton/walletkit` into your app with minimal boilerplate. It abstracts TON Connect and wallet specifics behind a clean API and UI-friendly events.
 
+After you complete this guide, you'll have your wallet fully integrated with the TON ecosystem. You'll be able to interact with dApps, NFTs, and jettons.
+
 ### Install
 
 Use pnpm:
