@@ -5,6 +5,7 @@ import { LRUCache } from 'lru-cache';
 
 import type { EmulationTokenInfoMasters } from '../types/toncenter/emulation';
 import { globalLogger } from './Logger';
+import { EventEmitter } from './EventEmitter';
 
 const log = globalLogger.createChild('JettonsManager');
 
@@ -28,7 +29,10 @@ export interface JettonInfo {
 export class JettonsManager {
     private cache: LRUCache<string, JettonInfo>;
 
-    constructor(cacheSize: number = 10000) {
+    constructor(
+        cacheSize: number = 10000,
+        private eventEmitter: EventEmitter,
+    ) {
         this.cache = new LRUCache({
             max: cacheSize,
         });
@@ -42,6 +46,21 @@ export class JettonsManager {
         });
 
         log.info('JettonsManager initialized', { cacheSize });
+
+        // Set up event listener for emulation results for jetton caching
+        this.eventEmitter.on('emulation:result', (emulationResult: unknown) => {
+            if (emulationResult && typeof emulationResult === 'object' && 'metadata' in emulationResult) {
+                this.addJettonsFromEmulationMetadata(
+                    emulationResult.metadata as Record<
+                        string,
+                        {
+                            is_indexed: boolean;
+                            token_info?: unknown[];
+                        }
+                    >,
+                );
+            }
+        });
     }
 
     /**
@@ -135,6 +154,7 @@ export class JettonsManager {
                 ) as EmulationTokenInfoMasters | undefined;
 
                 if (jettonMasterInfo) {
+                    log.debug('Adding jetton from emulation metadata', { jettonAddress });
                     this.addJettonFromEmulation(jettonAddress, jettonMasterInfo);
                     addedCount++;
                 }

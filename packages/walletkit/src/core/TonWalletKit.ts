@@ -22,6 +22,7 @@ import type { RequestProcessor } from './RequestProcessor';
 import type { ResponseHandler } from './ResponseHandler';
 import { JettonsManager, type JettonInfo } from './JettonsManager';
 import { RawBridgeEventConnect } from '../types/internal';
+import { EventEmitter } from './EventEmitter';
 
 const log = globalLogger.createChild('TonWalletKit');
 
@@ -47,13 +48,17 @@ export class TonWalletKit implements ITonWalletKit {
     private jettonsManager: JettonsManager;
     private initializer: Initializer;
 
+    // Event emitter for this kit instance
+    private eventEmitter: EventEmitter;
+
     // State
     private isInitialized = false;
     private initializationPromise?: Promise<void>;
 
     constructor(options: TonWalletKitOptions) {
-        this.initializer = new Initializer();
-        this.jettonsManager = new JettonsManager();
+        this.eventEmitter = new EventEmitter();
+        this.initializer = new Initializer({}, this.eventEmitter);
+        this.jettonsManager = new JettonsManager(10000, this.eventEmitter);
 
         // Auto-initialize (lazy)
         this.initializationPromise = this.initialize(options);
@@ -68,22 +73,7 @@ export class TonWalletKit implements ITonWalletKit {
         if (this.isInitialized) return;
 
         try {
-            // Create emulation callback for jetton caching
-            const emulationCallback = (emulationResult: unknown) => {
-                if (emulationResult && typeof emulationResult === 'object' && 'metadata' in emulationResult) {
-                    this.jettonsManager.addJettonsFromEmulationMetadata(
-                        emulationResult.metadata as Record<
-                            string,
-                            {
-                                is_indexed: boolean;
-                                token_info?: unknown[];
-                            }
-                        >,
-                    );
-                }
-            };
-
-            const components = await this.initializer.initialize(options, emulationCallback);
+            const components = await this.initializer.initialize(options);
             this.assignComponents(components);
             this.setupEventRouting();
             this.isInitialized = true;
@@ -432,5 +422,13 @@ export class TonWalletKit implements ITonWalletKit {
      */
     getJettonsManager(): JettonsManager {
         return this.jettonsManager;
+    }
+
+    /**
+     * Get the event emitter for this kit instance
+     * Allows external components to listen to and emit events
+     */
+    getEventEmitter(): EventEmitter {
+        return this.eventEmitter;
     }
 }

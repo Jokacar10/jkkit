@@ -16,10 +16,10 @@ import { WalletManager } from './WalletManager';
 import { SessionManager } from './SessionManager';
 import { BridgeManager } from './BridgeManager';
 import { EventRouter } from './EventRouter';
-import type { EmulationResultCallback } from '../handlers/TransactionHandler';
 import { RequestProcessor } from './RequestProcessor';
 import { ResponseHandler } from './ResponseHandler';
 import { globalLogger } from './Logger';
+import type { EventEmitter } from './EventEmitter';
 import { createWalletV5R1 } from '../contracts/w5/WalletV5R1Adapter';
 
 const log = globalLogger.createChild('Initializer');
@@ -53,14 +53,16 @@ export interface InitializationResult {
 export class Initializer {
     private config: InitializationConfig;
     private tonClient!: TonClient;
+    private eventEmitter: EventEmitter;
 
-    constructor(config: InitializationConfig = {}) {
+    constructor(config: InitializationConfig = {}, eventEmitter: EventEmitter) {
         this.config = {
             retryAttempts: 3,
             retryDelay: 1000,
             timeoutMs: 10000,
             ...config,
         };
+        this.eventEmitter = eventEmitter;
 
         // TonClient and wallet initializers will be created in initialize() with proper options
     }
@@ -68,10 +70,7 @@ export class Initializer {
     /**
      * Initialize all components
      */
-    async initialize(
-        options: TonWalletKitOptions,
-        emulationCallback?: EmulationResultCallback,
-    ): Promise<InitializationResult> {
+    async initialize(options: TonWalletKitOptions): Promise<InitializationResult> {
         try {
             log.info('Initializing TonWalletKit...');
 
@@ -85,7 +84,6 @@ export class Initializer {
             const { walletManager, sessionManager, bridgeManager, eventRouter } = await this.initializeManagers(
                 options,
                 storageAdapter,
-                emulationCallback,
             );
 
             // 5. Initialize processors
@@ -150,7 +148,6 @@ export class Initializer {
     private async initializeManagers(
         options: TonWalletKitOptions,
         storageAdapter: StorageAdapter,
-        emulationCallback?: EmulationResultCallback,
     ): Promise<{
         walletManager: WalletManager;
         sessionManager: SessionManager;
@@ -180,7 +177,7 @@ export class Initializer {
         );
         await bridgeManager.initialize();
 
-        const eventRouter = new EventRouter(emulationCallback);
+        const eventRouter = new EventRouter(this.eventEmitter);
 
         return {
             walletManager,

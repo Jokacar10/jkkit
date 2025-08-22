@@ -21,21 +21,19 @@ import {
 } from '../utils/toncenterEmulation';
 import { BasicHandler } from './BasicHandler';
 import { CallForSuccess } from '../utils/retry';
+import type { EventEmitter } from '../core/EventEmitter';
 
 const log = globalLogger.createChild('TransactionHandler');
-
-// Callback for emulation results - allows external processing
-export type EmulationResultCallback = (emulationResult: unknown) => void;
 
 export class TransactionHandler
     extends BasicHandler<EventTransactionRequest>
     implements EventHandler<EventTransactionRequest, RawBridgeEventTransaction>
 {
-    private emulationResultCallback?: EmulationResultCallback;
+    private eventEmitter: EventEmitter;
 
-    constructor(notify: (event: EventTransactionRequest) => void, emulationCallback?: EmulationResultCallback) {
+    constructor(notify: (event: EventTransactionRequest) => void, eventEmitter: EventEmitter) {
         super(notify);
-        this.emulationResultCallback = emulationCallback;
+        this.eventEmitter = eventEmitter;
     }
     canHandle(event: RawBridgeEvent): event is RawBridgeEventTransaction {
         return event.method === 'sendTransaction';
@@ -266,12 +264,12 @@ export class TransactionHandler
 
         const moneyFlow = processToncenterMoneyFlow(emulationResult);
 
-        // Notify callback about emulation result for jetton caching
-        if (this.emulationResultCallback && emulationResult.result) {
+        // Emit emulation result event for jetton caching and other components
+        if (emulationResult.result) {
             try {
-                this.emulationResultCallback(emulationResult.result);
+                this.eventEmitter.emit('emulation:result', emulationResult.result);
             } catch (error) {
-                log.warn('Error in emulation result callback', { error });
+                log.warn('Error emitting emulation result event', { error });
             }
         }
 
