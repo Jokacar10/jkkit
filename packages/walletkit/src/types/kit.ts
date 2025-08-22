@@ -15,6 +15,9 @@ export interface TonWalletKit {
     /** Get all registered wallets */
     getWallets(): WalletInterface[];
 
+    /** Get wallet by address */
+    getWallet(address: string): WalletInterface | undefined;
+
     /** Add a new wallet */
     addWallet(walletConfig: WalletInitConfig): Promise<void>;
 

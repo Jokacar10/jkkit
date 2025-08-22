@@ -114,6 +114,17 @@ export class TonWalletKit implements ITonWalletKit {
         return this.walletManager.getWallets();
     }
 
+    /**
+     * Get wallet by address
+     */
+    getWallet(address: string): WalletInterface | undefined {
+        if (!this.isInitialized) {
+            log.warn('TonWalletKit not yet initialized, returning undefined');
+            return undefined;
+        }
+        return this.walletManager.getWallet(address);
+    }
+
     async addWallet(walletConfig: WalletInitConfig): Promise<void> {
         await this.ensureInitialized();
         const wallet = await createWalletFromConfig(walletConfig, this.tonClient);
