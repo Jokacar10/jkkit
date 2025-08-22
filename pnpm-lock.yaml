@@ -120,6 +120,9 @@ importers:
       '@tonconnect/sdk':
         specifier: ^3.2.0
         version: 3.2.0
+      '@truecarry/tlb-abi':
+        specifier: ^0.2.0
+        version: 0.2.0(@ton/core@0.61.0(@ton/crypto@3.3.0))
       bridge-sdk:
         specifier: link:..\..\..\bridge-sdk
         version: link:../../../bridge-sdk
@@ -795,6 +798,11 @@ packages:
 
   '@tonconnect/sdk@3.2.0':
     resolution: {integrity: sha512-lh4bKpSdWDNtlKy2mv7uhdLLqnIoKRgRKbANRa/liQoPb8nDftQo6TbU1BYEmOAF32GbFn+9Sw9azPup4vfzxg==}
+
+  '@truecarry/tlb-abi@0.2.0':
+    resolution: {integrity: sha512-GKcaS1OdPiy6MH7+l3Y2teFoDIYNcdPNat+PLEQk+1jajB4b8lUy5KBv/nVpxDzCuWUQo+em1lq5Gok9auUZuA==}
+    peerDependencies:
+      '@ton/core': ^0.56.3
 
   '@types/babel__core@7.20.5':
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
@@ -3160,6 +3168,13 @@ snapshots:
       '@tonconnect/protocol': 2.3.0
     transitivePeerDependencies:
       - encoding
+
+  '@truecarry/tlb-abi@0.2.0(@ton/core@0.61.0(@ton/crypto@3.3.0))':
+    dependencies:
+      '@ton/core': 0.61.0(@ton/crypto@3.3.0)
+      debug: 4.4.1
+    transitivePeerDependencies:
+      - supports-color
 
   '@types/babel__core@7.20.5':
     dependencies:

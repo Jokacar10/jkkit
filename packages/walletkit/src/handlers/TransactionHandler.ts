@@ -1,6 +1,8 @@
 // Transaction request handler
 
-import type { WalletInterface, EventTransactionRequest, HumanReadableTx } from '../types';
+import { fromNano } from '@ton/core';
+
+import type { WalletInterface, EventTransactionRequest, HumanReadableTx, TransactionPreview } from '../types';
 import type {
     RawBridgeEvent,
     EventHandler,
@@ -8,11 +10,17 @@ import type {
     ConnectTransactionParamContent,
     ValidationResult,
 } from '../types/internal';
-import { isValidNanotonAmount, validateTransactionMessages } from '../validation/transaction';
+import { validateTransactionMessages } from '../validation/transaction';
 import { globalLogger } from '../core/Logger';
-import {} from '@tonconnect/protocol';
 import { isValidAddress } from '../utils/address';
+import {
+    createToncenterMessage,
+    fetchToncenterEmulation,
+    MoneyFlow,
+    processToncenterMoneyFlow,
+} from '../utils/toncenterEmulation';
 import { BasicHandler } from './BasicHandler';
+import { CallForSuccess } from '../utils/retry';
 
 const log = globalLogger.createChild('TransactionHandler');
 
@@ -36,8 +44,7 @@ export class TransactionHandler
             throw new Error('Failed to parse transaction request');
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const preview = {} as any; //await this.createTransactionPreview(request, event.wallet);
+        const preview = await CallForSuccess(() => this.createTransactionPreview(request, event.wallet));
 
         const txEvent: EventTransactionRequest = {
             ...event,
@@ -164,40 +171,50 @@ export class TransactionHandler
     /**
      * Create human-readable transaction preview
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private async createTransactionPreview(request: any, wallet?: WalletInterface): Promise<any> {
-        const humanReadableMessages = await Promise.all(
-            request.messages.map((msg: string, index: number) => this.parseMessageToHumanReadable(msg, index)),
-        );
+
+    private async createTransactionPreview(
+        request: ConnectTransactionParamContent,
+        wallet?: WalletInterface,
+    ): Promise<TransactionPreview> {
+        // const humanReadableMessages = await Promise.all(
+        //     request.messages.map((msg, index: number) => this.parseMessageToHumanReadable(msg, index)),
+        // );
 
         // TODO: Implement transaction emulation for fees and balance changes
         const emulationResult = await this.emulateTransaction(request, wallet);
+        log.info('Emulation result', { emulationResult });
 
         return {
-            messages: humanReadableMessages,
-            totalFees: emulationResult.totalFees,
-            willBounce: emulationResult.willBounce,
-            balanceBefore: emulationResult.balanceBefore,
-            balanceAfter: emulationResult.balanceAfter,
+            // messages: [],
+            moneyFlow: emulationResult.moneyFlow,
+
+            // messages: humanReadableMessages,
+            // totalFees: emulationResult.totalFees,
+            // willBounce: emulationResult.willBounce,
+            // balanceBefore: emulationResult.balanceBefore,
+            // balanceAfter: emulationResult.balanceAfter,
         };
     }
 
     /**
      * Parse BOC message to human-readable format
      */
-    private async parseMessageToHumanReadable(messageBoc: string, index: number): Promise<HumanReadableTx> {
+    private async parseMessageToHumanReadable(
+        message: ConnectTransactionParamContent['messages'][number],
+        index: number,
+    ): Promise<HumanReadableTx> {
         // TODO: Implement proper BOC parsing
         // This is a placeholder implementation
 
         try {
             // Mock parsing - replace with real BOC decoding
             const parsed: HumanReadableTx = {
-                to: 'UQC...(parsed from BOC)',
-                valueTON: '0.1',
-                comment: 'Comment from BOC data',
+                to: message.address,
+                valueTON: fromNano(message.amount).toString(),
+                // comment: 'Comment from BOC data',
                 type: 'ton',
                 extra: {
-                    originalBoc: messageBoc,
+                    // originalBoc: messageBoc,
                     index,
                 },
             };
@@ -212,7 +229,7 @@ export class TransactionHandler
                 valueTON: '0',
                 type: 'raw',
                 extra: {
-                    originalBoc: messageBoc,
+                    // originalBoc: message,
                     error: error instanceof Error ? error.message : 'Unknown error',
                 },
             };
@@ -222,32 +239,49 @@ export class TransactionHandler
     /**
      * Emulate transaction to get fees and balance changes
      */
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private async emulateTransaction(_request: any, wallet?: WalletInterface): Promise<any> {
+
+    private async emulateTransaction(
+        request: ConnectTransactionParamContent,
+        wallet?: WalletInterface,
+    ): Promise<{
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        emulationResult: any;
+        moneyFlow: MoneyFlow;
+    }> {
         // TODO: Implement transaction emulation using TON API
         // This would involve calling a TON Center API or similar service
 
-        let balanceBefore = '0';
-        if (wallet) {
-            try {
-                balanceBefore = (await wallet.getBalance()).toString();
-            } catch (error) {
-                log.warn('Failed to get wallet balance', { error });
-            }
-        }
+        const message = createToncenterMessage(wallet?.getAddress(), request.messages);
+        const emulationResult = await CallForSuccess(() => fetchToncenterEmulation(message));
 
-        // Mock emulation result
-        const totalFees = '5000000'; // 0.005 TON in nanotons
-        const balanceAfter = isValidNanotonAmount(balanceBefore)
-            ? (parseInt(balanceBefore, 10) - parseInt(totalFees, 10)).toString()
-            : '0';
+        const moneyFlow = processToncenterMoneyFlow(emulationResult);
 
         return {
-            totalFees,
-            balanceBefore,
-            balanceAfter,
-            willBounce: false, // TODO: Determine from emulation
+            emulationResult: emulationResult.result,
+            moneyFlow,
         };
+
+        // let balanceBefore = '0';
+        // if (wallet) {
+        //     try {
+        //         balanceBefore = (await wallet.getBalance()).toString();
+        //     } catch (error) {
+        //         log.warn('Failed to get wallet balance', { error });
+        //     }
+        // }
+
+        // // Mock emulation result
+        // const totalFees = '5000000'; // 0.005 TON in nanotons
+        // const balanceAfter = isValidNanotonAmount(balanceBefore)
+        //     ? (parseInt(balanceBefore, 10) - parseInt(totalFees, 10)).toString()
+        //     : '0';
+
+        // return {
+        //     totalFees,
+        //     balanceBefore,
+        //     balanceAfter,
+        //     willBounce: false, // TODO: Determine from emulation
+        // };
     }
 
     /**

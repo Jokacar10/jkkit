@@ -3,8 +3,8 @@
 import type { ConnectRequest } from '@tonconnect/protocol';
 
 import type { WalletInterface, TonNetwork } from './wallet';
-import type { HumanReadableTx } from '../validation/transaction';
 import { ConnectTransactionParamContent, RawBridgeEventTransaction } from './internal';
+import { MoneyFlow } from '../utils/toncenterEmulation';
 
 // export type EventConnectRequest = ConnectRequest;
 
@@ -91,19 +91,20 @@ export interface TransactionRequest {
  */
 export interface TransactionPreview {
     /** Estimated total fees */
-    totalFees?: string;
+    // totalFees?: string;
 
-    /** Whether transaction might bounce */
-    willBounce?: boolean;
+    // /** Whether transaction might bounce */
+    // willBounce?: boolean;
 
-    /** Balance before transaction */
-    balanceBefore?: string;
+    // /** Balance before transaction */
+    // balanceBefore?: string;
 
-    /** Estimated balance after transaction */
-    balanceAfter?: string;
+    // /** Estimated balance after transaction */
+    // balanceAfter?: string;
 
-    /** Human-readable message descriptions */
-    messages: HumanReadableTx[];
+    // /** Human-readable message descriptions */
+    // messages: HumanReadableTx[];
+    moneyFlow: MoneyFlow;
 }
 
 /**

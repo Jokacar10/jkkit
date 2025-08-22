@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import type { EventTransactionRequest } from '@ton/walletkit';
+import { fromNano, Address } from '@ton/ton';
 
 import { Button } from './Button';
 import { Card } from './Card';
 import { createComponentLogger } from '../utils/logger';
+import { formatUnits } from '../utils/units';
 
 // Create logger for transaction request modal
 const log = createComponentLogger('TransactionRequestModal');
@@ -38,18 +40,22 @@ export const TransactionRequestModal: React.FC<TransactionRequestModalProps> = (
         onReject('User rejected the transaction');
     };
 
-    const formatAddress = (address: string): string => {
-        if (!address) return '';
-        return `${address.slice(0, 8)}...${address.slice(-8)}`;
-    };
-
-    const formatTON = (nanotons: string): string => {
+    const formatTON = (nanotons: string | bigint): string => {
         try {
-            const value = BigInt(nanotons);
-            const tons = Number(value) / 1e9;
-            return tons.toFixed(4);
+            const value = typeof nanotons === 'string' ? BigInt(nanotons) : nanotons;
+            return fromNano(value);
         } catch {
             return '0';
+        }
+    };
+
+    const formatAddress = (address: string | Address): string => {
+        try {
+            const addr = typeof address === 'string' ? address : address.toString();
+            if (!addr) return '';
+            return `${addr.slice(0, 8)}...${addr.slice(-8)}`;
+        } catch {
+            return '';
         }
     };
 
@@ -75,13 +81,15 @@ export const TransactionRequestModal: React.FC<TransactionRequestModalProps> = (
                             {/* Sender */}
                             <div className="flex justify-between items-center mb-2">
                                 <span className="text-sm text-gray-600">From:</span>
-                                <span className="text-sm font-mono">{formatAddress(request.request.from)}</span>
+                                <span className="text-sm font-mono text-black">
+                                    {formatAddress(request.wallet?.getAddress() || '')}
+                                </span>
                             </div>
 
                             {/* Network */}
                             <div className="flex justify-between items-center mb-2">
                                 <span className="text-sm text-gray-600">Network:</span>
-                                <span className="text-sm">
+                                <span className="text-sm text-black">
                                     {request.request.network === '-3'
                                         ? 'Testnet'
                                         : request.request.network === '-239'
@@ -93,104 +101,77 @@ export const TransactionRequestModal: React.FC<TransactionRequestModalProps> = (
                             {/* Valid Until */}
                             <div className="flex justify-between items-center">
                                 <span className="text-sm text-gray-600">Valid Until:</span>
-                                <span className="text-sm">
+                                <span className="text-sm text-black">
                                     {new Date(request.request.valid_until * 1000).toLocaleString()}
                                 </span>
                             </div>
                         </div>
 
-                        {/* Transaction Messages */}
+                        {/* Money Flow Summary */}
                         <div>
-                            <h4 className="font-medium text-gray-900 mb-3">
-                                Messages ({request.preview.messages?.length || 0})
-                            </h4>
+                            <h4 className="font-medium text-gray-900 mb-3">Transaction Overview</h4>
                             <div className="space-y-3">
-                                {request.preview.messages?.map((message, index) => (
-                                    <div key={index} className="border rounded-lg p-3 bg-white">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <span className="text-xs text-gray-500">Message {index + 1}</span>
-                                            <span className="text-xs px-2 py-1 bg-gray-100 rounded">
-                                                {message.type || 'TON'}
+                                {/* TON Outputs */}
+                                {/* {request.preview.moneyFlow.outputs > 0n && (
+                                    <div className="border rounded-lg p-3 bg-red-50">
+                                        <div className="flex justify-between items-center">
+                                            <div>
+                                                <span className="text-sm font-medium text-red-800">TON Outgoing</span>
+                                                <p className="text-xs text-red-600">Amount you're sending</p>
+                                            </div>
+                                            <span className="text-lg font-bold text-red-700">
+                                                -{formatTON(request.preview.moneyFlow.outputs)} TON
                                             </span>
                                         </div>
+                                    </div>
+                                )} */}
 
-                                        <div className="space-y-1">
-                                            <div className="flex justify-between">
-                                                <span className="text-sm text-gray-600">To:</span>
-                                                <span className="text-sm font-mono">
-                                                    {formatAddress(message.to || 'Unknown')}
-                                                </span>
+                                {/* TON Inputs */}
+                                {/* {request.preview.moneyFlow.inputs > 0n && request.preview.moneyFlow.outputs > 0n && (
+                                    <div className="flex gap-4">
+                                        <div className="flex items-center gap-2">
+                                            <div>Ton:</div>
+                                            <div>
+                                                {formatUnits(
+                                                    request.preview.moneyFlow.inputs -
+                                                        request.preview.moneyFlow.outputs,
+                                                    9,
+                                                )}{' '}
+                                                TON
                                             </div>
-
-                                            <div className="flex justify-between">
-                                                <span className="text-sm text-gray-600">Amount:</span>
-                                                <span className="text-sm font-semibold">
-                                                    {message.valueTON ? `${formatTON(message.valueTON)} TON` : '0 TON'}
-                                                </span>
-                                            </div>
-
-                                            {message.comment && (
-                                                <div className="mt-2">
-                                                    <span className="text-sm text-gray-600">Comment:</span>
-                                                    <p className="text-sm mt-1 p-2 bg-gray-50 rounded">
-                                                        {message.comment}
-                                                    </p>
-                                                </div>
-                                            )}
                                         </div>
                                     </div>
-                                ))}
+                                )} */}
+
+                                <JettonFlow
+                                    jettonTransfers={request.preview.moneyFlow.jettonTransfers}
+                                    ourAddress={request.preview.moneyFlow.ourAddress}
+                                    tonDifference={request.preview.moneyFlow.inputs - request.preview.moneyFlow.outputs}
+                                />
+
+                                {/* No transfers message */}
+                                {request.preview.moneyFlow.outputs === 0n &&
+                                    request.preview.moneyFlow.inputs === 0n &&
+                                    request.preview.moneyFlow.jettonTransfers.length === 0 && (
+                                        <div className="border rounded-lg p-3 bg-gray-50">
+                                            <p className="text-sm text-gray-600 text-center">
+                                                This transaction doesn't involve any token transfers
+                                            </p>
+                                        </div>
+                                    )}
                             </div>
                         </div>
 
-                        {/* Transaction Fees and Balance Impact */}
-                        {request.preview && (
+                        {/* Wallet Information */}
+                        {request.preview.moneyFlow.ourAddress && (
                             <div className="border rounded-lg p-4 bg-blue-50">
-                                <h4 className="font-medium text-gray-900 mb-3">Estimated Impact</h4>
-
-                                {request.preview.totalFees && (
-                                    <div className="flex justify-between items-center mb-2">
-                                        <span className="text-sm text-gray-600">Network Fees:</span>
-                                        <span className="text-sm font-semibold text-red-600">
-                                            -{formatTON(request.preview.totalFees)} TON
-                                        </span>
-                                    </div>
-                                )}
-
-                                {request.preview.balanceBefore && (
-                                    <div className="flex justify-between items-center mb-2">
-                                        <span className="text-sm text-gray-600">Current Balance:</span>
-                                        <span className="text-sm">{formatTON(request.preview.balanceBefore)} TON</span>
-                                    </div>
-                                )}
-
-                                {request.preview.balanceAfter && (
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-sm text-gray-600">After Transaction:</span>
-                                        <span className="text-sm font-semibold">
-                                            {formatTON(request.preview.balanceAfter)} TON
-                                        </span>
-                                    </div>
-                                )}
-
-                                {request.preview.willBounce && (
-                                    <div className="mt-3 p-2 bg-yellow-100 border border-yellow-300 rounded">
-                                        <div className="flex items-center">
-                                            <svg
-                                                className="w-4 h-4 text-yellow-600 mr-2"
-                                                fill="currentColor"
-                                                viewBox="0 0 20 20"
-                                            >
-                                                <path
-                                                    fillRule="evenodd"
-                                                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                                                    clipRule="evenodd"
-                                                />
-                                            </svg>
-                                            <span className="text-xs text-yellow-700">This transaction may bounce</span>
-                                        </div>
-                                    </div>
-                                )}
+                                <h4 className="font-medium text-gray-900 mb-3">Wallet Information</h4>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-sm text-gray-600">Your Wallet:</span>
+                                    <span className="text-sm font-mono">
+                                        {formatAddress(request.preview.moneyFlow.ourAddress)}
+                                    </span>
+                                </div>
                             </div>
                         )}
 
@@ -235,3 +216,131 @@ export const TransactionRequestModal: React.FC<TransactionRequestModalProps> = (
         </div>
     );
 };
+
+export const JettonNameDisplay = memo(function JettonNameDisplay({
+    jettonAddress,
+}: {
+    jettonAddress: Address | string | undefined;
+}) {
+    // const jettonInfo = useJettonInfo(
+    //     jettonAddress
+    //         ? typeof jettonAddress === 'string' && jettonAddress !== 'TON'
+    //             ? SafeParseAddress(jettonAddress)
+    //             : jettonAddress
+    //         : null,
+    // );
+
+    // const name = jettonInfo.jettonInfo?.metadata?.name;
+    // return <div>{<AddressRow address={jettonAddress} text={name} />}</div>;
+    return <div>{jettonAddress === 'TON' ? jettonAddress : 'USDT'}</div>;
+});
+
+export const JettonAmountDisplay = memo(function JettonAmountDisplay({
+    amount,
+    jettonAddress,
+}: {
+    amount: bigint;
+    jettonAddress: Address | string | undefined;
+}) {
+    // const jettonInfo = useJettonInfo(
+    //     jettonAddress
+    //         ? typeof jettonAddress === 'string' && jettonAddress !== 'TON'
+    //             ? SafeParseAddress(jettonAddress)
+    //             : jettonAddress
+    //         : null,
+    // );
+    // const decimals = parseInt(jettonInfo.jettonInfo?.metadata.decimals || '9') || 9;
+    // const symbol = jettonInfo.jettonInfo?.metadata?.symbol || 'UNKWN';
+    const decimals =
+        jettonAddress === 'TON' ? 9 : jettonAddress === 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs' ? 6 : 9;
+    const symbol = jettonAddress === 'TON' ? 'TON' : 'USDT';
+    return (
+        <div>
+            {formatUnits(amount, decimals)} {symbol}
+        </div>
+    );
+});
+
+export const JettonImage = memo(function JettonImage({
+    jettonAddress,
+}: {
+    jettonAddress: Address | string | undefined;
+}) {
+    // const jettonInfo = useJettonInfo(
+    //     jettonAddress ? (typeof jettonAddress === 'string' ? Address.parse(jettonAddress) : jettonAddress) : null,
+    // );
+
+    // return <img src={jettonInfo.jettonInfo?.metadata.image} alt={jettonInfo.jettonInfo?.metadata.name} />;
+    return <></>;
+});
+
+const JettonFlowItem = memo(function JettonFlowItem({
+    jettonAddress,
+    amount,
+}: {
+    jettonAddress: Address | string | undefined;
+    amount: bigint;
+}) {
+    return (
+        <div className="flex items-center">
+            <span className="truncate max-w-[200px]">
+                <JettonNameDisplay jettonAddress={jettonAddress} />
+            </span>
+            <div className={`flex ml-2 font-medium ${amount >= 0n ? 'text-green-600' : 'text-red-600'}`}>
+                {amount >= 0n ? '+' : ''}
+                <JettonAmountDisplay amount={amount} jettonAddress={jettonAddress} />
+            </div>
+        </div>
+    );
+});
+export const JettonFlow = memo(function JettonFlow({
+    jettonTransfers,
+    tonDifference,
+    ourAddress,
+}: {
+    jettonTransfers: { from: Address; to: Address; jetton: Address | null; amount: bigint }[];
+    ourAddress: Address | null;
+    tonDifference: bigint;
+}) {
+    // Group transfers by jetton and calculate net flow
+    const jettonFlows = useMemo(() => {
+        return jettonTransfers.reduce<Record<string, bigint>>((acc, transfer) => {
+            const jettonKey = transfer.jetton?.toString() || 'unknown';
+            console.log('jettonKey', jettonKey);
+            if (jettonKey === 'EQCM3B12QK1e4yZSf8GtBRT0aLMNyEsBc_DhVfRRtOEffLez') {
+                return acc;
+            }
+            if (jettonKey === 'EQBnGWMCf3-FZZq1W4IWcWiGAc3PHuZ0_H-7sad2oY00o83S') {
+                return acc;
+            }
+            if (!acc[jettonKey]) {
+                acc[jettonKey] = 0n;
+            }
+
+            // Add to balance if receiving tokens (to our address)
+            // Subtract from balance if sending tokens (from our address)
+            if (ourAddress && transfer.to.equals(ourAddress)) {
+                acc[jettonKey] += transfer.amount;
+            }
+            if (ourAddress && transfer.from.equals(ourAddress)) {
+                acc[jettonKey] -= transfer.amount;
+            }
+
+            return acc;
+        }, {});
+    }, [jettonTransfers, ourAddress?.toRawString()]);
+
+    return (
+        <div className="mt-2">
+            <div className="font-semibold mb-1">Money Flow:</div>
+            <JettonFlowItem jettonAddress={'TON'} amount={tonDifference} />
+            {Object.entries(jettonFlows).length > 0 ? (
+                Object.entries(jettonFlows).map(([jettonAddr, amount]) => (
+                    <JettonFlowItem key={jettonAddr} jettonAddress={jettonAddr} amount={amount} />
+                ))
+            ) : (
+                <></>
+            )}
+        </div>
+    );
+});
