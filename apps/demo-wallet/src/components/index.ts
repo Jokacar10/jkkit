@@ -5,6 +5,8 @@ export { ConnectRequestModal } from './ConnectRequestModal';
 export { DisconnectNotifications } from './DisconnectNotifications';
 export { ImportWallet } from './ImportWallet';
 export { Input } from './Input';
+export { JettonsCard } from './JettonsCard';
+export { JettonsList } from './JettonsList';
 export { Layout } from './Layout';
 export { MnemonicDisplay } from './MnemonicDisplay';
 export { ProtectedRoute } from './ProtectedRoute';

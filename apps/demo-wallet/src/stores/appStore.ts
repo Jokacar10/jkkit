@@ -5,6 +5,7 @@ import { immer } from 'zustand/middleware/immer';
 
 import { createAuthSlice } from './slices/authSlice';
 import { createWalletSlice, setupWalletKitListeners } from './slices/walletSlice';
+import { createJettonsSlice } from './slices/jettonsSlice';
 import { createComponentLogger } from '../utils/logger';
 import type { AppState } from '../types/store';
 
@@ -56,6 +57,9 @@ export const useStore = create<AppState>()(
                     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                     // @ts-ignore
                     ...createWalletSlice(...a),
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore
+                    ...createJettonsSlice(...a),
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 })) as unknown as any,
                 {
@@ -76,6 +80,13 @@ export const useStore = create<AppState>()(
                             hasWallet: state.wallet.hasWallet,
                             transactions: state.wallet.transactions,
                             encryptedMnemonic: state.wallet.encryptedMnemonic,
+                        },
+                        jettons: {
+                            userJettons: state.jettons.userJettons,
+                            popularJettons: state.jettons.popularJettons,
+                            lastJettonsUpdate: state.jettons.lastJettonsUpdate,
+                            lastPopularUpdate: state.jettons.lastPopularUpdate,
+                            // Don't persist: loading states, errors, transfer history
                         },
                         // isAuthenticated: omit - never persist authentication for security
                         // },
@@ -191,6 +202,40 @@ export const useDisconnectEvents = () =>
             disconnectedSessions: state.wallet.disconnectedSessions || [],
             handleDisconnectEvent: state.handleDisconnectEvent,
             clearDisconnectNotifications: state.clearDisconnectNotifications,
+        })),
+    );
+
+export const useJettons = () =>
+    useStore(
+        useShallow((state) => ({
+            // Data
+            userJettons: state.jettons.userJettons,
+            jettonTransfers: state.jettons.jettonTransfers,
+            popularJettons: state.jettons.popularJettons,
+
+            // Loading states
+            isLoadingJettons: state.jettons.isLoadingJettons,
+            isLoadingTransfers: state.jettons.isLoadingTransfers,
+            isLoadingPopular: state.jettons.isLoadingPopular,
+            isRefreshing: state.jettons.isRefreshing,
+
+            // Error states
+            error: state.jettons.error,
+            transferError: state.jettons.transferError,
+
+            // Actions
+            loadUserJettons: state.loadUserJettons,
+            refreshJettons: state.refreshJettons,
+            loadJettonTransfers: state.loadJettonTransfers,
+            loadPopularJettons: state.loadPopularJettons,
+            searchJettons: state.searchJettons,
+            getJettonBalance: state.getJettonBalance,
+            validateJettonAddress: state.validateJettonAddress,
+            clearJettons: state.clearJettons,
+
+            // Utilities
+            getJettonByAddress: state.getJettonByAddress,
+            formatJettonAmount: state.formatJettonAmount,
         })),
     );
 

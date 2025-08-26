@@ -9,6 +9,7 @@ import {
     TransactionRequestModal,
     SignDataRequestModal,
     DisconnectNotifications,
+    JettonsCard,
 } from '../components';
 import { useWallet, useTonConnect, useTransactionRequests, useSignDataRequests } from '../stores';
 import { walletKit } from '../stores/slices/walletSlice';
@@ -185,6 +186,9 @@ export const WalletDashboard: React.FC = () => {
                         </div>
                     </div>
                 </Card>
+
+                {/* Jettons Card */}
+                <JettonsCard />
 
                 {/* TON Connect URL Input */}
                 <Card title="Connect to dApp">

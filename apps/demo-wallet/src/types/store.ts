@@ -5,6 +5,10 @@ import type {
     EventTransactionRequest,
     EventSignDataRequest,
     EventDisconnect,
+    AddressJetton,
+    JettonTransfer,
+    JettonInfo,
+    JettonBalance,
 } from '@ton/walletkit';
 
 import type { AuthState, WalletState, Transaction } from './wallet';
@@ -16,6 +20,45 @@ export interface AuthSlice extends AuthState {
     unlock: (password: string) => Promise<boolean>;
     lock: () => void;
     reset: () => void;
+}
+
+// Jettons slice interface
+export interface JettonsSlice {
+    jettons: {
+        // Data
+        userJettons: AddressJetton[];
+        jettonTransfers: JettonTransfer[];
+        popularJettons: JettonInfo[];
+
+        // Loading states
+        isLoadingJettons: boolean;
+        isLoadingTransfers: boolean;
+        isLoadingPopular: boolean;
+        isRefreshing: boolean;
+
+        // Error states
+        error: string | null;
+        transferError: string | null;
+
+        // Last update timestamps
+        lastJettonsUpdate: number;
+        lastTransfersUpdate: number;
+        lastPopularUpdate: number;
+    };
+
+    // Actions
+    loadUserJettons: (userAddress?: string) => Promise<void>;
+    refreshJettons: (userAddress?: string) => Promise<void>;
+    loadJettonTransfers: (userAddress?: string, jettonAddress?: string) => Promise<void>;
+    loadPopularJettons: () => Promise<void>;
+    searchJettons: (query: string) => Promise<JettonInfo[]>;
+    getJettonBalance: (jettonWalletAddress: string) => Promise<JettonBalance>;
+    validateJettonAddress: (address: string) => boolean;
+    clearJettons: () => void;
+
+    // Utility methods
+    getJettonByAddress: (jettonAddress: string) => AddressJetton | undefined;
+    formatJettonAmount: (amount: string, decimals: number) => string;
 }
 
 // Wallet slice interface
@@ -57,12 +100,14 @@ export interface WalletSlice extends WalletState {
 }
 
 // Combined app state
-export interface AppState extends AuthSlice, WalletSlice {}
+export interface AppState extends AuthSlice, WalletSlice, JettonsSlice {}
 
 // Slice creator types
 export type AuthSliceCreator = StateCreator<AppState, [], [], AuthSlice>;
 
 export type WalletSliceCreator = StateCreator<AppState, [], [], WalletSlice>;
+
+export type JettonsSliceCreator = StateCreator<AppState, [], [], JettonsSlice>;
 
 // Migration types
 export interface MigrationState {

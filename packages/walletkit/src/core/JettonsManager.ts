@@ -609,19 +609,23 @@ export class JettonsManager implements JettonsAPI {
         const timeoutId = setTimeout(() => controller.abort(), this.DEFAULT_TIMEOUT);
 
         try {
-            const response = await CallForSuccess(async () => {
-                const res = await fetch(url, {
-                    method: 'GET',
-                    headers,
-                    signal: controller.signal,
-                });
+            const response = await CallForSuccess(
+                async () => {
+                    const res = await fetch(url, {
+                        method: 'GET',
+                        headers,
+                        signal: controller.signal,
+                    });
 
-                if (!res.ok) {
-                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-                }
+                    if (!res.ok) {
+                        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                    }
 
-                return res.json();
-            });
+                    return res.json();
+                },
+                20,
+                500,
+            );
 
             return response;
         } finally {

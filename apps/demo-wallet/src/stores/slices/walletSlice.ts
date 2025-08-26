@@ -21,6 +21,7 @@ const walletKit = new TonWalletKit({
     bridgeUrl: 'https://bridge.tonapi.io/bridge',
     network: 'mainnet',
     wallets: [],
+    apiKey: '25a9b2326a34b39a5fa4b264fb78fb4709e1bd576fc5e6b176639f5b71e94b0d',
 });
 
 export const createWalletSlice: WalletSliceCreator = (set: SetState, get) => ({
