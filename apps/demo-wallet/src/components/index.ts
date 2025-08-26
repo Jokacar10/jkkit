@@ -6,6 +6,7 @@ export { DisconnectNotifications } from './DisconnectNotifications';
 export { ImportWallet } from './ImportWallet';
 export { Input } from './Input';
 export { JettonsCard } from './JettonsCard';
+export { JettonRow } from './JettonRow';
 export { JettonsList } from './JettonsList';
 export { Layout } from './Layout';
 export { MnemonicDisplay } from './MnemonicDisplay';

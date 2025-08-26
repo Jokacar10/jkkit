@@ -3,7 +3,7 @@
 import { Address } from '@ton/core';
 import { LRUCache } from 'lru-cache';
 
-import type { EmulationTokenInfoMasters } from '../types/toncenter/emulation';
+import type { EmulationTokenInfoMasters, ToncenterResponseJettonWallets } from '../types/toncenter/emulation';
 import { globalLogger } from './Logger';
 import { EventEmitter } from './EventEmitter';
 import { CallForSuccess } from '../utils/retry';
@@ -38,24 +38,6 @@ interface TonCenterJettonInfo {
     last_transaction_lt: string;
     code_hash: string;
     data_hash: string;
-}
-
-interface TonCenterAddressJetton {
-    jetton_address: string;
-    jetton_wallet_address: string;
-    balance: string;
-    price?: {
-        prices?: {
-            USD?: number;
-        };
-    };
-    jetton?: {
-        name: string;
-        symbol: string;
-        description: string;
-        image?: string;
-        decimals: number;
-    };
 }
 
 interface TonCenterJettonBalance {
@@ -174,30 +156,64 @@ export class JettonsManager implements JettonsAPI {
             log.debug('Getting address jettons', { userAddress: normalizedAddress, offset, limit });
 
             const response = (await this.makeApiRequest(
-                `/accounts/${normalizedAddress}/jettons?offset=${offset}&limit=${limit}`,
-            )) as { jettons?: TonCenterAddressJetton[] };
+                `/jetton/wallets?offset=${offset}&limit=${limit}&owner_address=${normalizedAddress}`,
+            )) as ToncenterResponseJettonWallets;
 
-            if (!response.jettons) {
+            if (!response.jetton_wallets) {
                 return [];
             }
 
             const addressJettons: AddressJetton[] = [];
 
-            for (const item of response.jettons) {
+            for (const item of response.jetton_wallets) {
                 try {
-                    const jettonInfo = await this.getJettonInfo(item.jetton_address);
+                    const jettonMetadata = response.metadata[item.jetton];
+                    const metadataJettonInfo = jettonMetadata?.token_info?.find(
+                        (info: unknown) =>
+                            typeof info === 'object' &&
+                            info !== null &&
+                            'type' in info &&
+                            (info as { type: string }).type === 'jetton_masters',
+                    ) as EmulationTokenInfoMasters | undefined;
+
+                    const jettonInfo: JettonInfo | null = metadataJettonInfo
+                        ? {
+                              address: normalizedAddress,
+                              name: metadataJettonInfo.name,
+                              symbol: metadataJettonInfo.symbol,
+                              description: metadataJettonInfo.description,
+                              image: metadataJettonInfo.image,
+                              decimals:
+                                  typeof metadataJettonInfo.extra.decimals === 'string'
+                                      ? parseInt(metadataJettonInfo.extra.decimals, 10)
+                                      : (metadataJettonInfo.extra.decimals as number),
+                              image_data: metadataJettonInfo.extra.image_data,
+                              uri: metadataJettonInfo.extra.uri,
+                          }
+                        : await this.getJettonInfo(item.jetton);
                     if (jettonInfo) {
                         const addressJetton: AddressJetton = {
-                            ...jettonInfo,
+                            address: item.jetton,
+                            name: jettonInfo.name,
+                            symbol: jettonInfo.symbol,
+                            description: jettonInfo.description,
+                            decimals: jettonInfo.decimals,
                             balance: item.balance,
-                            jettonWalletAddress: item.jetton_wallet_address,
-                            usdValue: item.price?.prices?.USD?.toString(),
+                            jettonWalletAddress: item.address,
+                            usdValue: '0',
+                            image: jettonInfo.image,
+                            verification: jettonInfo.verification,
+                            metadata: jettonInfo.metadata,
+                            totalSupply: jettonInfo.totalSupply,
+                            uri: jettonInfo.uri,
+                            image_data: jettonInfo.image_data,
+                            // lastActivity: item.last_transaction_lt,
                         };
                         addressJettons.push(addressJetton);
                     }
                 } catch (error) {
                     log.warn('Failed to get jetton info for address jetton', {
-                        jettonAddress: item.jetton_address,
+                        jettonAddress: item.jetton,
                         error,
                     });
                 }

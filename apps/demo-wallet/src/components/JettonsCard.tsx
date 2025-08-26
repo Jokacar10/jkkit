@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { useJettons } from '../stores';
 import { Button } from './Button';
 import { Card } from './Card';
+import { JettonRow } from './JettonRow';
 import { createComponentLogger } from '../utils/logger';
 
 const log = createComponentLogger('JettonsCard');
@@ -88,10 +89,21 @@ export const JettonsCard: React.FC<JettonsCardProps> = ({ className = '' }) => {
             ) : (
                 <div className="space-y-4">
                     {/* Summary */}
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div>
-                            <p className="text-sm font-medium text-gray-900">{totalJettons} Tokens</p>
-                            {totalValue > 0 && <p className="text-xs text-gray-500">≈ ${totalValue.toFixed(2)} USD</p>}
+                    <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-100">
+                        <div className="space-y-1">
+                            <p className="text-base font-semibold text-gray-900">
+                                {totalJettons} {totalJettons === 1 ? 'Token' : 'Tokens'}
+                            </p>
+                            {totalValue > 0 && (
+                                <p className="text-sm text-gray-600 font-medium">
+                                    ≈ $
+                                    {totalValue.toLocaleString('en-US', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2,
+                                    })}{' '}
+                                    USD
+                                </p>
+                            )}
                         </div>
                         <Button size="sm" variant="secondary" onClick={handleViewAll}>
                             View All
@@ -99,56 +111,18 @@ export const JettonsCard: React.FC<JettonsCardProps> = ({ className = '' }) => {
                     </div>
 
                     {/* Top Jettons */}
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                         {topJettons.map((jetton) => (
-                            <div
+                            <JettonRow
                                 key={jetton.address}
-                                className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
-                            >
-                                <div className="flex items-center space-x-3">
-                                    <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                                        {jetton.image ? (
-                                            <img
-                                                src={jetton.image}
-                                                alt={jetton.name}
-                                                className="w-6 h-6 rounded-full object-cover"
-                                                onError={(e) => {
-                                                    // Fallback to initials if image fails to load
-                                                    const target = e.target as HTMLImageElement;
-                                                    target.style.display = 'none';
-                                                    const parent = target.parentElement;
-                                                    if (parent) {
-                                                        parent.innerHTML = jetton.symbol.slice(0, 2);
-                                                        parent.className += ' text-xs font-bold text-gray-600';
-                                                    }
-                                                }}
-                                            />
-                                        ) : (
-                                            <span className="text-xs font-bold text-gray-600">
-                                                {jetton.symbol.slice(0, 2)}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-900">
-                                            {jetton.name || jetton.symbol}
-                                        </p>
-                                        <p className="text-xs text-gray-500">
-                                            {formatAddress(jetton.address)}
-                                            {jetton.verification?.verified && (
-                                                <span className="ml-1 text-green-600">✓</span>
-                                            )}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    <p className="text-sm font-medium text-gray-900">
-                                        {formatJettonAmount(jetton.balance, jetton.decimals)}
-                                    </p>
-                                    <p className="text-xs text-gray-500">{jetton.symbol}</p>
-                                    {jetton.usdValue && <p className="text-xs text-gray-400">≈ ${jetton.usdValue}</p>}
-                                </div>
-                            </div>
+                                jetton={jetton}
+                                formatJettonAmount={formatJettonAmount}
+                                formatAddress={formatAddress}
+                                onClick={() => {
+                                    // TODO: Handle jetton row click - navigate to jetton details
+                                    log.info('Jetton clicked:', jetton.name || jetton.symbol);
+                                }}
+                            />
                         ))}
                     </div>
 

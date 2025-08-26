@@ -66,3 +66,15 @@ export type {
 } from './jettons';
 
 export { JettonError, JettonErrorCode } from './jettons';
+
+// Toncenter types
+export type {
+    ToncenterEmulationResponse,
+    ToncenterResponseJettonWallets,
+    ToncenterJettonWallet,
+    EmulationAddressBookEntry,
+    EmulationAddressMetadata,
+    EmulationTokenInfo,
+    EmulationTokenInfoWallets,
+    EmulationTokenInfoMasters,
+} from './toncenter/emulation';

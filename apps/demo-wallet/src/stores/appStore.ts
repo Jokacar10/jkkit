@@ -81,13 +81,13 @@ export const useStore = create<AppState>()(
                             transactions: state.wallet.transactions,
                             encryptedMnemonic: state.wallet.encryptedMnemonic,
                         },
-                        jettons: {
-                            userJettons: state.jettons.userJettons,
-                            popularJettons: state.jettons.popularJettons,
-                            lastJettonsUpdate: state.jettons.lastJettonsUpdate,
-                            lastPopularUpdate: state.jettons.lastPopularUpdate,
-                            // Don't persist: loading states, errors, transfer history
-                        },
+                        // jettons: {
+                        //     userJettons: state.jettons.userJettons,
+                        //     popularJettons: state.jettons.popularJettons,
+                        //     lastJettonsUpdate: state.jettons.lastJettonsUpdate,
+                        //     lastPopularUpdate: state.jettons.lastPopularUpdate,
+                        //     // Don't persist: loading states, errors, transfer history
+                        // },
                         // isAuthenticated: omit - never persist authentication for security
                         // },
                         // Never persist these sensitive/runtime values:

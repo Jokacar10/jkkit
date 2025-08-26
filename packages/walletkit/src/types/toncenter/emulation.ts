@@ -232,13 +232,33 @@ export interface EmulationTokenInfoMasters extends EmulationTokenInfoBase {
     name: string;
     symbol: string;
     description: string;
-    image: string;
+    image?: string;
     extra: {
         _image_big?: string;
         _image_medium?: string;
         _image_small?: string;
         decimals: string | number;
-        uri: string;
+        image_data?: string; // base64 encoded image data
+        social?: string[];
+        uri?: string;
+        websites?: string[];
         [key: string]: unknown;
     };
+}
+
+// Toncenter Jetton Wallets API Response Types
+export interface ToncenterResponseJettonWallets {
+    jetton_wallets: ToncenterJettonWallet[];
+    address_book: Record<string, EmulationAddressBookEntry>;
+    metadata: Record<string, EmulationAddressMetadata>;
+}
+
+export interface ToncenterJettonWallet {
+    address: string;
+    balance: string;
+    owner: string;
+    jetton: string;
+    last_transaction_lt: string;
+    code_hash: string;
+    data_hash: string;
 }

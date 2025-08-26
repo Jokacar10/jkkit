@@ -1,4 +1,4 @@
-import type { AddressJetton, JettonTransfer, JettonInfo, JettonError } from '@ton/walletkit';
+import { type AddressJetton, type JettonTransfer, type JettonInfo, JettonError } from '@ton/walletkit';
 
 import { createComponentLogger } from '../../utils/logger';
 import type { SetState, JettonsSliceCreator } from '../../types/store';

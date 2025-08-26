@@ -9,6 +9,7 @@ export interface JettonInfo {
     decimals: number;
     totalSupply?: string;
     image?: string;
+    image_data?: string;
     uri?: string;
     verification?: JettonVerification;
     metadata?: Record<string, unknown>;
