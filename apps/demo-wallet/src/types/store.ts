@@ -4,6 +4,7 @@ import type {
     EventConnectRequest,
     EventTransactionRequest,
     EventSignDataRequest,
+    EventDisconnect,
 } from '@ton/walletkit';
 
 import type { AuthState, WalletState, Transaction } from './wallet';
@@ -45,6 +46,10 @@ export interface WalletSlice extends WalletState {
     approveSignDataRequest: () => Promise<void>;
     rejectSignDataRequest: (reason?: string) => Promise<void>;
     closeSignDataModal: () => void;
+
+    // Disconnect event actions
+    handleDisconnectEvent: (event: EventDisconnect) => void;
+    clearDisconnectNotifications: () => void;
 
     // Getters
     getDecryptedMnemonic: () => Promise<string[] | null>;

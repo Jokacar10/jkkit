@@ -34,6 +34,9 @@ export interface WalletState {
 
         // Encrypted mnemonic stored in state
         encryptedMnemonic?: string;
+
+        // Disconnect notifications
+        disconnectedSessions: DisconnectNotification[];
     };
 }
 
@@ -53,4 +56,10 @@ export interface Transaction {
     address: string;
     timestamp: number;
     status: 'pending' | 'confirmed' | 'failed';
+}
+
+export interface DisconnectNotification {
+    walletAddress: string;
+    reason?: string;
+    timestamp: number;
 }

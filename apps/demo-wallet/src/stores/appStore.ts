@@ -34,6 +34,7 @@ const migrate = (persistedState: unknown, fromVersion: number): unknown => {
                 isAuthenticated: false, // Never persist authentication
                 transactions: (state.transactions as unknown[]) || [],
                 encryptedMnemonic: state.encryptedMnemonic as string, // Migrate encrypted mnemonic
+                disconnectedSessions: [], // Always initialize as empty array
             },
         };
 
@@ -89,8 +90,10 @@ export const useStore = create<AppState>()(
                             log.error('Store rehydration error:', error);
                         } else if (state) {
                             log.info('Store rehydrated successfully');
-                            // Set up wallet kit listeners after rehydration
-                            // setupWalletKitListeners(state.showConnectRequest);
+                            // Ensure disconnectedSessions is always initialized
+                            if (!state.wallet.disconnectedSessions) {
+                                state.wallet.disconnectedSessions = [];
+                            }
                         }
                     },
                 },
@@ -103,7 +106,12 @@ export const useStore = create<AppState>()(
 if (typeof window !== 'undefined') {
     // Set up wallet kit listeners with the store's request handlers
     const store = useStore.getState();
-    setupWalletKitListeners(store.showConnectRequest, store.showTransactionRequest, store.showSignDataRequest);
+    setupWalletKitListeners(
+        store.showConnectRequest,
+        store.showTransactionRequest,
+        store.showSignDataRequest,
+        store.handleDisconnectEvent,
+    );
 }
 
 // Helper hooks for accessing specific parts of the store
@@ -174,6 +182,15 @@ export const useSignDataRequests = () =>
             approveSignDataRequest: state.approveSignDataRequest,
             rejectSignDataRequest: state.rejectSignDataRequest,
             closeSignDataModal: state.closeSignDataModal,
+        })),
+    );
+
+export const useDisconnectEvents = () =>
+    useStore(
+        useShallow((state) => ({
+            disconnectedSessions: state.wallet.disconnectedSessions || [],
+            handleDisconnectEvent: state.handleDisconnectEvent,
+            clearDisconnectNotifications: state.clearDisconnectNotifications,
         })),
     );
 

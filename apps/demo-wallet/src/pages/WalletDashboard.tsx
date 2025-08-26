@@ -8,8 +8,10 @@ import {
     ConnectRequestModal,
     TransactionRequestModal,
     SignDataRequestModal,
+    DisconnectNotifications,
 } from '../components';
 import { useWallet, useTonConnect, useTransactionRequests, useSignDataRequests } from '../stores';
+import { walletKit } from '../stores/slices/walletSlice';
 import { useTonWallet } from '../hooks';
 import { createComponentLogger } from '../utils/logger';
 
@@ -74,6 +76,15 @@ export const WalletDashboard: React.FC = () => {
             setIsConnecting(false);
         }
     }, [tonConnectUrl, handleTonConnectUrl]);
+
+    const handleTestDisconnectAll = useCallback(async () => {
+        try {
+            await walletKit.disconnect(); // Disconnect all sessions
+            log.info('All sessions disconnected');
+        } catch (err) {
+            log.error('Failed to disconnect sessions:', err);
+        }
+    }, []);
 
     const formatTonAmount = (amount: string): string => {
         const tonAmount = parseFloat(amount || '0') / 1000000000; // Convert nanoTON to TON
@@ -221,6 +232,9 @@ export const WalletDashboard: React.FC = () => {
                     </div>
                 )}
 
+                {/* Disconnect Notifications */}
+                <DisconnectNotifications />
+
                 {/* Transaction History */}
                 <Card title="Recent Transactions">
                     {transactions.length === 0 ? (
@@ -350,6 +364,20 @@ export const WalletDashboard: React.FC = () => {
                         <span className="text-sm">History</span>
                     </Button>
                 </div>
+
+                {/* Development Test Section */}
+                {process.env.NODE_ENV === 'development' && (
+                    <Card title="Development Tools">
+                        <div className="space-y-4">
+                            <p className="text-sm text-gray-600">
+                                Test disconnect event functionality (development only)
+                            </p>
+                            <Button variant="secondary" onClick={handleTestDisconnectAll} className="w-full">
+                                Test: Disconnect All Sessions
+                            </Button>
+                        </div>
+                    </Card>
+                )}
             </div>
 
             {/* Connect Request Modal */}

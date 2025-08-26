@@ -5,6 +5,7 @@ import {
     type EventConnectRequest,
     type EventTransactionRequest,
     type EventSignDataRequest,
+    type EventDisconnect,
 } from '@ton/walletkit';
 
 import { SimpleEncryption } from '../../utils';
@@ -40,6 +41,7 @@ export const createWalletSlice: WalletSliceCreator = (set: SetState, get) => ({
         pendingSignDataRequest: undefined,
         isSignDataModalOpen: false,
         encryptedMnemonic: undefined,
+        disconnectedSessions: [], // Track recently disconnected sessions
     },
 
     // Actions
@@ -433,6 +435,27 @@ export const createWalletSlice: WalletSliceCreator = (set: SetState, get) => ({
         });
     },
 
+    // Disconnect event handling
+    handleDisconnectEvent: (event: EventDisconnect) => {
+        log.info('Disconnect event received:', event);
+
+        // Add to disconnected sessions list
+        set((state) => {
+            state.wallet.disconnectedSessions.push({
+                walletAddress: event.wallet.getAddress(),
+                reason: event.reason,
+                timestamp: Date.now(),
+            });
+        });
+    },
+
+    // Clear disconnect notifications
+    clearDisconnectNotifications: () => {
+        set((state) => {
+            state.wallet.disconnectedSessions = [];
+        });
+    },
+
     // Getters
     getAvailableWallets: () => {
         return walletKit.getWallets();
@@ -444,6 +467,7 @@ export const setupWalletKitListeners = (
     showConnectRequest: (request: EventConnectRequest) => void,
     showTransactionRequest: (request: EventTransactionRequest) => void,
     showSignDataRequest: (request: EventSignDataRequest) => void,
+    handleDisconnectEvent: (event: EventDisconnect) => void,
 ) => {
     const onTransactionRequest = (event: EventTransactionRequest) => {
         log.info('Transaction request received:', event);
@@ -462,6 +486,11 @@ export const setupWalletKitListeners = (
     walletKit.onSignDataRequest((event) => {
         log.info('Sign data request received:', event);
         showSignDataRequest(event);
+    });
+
+    walletKit.onDisconnect((event) => {
+        log.info('Disconnect event received:', event);
+        handleDisconnectEvent(event);
     });
 };
 
