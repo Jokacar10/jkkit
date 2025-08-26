@@ -9,6 +9,7 @@ import { DisconnectHandler } from '../handlers/DisconnectHandler';
 import { validateBridgeEvent } from '../validation/events';
 import { globalLogger } from './Logger';
 import type { EventEmitter } from './EventEmitter';
+import { SessionManager } from './SessionManager';
 
 const log = globalLogger.createChild('EventRouter');
 
@@ -21,7 +22,10 @@ export class EventRouter {
     private signDataRequestCallbacks: EventCallback<EventSignDataRequest>[] = [];
     private disconnectCallbacks: EventCallback<EventDisconnect>[] = [];
 
-    constructor(private eventEmitter: EventEmitter) {
+    constructor(
+        private eventEmitter: EventEmitter,
+        private sessionManager: SessionManager,
+    ) {
         this.setupHandlers();
     }
 
@@ -118,7 +122,7 @@ export class EventRouter {
             new ConnectHandler(this.notifyConnectRequestCallbacks.bind(this)),
             new TransactionHandler(this.notifyTransactionRequestCallbacks.bind(this), this.eventEmitter),
             new SignDataHandler(this.notifySignDataRequestCallbacks.bind(this)),
-            new DisconnectHandler(this.notifyDisconnectCallbacks.bind(this)),
+            new DisconnectHandler(this.notifyDisconnectCallbacks.bind(this), this.sessionManager),
         ];
     }
 

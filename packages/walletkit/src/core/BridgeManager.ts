@@ -125,7 +125,7 @@ export class BridgeManager {
      * Send response to dApp
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async sendResponse(sessionId: string, requestId: string, response: any): Promise<void> {
+    async sendResponse(sessionId: string, requestId: string | null, response: any): Promise<void> {
         if (!this.bridgeProvider) {
             throw new Error('Bridge not initialized');
         }

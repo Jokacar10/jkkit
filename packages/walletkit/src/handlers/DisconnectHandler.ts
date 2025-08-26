@@ -1,5 +1,6 @@
 // Disconnect event handler
 
+import { SessionManager } from '../core/SessionManager';
 import type { EventDisconnect } from '../types';
 import type { RawBridgeEvent, EventHandler, RawBridgeEventDisconnect } from '../types/internal';
 import { BasicHandler } from './BasicHandler';
@@ -8,6 +9,13 @@ export class DisconnectHandler
     extends BasicHandler<EventDisconnect>
     implements EventHandler<EventDisconnect, RawBridgeEventDisconnect>
 {
+    constructor(
+        notify: (event: EventDisconnect) => void,
+        private readonly sessionManager: SessionManager,
+    ) {
+        super(notify);
+    }
+
     canHandle(event: RawBridgeEvent): event is RawBridgeEventDisconnect {
         return event.method === 'disconnect';
     }
@@ -23,6 +31,8 @@ export class DisconnectHandler
             reason,
             wallet: event.wallet,
         };
+
+        await this.sessionManager.removeSession(event.from);
 
         return disconnectEvent;
     }

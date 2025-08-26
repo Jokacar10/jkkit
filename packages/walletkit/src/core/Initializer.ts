@@ -184,7 +184,7 @@ export class Initializer {
         );
         await bridgeManager.start();
 
-        const eventRouter = new EventRouter(this.eventEmitter);
+        const eventRouter = new EventRouter(this.eventEmitter, sessionManager);
 
         // Create event processor for durable events
         // TODO - change default values

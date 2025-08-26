@@ -1,7 +1,7 @@
 // Minimal TonWalletKit - Pure orchestration layer
 
 import type { TonClient } from '@ton/ton';
-import { ConnectRequest } from '@tonconnect/protocol';
+import { ConnectRequest, DisconnectEvent } from '@tonconnect/protocol';
 
 import type {
     TonWalletKit as ITonWalletKit,
@@ -24,6 +24,7 @@ import { JettonsManager, type JettonInfo } from './JettonsManager';
 import { RawBridgeEventConnect } from '../types/internal';
 import { EventEmitter } from './EventEmitter';
 import { StorageEventProcessor } from './EventProcessor';
+import { BridgeManager } from './BridgeManager';
 
 const log = globalLogger.createChild('TonWalletKit');
 
@@ -49,6 +50,7 @@ export class TonWalletKit implements ITonWalletKit {
     private jettonsManager: JettonsManager;
     private initializer: Initializer;
     private eventProcessor!: StorageEventProcessor;
+    private bridgeManager!: BridgeManager;
 
     // Event emitter for this kit instance
     private eventEmitter: EventEmitter;
@@ -100,6 +102,7 @@ export class TonWalletKit implements ITonWalletKit {
         this.responseHandler = components.responseHandler;
         this.tonClient = components.tonClient;
         this.eventProcessor = components.eventProcessor;
+        this.bridgeManager = components.bridgeManager;
     }
 
     /**
@@ -204,10 +207,31 @@ export class TonWalletKit implements ITonWalletKit {
     async disconnect(sessionId?: string): Promise<void> {
         await this.ensureInitialized();
 
-        if (sessionId) {
+        const removeSession = async (sessionId: string) => {
+            await this.bridgeManager.sendResponse(sessionId, null, {
+                event: 'disconnect',
+                id: Date.now(),
+                payload: {},
+            } as DisconnectEvent);
             await this.sessionManager.removeSession(sessionId);
+        };
+        if (sessionId) {
+            try {
+                await removeSession(sessionId);
+            } catch (error) {
+                log.error('Failed to remove session', { sessionId, error });
+            }
         } else {
-            await this.sessionManager.clearSessions();
+            const sessions = this.sessionManager.getSessions();
+            if (sessions.length > 0) {
+                for (const session of sessions) {
+                    try {
+                        await removeSession(session.sessionId);
+                    } catch (error) {
+                        log.error('Failed to remove session', { sessionId: session.sessionId, error });
+                    }
+                }
+            }
         }
     }
 
