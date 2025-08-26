@@ -20,7 +20,8 @@ import type { SessionManager } from './SessionManager';
 import type { EventRouter } from './EventRouter';
 import type { RequestProcessor } from './RequestProcessor';
 import type { ResponseHandler } from './ResponseHandler';
-import { JettonsManager, type JettonInfo } from './JettonsManager';
+import { JettonsManager } from './JettonsManager';
+import type { JettonsAPI } from '../types/jettons';
 import { RawBridgeEventConnect } from '../types/internal';
 import { EventEmitter } from './EventEmitter';
 import { StorageEventProcessor } from './EventProcessor';
@@ -62,7 +63,7 @@ export class TonWalletKit implements ITonWalletKit {
     constructor(options: TonWalletKitOptions) {
         this.eventEmitter = new EventEmitter();
         this.initializer = new Initializer({}, this.eventEmitter);
-        this.jettonsManager = new JettonsManager(10000, this.eventEmitter);
+        this.jettonsManager = new JettonsManager(10000, this.eventEmitter, options.apiKey);
 
         // Auto-initialize (lazy)
         this.initializationPromise = this.initialize(options);
@@ -496,14 +497,9 @@ export class TonWalletKit implements ITonWalletKit {
     /**
      * Jettons API access
      */
-    jettons = {
-        getJettonInfo: (jettonAddress: string): JettonInfo | null => {
-            return this.jettonsManager.getJettonInfo(jettonAddress);
-        },
-        getAddressJettons: (userAddress: string, offset = 0, limit = 50): Promise<JettonInfo[]> => {
-            return this.jettonsManager.getAddressJettons(userAddress, offset, limit);
-        },
-    };
+    get jettons(): JettonsAPI {
+        return this.jettonsManager;
+    }
 
     /**
      * Get jettons manager for internal use

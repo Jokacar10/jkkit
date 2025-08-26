@@ -48,3 +48,21 @@ export type {
 export type { EventStatus, StoredEvent, DurableEventsConfig, EventStore, EventProcessor } from './durableEvents';
 
 export { DEFAULT_DURABLE_EVENTS_CONFIG } from './durableEvents';
+
+// Jettons types
+export type {
+    JettonInfo,
+    JettonVerification,
+    AddressJetton,
+    JettonBalance,
+    JettonTransferParams,
+    PreparedJettonTransfer,
+    JettonTransfer,
+    JettonTransaction,
+    JettonTransactionDetails,
+    JettonPrice,
+    TransactionFees,
+    JettonsAPI,
+} from './jettons';
+
+export { JettonError, JettonErrorCode } from './jettons';
