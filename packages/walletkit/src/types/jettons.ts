@@ -38,12 +38,9 @@ export interface JettonBalance {
 
 // === Transaction Operations ===
 export interface JettonTransferParams {
-    fromAddress: string; // User's main address
     toAddress: string; // Recipient address
     jettonAddress: string; // Jetton master address
     amount: string; // Amount in jetton units (not decimals)
-    forwardAmount?: string; // Forward TON amount
-    forwardPayload?: string; // Custom forward payload
     comment?: string; // Transfer comment
 }
 

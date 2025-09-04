@@ -168,7 +168,7 @@ export type WalletInitConfig =
     | WalletInitConfigMnemonicInterface
     | WalletInitConfigPrivateKeyInterface;
 
-export type WalletInterface = WalletInitInterface & WalletTonInterface & WalletNftInterface; // & WalletJettonInterface & WalletNftInterface;
+export type WalletInterface = WalletInitInterface & WalletTonInterface & WalletJettonInterface & WalletNftInterface;
 
 /**
  * Wallet metadata for storage/serialization
