@@ -8,8 +8,8 @@ export interface NftItemV3 {
     address: string;
     auction_contract_address: string;
     code_hash?: string;
-    collection: NFTCollectionV3;
-    collection_address?: string;
+    collection: NFTCollectionV3 | null;
+    collection_address: string | null;
     content?: { [key: string]: never };
     data_hash?: string;
     index: string;
@@ -28,7 +28,7 @@ export function toNftItem(data: NftItemV3): NftItem {
         codeHash: base64ToHash(data.code_hash),
         dataHash: base64ToHash(data.data_hash),
         collection: toNftCollection(data.collection),
-        collectionAddress: asAddressFriendly(data.collection_address),
+        collectionAddress: asMaybeAddressFriendly(data.collection_address),
         index: BigInt(data.index),
         init: data.init,
         onSale: data.on_sale,

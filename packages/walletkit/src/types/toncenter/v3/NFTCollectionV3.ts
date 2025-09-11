@@ -12,7 +12,8 @@ export interface NFTCollectionV3 {
     owner_address?: string;
 }
 
-export function toNftCollection(data: NFTCollectionV3): NftCollection {
+export function toNftCollection(data: NFTCollectionV3 | null): NftCollection | null {
+    if (!data) return null;
     const out: NftCollection = {
         address: asAddressFriendly(data.address),
         codeHash: base64ToHash(data.code_hash),

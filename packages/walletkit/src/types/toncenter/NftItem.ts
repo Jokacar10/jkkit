@@ -6,8 +6,8 @@ export interface NftItem {
     auctionContractAddress: AddressFriendly | null;
     codeHash: Hash | null;
     dataHash: Hash | null;
-    collection: NftCollection;
-    collectionAddress: AddressFriendly;
+    collection: NftCollection | null;
+    collectionAddress: AddressFriendly | null;
     content?: { [key: string]: never };
     index: bigint;
     init: boolean;
