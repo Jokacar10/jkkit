@@ -29,9 +29,9 @@ export function toNftItemsResponse(data: NftItemsResponseV3, pagination: Paginat
         metadata,
         items: (data.nft_items ?? []).map((data) => {
             const item = toNftItem(data);
-            const meta = metadata[item.address];
-            if (meta && meta.tokenInfo.length > 0) {
-                item.metadata = meta.tokenInfo[0];
+            const meta = metadata[item.address].tokenInfo.filter((it) => it.valid);
+            if (meta.length > 0) {
+                item.metadata = meta[0];
             }
             return item;
         }),
