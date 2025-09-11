@@ -2,13 +2,12 @@ import { Address } from '@ton/core';
 
 import {
     defaultWalletIdV5R1,
-    createWalletV5R1,
     ApiClientToncenter,
     WalletInitConfigMnemonic,
-    WalletV5R1Adapter,
-    WalletV5,
     ConnectTransactionParamMessage,
+    WalletInterface,
 } from '../src';
+import { createWalletFromConfig } from '../src/core/Initializer';
 
 // eslint-disable-next-line no-console
 const logInfo = console.log;
@@ -39,39 +38,34 @@ function nextWalletId(parent?: Address | string): number {
     return parseInt(bytes.reverse().join(''), 16);
 }
 
-async function createWallet(parent?: Address | string) {
-    return createWalletV5R1(
+async function createWallet(parent?: Address | string): Promise<WalletInterface> {
+    return createWalletFromConfig(
         new WalletInitConfigMnemonic({
             mnemonic: mnemonic!.trim().split(' '),
             walletId: nextWalletId(parent),
         }),
-        { tonClient },
+        tonClient,
     );
 }
 
-async function logWallet(wallet: WalletV5) {
+async function logWallet(wallet: WalletInterface) {
     return {
-        address: wallet.address,
-        publicKey: await wallet.publicKey,
-        status: await wallet.status,
-        seqno: await wallet.seqno,
-        walletId: await wallet.walletId,
-        isSignatureAuthAllowed: await wallet.isSignatureAuthAllowed,
-        extensions: await wallet.extensions,
+        address: wallet.getAddress(),
+        nfts: await wallet.getNfts({}),
+        balance: await wallet.getBalance(),
     };
 }
 
 async function main() {
     const existAccount = await createWallet();
-    const wallet = (existAccount as WalletV5R1Adapter).walletContract;
-    logInfo('exist account', await logWallet(wallet));
-    const notExistAccount = ((await createWallet(wallet.address)) as WalletV5R1Adapter).walletContract;
+    logInfo('exist account', await logWallet(existAccount));
+    const notExistAccount = await createWallet(existAccount.getAddress());
     logInfo('not exist account', await logWallet(notExistAccount));
     const message: ConnectTransactionParamMessage = {
-        address: wallet.address.toString(),
+        address: existAccount.getAddress(),
         amount: '1',
     };
-    const emulation = await tonClient.fetchEmulation(wallet.address, [message]);
+    const emulation = await tonClient.fetchEmulation(existAccount.getAddress(), [message]);
     logInfo(
         'emulation total fees',
         Object.values(emulation.transactions)

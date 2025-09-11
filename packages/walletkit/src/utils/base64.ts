@@ -1,3 +1,5 @@
+import { Hash, asHash } from '../types/primitive';
+
 export function base64Normalize(data: string): string {
     return data.replace(/\s+/g, '').replace(/-/g, '+').replace(/_/g, '/');
 }
@@ -8,6 +10,19 @@ export function parseBase64(data: string): string {
     }
     data = base64Normalize(data);
     return atob(data);
+}
+
+export function base64ToHash(data?: string | null): Hash | null {
+    const binary = base64ToUint8Array(data);
+    if (!binary) return null;
+
+    if (binary.length !== 32) {
+        throw new Error('Not a valid 32-byte hash');
+    }
+
+    const hex = [...binary].map((b) => b.toString(16).padStart(2, '0')).join('');
+
+    return asHash(`0x${hex}`);
 }
 
 export function base64ToUint8Array(data?: string | null): Uint8Array | null {

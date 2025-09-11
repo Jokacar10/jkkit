@@ -6,6 +6,8 @@ import { ToncenterEmulationResponse } from '../types';
 import { ConnectTransactionParamMessage } from '../types/internal';
 import { serializeStack, parseStack, RawStackItem } from '../utils/tvmStack';
 import { ApiClient } from '../types/toncenter/ApiClient';
+import { NftItemsResponseV3, toNftItems } from '../types/toncenter/v3/NftItemsResponseV3';
+import { NftItems } from '../types/toncenter/NftItems';
 
 export class TonClientError extends Error {
     public readonly status: number;
@@ -26,6 +28,19 @@ export interface ApiClientConfig {
     fetchApi?: typeof fetch;
 }
 
+export interface LimitRequest {
+    limit?: number;
+    offset?: number;
+}
+
+export interface NftItemsRequest extends LimitRequest {
+    address?: Array<Address | string>;
+    ownerAddress?: Array<Address | string>;
+    collectionAddress?: Array<Address | string>;
+    index?: Array<string>;
+    sortByLastTransactionLt?: boolean;
+}
+
 export class ApiClientToncenter implements ApiClient {
     private readonly endpoint: string;
     private readonly apiKey?: string;
@@ -37,6 +52,20 @@ export class ApiClientToncenter implements ApiClient {
         this.apiKey = config.apiKey;
         this.timeout = config.timeout ?? 30000;
         this.fetchApi = config.fetchApi ?? fetch;
+    }
+
+    async nftItems(request: NftItemsRequest): Promise<NftItems> {
+        const props: Record<string, unknown> = {
+            address: (request.address ?? []).map(prepareAddress),
+            owner_address: (request.ownerAddress ?? []).map(prepareAddress),
+            collection_address: (request.collectionAddress ?? []).map(prepareAddress),
+            index: request.index,
+            sort_by_last_transaction_lt: request.sortByLastTransactionLt ?? false,
+            limit: request.limit ?? 10,
+            offset: request.offset ?? 0,
+        };
+        const response = await this.getJson<NftItemsResponseV3>('/api/v3/nft/items', props);
+        return toNftItems(response);
     }
 
     async fetchEmulation(
@@ -179,8 +208,13 @@ export class ApiClientToncenter implements ApiClient {
             if (typeof value === 'string') url.searchParams.set(key, value);
             else if (Array.isArray(value)) {
                 for (const item of value) {
-                    url.searchParams.set(key, item);
+                    if (typeof item === 'string') url.searchParams.set(key, item);
+                    else if (item != null && typeof item.toString === 'function') {
+                        url.searchParams.set(key, item.toString());
+                    }
                 }
+            } else if (value != null && typeof value.toString === 'function') {
+                url.searchParams.set(key, value.toString());
             }
         }
         return url;
@@ -197,6 +231,13 @@ export class ApiClientToncenter implements ApiClient {
         }
         return new TonClientError(`HTTP ${response.status}: ${message}`, code, detail);
     }
+}
+
+function prepareAddress(address: Address | string): string {
+    if (address instanceof Address) {
+        address = address.toString();
+    }
+    return address;
 }
 
 interface InternalTransactionId {

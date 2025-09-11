@@ -3,8 +3,11 @@ import { Address, TupleItem } from '@ton/core';
 import { ConnectTransactionParamMessage } from '../internal';
 import { ToncenterEmulationResponse } from './emulation';
 import { FullAccountState, GetResult } from './api';
+import { NftItemsRequest } from '../../core/ApiClientToncenter';
+import { NftItems } from './NftItems';
 
 export interface ApiClient {
+    nftItems(request: NftItemsRequest): Promise<NftItems>;
     fetchEmulation(
         address: Address | string,
         messages: ConnectTransactionParamMessage[],

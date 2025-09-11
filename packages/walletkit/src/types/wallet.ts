@@ -1,12 +1,15 @@
 // Wallet-related type definitions
 
-import { SendMode } from '@ton/core';
+import { Address, SendMode } from '@ton/core';
 
 import { ConnectExtraCurrency, ConnectTransactionParamContent } from './internal';
 import { JettonTransferParams } from './jettons';
 import { NftTransferParamsHuman, NftTransferParamsNative } from './nfts';
 import { TransactionPreview } from './events';
 import { ApiClient } from './toncenter/ApiClient';
+import { NftItems } from './toncenter/NftItems';
+import { LimitRequest } from '../core/ApiClientToncenter';
+import type { NftItem } from './toncenter/NftItem';
 
 /**
  * TON network types
@@ -159,6 +162,8 @@ export interface WalletJettonInterface {
 export interface WalletNftInterface {
     createSendNft(params: NftTransferParamsHuman): Promise<ConnectTransactionParamContent>;
     createSendNftNative(params: NftTransferParamsNative): Promise<ConnectTransactionParamContent>;
+    getNfts(params: LimitRequest): Promise<NftItems>;
+    getNft(address: Address | string): Promise<NftItem | null>;
 }
 
 export type WalletInitConfig =

@@ -6,8 +6,30 @@ import { WalletNftInterface } from '../../../types/wallet';
 import { validateTransactionMessage } from '../../../validation';
 import { NftTransferParamsHuman, NftTransferParamsNative } from '../../../types/nfts';
 import { ConnectTransactionParamContent, ConnectTransactionParamMessage } from '../../../types/internal';
+import { NftItems } from '../../../types/toncenter/NftItems';
+import { LimitRequest } from '../../ApiClientToncenter';
+import type { NftItem } from '../../../types/toncenter/NftItem';
 
 export class WalletNftClass implements WalletNftInterface {
+    getNfts(this: WalletInterface, params: LimitRequest): Promise<NftItems> {
+        return this.client.nftItems({
+            ownerAddress: [this.getAddress()],
+            offset: params.offset ?? 0,
+            limit: params.limit ?? 100,
+        });
+    }
+
+    async getNft(this: WalletInterface, address: Address | string): Promise<NftItem | null> {
+        const result = await this.client.nftItems({
+            address: [address],
+            ownerAddress: [this.getAddress()],
+        });
+        if (result.nftItems.length > 0) {
+            return result.nftItems[0];
+        }
+        return null;
+    }
+
     async createSendNft(
         this: WalletInterface,
         nftTransferMessage: NftTransferParamsHuman,
