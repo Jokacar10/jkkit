@@ -1,6 +1,6 @@
-import { TokenInfoV3 } from './TokenInfoV3';
+import { NftTokenInfoV3 } from './NftTokenInfoV3';
 
 export interface AddressMetadataV3 {
     is_indexed: boolean;
-    token_info: TokenInfoV3[];
+    token_info: NftTokenInfoV3[];
 }

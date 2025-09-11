@@ -1,9 +1,9 @@
 import { AddressBookRow } from './AddressBookRow';
-import { AddressMetadata } from './AddressMetadata';
 import { AddressFriendly } from '../primitive';
 import { NftItems } from './NftItems';
+import { NftMetadata } from './NftMetadata';
 
 export interface NftItemsResponse extends NftItems {
     addressBook: { [key: AddressFriendly]: AddressBookRow };
-    metadata: { [key: AddressFriendly]: AddressMetadata };
+    metadata: NftMetadata;
 }

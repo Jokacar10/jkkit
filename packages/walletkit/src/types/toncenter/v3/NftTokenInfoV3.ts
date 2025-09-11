@@ -1,6 +1,6 @@
 import { TokenInfo } from '../TokenInfo';
 
-export interface TokenInfoV3 {
+export interface NftTokenInfoV3 {
     description?: string;
     extra?: { [key: string]: never };
     image?: string;
@@ -11,7 +11,7 @@ export interface TokenInfoV3 {
     valid?: boolean;
 }
 
-export function toTokenInfo(data: TokenInfoV3): TokenInfo {
+export function toTokenInfo(data: NftTokenInfoV3): TokenInfo {
     return {
         valid: data.valid,
         type: data.type,

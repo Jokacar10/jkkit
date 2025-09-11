@@ -1,5 +1,6 @@
 import { AddressFriendly, Hash } from '../primitive';
 import type { NftCollection } from './NftCollection';
+import { TokenInfo } from './TokenInfo';
 
 export interface NftItem {
     address: AddressFriendly;
@@ -9,6 +10,7 @@ export interface NftItem {
     collection: NftCollection | null;
     collectionAddress: AddressFriendly | null;
     content?: { [key: string]: never };
+    metadata?: TokenInfo;
     index: bigint;
     init: boolean;
     lastTransactionLt?: bigint;
