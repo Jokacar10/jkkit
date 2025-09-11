@@ -1,10 +1,11 @@
 import type { NftItemV3 } from './NftItemV3';
 import { AddressBookRowV3 } from './AddressBookRowV3';
 import { AddressMetadataV3 } from './AddressMetadataV3';
-import { NftItems } from '../NftItems';
+import { NftItemsResponse } from '../NftItemsResponse';
 import { toNftItem } from './NftItemV3';
 import { asAddressFriendly } from '../../primitive';
 import { toTokenInfo } from './TokenInfoV3';
+import { Pagination } from '../Pagination';
 
 export interface NftItemsResponseV3 {
     address_book?: { [key: string]: AddressBookRowV3 };
@@ -12,12 +13,16 @@ export interface NftItemsResponseV3 {
     nft_items?: NftItemV3[];
 }
 
-export function toNftItems(data: NftItemsResponseV3): NftItems {
-    const out: NftItems = {
+export function toNftItemsResponse(data: NftItemsResponseV3, pagination: Pagination): NftItemsResponse {
+    const out: NftItemsResponse = {
         addressBook: {},
         metadata: {},
-        nftItems: (data.nft_items ?? []).map(toNftItem),
+        items: (data.nft_items ?? []).map(toNftItem),
+        pagination,
     };
+    if (out.items.length === 0) {
+        out.pagination.pages = 0;
+    }
     if (data.address_book) {
         for (const address of Object.keys(data.address_book)) {
             out.addressBook[asAddressFriendly(address)] = {

@@ -7,9 +7,9 @@ import { JettonTransferParams } from './jettons';
 import { NftTransferParamsHuman, NftTransferParamsNative } from './nfts';
 import { TransactionPreview } from './events';
 import { ApiClient } from './toncenter/ApiClient';
-import { NftItems } from './toncenter/NftItems';
 import { LimitRequest } from '../core/ApiClientToncenter';
 import type { NftItem } from './toncenter/NftItem';
+import { NftItems } from './toncenter/NftItems';
 
 /**
  * TON network types

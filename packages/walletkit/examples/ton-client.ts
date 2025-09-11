@@ -1,4 +1,5 @@
 import { Address } from '@ton/core';
+import dotenv from 'dotenv';
 
 import {
     defaultWalletIdV5R1,
@@ -8,7 +9,6 @@ import {
     WalletInterface,
 } from '../src';
 import { createWalletFromConfig } from '../src/core/Initializer';
-import dotenv from 'dotenv';
 dotenv.config();
 
 // eslint-disable-next-line no-console
@@ -16,6 +16,7 @@ const logInfo = console.log;
 // eslint-disable-next-line no-console
 const logError = console.error;
 
+const isTestSend = process.env.TEST_SEND;
 const apiKey = process.env.TONCENTER_API_KEY;
 const mnemonic = process.env.MNEMONIC;
 
@@ -51,7 +52,6 @@ async function createWallet(parent?: Address | string): Promise<WalletInterface>
 }
 
 async function logWallet(wallet: WalletInterface) {
-    console.log('wallet', wallet);
     return {
         address: wallet.getAddress(),
         nfts: await wallet.getNfts({}),
@@ -75,16 +75,18 @@ async function main() {
             .map((it) => it.total_fees)
             .reduce((acc, cnt) => acc + +cnt, 0),
     );
-    const boc = await existAccount.getSignedExternal(
-        {
-            network: 'mainnet',
-            valid_until: Math.floor(Date.now() / 1000) + 60,
-            messages: [message],
-        },
-        { fakeSignature: false },
-    );
-    // const hash = await tonClient.sendBoc(boc);
-    // logInfo('send boc hash:', hash);
+    if (isTestSend) {
+        const boc = await existAccount.getSignedExternal(
+            {
+                network: 'mainnet',
+                valid_until: Math.floor(Date.now() / 1000) + 60,
+                messages: [message],
+            },
+            { fakeSignature: false },
+        );
+        const hash = await tonClient.sendBoc(boc);
+        logInfo('send boc hash:', hash);
+    }
 }
 
 main().catch((error) => {
