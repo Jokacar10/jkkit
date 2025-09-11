@@ -3,7 +3,6 @@
 import { Address } from '@ton/core';
 import { CHAIN, ConnectEventSuccess, ConnectRequest, DisconnectEvent } from '@tonconnect/protocol';
 
-import { ApiClientToncenter } from './ApiClientToncenter';
 import type {
     TonWalletKit as ITonWalletKit,
     TonWalletKitOptions,

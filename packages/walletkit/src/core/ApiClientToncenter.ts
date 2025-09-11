@@ -6,6 +6,9 @@ import { ToncenterEmulationResponse } from '../types';
 import { ConnectTransactionParamMessage } from '../types/internal';
 import { serializeStack, parseStack, RawStackItem } from '../utils/tvmStack';
 import { ApiClient } from '../types/toncenter/ApiClient';
+import { NftItemsResponseV3, toNftItemsResponse } from '../types/toncenter/v3/NftItemsResponseV3';
+import { NftItemsResponse } from '../types/toncenter/NftItemsResponse';
+import { Pagination } from '../types/toncenter/Pagination';
 
 export class TonClientError extends Error {
     public readonly status: number;
@@ -26,6 +29,20 @@ export interface ApiClientConfig {
     fetchApi?: typeof fetch;
 }
 
+export interface LimitRequest {
+    limit?: number;
+    offset?: number;
+}
+
+export interface NftItemsRequest {
+    address?: Array<Address | string>;
+}
+
+export interface NftItemsByOwnerRequest extends LimitRequest {
+    ownerAddress?: Array<Address | string>;
+    sortByLastTransactionLt?: boolean;
+}
+
 export class ApiClientToncenter implements ApiClient {
     private readonly endpoint: string;
     private readonly apiKey?: string;
@@ -37,6 +54,32 @@ export class ApiClientToncenter implements ApiClient {
         this.apiKey = config.apiKey;
         this.timeout = config.timeout ?? 30000;
         this.fetchApi = config.fetchApi ?? fetch;
+    }
+
+    async nftItemsByAddress(request: NftItemsRequest): Promise<NftItemsResponse> {
+        const props: Record<string, unknown> = {
+            address: (request.address ?? []).map(prepareAddress),
+        };
+        const response = await this.getJson<NftItemsResponseV3>('/api/v3/nft/items', props);
+        return toNftItemsResponse(response, {
+            limit: 0,
+            offset: 0,
+        });
+    }
+
+    async nftItemsByOwner(request: NftItemsByOwnerRequest): Promise<NftItemsResponse> {
+        const pagination: Pagination = {
+            limit: request.limit ?? 10,
+            offset: request.offset ?? 0,
+        };
+        const props: Record<string, unknown> = {
+            owner_address: (request.ownerAddress ?? []).map(prepareAddress),
+            sort_by_last_transaction_lt: request.sortByLastTransactionLt ?? false,
+            limit: pagination.limit,
+            offset: pagination.offset,
+        };
+        const response = await this.getJson<NftItemsResponseV3>('/api/v3/nft/items', props);
+        return toNftItemsResponse(response, pagination);
     }
 
     async fetchEmulation(
@@ -179,8 +222,13 @@ export class ApiClientToncenter implements ApiClient {
             if (typeof value === 'string') url.searchParams.set(key, value);
             else if (Array.isArray(value)) {
                 for (const item of value) {
-                    url.searchParams.set(key, item);
+                    if (typeof item === 'string') url.searchParams.set(key, item);
+                    else if (item != null && typeof item.toString === 'function') {
+                        url.searchParams.set(key, item.toString());
+                    }
                 }
+            } else if (value != null && typeof value.toString === 'function') {
+                url.searchParams.set(key, value.toString());
             }
         }
         return url;
@@ -197,6 +245,13 @@ export class ApiClientToncenter implements ApiClient {
         }
         return new TonClientError(`HTTP ${response.status}: ${message}`, code, detail);
     }
+}
+
+function prepareAddress(address: Address | string): string {
+    if (address instanceof Address) {
+        address = address.toString();
+    }
+    return address;
 }
 
 interface InternalTransactionId {

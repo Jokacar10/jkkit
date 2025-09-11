@@ -1,20 +1,26 @@
+import util from 'util';
+
 import { Address } from '@ton/core';
+import dotenv from 'dotenv';
 
 import {
     defaultWalletIdV5R1,
-    createWalletV5R1,
     ApiClientToncenter,
     createWalletInitConfigMnemonic,
     WalletV5R1Adapter,
     WalletV5,
     ConnectTransactionParamMessage,
+    WalletInterface,
 } from '../src';
+import { createWalletFromConfig } from '../src/core/Initializer';
+dotenv.config();
 
 // eslint-disable-next-line no-console
 const logInfo = console.log;
 // eslint-disable-next-line no-console
 const logError = console.error;
 
+const isTestSend = process.env.TEST_SEND;
 const apiKey = process.env.TONCENTER_API_KEY;
 const mnemonic = process.env.MNEMONIC;
 
@@ -45,54 +51,52 @@ async function createWallet(parent?: Address | string) {
             mnemonic: mnemonic!.trim().split(' '),
             walletId: BigInt(nextWalletId(parent)),
         }),
-        { tonClient },
+        tonClient,
     );
 }
 
-async function logWallet(wallet: WalletV5) {
+async function logWallet(wallet: WalletInterface) {
     return {
-        address: wallet.address,
-        publicKey: await wallet.publicKey,
-        status: await wallet.status,
-        seqno: await wallet.seqno,
-        walletId: await wallet.walletId,
-        isSignatureAuthAllowed: await wallet.isSignatureAuthAllowed,
-        extensions: await wallet.extensions,
+        address: wallet.getAddress(),
+        nfts: await wallet.getNfts({}),
+        balance: await wallet.getBalance(),
     };
 }
 
 async function main() {
     const existAccount = await createWallet();
-    const wallet = (existAccount as WalletV5R1Adapter).walletContract;
-    logInfo('exist account', await logWallet(wallet));
-    const notExistAccount = ((await createWallet(wallet.address)) as WalletV5R1Adapter).walletContract;
+    logInfo('exist account', util.inspect(await logWallet(existAccount), { colors: true, depth: 6 }));
+    const notExistAccount = await createWallet(existAccount.getAddress());
     logInfo('not exist account', await logWallet(notExistAccount));
     const message: ConnectTransactionParamMessage = {
-        address: wallet.address.toString(),
+        address: existAccount.getAddress(),
         amount: '1',
     };
-    const emulation = await tonClient.fetchEmulation(wallet.address, [message]);
+    const emulation = await tonClient.fetchEmulation(existAccount.getAddress(), [message]);
     logInfo(
         'emulation total fees',
         Object.values(emulation.transactions)
             .map((it) => it.total_fees)
             .reduce((acc, cnt) => acc + +cnt, 0),
     );
-    const boc = await existAccount.getSignedExternal(
-        {
-            network: 'mainnet',
-            valid_until: Math.floor(Date.now() / 1000) + 60,
-            messages: [message],
-        },
-        { fakeSignature: false },
-    );
-    const hash = await tonClient.sendBoc(boc);
-    logInfo('send boc hash:', hash);
+    if (isTestSend) {
+        const boc = await existAccount.getSignedExternal(
+            {
+                network: 'mainnet',
+                valid_until: Math.floor(Date.now() / 1000) + 60,
+                messages: [message],
+            },
+            { fakeSignature: false },
+        );
+        const hash = await tonClient.sendBoc(boc);
+        logInfo('send boc hash:', hash);
+    }
 }
 
 main().catch((error) => {
     if (error instanceof Error) {
         logError(error.message);
+        logError(error.stack);
     } else {
         logError('Unknown error:', error);
     }
