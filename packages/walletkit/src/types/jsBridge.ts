@@ -1,15 +1,7 @@
 // Types for TonConnect JS Bridge implementation
+import { Feature } from '@tonconnect/protocol';
 
-type Feature =
-    | {
-          name: 'SendTransaction';
-          maxMessages: number; // maximum number of messages in one `SendTransaction` that the wallet supports
-          extraCurrencySupported?: boolean; // indicates if the wallet supports extra currencies
-      }
-    | {
-          name: 'SignData';
-          types: ('text' | 'binary' | 'cell')[]; // array of supported data types for signing
-      };
+export { Feature };
 
 export interface DeviceInfo {
     platform: 'web' | 'ios' | 'android' | 'desktop';

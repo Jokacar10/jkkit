@@ -3,6 +3,9 @@
 import { Address } from '@ton/core';
 import {
     CHAIN,
+    CONNECT_EVENT_ERROR_CODES,
+    ConnectEventError,
+    Feature,
     SEND_TRANSACTION_ERROR_CODES,
     SendTransactionRpcResponseError,
     SendTransactionRpcResponseSuccess,
@@ -28,18 +31,7 @@ interface ConnectDevice {
     appName: string;
     appVersion: string;
     maxProtocolVersion: number;
-    features: Array<SendTransactionFeature | SignDataFeature>;
-}
-
-interface SendTransactionFeature {
-    name: 'SendTransaction';
-    maxMessages: number;
-    extraCurrencySupported?: boolean;
-}
-
-interface SignDataFeature {
-    name: 'SignData';
-    types: Array<'text' | 'binary' | 'cell'>;
+    features: Array<Feature>;
 }
 
 interface TonAddressItem {
@@ -121,7 +113,18 @@ export class RequestProcessor {
                 reason: reason || 'User rejected connection',
             });
 
-            // No response needed for rejections - just log and return
+            const response: ConnectEventError = {
+                event: 'connect_error',
+                id: parseInt(event.id),
+                payload: {
+                    code: CONNECT_EVENT_ERROR_CODES.USER_REJECTS_ERROR,
+                    message: reason || 'User rejected connection',
+                },
+            };
+            const newSession = await this.sessionManager.createSession(event.id, event.dAppName, '', undefined, {
+                disablePersist: true,
+            });
+            await this.bridgeManager.sendResponse(event, response, newSession);
         } catch (error) {
             log.error('Failed to reject connect request', { error });
             throw error;
@@ -255,6 +258,7 @@ export class RequestProcessor {
                     appVersion: '1.0.0',
                     maxProtocolVersion: 2,
                     features: [
+                        'SendTransaction',
                         {
                             name: 'SendTransaction',
                             maxMessages: 4, // Default for most wallet types

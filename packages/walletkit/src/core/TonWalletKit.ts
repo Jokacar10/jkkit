@@ -98,6 +98,7 @@ export class TonWalletKit implements ITonWalletKit {
                         appVersion: '1.0.0',
                         maxProtocolVersion: 2,
                         features: [
+                            'SendTransaction',
                             {
                                 name: 'SendTransaction',
                                 maxMessages: 4, // Default for most wallet types

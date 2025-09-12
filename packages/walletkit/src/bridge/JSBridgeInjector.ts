@@ -15,6 +15,7 @@ const DEFAULT_DEVICE_INFO: DeviceInfo = {
     appVersion: '1.0.0',
     maxProtocolVersion: 2,
     features: [
+        'SendTransaction',
         {
             name: 'SendTransaction',
             maxMessages: 4,

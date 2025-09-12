@@ -3,7 +3,7 @@
 import { SessionCrypto } from '@tonconnect/protocol';
 import { BridgeProvider, ClientConnection, WalletConsumer } from '@tonconnect/bridge-sdk';
 
-import type { BridgeConfig, BridgeEventBase, RawBridgeEvent, StorageAdapter } from '../types/internal';
+import type { BridgeConfig, BridgeEventBase, RawBridgeEvent, SessionData, StorageAdapter } from '../types/internal';
 import type { EventStore } from '../types/durableEvents';
 import type { EventEmitter } from './EventEmitter';
 import { globalLogger } from './Logger';
@@ -134,6 +134,7 @@ export class BridgeManager {
         event: BridgeEventBase,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         response: any,
+        _session?: SessionData,
     ): Promise<void> {
         if (!this.bridgeProvider) {
             throw new Error('Bridge not initialized');
@@ -159,7 +160,7 @@ export class BridgeManager {
             throw new Error('Session ID is required');
         }
 
-        const session = await this.sessionManager.getSession(sessionId);
+        const session = _session ?? (await this.sessionManager.getSession(sessionId));
         if (!session) {
             throw new Error(`Session ${event.sessionId} not found`);
         }
