@@ -315,18 +315,16 @@ export const WalletDashboard: React.FC = () => {
                 </Card>
 
                 {/* Development Test Section */}
-                {process.env.NODE_ENV === 'development' && (
-                    <Card title="Development Tools">
-                        <div className="space-y-4">
-                            <p className="text-sm text-gray-600">
-                                Test disconnect event functionality (development only)
-                            </p>
-                            <Button variant="secondary" onClick={handleTestDisconnectAll} className="w-full">
-                                Test: Disconnect All Sessions
-                            </Button>
-                        </div>
-                    </Card>
-                )}
+                <Card title="Development Tools">
+                    <div className="space-y-4">
+                        <p className="text-sm text-gray-600">
+                            Test disconnect event functionality
+                        </p>
+                        <Button variant="secondary" onClick={handleTestDisconnectAll} className="w-full">
+                            Test: Disconnect All Sessions
+                        </Button>
+                    </div>
+                </Card>
             </div>
 
             {/* Connect Request Modal */}
