@@ -39,7 +39,7 @@ export interface EventConnectRequest extends BridgeEventBase {
     preview: ConnectPreview;
 
     /** dApp information */
-    dappInfo: DAppInfo;
+    dAppInfo: DAppInfo;
 }
 
 /**
@@ -53,7 +53,7 @@ export type EventTransactionRequest = RawBridgeEventTransaction & {
     preview: TransactionPreview;
 
     /** dApp information */
-    dappInfo: DAppInfo;
+    dAppInfo: DAppInfo;
 
     error?: string;
 };
@@ -69,7 +69,7 @@ export interface EventSignDataRequest extends RawBridgeEventSignData {
     preview: SignDataPreview;
 
     /** dApp information */
-    dappInfo: DAppInfo;
+    dAppInfo: DAppInfo;
 }
 
 /**
@@ -82,7 +82,7 @@ export interface EventDisconnect extends BridgeEventBase {
     walletAddress: string;
 
     /** dApp information */
-    dappInfo: DAppInfo;
+    dAppInfo: DAppInfo;
 }
 
 export interface EventRequestError {

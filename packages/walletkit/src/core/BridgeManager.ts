@@ -490,7 +490,7 @@ export class BridgeManager {
                         rawEvent.walletAddress = session.walletAddress;
                     }
 
-                    rawEvent.dappInfo = {
+                    rawEvent.dAppInfo = {
                         name: session.dAppName,
                         description: session.dAppDescription,
                         url: session.dAppIconUrl,
@@ -508,7 +508,7 @@ export class BridgeManager {
                 }
 
                 if (session) {
-                    rawEvent.dappInfo = {
+                    rawEvent.dAppInfo = {
                         name: session.dAppName,
                         description: session.dAppDescription,
                         url: session.dAppIconUrl,

@@ -40,7 +40,7 @@ export class ConnectHandler
 
             request: event.params?.items || [],
             preview,
-            dappInfo: {
+            dAppInfo: {
                 name: preview?.manifest?.name,
                 description: preview?.manifest?.description,
                 url: preview?.manifest?.url,

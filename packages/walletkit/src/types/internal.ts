@@ -65,7 +65,7 @@ export type BridgeEventBase = {
     traceId?: string;
 
     /** dApp information */
-    dappInfo?: DAppInfo;
+    dAppInfo?: DAppInfo;
 };
 
 export type EventApprovalBase = {

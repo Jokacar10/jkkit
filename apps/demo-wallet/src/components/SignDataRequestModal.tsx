@@ -118,10 +118,10 @@ export const SignDataRequestModal: React.FC<SignDataRequestModalProps> = ({ requ
 
                         {/* dApp Information */}
                         <DAppInfo
-                            iconUrl={request.dappInfo?.iconUrl}
-                            name={request.dappInfo?.name}
-                            url={request.dappInfo?.url}
-                            description={request.dappInfo?.description}
+                            iconUrl={request.dAppInfo?.iconUrl}
+                            name={request.dAppInfo?.name}
+                            url={request.dAppInfo?.url}
+                            description={request.dAppInfo?.description}
                         />
 
                         {/* Request Information */}
