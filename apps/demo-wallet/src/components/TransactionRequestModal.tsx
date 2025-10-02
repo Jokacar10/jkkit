@@ -1,5 +1,5 @@
 import React, { memo, useEffect, useMemo, useState } from 'react';
-import type { EventTransactionRequest, JettonInfo, SessionInfo } from '@ton/walletkit';
+import type { EventTransactionRequest, JettonInfo } from '@ton/walletkit';
 import { Address } from '@ton/core';
 
 import { Button } from './Button';
@@ -27,16 +27,6 @@ export const TransactionRequestModal: React.FC<TransactionRequestModalProps> = (
     onReject,
 }) => {
     const [isLoading, setIsLoading] = useState(false);
-    const [sessionFrom, setSessionFrom] = useState<SessionInfo | undefined>(undefined);
-
-    useEffect(() => {
-        async function fetchSessionFrom() {
-            const sessions = await walletKit.listSessions();
-            const session = sessions.find((session) => session.sessionId === request.from);
-            setSessionFrom(session);
-        }
-        fetchSessionFrom();
-    }, [request.from]);
 
     const handleApprove = async () => {
         setIsLoading(true);
@@ -82,9 +72,10 @@ export const TransactionRequestModal: React.FC<TransactionRequestModalProps> = (
 
                         {/* dApp Information */}
                         <DAppInfo
-                            iconUrl={sessionFrom?.dAppIconUrl}
-                            name={sessionFrom?.dAppName}
-                            url={sessionFrom?.dAppUrl}
+                            iconUrl={request.dappInfo?.iconUrl}
+                            name={request.dappInfo?.name}
+                            url={request.dappInfo?.url}
+                            description={request.dappInfo?.description}
                         />
 
                         {/* Transaction Summary */}

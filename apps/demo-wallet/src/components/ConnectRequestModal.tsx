@@ -80,10 +80,10 @@ export const ConnectRequestModal: React.FC<ConnectRequestModalProps> = ({
 
                         {/* dApp Information */}
                         <DAppInfo
-                            name={request.preview.manifest?.name}
-                            description={request.preview.manifest?.description}
-                            url={request.preview.manifest?.url}
-                            iconUrl={request.preview.manifest?.iconUrl}
+                            name={request.dappInfo?.name}
+                            description={request.dappInfo?.description}
+                            url={request.dappInfo?.url}
+                            iconUrl={request.dappInfo?.iconUrl}
                         />
 
                         {/* Requested Permissions */}
