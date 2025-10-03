@@ -1,4 +1,4 @@
-import {ApiClientToncenter, CHAIN} from '../src';
+import { ApiClientToncenter, CHAIN } from '../src';
 
 // eslint-disable-next-line no-console
 const logInfo = console.log;
