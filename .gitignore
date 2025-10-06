@@ -7,3 +7,8 @@ dist-android
 .turbo
 apps/demo-wallet/dist-extension.pem
 apps/demo-wallet/dist-extension.crx
+
+# Android QuickJS build artifacts
+apps/androidkit/AndroidDemo/bridge/.cxx/
+apps/androidkit/dist-android-quickjs/
+node.log
