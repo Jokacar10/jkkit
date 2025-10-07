@@ -21,6 +21,9 @@
     },
     "quality": {
       "dependsOn": ["verify", "^quality"]
+    },
+    "e2e": {
+      "dependsOn": ["build", "^e2e"]
     }
   }
 }

@@ -1,3 +1,6 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
+
 import { test } from '@playwright/test';
 
 import {
@@ -13,7 +16,12 @@ import { isExtensionWalletSource } from '../qa/WalletApp';
 
 export function detectWalletSource() {
     const source = process.env.E2E_WALLET_SOURCE ?? 'http://localhost:5173/';
-    return process.env.E2E_WALLET_SOURCE_EXTENSION ?? source;
+    if (process.env.E2E_WALLET_SOURCE_EXTENSION) {
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = path.dirname(__filename);
+        return path.resolve(__dirname, process.env.E2E_WALLET_SOURCE_EXTENSION);
+    }
+    return source;
 }
 
 export function demoWalletFixture(config: ConfigFixture, slowMo = 0) {
@@ -45,7 +53,7 @@ export function demoWalletFixture(config: ConfigFixture, slowMo = 0) {
         wallet: async ({ context }, use) => {
             const source = isExtension ? await getExtensionId(context) : walletSource;
             const app = new DemoWallet(context, source);
-            await app.importWallet(mnemonic);
+            await app.importWallet(mnemonic ?? '');
             await use(app);
         },
     });

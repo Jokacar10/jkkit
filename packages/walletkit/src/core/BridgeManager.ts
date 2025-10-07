@@ -483,6 +483,8 @@ export class BridgeManager {
         } else if (event.method == 'restoreConnection') {
             this.eventEmitter?.emit('restoreConnection', {
                 ...event,
+                tabId: messageInfo.tabId,
+                domain: messageInfo.domain,
                 messageId: messageInfo.messageId,
             });
         } else if (event.method == 'send' && event?.params?.length === 1) {

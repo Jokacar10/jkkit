@@ -125,7 +125,12 @@ export class TonWalletKit implements ITonWalletKit {
                 },
             };
 
-            this.bridgeManager.sendJsBridgeResponse(event?.tabId?.toString() || '', true, event?.id, connectResponse);
+            this.bridgeManager.sendJsBridgeResponse(
+                event?.tabId?.toString() || '',
+                true,
+                event?.id ?? event?.messageId,
+                connectResponse,
+            );
         });
     }
 
