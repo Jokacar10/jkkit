@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CHAIN, MemoryStorageAdapter, TonWalletKit } from '@ton/walletkit';
+import { MemoryStorageAdapter, TonWalletKit } from '@ton/walletkit';
 
 declare global {
     interface Window {
@@ -297,4 +297,4 @@ window.initWalletKit = async (configuration) => {
     };
 
     initializeWalletKit();
-}
+};
