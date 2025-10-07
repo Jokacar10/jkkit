@@ -5,7 +5,7 @@ console.log('TON Wallet Demo extension background script loaded');
 import { ExtensionStorageAdapter, TonWalletKit } from '@ton/walletkit';
 import type { InjectedToExtensionBridgeRequest, InjectedToExtensionBridgeRequestPayload } from '@ton/walletkit';
 
-import { getTonConnectWalletManifest } from '../utils/walletManifest';
+import { getTonConnectDeviceInfo, getTonConnectWalletManifest } from '../utils/walletManifest';
 
 // Initialize WalletKit and JSBridge
 let walletKit: TonWalletKit | null = null;
@@ -14,6 +14,7 @@ async function initializeWalletKit() {
     try {
         // Initialize WalletKit with JS Bridge support
         walletKit = new TonWalletKit({
+            deviceInfo: getTonConnectDeviceInfo(),
             walletManifest: getTonConnectWalletManifest(),
             eventProcessor: {
                 disableEvents: true,

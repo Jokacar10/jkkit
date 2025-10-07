@@ -599,6 +599,10 @@ export class BridgeManager {
                         url: session.dAppIconUrl,
                         iconUrl: session.dAppIconUrl,
                     };
+
+                    if (!rawEvent.from) {
+                        rawEvent.from = session.sessionId;
+                    }
                 }
             }
 

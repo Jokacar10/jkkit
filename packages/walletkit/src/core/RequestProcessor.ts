@@ -12,6 +12,7 @@ import {
     SignDataRpcResponseSuccess,
     TonProofItemReplySuccess,
 } from '@tonconnect/protocol';
+import { getSecureRandomBytes } from '@ton/crypto';
 
 import type {
     EventConnectRequest,
@@ -97,7 +98,7 @@ export class RequestProcessor {
                 const url = new URL(event.preview.manifest?.url || '');
                 const domain = url.hostname;
                 const newSession = await this.sessionManager.createSession(
-                    event.from || '',
+                    event.from || (await getSecureRandomBytes(32)).toString('hex'),
                     event.preview.manifest?.name || '',
                     domain,
                     event.preview.manifest?.iconUrl || '',
@@ -187,7 +188,7 @@ export class RequestProcessor {
                 const url = new URL(event.result.dAppUrl);
                 const domain = url.hostname;
                 await this.sessionManager.createSession(
-                    event.from,
+                    event.from || (await getSecureRandomBytes(32)).toString('hex'),
                     event.result.dAppName,
                     domain,
                     event.result.dAppIconUrl,
