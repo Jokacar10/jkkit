@@ -21,12 +21,30 @@ struct TONWalletApp: App {
             } else {
                 ProgressView()
                     .task {
+                        let bridgeURL = "https://bridge.tonapi.io/bridge"
+                        
+                        let configuration = TONWalletKitConfiguration(
+                            network: .mainnet,
+                            walletManifest: TONWalletKitConfiguration.Manifest(
+                                name: "TON Wallet Demo App",
+                                appName: "Wallet",
+                                imageUrl: "https://example.com/image.png",
+                                aboutUrl: "https://example.com/about",
+                                universalLink: "https://example.com/universal-link",
+                                bridgeUrl: bridgeURL
+                            ),
+                            bridge: TONWalletKitConfiguration.Bridge(bridgeUrl: bridgeURL),
+                            apiClient: TONWalletKitConfiguration.APIClient(key: "25a9b2326a34b39a5fa4b264fb78fb4709e1bd576fc5e6b176639f5b71e94b0d"),
+                            features: [
+                                TONWalletKitConfiguration.SendTransactionFeature(maxMessages: 1),
+                                TONWalletKitConfiguration.SignDataFeature(types: [.text, .binary, .cell]),
+                            ]
+                        )
                         do {
-                            try await TONWalletKit.initialize(configuration: WalletKitConfig(
-                                network: .mainnet,
-                                storage: .memory,
-                                bridgeUrl: "https://walletbot.me/tonconnect-bridge/bridge"
-                            ), eventsHandler: TONEventsHandler.shared)
+                            try await TONWalletKit.initialize(
+                                configuration: configuration,
+                                eventsHandler: TONEventsHandler.shared
+                            )
                             initialized = true
                         } catch {
                             debugPrint(error.localizedDescription)
