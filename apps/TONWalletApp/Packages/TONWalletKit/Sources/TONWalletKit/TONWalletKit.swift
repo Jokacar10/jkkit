@@ -12,14 +12,17 @@ public struct TONWalletKit {
     static private(set) var engine: (any JSEngine)!
     
     public static func initialize(
-        configuration: WalletKitConfig,
+        configuration: TONWalletKitConfiguration,
         eventsHandler: any TONBridgeEventsHandler
     ) async throws {
         guard engine == nil else {
             return
         }
         
-        engine = WalletKitEngine(configuration: configuration, eventsHandler: eventsHandler)
+        engine = WalletKitEngine(
+            configuration: configuration,
+            eventsHandler: eventsHandler
+        )
         try await engine.start()
     }
     
