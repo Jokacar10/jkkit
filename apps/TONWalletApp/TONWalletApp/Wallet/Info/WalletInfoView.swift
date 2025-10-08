@@ -38,7 +38,7 @@ struct WalletInfoView: View {
             }
             .padding(16.0)
             .background(Color.gray.opacity(0.1))
-            .cornerRadius(8.0)
+            .cornerRadius(AppRadius.standard)
         }
         .task {
             await viewModel.load()

@@ -11,21 +11,39 @@ import SwiftUI
 struct WalletView: View {
     @StateObject var viewModel: WalletViewModel
     
+    @EnvironmentObject var appStateManager: TONWalletAppStateManager
+    
     var body: some View {
-        ScrollView {
-            VStack(spacing: 16.0) {
-                WalletInfoView(viewModel: viewModel.info)
-                    .widget()
-                
-                WalletDAppConnectionView(viewModel: viewModel.dAppConnection)
-                    .widget()
-                
-                WalletDAppDisconnectionView(viewModel: viewModel.dAppDisconnect)
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 16.0) {
+                    WalletInfoView(viewModel: viewModel.info)
+                        .widget()
+                    
+                    WalletDAppConnectionView(viewModel: viewModel.dAppConnection)
+                        .widget()
+                    
+                    WalletDAppDisconnectionView(viewModel: viewModel.dAppDisconnect)
+                }
+                .padding(16.0)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
-            .padding(16.0)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.TON.gray100)
+            .navigationTitle("TON Wallet")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(
+                        action: {
+                            viewModel.remove()
+                        },
+                        label: {
+                            Image(systemName: "trash")
+                                .foregroundStyle(Color.TON.red600)
+                        }
+                    )
+                }
+            }
         }
-        .background(Color.TON.gray100)
-        .navigationTitle("TON Wallet")
     }
 }

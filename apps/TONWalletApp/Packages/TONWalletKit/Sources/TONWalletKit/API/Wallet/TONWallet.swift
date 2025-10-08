@@ -34,4 +34,10 @@ public class TONWallet {
     public func connect(url: String) async throws {
         try await TONWalletKit.handleTonConnectUrl(url)
     }
+    
+    public func remove() async throws {
+        if let address {
+            try await TONWalletKit.removeWallet(address)
+        }
+    }
 }
