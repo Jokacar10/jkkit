@@ -2,6 +2,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { MemoryStorageAdapter, TonWalletKit } from '@ton/walletkit';
 
+import { SwiftStorageAdapter } from './SwiftStorageAdapter';
+
 declare global {
     interface Window {
         walletKitSwiftBridge?: {
@@ -9,14 +11,15 @@ declare global {
         };
 
         walletKit?: any;
-        initWalletKit: (configuration) => Promise<void>;
+        initWalletKit: (configuration, storage) => Promise<void>;
     }
 }
 
-window.initWalletKit = async (configuration) => {
+window.initWalletKit = async (configuration, storage) => {
     console.log('🚀 WalletKit iOS Bridge starting...');
 
     console.log('Creating WalletKit instance with configuration', configuration);
+    console.log('Storage', storage);
 
     const walletKit = new TonWalletKit({
         network: configuration.network,
@@ -32,7 +35,7 @@ window.initWalletKit = async (configuration) => {
 
         apiClient: configuration.apiClient,
 
-        storage: new MemoryStorageAdapter({}),
+        storage: storage ? new SwiftStorageAdapter(storage) : new MemoryStorageAdapter({}),
     });
 
     console.log('🚀 WalletKit iOS Bridge starting...');

@@ -31,14 +31,30 @@ public class WalletKitEngine: JSEngine {
         let bridgePolyfill = JSWalletKitSwiftBridgePolyfill { [weak self] in
             guard let self else { return }
             
-            if let walletKitEvent = WalletKitEvent(bridgeEvent: $0, walletKit: self) {
+            if let walletKitEvent = TONWalletKitEvent(bridgeEvent: $0, walletKit: self) {
                 self.eventsHandler.handle(event: walletKitEvent)
             }
         }
         
         context.polyfill(with: bridgePolyfill)
         
-        try await context.initWalletKit(configuration)
+        let storage: WalletKitJSStorage?
+        
+        switch configuration.storage {
+        case .memory: storage = nil
+        case .keychain:
+            storage = WalletKitStorageWrapper(
+                context: context,
+                storage: WalletKitKeychainStorage()
+            )
+        case .custom(let value):
+            storage = WalletKitStorageWrapper(
+                context: context,
+                storage: value
+            )
+        }
+        
+        try await context.initWalletKit(configuration, storage)
     }
     
     public func context() -> JSContext {

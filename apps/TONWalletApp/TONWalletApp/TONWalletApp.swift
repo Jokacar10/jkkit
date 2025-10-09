@@ -38,7 +38,8 @@ struct TONWalletApp: App {
                             features: [
                                 TONWalletKitConfiguration.SendTransactionFeature(maxMessages: 1),
                                 TONWalletKitConfiguration.SignDataFeature(types: [.text, .binary, .cell]),
-                            ]
+                            ],
+                            storage: .keychain
                         )
                         do {
                             try await TONWalletKit.initialize(
