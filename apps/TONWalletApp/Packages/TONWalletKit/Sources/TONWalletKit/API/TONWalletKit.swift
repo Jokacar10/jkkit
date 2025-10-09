@@ -30,8 +30,3 @@ public struct TONWalletKit {
         engine[dynamicMember: member]
     }
 }
-
-public protocol TONBridgeEventsHandler {
-    
-    func handle(event: WalletKitEvent)
-}

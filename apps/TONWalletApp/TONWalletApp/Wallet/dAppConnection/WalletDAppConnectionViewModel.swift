@@ -72,6 +72,19 @@ class WalletDAppConnectionViewModel: ObservableObject {
     }
     
     func connect() {
+        isConnecting = true
+        
+        Task {
+            do {
+                try await wallet.connect(url: link)
+            } catch {
+                debugPrint(error.localizedDescription)
+                isConnecting = false
+            }
+        }
+    }
+    
+    func waitForEvent() {
         subscribers.removeAll()
         
         TONEventsHandler.shared.events
@@ -88,17 +101,6 @@ class WalletDAppConnectionViewModel: ObservableObject {
                 }
             }
             .store(in: &subscribers)
-        
-        isConnecting = true
-        
-        Task {
-            do {
-                try await wallet.connect(url: link)
-            } catch {
-                debugPrint(error.localizedDescription)
-                isConnecting = false
-            }
-        }
     }
     
     func approveConnection() {

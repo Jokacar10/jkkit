@@ -10,13 +10,13 @@ import Combine
 import TONWalletKit
 
 class TONEventsHandler: TONBridgeEventsHandler {
-    let events = PassthroughSubject<WalletKitEvent, Never>()
+    let events = PassthroughSubject<TONWalletKitEvent, Never>()
     
     static let shared = TONEventsHandler()
     
     private init() {}
     
-    func handle(event: WalletKitEvent) {
+    func handle(event: TONWalletKitEvent) {
         events.send(event)
     }
 }

@@ -7,12 +7,11 @@
 
 import Foundation
 
-public enum WalletKitEvent {
+public enum TONWalletKitEvent {
     case connectRequest(TONWalletConnectionRequest)
     case transactionRequest(TONWalletTransactionRequest)
     case signDataRequest(TONWalletSignDataRequest)
     case disconnect(DisconnectEvent)
-    case stateChanged
     
     init?(bridgeEvent: JSWalletKitSwiftBridgeEvent, walletKit: any JSDynamicObject) {
         let decoder = JSONDecoder()

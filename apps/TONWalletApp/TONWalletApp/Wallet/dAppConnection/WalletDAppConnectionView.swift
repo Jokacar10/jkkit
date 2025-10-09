@@ -75,5 +75,8 @@ struct WalletDAppConnectionView: View {
                 )
             }
         }
+        .onAppear {
+            viewModel.waitForEvent()
+        }
     }
 }

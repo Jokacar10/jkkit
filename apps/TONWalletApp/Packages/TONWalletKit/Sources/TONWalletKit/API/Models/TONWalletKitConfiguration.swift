@@ -14,13 +14,15 @@ public struct TONWalletKitConfiguration: Encodable {
     let walletManifest: Manifest
     let bridge: Bridge
     let apiClient: APIClient?
+    let storage: Storage
     
     public init(
         network: TONNetwork,
         walletManifest: Manifest,
         bridge: Bridge,
         apiClient: APIClient? = nil,
-        features: [any Feature]
+        features: [any Feature],
+        storage: Storage
     ) {
         self.network = network
         
@@ -37,6 +39,15 @@ public struct TONWalletKitConfiguration: Encodable {
         self.walletManifest = manifest
         self.bridge = bridge
         self.apiClient = apiClient
+        self.storage = storage
+    }
+    
+    enum CodingKeys: CodingKey {
+        case network
+        case deviceInfo
+        case walletManifest
+        case bridge
+        case apiClient
     }
 }
 
@@ -179,6 +190,12 @@ extension TONWalletKitConfiguration {
         public init(types: [SignDataType]) {
             self.types = types
         }
+    }
+    
+    public enum Storage {
+        case memory
+        case keychain
+        case custom(TONWalletKitStorage)
     }
 }
 
