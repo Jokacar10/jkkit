@@ -61,18 +61,6 @@ struct WalletsListView: View {
             switch viewModel.approval {
             case .none:
                 Alert(title: Text("Incorrect event"))
-            case .transaction:
-                Alert(
-                    title: Text("dApp wants to perform transaction"),
-                    primaryButton: .default(
-                        Text("Approve"),
-                        action: { viewModel.approveTransaction() }
-                    ),
-                    secondaryButton: .default(
-                        Text("Reject"),
-                        action: { viewModel.rejectTransaction() }
-                    )
-                )
             case .signData:
                 Alert(
                     title: Text("dApp wants to sign data"),
@@ -86,6 +74,10 @@ struct WalletsListView: View {
                     )
                 )
             }
+        }
+        .sheet(item: $viewModel.event) { event in
+            WalletTransactionRequestView(viewModel: .init(request: event.transactionRequest))
+                .automaticHeightPresentationDetents()
         }
     }
 }
