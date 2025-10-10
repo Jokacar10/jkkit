@@ -122,23 +122,21 @@ export function processToncenterMoneyFlow(emulation: ToncenterEmulationResponse)
     const messagesTo = ourTxes.flatMap((t) => t.in_msg).filter((m) => m !== null);
 
     // Calculate TON outputs (message values + transaction fees)
-    const messageOutputs = messagesFrom
-        .reduce((acc, m) => {
-            if (m.value) {
-                return acc + BigInt(m.value);
-            }
-            return acc + 0n;
-        }, 0n);
-    
+    const messageOutputs = messagesFrom.reduce((acc, m) => {
+        if (m.value) {
+            return acc + BigInt(m.value);
+        }
+        return acc + 0n;
+    }, 0n);
+
     // Add total fees from all our transactions
-    const totalFees = ourTxes
-        .reduce((acc, t) => {
-            if (t.total_fees) {
-                return acc + BigInt(t.total_fees);
-            }
-            return acc + 0n;
-        }, 0n);
-    
+    const totalFees = ourTxes.reduce((acc, t) => {
+        if (t.total_fees) {
+            return acc + BigInt(t.total_fees);
+        }
+        return acc + 0n;
+    }, 0n);
+
     const outputs = (messageOutputs + totalFees).toString();
 
     // Calculate TON inputs

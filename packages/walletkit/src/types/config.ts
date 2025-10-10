@@ -29,13 +29,11 @@ export interface TonWalletKitOptions {
               allowMemory?: boolean;
           }
         | StorageAdapter;
-
     /** Validation settings */
     validation?: {
         strictMode?: boolean;
         allowUnknownWalletVersions?: boolean;
     };
-
     /** Event processor settings */
     eventProcessor?: EventProcessorConfig;
 

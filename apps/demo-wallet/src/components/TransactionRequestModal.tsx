@@ -175,7 +175,7 @@ export const TransactionRequestModal: React.FC<TransactionRequestModalProps> = (
                                 <span className="text-sm text-gray-600">Valid Until:</span>
                                 <span className="text-sm text-black">
                                     {typeof request.request.valid_until === 'number'
-                                        ? new Date(request?.request?.valid_until ?? 0 * 1000).toLocaleString()
+                                        ? new Date(request.request.valid_until * 1000).toLocaleString()
                                         : '—'}
                                 </span>
                             </div>
