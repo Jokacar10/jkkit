@@ -9,13 +9,13 @@ import Foundation
 import JavaScriptCore
 
 public class WalletKitEngine: JSEngine {
-    private let configuration: WalletKitConfig
+    private let configuration: TONWalletKitConfiguration
     private let eventsHandler: any TONBridgeEventsHandler
     
     public private(set) var jsContext: JSContext?
     
     public init(
-        configuration: WalletKitConfig,
+        configuration: TONWalletKitConfiguration,
         eventsHandler: any TONBridgeEventsHandler
     ) {
         self.configuration = configuration
@@ -28,27 +28,33 @@ public class WalletKitEngine: JSEngine {
     }
     
     public func processJS(in context: JSContext) async throws {
-        let bridgePolyfill = JSWalletKitSwiftBridgePolyfill(configuration: configuration) { [weak self] in
+        let bridgePolyfill = JSWalletKitSwiftBridgePolyfill { [weak self] in
             guard let self else { return }
             
-            if let walletKitEvent = WalletKitEvent(bridgeEvent: $0, walletKit: self) {
-                debugPrint("Event received: \($0)")
-                
+            if let walletKitEvent = TONWalletKitEvent(bridgeEvent: $0, walletKit: self) {
                 self.eventsHandler.handle(event: walletKitEvent)
             }
         }
         
         context.polyfill(with: bridgePolyfill)
         
-        if let exception = context.exception {
-            throw "JS setup failed: \(exception)"
+        let storage: WalletKitJSStorage?
+        
+        switch configuration.storage {
+        case .memory: storage = nil
+        case .keychain:
+            storage = WalletKitStorageWrapper(
+                context: context,
+                storage: WalletKitKeychainStorage()
+            )
+        case .custom(let value):
+            storage = WalletKitStorageWrapper(
+                context: context,
+                storage: value
+            )
         }
         
-        if context.objectForKeyedSubscript("walletKit") != nil {
-            print("✅ WalletKit bridge instance ready")
-        } else {
-            print("⚠️ WalletKit global not found after initialization")
-        }
+        try await context.initWalletKit(configuration, storage)
     }
     
     public func context() -> JSContext {
@@ -57,14 +63,7 @@ public class WalletKitEngine: JSEngine {
         }
         
         let context = JSContext()
-        
-        context?.exceptionHandler = { context, exception in
-            print("❌ JavaScript Exception: \(exception?.toString() ?? "Unknown")")
-            if let stackTrace = exception?.objectForKeyedSubscript("stack") {
-                print("Stack trace: \(stackTrace)")
-            }
-        }
-        
+
         context?.polyfill(with: JSConsoleLogPolyfill())
         context?.polyfill(with: JSTimerPolyfill())
         context?.polyfill(with: JSFetchPolyfill())

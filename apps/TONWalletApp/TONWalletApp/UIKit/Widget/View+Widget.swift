@@ -40,7 +40,7 @@ public extension WidgetModifier {
         case block(BlockType)
         
         var edgeInsets: EdgeInsets {
-            let inset: CGFloat = AppSpacing.spacing(3.0)
+            let inset: CGFloat = AppSpacing.spacing(4.0)
             return EdgeInsets(
                 top: inset,
                 leading: inset,
@@ -71,7 +71,7 @@ public extension WidgetModifier {
         }
         
         var cornerRadius: CGFloat {
-            return 8.0
+            return AppRadius.standard
         }
     }
     

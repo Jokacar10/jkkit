@@ -30,10 +30,3 @@ public enum StorageConfig {
     case memory
     case custom(String) // Custom storage identifier
 }
-
-public enum TONNetwork: String, CaseIterable, Codable {
-    case mainnet = "-239"
-    case testnet = "-3"
-    
-    public var chainId: String { rawValue }
-}

@@ -9,14 +9,11 @@ import Foundation
 import JavaScriptCore
 
 public class JSWalletKitSwiftBridgePolyfill: JSPolyfill {
-    private let configuration: WalletKitConfig
     private let eventsHandler: (JSWalletKitSwiftBridgeEvent) -> Void
     
     public init(
-        configuration: WalletKitConfig,
         eventsHandler: @escaping (JSWalletKitSwiftBridgeEvent) -> Void
     ) {
-        self.configuration = configuration
         self.eventsHandler = eventsHandler
     }
     
@@ -37,13 +34,6 @@ public class JSWalletKitSwiftBridgePolyfill: JSPolyfill {
         let bridgeSetupScript = """
             // Set up the Swift bridge that the JavaScript expects
             window.walletKitSwiftBridge = {
-                config: {
-                    network: '\(configuration.network.rawValue)',
-                    storage: 'memory',
-                    bridgeUrl: '\(configuration.bridgeUrl)',
-                    isMobile: true,
-                    isNative: true
-                },
                 sendEvent: sendEventCallback
             };
             

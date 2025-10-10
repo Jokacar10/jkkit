@@ -32,13 +32,13 @@ struct WalletInfoView: View {
                     .buttonStyle(TONLinkButtonStyle(type: .secondary))
                 }
                 
-                Text(viewModel.address ?? "")
+                Text(viewModel.address)
                     .multilineTextAlignment(.center)
                     .font(.callout)
             }
             .padding(16.0)
             .background(Color.gray.opacity(0.1))
-            .cornerRadius(8.0)
+            .cornerRadius(AppRadius.standard)
         }
         .task {
             await viewModel.load()

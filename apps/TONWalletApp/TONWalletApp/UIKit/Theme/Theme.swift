@@ -12,73 +12,72 @@ import SwiftUI
 extension Color {
     // MARK: - Design System Colors
     struct TON {
-        // Red Palette
-        static let red50 = Color(hex: "#fef4f3")
-        static let red100 = Color(hex: "#fde6e4")
-        static let red200 = Color(hex: "#fccfc9")
-        static let red300 = Color(hex: "#f9a89a")
-        static let red400 = Color(hex: "#f36f5b")
-        static let red500 = Color(hex: "#ed4c38")
-        static let red600 = Color(hex: "#d93c2b")
-        static let red700 = Color(hex: "#b82f23")
-        static let red800 = Color(hex: "#962b22")
-        static let red900 = Color(hex: "#7a2822")
+        static let red50 = Color(hex: "#FEF3F3")
+        static let red100 = Color(hex: "#FDE5E6")
+        static let red200 = Color(hex: "#FBD0D2")
+        static let red300 = Color(hex: "#F7AFB4")
+        static let red400 = Color(hex: "#EF7C87")
+        static let red500 = Color(hex: "#E75364")
+        static let red600 = Color(hex: "#D93449")
+        static let red700 = Color(hex: "#B71E35")
+        static let red800 = Color(hex: "#99162D")
+        static let red900 = Color(hex: "#811428")
         
-        // Yellow Palette
-        static let yellow50 = Color(hex: "#fefbf0")
-        static let yellow100 = Color(hex: "#fef7d9")
-        static let yellow200 = Color(hex: "#fdedb0")
-        static let yellow300 = Color(hex: "#fbde7e")
-        static let yellow400 = Color(hex: "#f7ca4b")
-        static let yellow500 = Color(hex: "#f0b52d")
-        static let yellow600 = Color(hex: "#cf8e1c")
-        static let yellow700 = Color(hex: "#a86918")
-        static let yellow800 = Color(hex: "#88541a")
-        static let yellow900 = Color(hex: "#70461a")
+        // Yellow
+        static let yellow50 = Color(hex: "#FFFBF0")
+        static let yellow100 = Color(hex: "#FFF6D6")
+        static let yellow200 = Color(hex: "#FFEDB3")
+        static let yellow300 = Color(hex: "#FFE085")
+        static let yellow400 = Color(hex: "#FFCF4D")
+        static let yellow500 = Color(hex: "#FBBA1F")
+        static let yellow600 = Color(hex: "#D89B0D")
+        static let yellow700 = Color(hex: "#A87607")
+        static let yellow800 = Color(hex: "#8A5F09")
+        static let yellow900 = Color(hex: "#74500C")
         
-        // Green Palette
-        static let green50 = Color(hex: "#f5fef7")
-        static let green100 = Color(hex: "#e8fded")
-        static let green300 = Color(hex: "#b3f1c2")
-        static let green500 = Color(hex: "#5bd97b")
-        static let green600 = Color(hex: "#3cb85e")
-        static let green700 = Color(hex: "#2e9448")
-        static let green800 = Color(hex: "#28753d")
-        static let green900 = Color(hex: "#246136")
+        // Green
+        static let green50 = Color(hex: "#F3FEF3")
+        static let green100 = Color(hex: "#E6FCE7")
+        static let green300 = Color(hex: "#B8F0BA")
+        static let green500 = Color(hex: "#5FD664")
+        static let green600 = Color(hex: "#3FB546")
+        static let green700 = Color(hex: "#2A8F30")
+        static let green800 = Color(hex: "#227128")
+        static let green900 = Color(hex: "#1F5E24")
         
-        // Blue Palette
-        static let blue50 = Color(hex: "#f4f7fe")
-        static let blue100 = Color(hex: "#e3ebfc")
-        static let blue200 = Color(hex: "#d0dcf9")
-        static let blue300 = Color(hex: "#b0c7f5")
-        static let blue500 = Color(hex: "#5c8bef")
-        static let blue600 = Color(hex: "#3c6fe3")
-        static let blue700 = Color(hex: "#2f5bd0")
-        static let blue800 = Color(hex: "#2b4aa8")
-        static let blue900 = Color(hex: "#284084")
+        // Blue
+        static let blue50 = Color(hex: "#F3F8FF")
+        static let blue100 = Color(hex: "#E5F0FF")
+        static let blue200 = Color(hex: "#D5E6FF")
+        static let blue300 = Color(hex: "#BBD7FF")
+        static let blue500 = Color(hex: "#4A9EFF")
+        static let blue600 = Color(hex: "#2271F5")
+        static let blue700 = Color(hex: "#0F56E0")
+        static let blue800 = Color(hex: "#0D43B8")
+        static let blue900 = Color(hex: "#123795")
         
-        // Purple Palette
-        static let purple50 = Color(hex: "#faf7fe")
-        static let purple100 = Color(hex: "#f1ebfc")
-        static let purple600 = Color(hex: "#9333ea")
+        // Purple
+        static let purple50 = Color(hex: "#FCF7FE")
+        static let purple100 = Color(hex: "#F8ECFD")
+        static let purple600 = Color(hex: "#B128E6")
         
-        // Pink Palette
-        static let pink50 = Color(hex: "#fef4f8")
+        // Pink
+        static let pink50 = Color(hex: "#FEF3F9")
         
-        // Gray Palette
-        static let gray50 = Color(hex: "#fafafa")
-        static let gray100 = Color(hex: "#f5f5f5")
-        static let gray200 = Color(hex: "#e7e7e7")
-        static let gray300 = Color(hex: "#d4d4d4")
-        static let gray400 = Color(hex: "#a3a3a3")
-        static let gray500 = Color(hex: "#737373")
-        static let gray600 = Color(hex: "#525252")
-        static let gray700 = Color(hex: "#404040")
-        static let gray900 = Color(hex: "#171717")
+        // Gray
+        static let gray50 = Color(hex: "#FAFAFA")
+        static let gray100 = Color(hex: "#F5F5F6")
+        static let gray200 = Color(hex: "#EBEBEC")
+        static let gray300 = Color(hex: "#DCDCDE")
+        static let gray400 = Color(hex: "#AAABB0")
+        static let gray500 = Color(hex: "#77787F")
+        static let gray600 = Color(hex: "#5D5E64")
+        static let gray700 = Color(hex: "#494A50")
+        static let gray900 = Color(hex: "#1D1D23")
         
-        // Base Colors
+        // Black & White
         static let black = Color(hex: "#000000")
-        static let white = Color(hex: "#ffffff")
+        static let white = Color(hex: "#FFFFFF")
     }
 }
 
@@ -165,18 +164,18 @@ extension View {
 }
 
 extension UIColor {
-
+    
     convenience init(hex: String) {
         var hexFormatted = hex.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
-
+        
         // Remove the # if it exists
         if hexFormatted.hasPrefix("#") {
             hexFormatted.remove(at: hexFormatted.startIndex)
         }
-
+        
         var rgbValue: UInt64 = 0
         Scanner(string: hexFormatted).scanHexInt64(&rgbValue)
-
+        
         if hexFormatted.count == 6 {
             // RGB (no alpha)
             let r = CGFloat((rgbValue & 0xFF0000) >> 16) / 255.0
@@ -198,7 +197,7 @@ extension UIColor {
 }
 
 public extension Color {
-
+    
     init(hex: String) {
         self.init(uiColor: UIColor(hex: hex))
     }

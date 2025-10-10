@@ -9,7 +9,8 @@
     "dev": "turbo dev",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --max-warnings 0 --fix",
-    "quality": "turbo quality"
+    "quality": "turbo quality",
+    "e2e": "turbo e2e"
   },
   "prettier": "@ton/toolchain/prettier",
   "keywords": [],

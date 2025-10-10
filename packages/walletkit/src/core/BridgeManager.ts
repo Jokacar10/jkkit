@@ -490,6 +490,8 @@ export class BridgeManager {
         } else if (event.method == 'restoreConnection') {
             this.eventEmitter?.emit('restoreConnection', {
                 ...event,
+                tabId: messageInfo.tabId,
+                domain: messageInfo.domain,
                 messageId: messageInfo.messageId,
             });
         } else if (event.method == 'send' && event?.params?.length === 1) {
@@ -572,6 +574,7 @@ export class BridgeManager {
                 rawEvent.traceId = uuidv7();
             }
 
+            await this.sessionManager.initialize();
             if (rawEvent.from) {
                 const session = await this.sessionManager.getSession(rawEvent.from);
                 rawEvent.domain = session?.domain || '';
@@ -604,6 +607,10 @@ export class BridgeManager {
                         url: session.dAppIconUrl,
                         iconUrl: session.dAppIconUrl,
                     };
+
+                    if (!rawEvent.from) {
+                        rawEvent.from = session.sessionId;
+                    }
                 }
             }
 

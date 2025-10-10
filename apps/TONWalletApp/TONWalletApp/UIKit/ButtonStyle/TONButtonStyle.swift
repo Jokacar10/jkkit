@@ -36,9 +36,9 @@ struct TONButtonStyle: ButtonStyle {
         )
         .contentShape(.rect)
         .padding(.horizontal, 16.0)
-        .background(type.backgroundColor)
-        .cornerRadius(8.0)
-        .opacity(isEnabled ? 1.0 : 0.3)
+        .background(configuration.isPressed ? type.highlightColor : type.backgroundColor)
+        .cornerRadius(AppRadius.standard)
+        .opacity(isEnabled ? 1.0 : 0.5)
         .allowsHitTesting(!isLoading)
     }
 }
@@ -49,15 +49,22 @@ enum TONButtonType {
     
     var textColor: Color {
         switch self {
-        case .primary: .white
-        case .secondary: .black
+        case .primary: .TON.white
+        case .secondary: .TON.gray900
         }
     }
     
     var backgroundColor: Color {
         switch self {
-        case .primary: .blue
-        case .secondary: Color(UIColor.lightGray)
+        case .primary: .TON.blue500
+        case .secondary: .TON.gray200
+        }
+    }
+    
+    var highlightColor: Color {
+        switch self {
+        case .primary: .TON.blue700
+        case .secondary: .TON.gray300
         }
     }
 }

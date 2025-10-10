@@ -115,12 +115,13 @@ export class TonWalletKit implements ITonWalletKit {
                 log.error('Session not found for domain', { domain: event.domain });
                 return;
             }
+            const deviceInfo = getDeviceInfoWithDefaults(this.config.deviceInfo);
             // Create base response data
             const connectResponse: ConnectEventSuccess = {
                 event: 'connect',
                 id: Date.now(),
                 payload: {
-                    device: getDeviceInfoWithDefaults(this.config.deviceInfo),
+                    device: deviceInfo,
                     items: [
                         {
                             name: 'ton_addr',
@@ -133,7 +134,12 @@ export class TonWalletKit implements ITonWalletKit {
                 },
             };
 
-            this.bridgeManager.sendJsBridgeResponse(event?.tabId?.toString() || '', true, event?.id, connectResponse);
+            this.bridgeManager.sendJsBridgeResponse(
+                event?.tabId?.toString() || '',
+                true,
+                event?.id ?? event?.messageId,
+                connectResponse,
+            );
         });
     }
 
@@ -680,6 +686,7 @@ export class TonWalletKit implements ITonWalletKit {
         messageInfo: BridgeEventMessageInfo,
         request: InjectedToExtensionBridgeRequestPayload,
     ): Promise<unknown> {
+        await this.ensureInitialized();
         return this.bridgeManager.queueJsBridgeEvent(messageInfo, request);
     }
 }
