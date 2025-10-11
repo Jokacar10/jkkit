@@ -6,17 +6,11 @@ export function launchPersistentContext(extensionPath: string, slowMo = 0) {
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
-        '--disable-web-security',
         '--no-first-run',
-       // '--disable-default-apps',
-       // '--disable-sync',
-       // '--disable-translate',
-        '--disable-notifications',
-        '--disable-popup-blocking',
         '--disable-infobars',
         '--disable-blink-features=AutomationControlled',
-        //'--autoplay-policy=no-user-gesture-required',
-        '--use-fake-ui-for-media-stream'
+        '--use-fake-ui-for-media-stream',
+        '--disable-permissions-api',
     ];
 
     if (extensionPath != '') {

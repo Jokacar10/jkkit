@@ -74,8 +74,8 @@ export class TonConnectWidget {
         console.log('buttonToClick', buttonToClick);
         if (buttonToClick) {
             await buttonToClick.waitFor({ state: 'visible' });
-            await buttonToClick.click();   
-        } else {   
+            await buttonToClick.click();
+        } else {
             await this.connectButton.waitFor({ state: 'visible' });
             await this.connectButton.click();
         }

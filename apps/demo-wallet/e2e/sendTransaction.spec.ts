@@ -1,14 +1,12 @@
 import { config } from 'dotenv';
 import { expect } from '@playwright/test';
-import { allure } from 'allure-playwright';
-
-// Загружаем переменные окружения
-config();
+import { allureId, owner } from 'allure-js-commons';
 import type { TestInfo } from '@playwright/test';
 
 import { AllureApiClient, createAllureConfig, getTestCaseData, extractAllureId } from './utils';
 import { testWithDemoWalletFixture } from './demo-wallet';
 import type { TestFixture } from './qa';
+config();
 
 const test = testWithDemoWalletFixture({
     appUrl: process.env.DAPP_URL ?? 'https://allure-test-runner.vercel.app/e2e',
@@ -16,27 +14,35 @@ const test = testWithDemoWalletFixture({
 // Global variable for storing the Allure client
 let allureClient: AllureApiClient;
 
-// Function for extracting allureId from the test title
+test.beforeAll(async () => {
+    try {
+        const config = createAllureConfig();
+        allureClient = new AllureApiClient(config);
+    } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Error creating allure client:', error);
+        throw error;
+    }
+});
 
-// universal function for executing SendTransaction test
 async function runSendTransactionTest(
     { wallet, app, widget }: Pick<TestFixture, 'wallet' | 'app' | 'widget'>,
     testInfo: TestInfo,
 ) {
-    const allureId = extractAllureId(testInfo.title);
+    const testAllureId = extractAllureId(testInfo.title);
 
-    if (allureId) {
-        await allure.allureId(allureId);
-        await allure.owner('e.kurilenko');
+    if (testAllureId) {
+        await allureId(testAllureId);
+        await owner('e.kurilenko');
     }
 
     let precondition: string = '';
     let expectedResult: string = '';
     let isPositiveCase: boolean = true;
 
-    if (allureId && allureClient) {
+    if (testAllureId && allureClient) {
         try {
-            const testCaseData = await getTestCaseData(allureClient, allureId);
+            const testCaseData = await getTestCaseData(allureClient, testAllureId);
             precondition = testCaseData.precondition;
             expectedResult = testCaseData.expectedResult;
             isPositiveCase = testCaseData.isPositiveCase;
@@ -60,17 +66,6 @@ async function runSendTransactionTest(
 
     await expect(app.getByTestId('sendTransactionValidation')).toHaveText('Validation Passed');
 }
-
-test.beforeAll(async () => {
-    try {
-        const config = createAllureConfig();
-        allureClient = new AllureApiClient(config);
-    } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Error creating allure client:', error);
-        throw error;
-    }
-});
 
 // SendTransaction validation tests
 test('[address] Error if absent @allureId(1847)', async ({ wallet, app, widget }) => {

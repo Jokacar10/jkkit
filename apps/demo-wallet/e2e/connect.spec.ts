@@ -1,15 +1,12 @@
 import { config } from 'dotenv';
-//import * as allure from 'allure-js-commons';
-
-// Загружаем переменные окружения
-config();
 import type { TestInfo } from '@playwright/test';
 import { expect } from '@playwright/test';
-import { allure } from 'allure-playwright';
+import { allureId, owner } from 'allure-js-commons';
 
 import { testWithDemoWalletFixture } from './demo-wallet';
 import type { TestFixture } from './qa';
 import { AllureApiClient, createAllureConfig, getTestCaseData, extractAllureId } from './utils';
+config();
 
 const feature = {
     jsBridge: Boolean(process.env.E2E_JS_BRIDGE),
@@ -34,17 +31,17 @@ async function runConnectTest(
     { wallet, app, widget }: Pick<TestFixture, 'wallet' | 'app' | 'widget'>,
     testInfo: TestInfo,
 ) {
-    const allureId = extractAllureId(testInfo.title);
-    if (allureId) {
-        await allure.allureId(allureId);
-        await allure.owner('e.kurilenko');
+    const testAllureId = extractAllureId(testInfo.title);
+    if (testAllureId) {
+        await allureId(testAllureId);
+        await owner('e.kurilenko');
     }
     let precondition: string = '';
     let expectedResult: string = '';
 
-    if (allureId && allureClient) {
+    if (testAllureId && allureClient) {
         try {
-            const testCaseData = await getTestCaseData(allureClient, allureId);
+            const testCaseData = await getTestCaseData(allureClient, testAllureId);
             precondition = testCaseData.precondition;
             expectedResult = testCaseData.expectedResult;
         } catch (error) {

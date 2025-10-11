@@ -1,7 +1,5 @@
 import { config } from 'dotenv';
-import { allure } from 'allure-playwright';
-
-// Загружаем переменные окружения
+import { allureId, owner } from 'allure-js-commons';
 config();
 import { expect } from '@playwright/test';
 import type { TestInfo } from '@playwright/test';
@@ -31,10 +29,10 @@ async function runSignDataTest(
     { wallet, app, widget }: Pick<TestFixture, 'wallet' | 'app' | 'widget'>,
     testInfo: TestInfo,
 ) {
-    const allureId = extractAllureId(testInfo.title);
-    if (allureId) {
-        await allure.allureId(allureId);
-        await allure.owner('e.kurilenko');
+    const testAllureId = extractAllureId(testInfo.title);
+    if (testAllureId) {
+        await allureId(testAllureId);
+        await owner('e.kurilenko');
     }
     let precondition: string = '';
     let expectedResult: string = '';
