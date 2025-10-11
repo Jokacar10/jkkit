@@ -18,13 +18,8 @@ const test = testWithDemoWalletFixture({
 let allureClient: AllureApiClient;
 
 test.beforeAll(async () => {
-    try {
-        const config = createAllureConfig();
-        allureClient = new AllureApiClient(config);
-    } catch (error) {
-        console.error('Error creating allure client:', error);
-        throw error;
-    }
+    const config = createAllureConfig();
+    allureClient = new AllureApiClient(config);
 });
 
 async function runConnectTest(
@@ -40,26 +35,14 @@ async function runConnectTest(
     let expectedResult: string = '';
 
     if (testAllureId && allureClient) {
-        try {
-            const testCaseData = await getTestCaseData(allureClient, testAllureId);
-            precondition = testCaseData.precondition;
-            expectedResult = testCaseData.expectedResult;
-        } catch (error) {
-            console.error('Error getting test case data:', error);
-        }
-    } else {
-        console.warn('AllureId not found in test title or client not available');
+        const testCaseData = await getTestCaseData(allureClient, testAllureId);
+        precondition = testCaseData.precondition;
+        expectedResult = testCaseData.expectedResult;
     }
 
     await app.getByTestId('connectPrecondition').fill(precondition || '');
     await app.getByTestId('connectExpectedResult').fill(expectedResult);
     await expect(app.getByTestId('connect-button')).toHaveText('Connect Wallet');
-
-    //await app.getByTestId('connect-button').click();
-
-    //await widget.connectUrlButton.waitFor({ state: 'visible' });
-    //await widget.connectUrlButton.click();
-
     await wallet.connectBy(await widget.connectUrl(await app.getByTestId('connect-button')));
     await app.getByTestId('connectValidation').waitFor({ state: 'visible' });
     await expect(app.getByTestId('connectValidation')).toHaveText('Validation Passed', { timeout: 1 });
