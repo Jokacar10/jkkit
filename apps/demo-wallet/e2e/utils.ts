@@ -12,7 +12,9 @@ interface AllureConfig {
 }
 
 /**
- * Gets JWT token for Allure TestOps API
+ * Получает JWT токен для Allure TestOps API
+ * @param config - Конфигурация Allure TestOps
+ * @returns Promise с JWT токеном
  */
 export async function getAllureToken(config: AllureConfig): Promise<string> {
     const { baseUrl, apiToken } = config;
@@ -41,11 +43,18 @@ export async function getAllureToken(config: AllureConfig): Promise<string> {
         throw new Error(`Error getting Allure token: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 }
-
+export type TestCaseData = {
+    precondition: string;
+    expectedResult: string;
+    isPositiveCase: boolean;
+}
 /**
- * Gets test case information by allureId
+ * Получает информацию о тест-кейсе по allureId
+ * @param config - Конфигурация Allure TestOps
+ * @param allureId - ID тест-кейса в Allure
+ * @returns Promise с данными тест-кейса
  */
-export async function getTestCaseByAllureId(config: AllureConfig, allureId: string): Promise<unknown> {
+export async function getTestCaseByAllureId(config: AllureConfig, allureId: string): Promise<TestCaseData> {
     const { baseUrl } = config;
     const token = await getAllureToken(config);
 
@@ -70,7 +79,8 @@ export async function getTestCaseByAllureId(config: AllureConfig, allureId: stri
 }
 
 /**
- * Creates Allure TestOps configuration from environment variables
+ * Создает конфигурацию Allure TestOps из переменных окружения
+ * @returns Конфигурация Allure TestOps
  */
 export function createAllureConfig(): AllureConfig {
     const baseUrl = process.env.ALLURE_BASE_URL || 'https://tontech.testops.cloud';
@@ -88,7 +98,7 @@ export function createAllureConfig(): AllureConfig {
 }
 
 /**
- * Utility for working with Allure TestOps API
+ * Утилита для работы с Allure TestOps API
  */
 export class AllureApiClient {
     private config: AllureConfig;
@@ -100,7 +110,7 @@ export class AllureApiClient {
     }
 
     /**
-     * Gets valid token (with caching)
+     * Получает актуальный токен (с кэшированием)
      */
     private async getValidToken(): Promise<string> {
         const now = Date.now();
@@ -115,9 +125,9 @@ export class AllureApiClient {
     }
 
     /**
-     * Makes authorized request to Allure API
+     * Выполняет авторизованный запрос к Allure API
      */
-    private async makeRequest(endpoint: string, options: Record<string, unknown> = {}): Promise<Response> {
+    private async makeRequest(endpoint: string, options: RequestInit = {}): Promise<Response> {
         const token = await this.getValidToken();
 
         const response = await fetch(`${this.config.baseUrl}${endpoint}`, {
@@ -138,48 +148,55 @@ export class AllureApiClient {
     }
 
     /**
-     * Gets test case information by allureId
+     * Получает информацию о тест-кейсе по allureId
      */
-    async getTestCase(allureId: string): Promise<unknown> {
+    async getTestCase(allureId: string): Promise<any> {
         const response = await this.makeRequest(`/api/rs/testcase/allureId/${allureId}`);
         return await response.json();
     }
 
     /**
-     * Gets project information
+     * Получает информацию о проекте
      */
-    async getProject(): Promise<unknown> {
+    async getProject(): Promise<any> {
         const response = await this.makeRequest(`/api/rs/project/${this.config.projectId}`);
         return await response.json();
     }
 
     /**
-     * Gets test plans list
+     * Получает список тест-планов
      */
-    async getTestPlans(): Promise<unknown> {
+    async getTestPlans(): Promise<any> {
         const response = await this.makeRequest(`/api/rs/project/${this.config.projectId}/testplan`);
         return await response.json();
     }
 
     /**
-     * Gets test case information by ID
+     * Получает информацию о тест-кейсе по ID
+     * @param id - ID тест-кейса
+     * @returns Promise с данными тест-кейса
      */
-    async getTestCaseById(id: string): Promise<unknown> {
+    async getTestCaseById(id: string): Promise<any> {
         const response = await this.makeRequest(`/api/testcase/${id}`);
         return await response.json();
     }
 }
 
 /**
- * Extracts allureId from test title
+ * Извлекает allureId из названия теста
+ * @param testTitle - название теста
+ * @returns allureId или null если не найден
  */
 export function extractAllureId(testTitle: string): string | null {
-    const match = testTitle.match(/@allureId\((\d+)\)/);
-    return match ? match[1] : null;
+  const match = testTitle.match(/@allureId\((\d+)\)/);
+  return match ? match[1] : null;
 }
 
 /**
- * Gets test case data and extracts precondition and expectedResult
+ * Получает данные тест-кейса и извлекает precondition и expectedResult
+ * @param allureClient - клиент Allure API
+ * @param allureId - ID тест-кейса
+ * @returns Promise с объектом содержащим preconditions и expectedResult
  */
 export async function getTestCaseData(
     allureClient: AllureApiClient,
@@ -198,7 +215,6 @@ export async function getTestCaseData(
             ...testCaseData,
         };
     } catch (error) {
-        // eslint-disable-next-line no-console
         console.error('Error getting test case data:', error);
         throw error;
     }

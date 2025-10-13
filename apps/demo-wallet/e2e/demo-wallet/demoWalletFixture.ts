@@ -28,7 +28,7 @@ export function demoWalletFixture(config: ConfigFixture, slowMo = 0) {
     const walletSource = config.walletSource ?? detectWalletSource();
     const isExtension = isExtensionWalletSource(walletSource);
     const mnemonic = config.mnemonic ?? process.env.WALLET_MNEMONIC;
-
+    
     // Отладочная информация
     console.log('DEBUG: config.mnemonic:', config.mnemonic);
     console.log('DEBUG: process.env.WALLET_MNEMONIC:', process.env.WALLET_MNEMONIC);
