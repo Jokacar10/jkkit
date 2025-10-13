@@ -76,8 +76,6 @@ export function createAllureConfig(): AllureConfig {
     const baseUrl = process.env.ALLURE_BASE_URL || 'https://tontech.testops.cloud';
     const apiToken = process.env.ALLURE_API_TOKEN;
     const projectId = parseInt(process.env.ALLURE_PROJECT_ID || '100');
-    // eslint-disable-next-line no-console
-    console.log(process.env);
     if (!apiToken) {
         throw new Error('ALLURE_API_TOKEN environment variable is required');
     }
