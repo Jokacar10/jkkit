@@ -4,7 +4,7 @@ import { createConsola } from 'consola';
 // Get log level from localStorage or fallback to environment-based level
 const getInitialLogLevel = (): number => {
     try {
-        const storedLevel = localStorage.getItem('wallet-log-level');
+        const storedLevel = typeof localStorage !== 'undefined' ? localStorage.getItem('wallet-log-level') : null;
         if (storedLevel !== null) {
             const level = parseInt(storedLevel, 10);
             // Validate level is within consola's range (0-5)
@@ -19,7 +19,7 @@ const getInitialLogLevel = (): number => {
         console.warn('Failed to read log level from localStorage:', error);
     }
     // Fallback to environment-based level
-    return import.meta.env.DEV ? 4 : 2; // Debug level in dev, Info level in prod
+    return import.meta?.env?.DEV ? 4 : 2; // Debug level in dev, Info level in prod
 };
 
 // Create a custom logger instance with wallet-specific configuration

@@ -298,6 +298,7 @@ export const SettingsDropdown: React.FC = () => {
                                         </div>
                                         <select
                                             className="px-3 py-1 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
+                                            data-testid="network-select"
                                             value={network || 'testnet'}
                                             onChange={(e) => {
                                                 const newNetwork = e.target.value as 'mainnet' | 'testnet';

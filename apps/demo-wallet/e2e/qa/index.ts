@@ -12,12 +12,12 @@ export interface ConfigFixture {
     mnemonic?: string;
 }
 
-import { WalletApp } from './WalletApp';
 import { TonConnectWidget } from './TonConnectWidget';
+import { DemoWallet } from '../demo-wallet';
 
 export type TestFixture = {
     context: BrowserContext;
-    wallet: WalletApp;
+    wallet: DemoWallet;
     widget: TonConnectWidget;
     app: Page;
 };

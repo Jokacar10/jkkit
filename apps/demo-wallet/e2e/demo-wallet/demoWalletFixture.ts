@@ -28,6 +28,7 @@ export function demoWalletFixture(config: ConfigFixture, slowMo = 0) {
     const walletSource = config.walletSource ?? detectWalletSource();
     const isExtension = isExtensionWalletSource(walletSource);
     const mnemonic = config.mnemonic ?? process.env.WALLET_MNEMONIC;
+
     return test.extend<TestFixture>({
         context: async ({ context: _ }, use) => {
             const extensionPath = isExtension ? walletSource : '';

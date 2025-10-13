@@ -1,3 +1,7 @@
+import { createComponentLogger } from '../src/utils/logger';
+
+const log = createComponentLogger('Allure');
+
 interface TokenResponse {
     access_token: string;
     token_type: string;
@@ -12,7 +16,9 @@ interface AllureConfig {
 }
 
 /**
- * Gets JWT token for Allure TestOps API
+ * Получает JWT токен для Allure TestOps API
+ * @param config - Конфигурация Allure TestOps
+ * @returns Promise с JWT токеном
  */
 export async function getAllureToken(config: AllureConfig): Promise<string> {
     const { baseUrl, apiToken } = config;
@@ -41,11 +47,18 @@ export async function getAllureToken(config: AllureConfig): Promise<string> {
         throw new Error(`Error getting Allure token: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 }
-
+export type TestCaseData = {
+    precondition: string;
+    expectedResult: string;
+    isPositiveCase: boolean;
+};
 /**
- * Gets test case information by allureId
+ * Получает информацию о тест-кейсе по allureId
+ * @param config - Конфигурация Allure TestOps
+ * @param allureId - ID тест-кейса в Allure
+ * @returns Promise с данными тест-кейса
  */
-export async function getTestCaseByAllureId(config: AllureConfig, allureId: string): Promise<unknown> {
+export async function getTestCaseByAllureId(config: AllureConfig, allureId: string): Promise<TestCaseData> {
     const { baseUrl } = config;
     const token = await getAllureToken(config);
 
@@ -70,14 +83,13 @@ export async function getTestCaseByAllureId(config: AllureConfig, allureId: stri
 }
 
 /**
- * Creates Allure TestOps configuration from environment variables
+ * Создает конфигурацию Allure TestOps из переменных окружения
+ * @returns Конфигурация Allure TestOps
  */
 export function createAllureConfig(): AllureConfig {
     const baseUrl = process.env.ALLURE_BASE_URL || 'https://tontech.testops.cloud';
     const apiToken = process.env.ALLURE_API_TOKEN;
     const projectId = parseInt(process.env.ALLURE_PROJECT_ID || '100');
-    // eslint-disable-next-line no-console
-    console.log(process.env);
     if (!apiToken) {
         throw new Error('ALLURE_API_TOKEN environment variable is required');
     }
@@ -90,7 +102,7 @@ export function createAllureConfig(): AllureConfig {
 }
 
 /**
- * Utility for working with Allure TestOps API
+ * Утилита для работы с Allure TestOps API
  */
 export class AllureApiClient {
     private config: AllureConfig;
@@ -102,7 +114,7 @@ export class AllureApiClient {
     }
 
     /**
-     * Gets valid token (with caching)
+     * Получает актуальный токен (с кэшированием)
      */
     private async getValidToken(): Promise<string> {
         const now = Date.now();
@@ -117,9 +129,9 @@ export class AllureApiClient {
     }
 
     /**
-     * Makes authorized request to Allure API
+     * Выполняет авторизованный запрос к Allure API
      */
-    private async makeRequest(endpoint: string, options: Record<string, unknown> = {}): Promise<Response> {
+    private async makeRequest(endpoint: string, options: { headers?: Record<string, string> } = {}): Promise<Response> {
         const token = await this.getValidToken();
 
         const response = await fetch(`${this.config.baseUrl}${endpoint}`, {
@@ -140,7 +152,7 @@ export class AllureApiClient {
     }
 
     /**
-     * Gets test case information by allureId
+     * Получает информацию о тест-кейсе по allureId
      */
     async getTestCase(allureId: string): Promise<unknown> {
         const response = await this.makeRequest(`/api/rs/testcase/allureId/${allureId}`);
@@ -148,7 +160,7 @@ export class AllureApiClient {
     }
 
     /**
-     * Gets project information
+     * Получает информацию о проекте
      */
     async getProject(): Promise<unknown> {
         const response = await this.makeRequest(`/api/rs/project/${this.config.projectId}`);
@@ -156,7 +168,7 @@ export class AllureApiClient {
     }
 
     /**
-     * Gets test plans list
+     * Получает список тест-планов
      */
     async getTestPlans(): Promise<unknown> {
         const response = await this.makeRequest(`/api/rs/project/${this.config.projectId}/testplan`);
@@ -164,7 +176,9 @@ export class AllureApiClient {
     }
 
     /**
-     * Gets test case information by ID
+     * Получает информацию о тест-кейсе по ID
+     * @param id - ID тест-кейса
+     * @returns Promise с данными тест-кейса
      */
     async getTestCaseById(id: string): Promise<unknown> {
         const response = await this.makeRequest(`/api/testcase/${id}`);
@@ -173,7 +187,9 @@ export class AllureApiClient {
 }
 
 /**
- * Extracts allureId from test title
+ * Извлекает allureId из названия теста
+ * @param testTitle - название теста
+ * @returns allureId или null если не найден
  */
 export function extractAllureId(testTitle: string): string | null {
     const match = testTitle.match(/@allureId\((\d+)\)/);
@@ -181,7 +197,10 @@ export function extractAllureId(testTitle: string): string | null {
 }
 
 /**
- * Gets test case data and extracts precondition and expectedResult
+ * Получает данные тест-кейса и извлекает precondition и expectedResult
+ * @param allureClient - клиент Allure API
+ * @param allureId - ID тест-кейса
+ * @returns Promise с объектом содержащим preconditions и expectedResult
  */
 export async function getTestCaseData(
     allureClient: AllureApiClient,
@@ -193,15 +212,20 @@ export async function getTestCaseData(
 }> {
     try {
         const testCaseData = await allureClient.getTestCaseById(allureId);
+        if (typeof testCaseData !== 'object' || testCaseData === null || !('name' in testCaseData)) {
+            throw new Error('Test case data is not an object');
+        }
         const isPositiveCase = !String(testCaseData.name).toLowerCase().includes('error');
-
         return {
             isPositiveCase,
             ...testCaseData,
+        } as unknown as {
+            precondition: string;
+            expectedResult: string;
+            isPositiveCase: boolean;
         };
     } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Error getting test case data:', error);
+        log.error('Error getting test case data:', error);
         throw error;
     }
 }

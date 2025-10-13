@@ -1,4 +1,6 @@
-import { allure } from 'allure-playwright';
+import { config } from 'dotenv';
+import { allureId, owner } from 'allure-js-commons';
+config();
 import { expect } from '@playwright/test';
 import type { TestInfo } from '@playwright/test';
 
@@ -27,21 +29,21 @@ async function runSignDataTest(
     { wallet, app, widget }: Pick<TestFixture, 'wallet' | 'app' | 'widget'>,
     testInfo: TestInfo,
 ) {
-    const allureId = extractAllureId(testInfo.title);
-    if (allureId) {
-        await allure.allureId(allureId);
-        await allure.owner('e.kurilenko');
+    const testAllureId = extractAllureId(testInfo.title);
+    if (testAllureId) {
+        await allureId(testAllureId);
+        await owner('e.kurilenko');
     }
     let precondition: string = '';
     let expectedResult: string = '';
-    let isPositiveCase: boolean = true;
+    // let isPositiveCase: boolean = true;
 
-    if (allureId && allureClient) {
+    if (testAllureId && allureClient) {
         try {
-            const testCaseData = await getTestCaseData(allureClient, allureId);
+            const testCaseData = await getTestCaseData(allureClient, testAllureId);
             precondition = testCaseData.precondition;
             expectedResult = testCaseData.expectedResult;
-            isPositiveCase = testCaseData.isPositiveCase;
+            //isPositiveCase = testCaseData.isPositiveCase; will use it for negative cases later
         } catch (error) {
             // eslint-disable-next-line no-console
             console.error('Error getting test case data:', error);
@@ -57,7 +59,7 @@ async function runSignDataTest(
     await app.getByTestId('signDataExpectedResult').fill(expectedResult);
     await app.getByTestId('sign-data-button').click();
 
-    await wallet.signData(isPositiveCase);
+    await wallet.signData(true);
 
     await expect(app.getByTestId('signDataValidation')).toHaveText('Validation Passed');
 }

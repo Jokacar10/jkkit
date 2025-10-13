@@ -33,6 +33,7 @@ export class DemoWallet extends WalletApp {
         await app.getByTestId('auto-lock').click();
         await app.getByTestId('hold-to-sign').waitFor({ state: 'attached' });
         await app.getByTestId('hold-to-sign').click();
+        await app.getByTestId('network-select').selectOption('mainnet');
         await this.close();
     }
 
@@ -63,6 +64,13 @@ export class DemoWallet extends WalletApp {
         await chose.click();
         await modal.waitFor({ state: 'detached', timeout });
         await this.close();
+    }
+
+    async sendTransaction(isPositiveCase: boolean, confirm: boolean): Promise<void> {
+        await this.open();
+        if (isPositiveCase) {
+            await this.accept(confirm);
+        }
     }
 
     async accept(confirm: boolean = true): Promise<void> {
