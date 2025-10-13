@@ -47,7 +47,7 @@ export type TestCaseData = {
     precondition: string;
     expectedResult: string;
     isPositiveCase: boolean;
-}
+};
 /**
  * Получает информацию о тест-кейсе по allureId
  * @param config - Конфигурация Allure TestOps
@@ -188,8 +188,8 @@ export class AllureApiClient {
  * @returns allureId или null если не найден
  */
 export function extractAllureId(testTitle: string): string | null {
-  const match = testTitle.match(/@allureId\((\d+)\)/);
-  return match ? match[1] : null;
+    const match = testTitle.match(/@allureId\((\d+)\)/);
+    return match ? match[1] : null;
 }
 
 /**

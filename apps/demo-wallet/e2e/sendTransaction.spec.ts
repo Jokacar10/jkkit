@@ -62,7 +62,7 @@ async function runSendTransactionTest(
     await app.getByTestId('sendTxExpectedResult').fill(expectedResult);
     await app.getByTestId('send-transaction-button').click();
 
-    await wallet.accept(isPositiveCase);
+    await wallet.sendTransaction(isPositiveCase, true);
 
     await expect(app.getByTestId('sendTransactionValidation')).toHaveText('Validation Passed');
 }
