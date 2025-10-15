@@ -1,14 +1,15 @@
 import {
     TonWalletKit,
-    type WalletInterface,
+    type IWalletAdapter,
     type EventConnectRequest,
     type EventTransactionRequest,
     type EventSignDataRequest,
     type EventDisconnect,
     ExtensionStorageAdapter,
-    type WalletInitConfig,
-    createWalletInitConfigSigner,
-    MnemonicToKeyPair,
+    type IWallet,
+    Signer,
+    WalletV5R1Adapter,
+    WalletV4R2Adapter,
     DefaultSignature,
     CHAIN,
     type ITonWalletKit,
@@ -16,7 +17,8 @@ import {
     createWalletManifest,
     type ToncenterTransaction,
     SEND_TRANSACTION_ERROR_CODES,
-    CreateSignerFromMnemonic,
+    MnemonicToKeyPair,
+    type WalletSigner,
 } from '@ton/walletkit';
 import { createWalletInitConfigLedger, createLedgerPath, createWalletV4R2Ledger } from '@ton/v4ledger-adapter';
 import TransportWebHID from '@ledgerhq/hw-transport-webhid';
@@ -117,7 +119,7 @@ function transformToncenterTransaction(tx: ToncenterTransaction): PreviewTransac
     };
 }
 
-async function createWalletConfig(params: {
+async function createWalletAdapter(params: {
     mnemonic?: string[];
     useWalletInterfaceType: 'signer' | 'mnemonic' | 'ledger';
     ledgerAccountNumber?: number;
@@ -125,7 +127,7 @@ async function createWalletConfig(params: {
     network: 'mainnet' | 'testnet';
     walletKit: ITonWalletKit;
     version?: 'v5r1' | 'v4r2';
-}): Promise<WalletInitConfig> {
+}): Promise<IWalletAdapter> {
     const {
         mnemonic,
         useWalletInterfaceType,
@@ -149,29 +151,50 @@ async function createWalletConfig(params: {
             }
             const keyPair = await MnemonicToKeyPair(mnemonic);
 
-            return createWalletInitConfigSigner({
-                publicKey: keyPair.publicKey,
-                version: version,
-                network: chainNetwork,
+            // Create custom signer with confirmation dialog
+            const customSigner: WalletSigner = {
                 sign: async (bytes: Uint8Array) => {
                     if (confirm('Are you sure you want to sign?')) {
                         return DefaultSignature(bytes, keyPair.secretKey);
                     }
-
                     throw new Error('User did not confirm');
                 },
-            });
+                publicKey: keyPair.publicKey,
+            };
+
+            // Create adapter with the appropriate version
+            if (version === 'v5r1') {
+                return await WalletV5R1Adapter.create(customSigner, {
+                    client: walletKit.getApiClient(),
+                    network: chainNetwork,
+                });
+            } else {
+                return await WalletV4R2Adapter.create(customSigner, {
+                    client: walletKit.getApiClient(),
+                    network: chainNetwork,
+                });
+            }
         }
         case 'mnemonic': {
             if (!mnemonic) {
                 throw new Error('Mnemonic required for mnemonic wallet type');
             }
-            return CreateSignerFromMnemonic({
-                mnemonic,
-                version: version,
-                mnemonicType: 'ton',
-                network: chainNetwork,
-            });
+
+            // Use Signer.fromMnemonic to create signer with publicKey
+            const signer = await Signer.fromMnemonic(mnemonic, { type: 'ton' });
+
+            // Create adapter with the appropriate version
+            if (version === 'v5r1') {
+                return await WalletV5R1Adapter.create(signer, {
+                    client: walletKit.getApiClient(),
+                    network: chainNetwork,
+                });
+            } else {
+                return await WalletV4R2Adapter.create(signer, {
+                    client: walletKit.getApiClient(),
+                    network: chainNetwork,
+                });
+            }
         }
         case 'ledger': {
             // For Ledger, we need to request WebUSB transport
@@ -287,11 +310,11 @@ export const createWalletSlice: WalletSliceCreator = (set: SetState, get) => ({
 
         for (const savedWallet of savedWallets) {
             try {
-                let walletConfig: WalletInitConfig;
+                let walletAdapter: IWalletAdapter;
 
                 if (savedWallet.walletType === 'ledger' && savedWallet.ledgerConfig) {
                     // Load Ledger wallet
-                    walletConfig = await createWalletConfig({
+                    walletAdapter = await createWalletAdapter({
                         useWalletInterfaceType: 'ledger',
                         ledgerAccountNumber: savedWallet.ledgerConfig.accountIndex,
                         storedLedgerConfig: savedWallet.ledgerConfig,
@@ -307,7 +330,7 @@ export const createWalletSlice: WalletSliceCreator = (set: SetState, get) => ({
                     );
                     const mnemonic = JSON.parse(mnemonicJson) as string[];
 
-                    walletConfig = await createWalletConfig({
+                    walletAdapter = await createWalletAdapter({
                         mnemonic,
                         useWalletInterfaceType: savedWallet.walletInterfaceType,
                         ledgerAccountNumber: state.auth.ledgerAccountNumber,
@@ -323,7 +346,7 @@ export const createWalletSlice: WalletSliceCreator = (set: SetState, get) => ({
 
                 // debugger;
 
-                await walletKit.addWallet(walletConfig);
+                await walletKit.addWallet(walletAdapter);
                 log.info(`Loaded wallet ${savedWallet.name} (${savedWallet.address})`);
             } catch (error) {
                 log.error(`Failed to load wallet ${savedWallet.name}:`, error);
@@ -433,7 +456,7 @@ export const createWalletSlice: WalletSliceCreator = (set: SetState, get) => ({
 
             // Create wallet using walletkit
             const network = state.auth.network || 'testnet';
-            const walletConfig = await createWalletConfig({
+            const walletAdapter = await createWalletAdapter({
                 mnemonic,
                 useWalletInterfaceType: state.auth.useWalletInterfaceType || 'mnemonic',
                 ledgerAccountNumber: state.auth.ledgerAccountNumber,
@@ -443,9 +466,9 @@ export const createWalletSlice: WalletSliceCreator = (set: SetState, get) => ({
                 version,
             });
 
-            const wallet = await state.wallet.walletKit.addWallet(walletConfig);
+            const wallet = await state.wallet.walletKit.addWallet(walletAdapter);
             // const wallets = state.wallet.walletKit.getWallets();
-            // const wallet = wallets.find((w) => w.getAddress() === walletConfig.getAddress());
+            // const wallet = wallets.find((w) => w.getAddress() === walletAdapter.getAddress());
 
             if (!wallet) {
                 throw new Error('Failed to find created wallet');
@@ -525,7 +548,7 @@ export const createWalletSlice: WalletSliceCreator = (set: SetState, get) => ({
 
             // Create wallet using walletkit with Ledger configuration
             const network = state.auth.network || 'testnet';
-            const walletConfig = await createWalletConfig({
+            const walletAdapter = await createWalletAdapter({
                 useWalletInterfaceType: 'ledger',
                 ledgerAccountNumber: state.auth.ledgerAccountNumber,
                 storedLedgerConfig: undefined,
@@ -533,9 +556,9 @@ export const createWalletSlice: WalletSliceCreator = (set: SetState, get) => ({
                 walletKit: state.wallet.walletKit,
             });
 
-            const wallet = await state.wallet.walletKit.addWallet(walletConfig);
+            const wallet = await state.wallet.walletKit.addWallet(walletAdapter);
             // const wallets = state.wallet.walletKit.getWallets();
-            // const wallet = wallets.find((w) => w.getAddress() === walletConfig.getAddress());
+            // const wallet = wallets.find((w) => w.getAddress() === walletAdapter.getAddress());
 
             if (!wallet) {
                 throw new Error('Failed to find created Ledger wallet');
@@ -629,7 +652,7 @@ export const createWalletSlice: WalletSliceCreator = (set: SetState, get) => ({
                 const network = state.auth.network || 'testnet';
 
                 if (savedWallet.walletType === 'ledger') {
-                    const walletConfig = await createWalletConfig({
+                    const walletAdapter = await createWalletAdapter({
                         useWalletInterfaceType: 'ledger',
                         ledgerAccountNumber: savedWallet.ledgerConfig?.accountIndex,
                         storedLedgerConfig: savedWallet.ledgerConfig,
@@ -638,7 +661,7 @@ export const createWalletSlice: WalletSliceCreator = (set: SetState, get) => ({
                         version: savedWallet.version || 'v4r2',
                     });
 
-                    await state.wallet.walletKit.addWallet(walletConfig);
+                    await state.wallet.walletKit.addWallet(walletAdapter);
                 } else if (savedWallet.encryptedMnemonic) {
                     const decryptedString = await SimpleEncryption.decrypt(
                         savedWallet.encryptedMnemonic,
@@ -646,7 +669,7 @@ export const createWalletSlice: WalletSliceCreator = (set: SetState, get) => ({
                     );
                     const mnemonic = JSON.parse(decryptedString) as string[];
 
-                    const walletConfig = await createWalletConfig({
+                    const walletAdapter = await createWalletAdapter({
                         mnemonic,
                         useWalletInterfaceType: savedWallet.walletInterfaceType,
                         ledgerAccountNumber: state.auth.ledgerAccountNumber,
@@ -656,7 +679,7 @@ export const createWalletSlice: WalletSliceCreator = (set: SetState, get) => ({
                         version: savedWallet.version || 'v5r1',
                     });
 
-                    await state.wallet.walletKit.addWallet(walletConfig);
+                    await state.wallet.walletKit.addWallet(walletAdapter);
                 }
 
                 // Get the newly loaded wallet
@@ -770,7 +793,7 @@ export const createWalletSlice: WalletSliceCreator = (set: SetState, get) => ({
                 const network = state.auth.network || 'testnet';
 
                 if (savedWallet.walletType === 'ledger') {
-                    const walletConfig = await createWalletConfig({
+                    const walletAdapter = await createWalletAdapter({
                         useWalletInterfaceType: 'ledger',
                         ledgerAccountNumber: savedWallet.ledgerConfig?.accountIndex,
                         storedLedgerConfig: savedWallet.ledgerConfig,
@@ -778,7 +801,7 @@ export const createWalletSlice: WalletSliceCreator = (set: SetState, get) => ({
                         walletKit: state.wallet.walletKit,
                     });
 
-                    await state.wallet.walletKit.addWallet(walletConfig);
+                    await state.wallet.walletKit.addWallet(walletAdapter);
                 } else if (savedWallet.encryptedMnemonic) {
                     const decryptedString = await SimpleEncryption.decrypt(
                         savedWallet.encryptedMnemonic,
@@ -786,7 +809,7 @@ export const createWalletSlice: WalletSliceCreator = (set: SetState, get) => ({
                     );
                     const mnemonic = JSON.parse(decryptedString) as string[];
 
-                    const walletConfig = await createWalletConfig({
+                    const walletAdapter = await createWalletAdapter({
                         mnemonic,
                         useWalletInterfaceType: savedWallet.walletInterfaceType,
                         ledgerAccountNumber: state.auth.ledgerAccountNumber,
@@ -795,7 +818,7 @@ export const createWalletSlice: WalletSliceCreator = (set: SetState, get) => ({
                         walletKit: state.wallet.walletKit,
                     });
 
-                    await state.wallet.walletKit.addWallet(walletConfig);
+                    await state.wallet.walletKit.addWallet(walletAdapter);
                 }
             }
 
@@ -968,7 +991,7 @@ export const createWalletSlice: WalletSliceCreator = (set: SetState, get) => ({
         });
     },
 
-    approveConnectRequest: async (selectedWallet: WalletInterface) => {
+    approveConnectRequest: async (selectedWallet: IWallet) => {
         const state = get();
         if (!state.wallet.pendingConnectRequest) {
             log.error('No pending connect request to approve');

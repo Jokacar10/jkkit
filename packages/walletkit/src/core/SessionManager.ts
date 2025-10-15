@@ -2,11 +2,11 @@
 
 import { SessionCrypto } from '@tonconnect/protocol';
 
-import type { SessionInfo, WalletInterface } from '../types';
+import type { SessionInfo, IWallet } from '../types';
 import type { WalletManager } from '../core/WalletManager';
 import type { SessionData, StorageAdapter } from '../types/internal';
 import { globalLogger } from './Logger';
-import { WalletInitInterface } from '../types/wallet';
+import { IWalletAdapter } from '../types/wallet';
 
 const log = globalLogger.createChild('SessionManager');
 
@@ -37,7 +37,7 @@ export class SessionManager {
         domain: string,
         dAppIconUrl: string,
         dAppDescription: string,
-        wallet?: WalletInterface,
+        wallet?: IWallet,
         { disablePersist = false }: { disablePersist?: boolean } = {},
     ): Promise<SessionData> {
         const now = new Date();
@@ -128,7 +128,7 @@ export class SessionManager {
     /**
      * Get sessions for specific wallet
      */
-    getSessionsForWallet(wallet: WalletInitInterface): SessionData[] {
+    getSessionsForWallet(wallet: IWalletAdapter): SessionData[] {
         return this.getSessions().filter((session) => session.walletAddress === wallet.getAddress());
     }
 
@@ -157,7 +157,7 @@ export class SessionManager {
     /**
      * Remove all sessions for a wallet
      */
-    async removeSessionsForWallet(wallet: WalletInitInterface): Promise<number> {
+    async removeSessionsForWallet(wallet: IWalletAdapter): Promise<number> {
         const sessionsToRemove = this.getSessionsForWallet(wallet);
 
         let removedCount = 0;

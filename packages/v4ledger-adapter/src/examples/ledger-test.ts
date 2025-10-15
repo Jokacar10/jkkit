@@ -3,7 +3,7 @@ import util from 'util';
 // import { Address } from '@ton/core'; // Not used in this example
 import * as dotenv from 'dotenv';
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid';
-import { ApiClientToncenter, CHAIN, ConnectTransactionParamMessage, WalletInterface } from '@ton/walletkit';
+import { ApiClientToncenter, CHAIN, ConnectTransactionParamMessage, IWallet } from '@ton/walletkit';
 import { wrapWalletInterface } from '@ton/walletkit';
 
 import { createLedgerPath, createWalletV4R2Ledger } from '../utils';
@@ -29,7 +29,7 @@ async function createLedgerWallet(
     testnet: boolean = false,
     workchain: number = 0,
     account: number = 0,
-): Promise<WalletInterface> {
+): Promise<IWallet> {
     logInfo('🔌 Connecting to Ledger device...');
 
     try {
@@ -58,7 +58,7 @@ async function createLedgerWallet(
     }
 }
 
-async function logWallet(wallet: WalletInterface) {
+async function logWallet(wallet: IWallet) {
     const address = wallet.getAddress();
     logInfo('📍 Wallet address:', address);
 

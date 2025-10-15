@@ -2,7 +2,7 @@
 
 import { CHAIN, SendTransactionRpcResponseError } from '@tonconnect/protocol';
 
-import type { WalletInterface, WalletInitConfig, WalletInitInterface } from './wallet';
+import type { IWallet, IWalletAdapter } from './wallet';
 import type {
     EventConnectRequest,
     EventTransactionRequest,
@@ -32,16 +32,16 @@ export interface ITonWalletKit {
     // === Wallet Management ===
 
     /** Get all registered wallets */
-    getWallets(): WalletInterface[];
+    getWallets(): IWallet[];
 
     /** Get wallet by address */
-    getWallet(address: string): WalletInterface | undefined;
+    getWallet(address: string): IWallet | undefined;
 
     /** Add a new wallet */
-    addWallet(walletConfig: WalletInitConfig): Promise<WalletInterface | undefined>;
+    addWallet(adapter: IWalletAdapter): Promise<IWallet | undefined>;
 
     /** Remove a wallet */
-    removeWallet(wallet: WalletInitInterface): Promise<void>;
+    removeWallet(wallet: IWalletAdapter): Promise<void>;
 
     /** Clear all wallets */
     clearWallets(): Promise<void>;
@@ -60,7 +60,7 @@ export interface ITonWalletKit {
     handleTonConnectUrl(url: string): Promise<void>;
 
     /** Handle new transaction */
-    handleNewTransaction(wallet: WalletInterface, data: ConnectTransactionParamContent): Promise<void>;
+    handleNewTransaction(wallet: IWallet, data: ConnectTransactionParamContent): Promise<void>;
 
     // === Request Processing ===
 

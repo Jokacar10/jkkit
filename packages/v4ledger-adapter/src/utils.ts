@@ -4,9 +4,7 @@ import { CHAIN } from '@tonconnect/protocol';
 import { TonTransport } from '@ton-community/ton-ledger';
 import Transport from '@ledgerhq/hw-transport';
 import {
-    WalletInitInterface,
-    // WalletInitConfigLedgerInterface,
-    // isWalletInitConfigLedger,
+    IWalletAdapter,
     ApiClient,
     // globalLogger,
 } from '@ton/walletkit';
@@ -45,7 +43,7 @@ export async function createWalletV4R2Ledger(
     options: {
         tonClient: ApiClient;
     },
-): Promise<WalletInitInterface> {
+): Promise<IWalletAdapter> {
     if (!isWalletInitConfigLedger(config)) {
         throw new Error('Invalid Ledger configuration');
     }

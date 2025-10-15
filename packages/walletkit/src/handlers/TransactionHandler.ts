@@ -7,7 +7,7 @@ import {
 } from '@tonconnect/protocol';
 
 import type {
-    WalletInterface,
+    IWallet,
     EventTransactionRequest,
     TransactionPreview,
     ToncenterEmulationResponse,
@@ -158,7 +158,7 @@ export class TransactionHandler
 
     private parseTonConnectTransactionRequest(
         event: RawBridgeEventTransaction,
-        wallet: WalletInterface,
+        wallet: IWallet,
     ): {
         result: ConnectTransactionParamContent | undefined;
         validation: ValidationResult;
@@ -220,7 +220,7 @@ export class TransactionHandler
      * Parse network from various possible formats
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private validateNetwork(network: any, wallet: WalletInterface): ReturnWithValidationResult<CHAIN | undefined> {
+    private validateNetwork(network: any, wallet: IWallet): ReturnWithValidationResult<CHAIN | undefined> {
         let errors: string[] = [];
         if (typeof network === 'string') {
             if (network === '-3' || network === '-239') {
@@ -241,7 +241,7 @@ export class TransactionHandler
         return { result: undefined, isValid: errors.length === 0, errors: errors };
     }
 
-    private validateFrom(from: unknown, wallet: WalletInterface): ReturnWithValidationResult<string> {
+    private validateFrom(from: unknown, wallet: IWallet): ReturnWithValidationResult<string> {
         let errors: string[] = [];
 
         if (typeof from !== 'string') {
@@ -293,7 +293,7 @@ export class TransactionHandler
 
     private async createTransactionPreview(
         request: ConnectTransactionParamContent,
-        wallet?: WalletInterface,
+        wallet?: IWallet,
     ): Promise<TransactionPreview> {
         const emulationResult = await this.emulateTransaction(request, wallet);
         log.info('Emulation result', { emulationResult });
@@ -307,7 +307,7 @@ export class TransactionHandler
 
     private async emulateTransaction(
         request: ConnectTransactionParamContent,
-        wallet?: WalletInterface,
+        wallet?: IWallet,
     ): Promise<TransactionPreview> {
         const message = createToncenterMessage(wallet?.getAddress(), request.messages);
 

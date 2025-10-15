@@ -12,15 +12,14 @@ import {
 import type {
     ITonWalletKit,
     TonWalletKitOptions,
-    WalletInterface,
+    IWallet,
     EventConnectRequest,
     EventTransactionRequest,
     EventSignDataRequest,
     EventDisconnect,
-    WalletInitConfig,
     SessionInfo,
 } from '../types';
-import { createWalletFromConfig, Initializer, type InitializationResult } from './Initializer';
+import { Initializer, type InitializationResult, wrapWalletInterface } from './Initializer';
 import { globalLogger } from './Logger';
 import type { WalletManager } from './WalletManager';
 import type { SessionManager } from './SessionManager';
@@ -41,7 +40,7 @@ import { EventEmitter } from './EventEmitter';
 import { StorageEventProcessor } from './EventProcessor';
 import { BridgeManager } from './BridgeManager';
 import type { BridgeEventMessageInfo, InjectedToExtensionBridgeRequestPayload } from '../types/jsBridge';
-import { WalletInitInterface } from '../types/wallet';
+import { IWalletAdapter } from '../types/wallet';
 import { ApiClient } from '../types/toncenter/ApiClient';
 import { getDeviceInfoWithDefaults } from '../utils/getDefaultWalletConfig';
 import { Hash } from '../types/primitive';
@@ -223,7 +222,7 @@ export class TonWalletKit implements ITonWalletKit {
 
     // === Wallet Management API (Delegated) ===
 
-    getWallets(): WalletInterface[] {
+    getWallets(): IWallet[] {
         if (!this.isInitialized) {
             log.warn('TonWalletKit not yet initialized, returning empty array');
             return [];
@@ -234,7 +233,7 @@ export class TonWalletKit implements ITonWalletKit {
     /**
      * Get wallet by address
      */
-    getWallet(address: string): WalletInterface | undefined {
+    getWallet(address: string): IWallet | undefined {
         if (!this.isInitialized) {
             log.warn('TonWalletKit not yet initialized, returning undefined');
             return undefined;
@@ -242,9 +241,9 @@ export class TonWalletKit implements ITonWalletKit {
         return this.walletManager.getWallet(address);
     }
 
-    async addWallet(walletConfig: WalletInitConfig): Promise<WalletInterface | undefined> {
+    async addWallet(adapter: IWalletAdapter): Promise<IWallet | undefined> {
         await this.ensureInitialized();
-        const wallet = await createWalletFromConfig(walletConfig, this.tonClient);
+        const wallet = await wrapWalletInterface(adapter, this.tonClient);
         const walletAdded = await this.walletManager.addWallet(wallet);
         // wallet already exists
         if (!walletAdded) {
@@ -256,7 +255,7 @@ export class TonWalletKit implements ITonWalletKit {
         return wallet;
     }
 
-    async removeWallet(argWallet: WalletInitInterface | string): Promise<void> {
+    async removeWallet(argWallet: IWalletAdapter | string): Promise<void> {
         await this.ensureInitialized();
 
         const wallet = typeof argWallet === 'string' ? this.walletManager.getWallet(argWallet) : argWallet;
@@ -450,7 +449,7 @@ export class TonWalletKit implements ITonWalletKit {
         }
     }
 
-    async handleNewTransaction(wallet: WalletInterface, data: ConnectTransactionParamContent): Promise<void> {
+    async handleNewTransaction(wallet: IWallet, data: ConnectTransactionParamContent): Promise<void> {
         await this.ensureInitialized();
 
         data.valid_until ??= Math.floor(Date.now() / 1000) + 300;

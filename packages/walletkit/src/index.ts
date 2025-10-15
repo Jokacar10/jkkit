@@ -39,7 +39,6 @@ export { WalletV5, WalletId, Opcodes } from './contracts/w5/WalletV5R1';
 export type { WalletV5Config } from './contracts/w5/WalletV5R1';
 export { WalletV5R1CodeCell, WalletV5R1CodeBoc } from './contracts/w5/WalletV5R1.source';
 export { WalletV5R1Adapter } from './contracts/w5/WalletV5R1Adapter';
-export { createWalletV5R1 } from './contracts/w5/WalletV5R1Adapter';
 export { defaultWalletIdV5R1 } from './contracts/w5/WalletV5R1Adapter';
 
 export { WalletV4R2 } from './contracts/v4r2/WalletV4R2';
@@ -109,4 +108,4 @@ export { DefaultSignature, FakeSignature } from './utils/sign';
 export { wrapWalletInterface } from './core/Initializer';
 export { createDeviceInfo, createWalletManifest } from './utils/getDefaultWalletConfig';
 
-export { CreateSignerFromMnemonic, CreateSignerFromPrivateKey } from './core/WalletManager';
+export { Signer } from './utils/Signer';

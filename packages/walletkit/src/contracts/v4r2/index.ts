@@ -1,5 +1,5 @@
 // Main exports
-export { WalletV4R2Adapter, createWalletV4R2 } from './WalletV4R2Adapter';
+export { WalletV4R2Adapter } from './WalletV4R2Adapter';
 export { WalletV4R2 } from './WalletV4R2';
 export { WalletV4R2CodeCell } from './WalletV4R2.source';
 

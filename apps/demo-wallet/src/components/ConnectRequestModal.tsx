@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import type { EventConnectRequest, WalletInterface } from '@ton/walletkit';
+import type { EventConnectRequest, IWallet } from '@ton/walletkit';
 
 import { Button } from './Button';
 import { Card } from './Card';
@@ -13,10 +13,10 @@ const log = createComponentLogger('ConnectRequestModal');
 
 interface ConnectRequestModalProps {
     request: EventConnectRequest;
-    availableWallets: WalletInterface[];
+    availableWallets: IWallet[];
     savedWallets: SavedWallet[];
     isOpen: boolean;
-    onApprove: (selectedWallet: WalletInterface) => void;
+    onApprove: (selectedWallet: IWallet) => void;
     onReject: (reason?: string) => void;
 }
 
@@ -28,7 +28,7 @@ export const ConnectRequestModal: React.FC<ConnectRequestModalProps> = ({
     onApprove,
     onReject,
 }) => {
-    const [selectedWallet, setSelectedWallet] = useState<WalletInterface | null>(availableWallets[0] || null);
+    const [selectedWallet, setSelectedWallet] = useState<IWallet | null>(availableWallets[0] || null);
     const [isLoading, setIsLoading] = useState(false);
     const [showAllWallets, setShowAllWallets] = useState(false);
 

@@ -1,7 +1,7 @@
 import { storeNftTransferMessage } from '@ton-community/assets-sdk';
 import { Address, beginCell, SendMode } from '@ton/core';
 
-import { WalletInterface } from '../../../types';
+import { IWallet } from '../../../types';
 import { WalletNftInterface } from '../../../types/wallet';
 import { validateTransactionMessage } from '../../../validation';
 import { NftTransferParamsHuman, NftTransferParamsRaw } from '../../../types/nfts';
@@ -11,7 +11,7 @@ import { NftItems } from '../../../types/toncenter/NftItems';
 import { LimitRequest } from '../../../types/toncenter/ApiClient';
 
 export class WalletNftClass implements WalletNftInterface {
-    async getNfts(this: WalletInterface, params: LimitRequest): Promise<NftItems> {
+    async getNfts(this: IWallet, params: LimitRequest): Promise<NftItems> {
         const out = await this.client.nftItemsByOwner({
             ownerAddress: [this.getAddress()],
             offset: params.offset ?? 0,
@@ -23,7 +23,7 @@ export class WalletNftClass implements WalletNftInterface {
         };
     }
 
-    async getNft(this: WalletInterface, address: Address | string): Promise<NftItem | null> {
+    async getNft(this: IWallet, address: Address | string): Promise<NftItem | null> {
         const result = await this.client.nftItemsByAddress({
             address: [address],
         });
@@ -34,7 +34,7 @@ export class WalletNftClass implements WalletNftInterface {
     }
 
     async createTransferNftTransaction(
-        this: WalletInterface,
+        this: IWallet,
         nftTransferMessage: NftTransferParamsHuman,
     ): Promise<ConnectTransactionParamContent> {
         const forwardPayload = nftTransferMessage.comment
@@ -72,7 +72,7 @@ export class WalletNftClass implements WalletNftInterface {
     }
 
     async createTransferNftRawTransaction(
-        this: WalletInterface,
+        this: IWallet,
         params: NftTransferParamsRaw,
     ): Promise<ConnectTransactionParamContent> {
         const nftPayload = beginCell().store(storeNftTransferMessage(params.transferMessage)).endCell();

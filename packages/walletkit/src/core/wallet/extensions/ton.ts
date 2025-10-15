@@ -1,16 +1,23 @@
 import { beginCell, Address } from '@ton/core';
 
-import { TransactionPreview, WalletInterface } from '../../../types';
+import { TransactionPreview, IWallet } from '../../../types';
 import { ConnectTransactionParamContent, ConnectTransactionParamMessage } from '../../../types/internal';
 import { WalletTonInterface, TonTransferParams, TonTransferManyParams } from '../../../types/wallet';
 import { isValidAddress } from '../../../utils/address';
 import { isValidNanotonAmount, validateTransactionMessage } from '../../../validation';
 import { CallForSuccess } from '../../../utils/retry';
 import { EmulationErrorUnknown } from '../../../types/emulation/errors';
+import { ApiClient } from '../../../types/toncenter/ApiClient';
 
 export class WalletTonClass implements WalletTonInterface {
+    client: ApiClient;
+
+    private constructor(client: ApiClient) {
+        this.client = client;
+    }
+
     async createTransferTonTransaction(
-        this: WalletInterface,
+        this: IWallet,
         param: TonTransferParams,
     ): Promise<ConnectTransactionParamContent> {
         let messages: ConnectTransactionParamMessage[] = [];
@@ -47,7 +54,7 @@ export class WalletTonClass implements WalletTonInterface {
         };
     }
     async createTransferMultiTonTransaction(
-        this: WalletInterface,
+        this: IWallet,
         { messages: params }: TonTransferManyParams,
     ): Promise<ConnectTransactionParamContent> {
         let messages: ConnectTransactionParamMessage[] = [];
@@ -87,7 +94,7 @@ export class WalletTonClass implements WalletTonInterface {
     }
 
     async getTransactionPreview(
-        this: WalletInterface,
+        this: IWallet,
         param: ConnectTransactionParamContent | Promise<ConnectTransactionParamContent>,
     ): Promise<{
         preview: TransactionPreview;
@@ -101,7 +108,7 @@ export class WalletTonClass implements WalletTonInterface {
         };
     }
 
-    async getBalance(this: WalletInterface): Promise<bigint> {
+    async getBalance(this: IWallet): Promise<bigint> {
         return await CallForSuccess(() => this.client.getBalance(Address.parse(this.getAddress())));
     }
 }

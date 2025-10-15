@@ -1,12 +1,12 @@
 // Wallet-specific validation logic
 
-import type { WalletInterface } from '../types/wallet';
+import type { IWallet } from '../types/wallet';
 import type { ValidationResult, ValidationContext } from './types';
 
 /**
  * Validate wallet interface implementation
  */
-export function validateWallet(_wallet: WalletInterface, _context: ValidationContext = {}): ValidationResult {
+export function validateWallet(_wallet: IWallet, _context: ValidationContext = {}): ValidationResult {
     const errors: string[] = [];
     const warnings: string[] = [];
 
@@ -120,7 +120,7 @@ function isValidWalletVersion(version: string): boolean {
 /**
  * Validate that wallet methods can be called (basic smoke test)
  */
-export async function validateWalletMethods(wallet: WalletInterface): Promise<ValidationResult> {
+export async function validateWalletMethods(wallet: IWallet): Promise<ValidationResult> {
     const errors: string[] = [];
 
     try {

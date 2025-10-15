@@ -1,0 +1,53 @@
+// Signer utility class for creating wallet signers
+
+import { keyPairFromSeed } from '@ton/crypto';
+
+import { WalletSigner } from '../types/wallet';
+import { MnemonicToKeyPair } from './mnemonic';
+import { createWalletSigner } from './sign';
+
+/**
+ * Utility class for creating wallet signers from various sources
+ */
+export class Signer {
+    /**
+     * Create a signer from a mnemonic phrase
+     * @param mnemonic - Mnemonic phrase as string or array of words
+     * @param options - Optional configuration for mnemonic type
+     * @returns Signer function with publicKey property
+     */
+    static async fromMnemonic(
+        mnemonic: string | string[],
+        options?: { type?: 'ton' | 'bip39' },
+    ): Promise<WalletSigner> {
+        const keyPair = await MnemonicToKeyPair(mnemonic, options?.type ?? 'ton');
+        const signer = createWalletSigner(keyPair.secretKey);
+
+        // Attach publicKey to the signer function
+        return {
+            sign: signer,
+            publicKey: keyPair.publicKey,
+        };
+    }
+
+    /**
+     * Create a signer from a private key
+     * @param privateKey - Private key as hex string or Uint8Array
+     * @returns Signer function with publicKey property
+     */
+    static async fromPrivateKey(privateKey: string | Uint8Array): Promise<WalletSigner> {
+        const privateKeyBytes =
+            typeof privateKey === 'string'
+                ? Uint8Array.from(Buffer.from(privateKey.replace('0x', ''), 'hex'))
+                : privateKey;
+
+        const keyPair = await keyPairFromSeed(Buffer.from(privateKeyBytes));
+        const signer = createWalletSigner(keyPair.secretKey);
+
+        // Attach publicKey to the signer function
+        return {
+            sign: signer,
+            publicKey: keyPair.publicKey,
+        };
+    }
+}

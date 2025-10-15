@@ -1,6 +1,6 @@
 import type { StateCreator } from 'zustand';
 import type {
-    WalletInterface,
+    IWallet,
     EventConnectRequest,
     EventTransactionRequest,
     EventSignDataRequest,
@@ -120,7 +120,7 @@ export interface WalletSlice extends WalletState {
     // TON Connect actions
     handleTonConnectUrl: (url: string) => Promise<void>;
     showConnectRequest: (request: EventConnectRequest) => void;
-    approveConnectRequest: (selectedWallet: WalletInterface) => Promise<void>;
+    approveConnectRequest: (selectedWallet: IWallet) => Promise<void>;
     rejectConnectRequest: (reason?: string) => Promise<void>;
     closeConnectModal: () => void;
 
@@ -142,7 +142,7 @@ export interface WalletSlice extends WalletState {
 
     // Getters
     getDecryptedMnemonic: (walletId?: string) => Promise<string[] | null>;
-    getAvailableWallets: () => WalletInterface[];
+    getAvailableWallets: () => IWallet[];
     getActiveWallet: () => SavedWallet | undefined;
 }
 
