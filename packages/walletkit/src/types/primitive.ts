@@ -2,14 +2,14 @@ import { Address, beginCell, Cell } from '@ton/core';
 
 declare const hashBrand: unique symbol;
 
-export type Hash = `0x${string}` & { readonly [hashBrand]: never };
+export type Hex = `0x${string}` & { readonly [hashBrand]: never };
 // export type Base64String = string;
 
-export function asHash(data: string): Hash {
-    if (!/^0x[0-9a-fA-F]{64}$/.test(data) && !/^0x[0-9a-fA-F]{128}$/.test(data)) {
-        throw new Error('Not a valid 32-byte or 64-byte hash');
+export function asHex(data: string): Hex {
+    if (!/^0x[0-9a-fA-F]+$/.test(data) || data.length % 2 !== 0) {
+        throw new Error('Not a valid hex');
     }
-    return data as Hash;
+    return data as Hex;
 }
 
 export type AddressFriendly = string;

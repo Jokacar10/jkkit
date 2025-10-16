@@ -21,11 +21,11 @@ import {
     CallForSuccess,
     ConnectTransactionParamContent,
     PrepareSignDataResult,
-    Hash,
+    Hex,
     TonProofParsedMessage,
-    HashToBigInt,
-    Uint8ArrayToHash,
-    HashToUint8Array,
+    HexToBigInt,
+    Uint8ArrayToHex,
+    HexToUint8Array,
 } from '@ton/walletkit';
 
 import { WalletV4R2, WalletV4R2Config } from './WalletV4R2';
@@ -63,7 +63,7 @@ export class WalletV4R2LedgerAdapter implements IWalletAdapter {
 
     readonly walletContract: WalletV4R2;
     readonly client: ApiClient;
-    public readonly publicKey: Hash;
+    public readonly publicKey: Hex;
     public readonly version = 'v4r2';
 
     constructor(config: WalletV4R2LedgerAdapterConfig) {
@@ -72,10 +72,10 @@ export class WalletV4R2LedgerAdapter implements IWalletAdapter {
         this.createTransport = config.createTransport;
         this.derivationPath = config.path;
 
-        this.publicKey = Uint8ArrayToHash(this.config.publicKey);
+        this.publicKey = Uint8ArrayToHex(this.config.publicKey);
 
         const walletConfig: WalletV4R2Config = {
-            publicKey: HashToBigInt(this.publicKey),
+            publicKey: HexToBigInt(this.publicKey),
             workchain: config.workchain ?? 0,
             seqno: 0,
             subwalletId: config.walletId ?? defaultWalletIdV4R2,
@@ -235,11 +235,11 @@ export class WalletV4R2LedgerAdapter implements IWalletAdapter {
         }
     }
 
-    async getSignedSignData(_input: PrepareSignDataResult): Promise<Hash> {
+    async getSignedSignData(_input: PrepareSignDataResult): Promise<Hex> {
         throw new Error('Not implemented');
     }
 
-    async getSignedTonProof(input: TonProofParsedMessage): Promise<Hash> {
+    async getSignedTonProof(input: TonProofParsedMessage): Promise<Hex> {
         // todo - add ledger max len checks
         let transport: Transport | undefined;
         try {
@@ -254,7 +254,7 @@ export class WalletV4R2LedgerAdapter implements IWalletAdapter {
                 timestamp: input.timstamp,
                 payload: Buffer.from(input.payload),
             });
-            return ('0x' + toHexString(signature)) as Hash;
+            return ('0x' + toHexString(signature)) as Hex;
         } finally {
             if (transport) {
                 await transport.close();
@@ -272,7 +272,7 @@ export class WalletV4R2LedgerAdapter implements IWalletAdapter {
         if (!addressResponse.publicKey) {
             return false;
         }
-        const publicKey = HashToUint8Array(this.publicKey);
+        const publicKey = HexToUint8Array(this.publicKey);
         if (!isUint8ArrayEqual(publicKey, addressResponse.publicKey)) {
             return false;
         }

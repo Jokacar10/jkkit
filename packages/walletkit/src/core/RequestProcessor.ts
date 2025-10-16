@@ -31,7 +31,7 @@ import { ApiClient } from '../types/toncenter/ApiClient';
 import { getDeviceInfoWithDefaults } from '../utils/getDefaultWalletConfig';
 import { WalletManager } from './WalletManager';
 import { EventConnectApproval, EventTransactionApproval } from '../types/events';
-import { asHash, Hash } from '../types/primitive';
+import { asHex, Hex } from '../types/primitive';
 import { AnalyticsApi } from '../analytics/sender';
 import { WalletKitError, ERROR_CODES } from '../errors';
 import { uuidv7 } from '../utils/uuid';
@@ -477,7 +477,7 @@ export class RequestProcessor {
     /**
      * Process sign data request approval
      */
-    async approveSignDataRequest(event: EventSignDataRequest | EventSignDataApproval): Promise<{ signature: Hash }> {
+    async approveSignDataRequest(event: EventSignDataRequest | EventSignDataApproval): Promise<{ signature: Hex }> {
         try {
             if ('result' in event) {
                 // Send approval response
@@ -523,7 +523,7 @@ export class RequestProcessor {
                         client_id: event.from,
                     },
                 ]);
-                return { signature: asHash(event.result.signature) };
+                return { signature: asHex(event.result.signature) };
             } else {
                 if (!event.domain) {
                     const error = new WalletKitError(
@@ -611,7 +611,7 @@ export class RequestProcessor {
                         client_id: event.from,
                     },
                 ]);
-                return { signature: asHash(signature) };
+                return { signature: asHex(signature) };
             }
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {

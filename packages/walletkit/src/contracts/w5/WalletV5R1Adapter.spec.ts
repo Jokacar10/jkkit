@@ -7,7 +7,7 @@ import { mockFn, clearAllMocks, mocked } from '../../../mock.config';
 import { WalletV5R1Adapter } from './WalletV5R1Adapter';
 import type { ApiClient } from '../../types/toncenter/ApiClient';
 import type { FullAccountState } from '../../types/toncenter/api';
-import { HashToBase64, Uint8ArrayToHash } from '../../utils/base64';
+import { HexToBase64, Uint8ArrayToHex } from '../../utils/base64';
 import { Signer } from '../../utils/Signer';
 import {
     addressV5r1,
@@ -34,7 +34,7 @@ describe('WalletV5R1Adapter', () => {
     });
 
     it('should create wallet with correct properties', async () => {
-        expect(wallet.publicKey).toEqual(Uint8ArrayToHash(publicKey));
+        expect(wallet.publicKey).toEqual(Uint8ArrayToHex(publicKey));
         expect(wallet.version).toEqual('v5r1');
         expect(wallet.getAddress()).toEqual(addressV5r1.bounceableNot);
         expect(wallet.getAddress({ testnet: true })).toEqual(addressV5r1Test.bounceableNot);
@@ -48,7 +48,7 @@ describe('WalletV5R1Adapter', () => {
 
     it('should sign data using provided signer', async () => {
         const testData = new Uint8Array([1, 2, 3, 4]);
-        const signature = HashToBase64(await wallet.sign(testData));
+        const signature = HexToBase64(await wallet.sign(testData));
         expect(signature).toEqual(
             'gaYAMdlcwx1KGzqAkUn8jUNeVqNfW8zex2xJK/mlRkDD78K/4U2EvwfrD/q94YVFEnPnpWkPhNhhmGsabQbzBw==',
         );

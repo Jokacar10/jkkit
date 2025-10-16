@@ -1,7 +1,7 @@
 import { Address, ExtraCurrency, AccountStatus, TupleItem } from '@ton/core';
 import { CHAIN } from '@tonconnect/protocol';
 
-import { Base64ToBigInt, Uint8ArrayToBase64, Base64Normalize, Base64ToHash } from '../utils/base64';
+import { Base64ToBigInt, Uint8ArrayToBase64, Base64Normalize, Base64ToHex } from '../utils/base64';
 import { FullAccountState, GetResult, TransactionId } from '../types/toncenter/api';
 import { ToncenterEmulationResponse } from '../types';
 import { ConnectTransactionParamMessage } from '../types/internal';
@@ -186,7 +186,7 @@ export class ApiClientToncenter implements ApiClient {
             }),
         };
         if (raw.frozen_hash) {
-            out.frozenHash = Base64ToHash(raw.frozen_hash) ?? undefined;
+            out.frozenHash = Base64ToHex(raw.frozen_hash) ?? undefined;
         }
         return out;
     }
@@ -470,7 +470,7 @@ function parseInternalTransactionId(data: InternalTransactionId): TransactionId 
     if (data.hash !== 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=') {
         return {
             lt: data.lt,
-            hash: Base64ToHash(data.hash),
+            hash: Base64ToHex(data.hash),
         };
     }
     return null;

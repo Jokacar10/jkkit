@@ -9,7 +9,7 @@ import { WalletId } from './WalletV5R1';
 import { WalletV5R1Adapter } from './WalletV5R1Adapter';
 import { ToncenterResponseJettonMasters, ToncenterTransactionsResponse } from '../../types/toncenter/emulation';
 import { Signer } from '../../utils/Signer';
-import { Uint8ArrayToHash } from '../../utils/base64';
+import { Uint8ArrayToHex } from '../../utils/base64';
 
 export const mnemonic = [
     'hospital',
@@ -66,7 +66,7 @@ export function createMockApiClient(): ApiClient {
             balance: '1000000000',
             last: {
                 lt: '123',
-                hash: Uint8ArrayToHash(new Uint8Array(32).fill(1)),
+                hash: Uint8ArrayToHex(new Uint8Array(32).fill(1)),
             },
             frozen: null,
             state: { type: 'active', code: 'mock-code', data: 'mock-data' },

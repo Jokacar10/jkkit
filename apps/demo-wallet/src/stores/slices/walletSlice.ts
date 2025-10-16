@@ -19,7 +19,7 @@ import {
     SEND_TRANSACTION_ERROR_CODES,
     MnemonicToKeyPair,
     type WalletSigner,
-    Uint8ArrayToHash,
+    Uint8ArrayToHex,
 } from '@ton/walletkit';
 import { createWalletInitConfigLedger, createLedgerPath, createWalletV4R2Ledger } from '@ton/v4ledger-adapter';
 import TransportWebHID from '@ledgerhq/hw-transport-webhid';
@@ -160,7 +160,7 @@ async function createWalletAdapter(params: {
                     }
                     throw new Error('User did not confirm');
                 },
-                publicKey: Uint8ArrayToHash(keyPair.publicKey),
+                publicKey: Uint8ArrayToHex(keyPair.publicKey),
             };
 
             // Create adapter with the appropriate version

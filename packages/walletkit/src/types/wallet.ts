@@ -12,7 +12,7 @@ import { ApiClient, LimitRequest } from './toncenter/ApiClient';
 import type { NftItem } from './toncenter/NftItem';
 import { NftItems } from './toncenter/NftItems';
 import { PrepareSignDataResult } from '../utils/signData/sign';
-import { Hash } from './primitive';
+import { Hex } from './primitive';
 import { TonProofParsedMessage } from '../utils/tonProof';
 
 /**
@@ -20,11 +20,11 @@ import { TonProofParsedMessage } from '../utils/tonProof';
  */
 export type WalletVersion = 'v5r1' | 'v4r2' | 'unknown';
 
-export type ISigner = (bytes: Iterable<number>) => Promise<Hash>;
+export type ISigner = (bytes: Iterable<number>) => Promise<Hex>;
 
 export type WalletSigner = {
     sign: ISigner;
-    publicKey: Hash;
+    publicKey: Hex;
 };
 
 /**
@@ -32,7 +32,7 @@ export type WalletSigner = {
  */
 export interface IWalletAdapter {
     /** Unique identifier for this wallet (typically public key) */
-    publicKey: Hash;
+    publicKey: Hex;
 
     /** Wallet contract version (e.g., 'v4r2', 'v5r1') */
     version: string;
@@ -56,13 +56,13 @@ export interface IWalletAdapter {
         options?: {
             fakeSignature: boolean;
         },
-    ): Promise<Hash>;
+    ): Promise<Hex>;
     getSignedTonProof(
         input: TonProofParsedMessage,
         options?: {
             fakeSignature: boolean;
         },
-    ): Promise<Hash>;
+    ): Promise<Hex>;
 }
 
 export type TonTransferMessage = {

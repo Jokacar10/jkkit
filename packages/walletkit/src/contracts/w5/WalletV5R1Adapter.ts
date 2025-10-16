@@ -25,9 +25,9 @@ import { ConnectTransactionParamContent } from '../../types/internal';
 import { ActionSendMsg, packActionsList } from './actions';
 import { IWalletAdapter, WalletSigner } from '../../types/wallet';
 import { ApiClient } from '../../types/toncenter/ApiClient';
-import { HashToBigInt, HashToUint8Array } from '../../utils/base64';
+import { HexToBigInt, HexToUint8Array } from '../../utils/base64';
 import { PrepareSignDataResult } from '../../utils/signData/sign';
-import { Hash } from '../../types/primitive';
+import { Hex } from '../../types/primitive';
 import { CreateTonProofMessageBytes, TonProofParsedMessage } from '../../utils/tonProof';
 
 const log = globalLogger.createChild('WalletV5R1Adapter');
@@ -41,7 +41,7 @@ export interface WalletV5R1AdapterConfig {
     /** Signer function */
     signer: WalletSigner;
     /** Public key */
-    publicKey: Hash;
+    publicKey: Hex;
     /** Wallet ID configuration */
     walletId?: number | bigint;
     /** Shared TON client instance */
@@ -62,7 +62,7 @@ export class WalletV5R1Adapter implements IWalletAdapter {
 
     readonly walletContract: WalletV5;
     readonly client: ApiClient;
-    public readonly publicKey: Hash;
+    public readonly publicKey: Hex;
     public readonly version = 'v5r1';
 
     /**
@@ -97,7 +97,7 @@ export class WalletV5R1Adapter implements IWalletAdapter {
         this.publicKey = this.config.publicKey;
         this.walletContract = WalletV5.createFromConfig(
             {
-                publicKey: HashToBigInt(this.publicKey),
+                publicKey: HexToBigInt(this.publicKey),
                 seqno: 0,
                 signatureAllowed: true,
                 walletId:
@@ -117,7 +117,7 @@ export class WalletV5R1Adapter implements IWalletAdapter {
     /**
      * Sign raw bytes with wallet's private key
      */
-    async sign(bytes: Iterable<number>): Promise<Hash> {
+    async sign(bytes: Iterable<number>): Promise<Hex> {
         return await this.signer.sign(bytes);
     }
 
@@ -326,16 +326,16 @@ export class WalletV5R1Adapter implements IWalletAdapter {
         const signature = options.fakeSignature ? FakeSignature(signingData) : await this.sign(signingData);
         return beginCell()
             .storeSlice(payload.beginParse())
-            .storeBuffer(Buffer.from(HashToUint8Array(signature)))
+            .storeBuffer(Buffer.from(HexToUint8Array(signature)))
             .endCell();
     }
 
-    async getSignedSignData(input: PrepareSignDataResult): Promise<Hash> {
+    async getSignedSignData(input: PrepareSignDataResult): Promise<Hex> {
         const signature = await this.sign(input.hash);
         return signature;
     }
 
-    async getSignedTonProof(input: TonProofParsedMessage): Promise<Hash> {
+    async getSignedTonProof(input: TonProofParsedMessage): Promise<Hex> {
         const message = await CreateTonProofMessageBytes(input);
         const signature = await this.sign(message);
 

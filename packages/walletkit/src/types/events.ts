@@ -19,7 +19,7 @@ import {
 import { MoneyFlow } from '../utils/toncenterEmulation';
 import { ToncenterEmulationResponse } from './toncenter/emulation';
 import { EmulationError } from './emulation/errors';
-import { Hash } from './primitive';
+import { Hex } from './primitive';
 
 // export type EventConnectRequest = ConnectRequest;
 
@@ -78,7 +78,7 @@ export interface EventSignDataRequest extends RawBridgeEventSignData {
 }
 
 export interface EventSignDataResponse {
-    signature: Hash;
+    signature: Hex;
 }
 
 /**

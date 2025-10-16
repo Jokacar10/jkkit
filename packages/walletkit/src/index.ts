@@ -61,23 +61,23 @@ export {
     Base64Normalize,
     Base64NormalizeUrl,
     ParseBase64,
-    Base64ToHash,
+    Base64ToHex,
     Base64ToUint8Array,
     Uint8ArrayToBase64,
     Base64ToBigInt,
     BigIntToBase64,
     Uint8ArrayToBigInt,
-    HashToBigInt,
-    HashToBase64,
-    Uint8ArrayToHash,
-    HashToUint8Array,
+    HexToBigInt,
+    HexToBase64,
+    Uint8ArrayToHex,
+    HexToUint8Array,
 } from './utils/base64';
 
 export type { ToncenterTransaction } from './types/toncenter/emulation';
 
 export { PrepareSignDataResult } from './utils/signData/sign';
 
-export { Hash } from './types/primitive';
+export { Hex } from './types/primitive';
 export { TonProofParsedMessage } from './utils/tonProof';
 export type { ITonWalletKit } from './types/kit';
 

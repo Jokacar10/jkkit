@@ -20,12 +20,12 @@ import { WalletV4R2CodeCell } from './WalletV4R2.source';
 import { defaultWalletIdV4R2 } from './constants';
 import { IWalletAdapter, WalletSigner } from '../../types/wallet';
 import { ApiClient } from '../../types/toncenter/ApiClient';
-import { HashToBigInt, HashToUint8Array } from '../../utils/base64';
+import { HexToBigInt, HexToUint8Array } from '../../utils/base64';
 import { formatWalletAddress } from '../../utils/address';
 import { ConnectTransactionParamContent } from '../../types/internal';
 import { CallForSuccess } from '../../utils/retry';
 import { PrepareSignDataResult } from '../../utils/signData/sign';
-import { Hash } from '../../types/primitive';
+import { Hex } from '../../types/primitive';
 import { CreateTonProofMessageBytes, TonProofParsedMessage } from '../../utils/tonProof';
 import { globalLogger } from '../../core/Logger';
 import { WalletV4R2AdapterConfig } from './types';
@@ -41,7 +41,7 @@ export class WalletV4R2Adapter implements IWalletAdapter {
 
     readonly walletContract: WalletV4R2;
     readonly client: ApiClient;
-    public readonly publicKey: Hash;
+    public readonly publicKey: Hex;
     public readonly version = 'v4r2';
 
     /**
@@ -76,7 +76,7 @@ export class WalletV4R2Adapter implements IWalletAdapter {
         this.publicKey = this.config.publicKey;
 
         const walletConfig: WalletV4R2Config = {
-            publicKey: HashToBigInt(this.publicKey),
+            publicKey: HexToBigInt(this.publicKey),
             workchain: config.workchain ?? 0,
             seqno: 0,
             subwalletId: config.walletId ?? (defaultWalletIdV4R2 as number),
@@ -92,7 +92,7 @@ export class WalletV4R2Adapter implements IWalletAdapter {
     /**
      * Sign raw bytes with wallet's private key
      */
-    async sign(bytes: Iterable<number>): Promise<Hash> {
+    async sign(bytes: Iterable<number>): Promise<Hex> {
         return await this.signer.sign(bytes);
     }
 
@@ -151,7 +151,7 @@ export class WalletV4R2Adapter implements IWalletAdapter {
 
             const signature = await this.sign(Uint8Array.from(data.hash()));
             const signedCell = beginCell()
-                .storeBuffer(Buffer.from(HashToUint8Array(signature)))
+                .storeBuffer(Buffer.from(HexToUint8Array(signature)))
                 .storeSlice(data.asSlice())
                 .endCell();
 
@@ -243,12 +243,12 @@ export class WalletV4R2Adapter implements IWalletAdapter {
         }
     }
 
-    async getSignedSignData(input: PrepareSignDataResult): Promise<Hash> {
+    async getSignedSignData(input: PrepareSignDataResult): Promise<Hex> {
         const signature = await this.sign(input.hash);
         return signature;
     }
 
-    async getSignedTonProof(input: TonProofParsedMessage): Promise<Hash> {
+    async getSignedTonProof(input: TonProofParsedMessage): Promise<Hex> {
         const message = await CreateTonProofMessageBytes(input);
         const signature = await this.sign(message);
 

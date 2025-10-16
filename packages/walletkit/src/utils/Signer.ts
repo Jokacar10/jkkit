@@ -5,7 +5,7 @@ import { keyPairFromSeed } from '@ton/crypto';
 import { WalletSigner } from '../types/wallet';
 import { MnemonicToKeyPair } from './mnemonic';
 import { createWalletSigner } from './sign';
-import { Uint8ArrayToHash } from './base64';
+import { Uint8ArrayToHex } from './base64';
 
 /**
  * Utility class for creating wallet signers from various sources
@@ -27,7 +27,7 @@ export class Signer {
         // Attach publicKey to the signer function
         return {
             sign: signer,
-            publicKey: Uint8ArrayToHash(keyPair.publicKey),
+            publicKey: Uint8ArrayToHex(keyPair.publicKey),
         };
     }
 
@@ -48,7 +48,7 @@ export class Signer {
         // Attach publicKey to the signer function
         return {
             sign: signer,
-            publicKey: Uint8ArrayToHash(keyPair.publicKey),
+            publicKey: Uint8ArrayToHex(keyPair.publicKey),
         };
     }
 }

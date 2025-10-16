@@ -1,10 +1,10 @@
 import { AccountStatus, ExtraCurrency, TupleReader } from '@ton/core';
 
-import { Hash } from '../primitive';
+import { Hex } from '../primitive';
 
 export interface TransactionId {
     lt: string;
-    hash: Hash;
+    hash: Hex;
 }
 
 export interface FullAccountState {
@@ -14,7 +14,7 @@ export interface FullAccountState {
     code: string | null; // base64 encoded
     data: string | null; // base64 encoded
     lastTransaction: TransactionId | null;
-    frozenHash?: Hash;
+    frozenHash?: Hex;
 }
 
 export interface GetResult {
