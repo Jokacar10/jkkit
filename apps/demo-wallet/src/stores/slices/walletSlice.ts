@@ -19,6 +19,7 @@ import {
     SEND_TRANSACTION_ERROR_CODES,
     MnemonicToKeyPair,
     type WalletSigner,
+    Uint8ArrayToHash,
 } from '@ton/walletkit';
 import { createWalletInitConfigLedger, createLedgerPath, createWalletV4R2Ledger } from '@ton/v4ledger-adapter';
 import TransportWebHID from '@ledgerhq/hw-transport-webhid';
@@ -153,13 +154,13 @@ async function createWalletAdapter(params: {
 
             // Create custom signer with confirmation dialog
             const customSigner: WalletSigner = {
-                sign: async (bytes: Uint8Array) => {
+                sign: async (bytes: Iterable<number>) => {
                     if (confirm('Are you sure you want to sign?')) {
                         return DefaultSignature(bytes, keyPair.secretKey);
                     }
                     throw new Error('User did not confirm');
                 },
-                publicKey: keyPair.publicKey,
+                publicKey: Uint8ArrayToHash(keyPair.publicKey),
             };
 
             // Create adapter with the appropriate version
@@ -392,7 +393,7 @@ export const createWalletSlice: WalletSliceCreator = (set: SetState, get) => ({
 
             const balance = await wallet.getBalance();
             const minNeededBalance = event.request.messages.reduce((acc, message) => acc + BigInt(message.amount), 0n);
-            if (balance < minNeededBalance) {
+            if (BigInt(balance) < minNeededBalance) {
                 await walletKit.rejectTransactionRequest(event, {
                     code: SEND_TRANSACTION_ERROR_CODES.BAD_REQUEST_ERROR,
                     message: 'Insufficient balance',
@@ -486,9 +487,7 @@ export const createWalletSlice: WalletSliceCreator = (set: SetState, get) => ({
             }
 
             const balance = await wallet.getBalance();
-            const publicKey = Array.from(wallet.publicKey)
-                .map((b) => b.toString(16).padStart(2, '0'))
-                .join('');
+            const publicKey = wallet.publicKey;
 
             // Create saved wallet entry
             const savedWallet: SavedWallet = {
@@ -576,14 +575,12 @@ export const createWalletSlice: WalletSliceCreator = (set: SetState, get) => ({
             }
 
             const balance = await wallet.getBalance();
-            const publicKey = Array.from(wallet.publicKey)
-                .map((b) => b.toString(16).padStart(2, '0'))
-                .join('');
+            const publicKey = wallet.publicKey;
 
             // Store Ledger configuration
             const ledgerPath = createLedgerPath(false, 0, state.auth.ledgerAccountNumber || 0);
             const ledgerConfig: LedgerConfig = {
-                publicKey: Array.from(wallet.publicKey),
+                publicKey: wallet.publicKey,
                 path: ledgerPath,
                 walletId: 698983191,
                 version: wallet.version,
@@ -1070,23 +1067,27 @@ export const createWalletSlice: WalletSliceCreator = (set: SetState, get) => ({
         }
 
         try {
-            const approveResult = await state.wallet.walletKit.approveTransactionRequest(
-                state.wallet.pendingTransactionRequest,
-            );
-            if (approveResult.success) {
-                // Delay closing the modal to allow success animation to show
+            try {
+                await state.wallet.walletKit.approveTransactionRequest(state.wallet.pendingTransactionRequest);
                 setTimeout(() => {
                     set((state) => {
                         state.wallet.pendingTransactionRequest = undefined;
                         state.wallet.isTransactionModalOpen = false;
                     });
                 }, 3000); // 3 second delay for success animation
-            } else {
-                log.error('Failed to approve transaction request:', approveResult);
-                if (approveResult.error?.message?.toLocaleLowerCase()?.includes('ledger')) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } catch (error: any) {
+                log.error('Failed to approve transaction request:', state.wallet.pendingTransactionRequest);
+                if (error?.message?.toLocaleLowerCase()?.includes('ledger')) {
                     toast.error('Could not approve transaction request with Ledger, please unlock it and open TON App');
                 } else {
                     toast.error('Could not approve transaction request');
+                    setTimeout(() => {
+                        set((state) => {
+                            state.wallet.pendingTransactionRequest = undefined;
+                            state.wallet.isTransactionModalOpen = false;
+                        });
+                    }, 3000);
                 }
             }
         } catch (error) {
