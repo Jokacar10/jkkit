@@ -1,9 +1,12 @@
-import { allureId, owner } from 'allure-js-commons';
+import { allureId, label, owner, subSuite, suite, tags } from 'allure-js-commons';
 import type { TestInfo } from '@playwright/test';
 
 import { AllureApiClient, createAllureConfig, getTestCaseData, extractAllureId } from './utils';
 import { testWithDemoWalletFixture } from './demo-wallet';
 import type { TestFixture } from './qa';
+import { config } from 'dotenv';
+// Загружаем переменные окружения
+config();
 
 const isExtension = process.env.E2E_JS_BRIDGE === 'true';
 
@@ -32,7 +35,11 @@ async function runSignDataTest(
     const testAllureId = extractAllureId(testInfo.title);
     if (testAllureId) {
         await allureId(testAllureId);
-        await owner('e.kurilenko');
+        //await owner('e.kurilenko');
+        await suite('JS result');
+        await label('sub-suite', 'SignData');
+        //await subSuite('SignData');
+        await tags('automated', 'signData');
     }
     let precondition: string = '';
     let expectedResult: string = '';

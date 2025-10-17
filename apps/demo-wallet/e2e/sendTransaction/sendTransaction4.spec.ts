@@ -1,4 +1,4 @@
-import { allureId, owner } from 'allure-js-commons';
+import { allureId, label, owner, suite, tags } from 'allure-js-commons';
 import type { TestInfo } from '@playwright/test';
 
 import { AllureApiClient, createAllureConfig, getTestCaseData, extractAllureId } from '../utils';
@@ -34,7 +34,10 @@ async function runSendTransactionTest(
 
     if (testAllureId) {
         await allureId(testAllureId);
-        await owner('e.kurilenko');
+        await label('sub-suite', 'Send Transaction');
+        await tags('sendTransaction', 'automated');
+        await suite('JS result');
+        
     }
 
     let precondition: string = '';
@@ -73,38 +76,26 @@ async function runSendTransactionTest(
     await expect(app.getByTestId('sendTransactionValidation')).toHaveText('Validation Passed');
 }
 
-test('[amount] Error if as a number @allureId(2231)', async ({ wallet, app, widget }) => {
+test('[messages] Error if contains invalid message @allureId(2243)', async ({ wallet, app, widget }) => {
     await runSendTransactionTest({ wallet, app, widget }, test.info());
 });
 
-test('[amount] Error if insufficient balance @allureId(2245)', async ({ wallet, app, widget }) => {
-    await runSendTransactionTest({ wallet, app, widget }, test.info());
-});
-
-// test("[amount] Success if '0' @allureId(2261)", async ({ wallet, app, widget }) => {
+// test('[messages] Success if contains maximum messages @allureId(1959)', async ({ wallet, app, widget }) => {
 //     await runSendTransactionTest({ wallet, app, widget }, test.info());
 // });
 
-test('[amount] Success if as a string @allureId(2223)', async ({ wallet, app, widget }) => {
+test('[network] Error if as a number @allureId(2234)', async ({ wallet, app, widget }) => {
     await runSendTransactionTest({ wallet, app, widget }, test.info());
 });
 
-test("[from] Error if address doesn't match the user's wallet address @allureId(2251)", async ({
-    wallet,
-    app,
-    widget,
-}) => {
+test("[network] Success if '-239' (mainnet) @allureId(2249)", async ({ wallet, app, widget }) => {
     await runSendTransactionTest({ wallet, app, widget }, test.info());
 });
 
-test('[payload] Success if valid value @allureId(2253)', async ({ wallet, app, widget }) => {
+test('[payload] Error if invalid value @allureId(2246)', async ({ wallet, app, widget }) => {
     await runSendTransactionTest({ wallet, app, widget }, test.info());
 });
 
-test('[stateInit] Error if invalid value @allureId(2248)', async ({ wallet, app, widget }) => {
-    await runSendTransactionTest({ wallet, app, widget }, test.info());
-});
-
-test('[stateInit] Success if absent @allureId(2233)', async ({ wallet, app, widget }) => {
+test('[payload] Success if absent @allureId(2228)', async ({ wallet, app, widget }) => {
     await runSendTransactionTest({ wallet, app, widget }, test.info());
 });

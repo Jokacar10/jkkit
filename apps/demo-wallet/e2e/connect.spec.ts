@@ -1,56 +1,69 @@
-// import type { TestInfo } from '@playwright/test';
-// import { allureId, owner } from 'allure-js-commons';
+import { config } from 'dotenv';
+import type { TestInfo } from '@playwright/test';
+import { allureId, owner, suite, subSuite, tags, label } from 'allure-js-commons';
 
-// import { testWithDemoWalletFixture } from './demo-wallet';
-// import type { TestFixture } from './qa';
-// import { AllureApiClient, createAllureConfig, getTestCaseData, extractAllureId } from './utils';
+// Загружаем переменные окружения
+config();
 
-// const test = testWithDemoWalletFixture({
-//     appUrl: process.env.DAPP_URL ?? 'https://allure-test-runner.vercel.app/e2e',
-// });
-// const { expect } = test;
+import { testWithDemoWalletFixture } from './demo-wallet';
+import type { TestFixture } from './qa';
+import { AllureApiClient, createAllureConfig, getTestCaseData, extractAllureId } from './utils';
 
-// let allureClient: AllureApiClient;
+const test = testWithDemoWalletFixture({
+    appUrl: process.env.DAPP_URL ?? 'https://allure-test-runner.vercel.app/e2e',
+});
+const { expect } = test;
 
-// test.beforeAll(async () => {
-//     const config = createAllureConfig();
-//     allureClient = new AllureApiClient(config);
-// });
+let allureClient: AllureApiClient;
 
-// async function runConnectTest(
-//     { wallet, app, widget }: Pick<TestFixture, 'wallet' | 'app' | 'widget'>,
-//     testInfo: TestInfo,
-// ) {
-//     const testAllureId = extractAllureId(testInfo.title);
-//     if (testAllureId) {
-//         await allureId(testAllureId);
-//         await owner('e.kurilenko');
-//     }
-//     let precondition: string = '';
-//     let expectedResult: string = '';
+test.beforeAll(async () => {
+    const config = createAllureConfig();
+    allureClient = new AllureApiClient(config);
+});
 
-//     if (testAllureId && allureClient) {
-//         const testCaseData = await getTestCaseData(allureClient, testAllureId);
-//         precondition = testCaseData.precondition;
-//         expectedResult = testCaseData.expectedResult;
-//     }
+async function runConnectTest(
+    { wallet, app, widget }: Pick<TestFixture, 'wallet' | 'app' | 'widget'>,
+    testInfo: TestInfo,
+) {
+    const testAllureId = extractAllureId(testInfo.title);
+    if (testAllureId) {
+        await allureId(testAllureId);
+        await suite('JS result');
+        await label('sub-suite', 'Connect');
+        await tags('connect', 'automated');
+    }
+    let precondition: string = '';
+    let expectedResult: string = '';
 
-//     await app.getByTestId('connectPrecondition').fill(precondition || '');
-//     await app.getByTestId('connectExpectedResult').fill(expectedResult);
-//     await expect(app.getByTestId('connect-button')).toHaveText('Connect Wallet');
-//     await wallet.connectBy(await widget.connectUrl(await app.getByTestId('connect-button')));
-//     await app.getByTestId('connectValidation').waitFor({ state: 'visible' });
-//     await expect(app.getByTestId('connectValidation')).toHaveText('Validation Passed', { timeout: 1 });
-// }
+    if (testAllureId && allureClient) {
+        const testCaseData = await getTestCaseData(allureClient, testAllureId);
+        console.log('testCaseData', testCaseData);
+        precondition = testCaseData.precondition;
+        console.log('precondition', precondition);
+        expectedResult = testCaseData.expectedResult;
+        console.log('expectedResult', expectedResult);
+    }
 
-// test('Connect @allureId(1286)', async ({ wallet, app, widget }) => {
+    await app.getByTestId('connectPrecondition').fill(precondition || '');
+    await app.getByTestId('connectExpectedResult').fill(expectedResult);
+    await expect(app.getByTestId('connect-button')).toHaveText('Connect Wallet');
+    await wallet.connectBy(await widget.connectUrl(await app.getByTestId('connect-button')));
+    await app.getByTestId('connectValidation').waitFor({ state: 'visible' });
+    await expect(app.getByTestId('connectValidation')).toHaveText('Validation Passed', { timeout: 1 });
+}
+
+// test('Connect @allureId(1933)', async ({ wallet, app, widget }) => {
 //     await runConnectTest({ wallet, app, widget }, test.info());
 // });
 
-// test('Connect @allureId(2254)', async ({ wallet, app, widget }) => {
-//     await runConnectTest({ wallet, app, widget }, test.info());
-// });
+test('Successful Connect @allureId(2294)', async ({ wallet, app, widget }) => {
+    await runConnectTest({ wallet, app, widget }, test.info());
+});
 
-// test('Connect @allureId(2255)', async ({ wallet, app, widget }) => {
-//     await runConnectTest({ wallet, app, widget }, test.info());
-// });
+test('Connect with invalid manifest url@allureId(2254)', async ({ wallet, app, widget }) => {
+    await runConnectTest({ wallet, app, widget }, test.info());
+});
+
+test('Connect with invalid app url in the manifest @allureId(2255)', async ({ wallet, app, widget }) => {
+    await runConnectTest({ wallet, app, widget }, test.info());
+});

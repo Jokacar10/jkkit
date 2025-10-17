@@ -1,4 +1,4 @@
-import { allureId, owner } from 'allure-js-commons';
+import { allureId, label, owner, suite, tags } from 'allure-js-commons';
 import type { TestInfo } from '@playwright/test';
 
 import { AllureApiClient, createAllureConfig, getTestCaseData, extractAllureId } from '../utils';
@@ -11,6 +11,7 @@ const test = testWithDemoWalletFixture({
     appUrl: process.env.DAPP_URL ?? 'https://allure-test-runner.vercel.app/e2e',
 });
 const { expect } = test;
+
 // Global variable for storing the Allure client
 let allureClient: AllureApiClient;
 
@@ -33,7 +34,9 @@ async function runSendTransactionTest(
 
     if (testAllureId) {
         await allureId(testAllureId);
-        await owner('e.kurilenko');
+        await label('sub-suite', 'Send Transaction');
+        await tags('sendTransaction', 'automated');
+        await suite('JS result');
     }
 
     let precondition: string = '';
@@ -63,6 +66,7 @@ async function runSendTransactionTest(
         await wallet.connectBy(await widget.connectUrl());
         await expect(widget.connectButtonText).not.toHaveText('Connect Wallet');
     }
+    await expect(widget.connectButtonText).not.toHaveText('Connect Wallet');
     await app.getByTestId('sendTxPrecondition').fill(precondition);
     await app.getByTestId('sendTxExpectedResult').fill(expectedResult);
     await app.getByTestId('send-transaction-button').click();
@@ -71,26 +75,42 @@ async function runSendTransactionTest(
 
     await expect(app.getByTestId('sendTransactionValidation')).toHaveText('Validation Passed');
 }
-test('[stateInit] Success if valid value @allureId(2224)', async ({ wallet, app, widget }) => {
+
+// SendTransaction validation tests
+test('[address] Error if absent @allureId(2221)', async ({ wallet, app, widget }) => {
     await runSendTransactionTest({ wallet, app, widget }, test.info());
 });
 
-test('[validUntil] Success if absent @allureId(2240)', async ({ wallet, app, widget }) => {
+test('[address] Error if in HEX format @allureId(2244)', async ({ wallet, app, widget }) => {
     await runSendTransactionTest({ wallet, app, widget }, test.info());
 });
 
-test('[validUntil] Error if as a string @allureId(2239)', async ({ wallet, app, widget }) => {
+test('[address] Error if invalid value @allureId(2230)', async ({ wallet, app, widget }) => {
     await runSendTransactionTest({ wallet, app, widget }, test.info());
 });
 
-test('[validUntil] Error if expired @allureId(2235)', async ({ wallet, app, widget }) => {
+test('[address] Success if in bounceable format @allureId(2226)', async ({ wallet, app, widget }) => {
     await runSendTransactionTest({ wallet, app, widget }, test.info());
 });
 
-// test('[validUntil] Error if has expired during confirmation @allureId(2237)', async ({ wallet, app, widget }) => {
-//     await runSendTransactionTest({ wallet, app, widget }, test.info());
-// });
+test('[address] Success if in non-bounceable format @allureId(2227)', async ({ wallet, app, widget }) => {
+    await runSendTransactionTest({ wallet, app, widget }, test.info());
+});
 
-test('[validUntil] Error if NaN @allureId(2241)', async ({ wallet, app, widget }) => {
+test('[amount] Error if absent @allureId(2247)', async ({ wallet, app, widget }) => {
+    await runSendTransactionTest({ wallet, app, widget }, test.info());
+});
+
+// Merkle proof/update tests
+test('Send merkle proof @allureId(2256)', async ({ wallet, app, widget }) => {
+    await runSendTransactionTest({ wallet, app, widget }, test.info());
+});
+
+test('Send merkle update @allureId(2257)', async ({ wallet, app, widget }) => {
+    await runSendTransactionTest({ wallet, app, widget }, test.info());
+});
+
+// Jetton minting tests
+test('Minting Jetton with Deployed Contract @allureId(1898)', async ({ wallet, app, widget }) => {
     await runSendTransactionTest({ wallet, app, widget }, test.info());
 });

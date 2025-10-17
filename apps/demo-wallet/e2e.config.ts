@@ -15,8 +15,8 @@ export default defineConfig({
         : [['list'], ['html'], ['allure-playwright']],
     workers: process.env.CI ? 2 : undefined,
     use: {
-        screenshot: 'on',
-        trace: 'on',
+        screenshot: 'only-on-failure',
+        trace: 'retain-on-failure',
         permissions: ['clipboard-read', 'clipboard-write'],
         launchOptions: {
             args: [

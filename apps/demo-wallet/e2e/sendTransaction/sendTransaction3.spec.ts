@@ -1,4 +1,4 @@
-import { allureId, owner } from 'allure-js-commons';
+import { allureId, label, owner, suite, tags } from 'allure-js-commons';
 import type { TestInfo } from '@playwright/test';
 
 import { AllureApiClient, createAllureConfig, getTestCaseData, extractAllureId } from '../utils';
@@ -34,7 +34,9 @@ async function runSendTransactionTest(
 
     if (testAllureId) {
         await allureId(testAllureId);
-        await owner('e.kurilenko');
+        await label('sub-suite', 'Send Transaction');
+        await tags('sendTransaction', 'automated');
+        await suite('JS result');
     }
 
     let precondition: string = '';
