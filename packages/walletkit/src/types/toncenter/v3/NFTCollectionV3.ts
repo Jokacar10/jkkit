@@ -1,5 +1,6 @@
 import { NftCollection } from '../NftCollection';
-import { asAddressFriendly, asHex, asMaybeAddressFriendly } from '../../primitive';
+import { asAddressFriendly, asMaybeAddressFriendly } from '../../primitive';
+import { Base64ToHex } from '../../../utils/base64';
 
 export interface NFTCollectionV3 {
     address: string;
@@ -15,8 +16,8 @@ export function toNftCollection(data: NFTCollectionV3 | null): NftCollection | n
     if (!data) return null;
     const out: NftCollection = {
         address: asAddressFriendly(data.address),
-        codeHash: data.code_hash ? asHex(data.code_hash) : null,
-        dataHash: data.data_hash ? asHex(data.data_hash) : null,
+        codeHash: data.code_hash ? Base64ToHex(data.code_hash) : null,
+        dataHash: data.data_hash ? Base64ToHex(data.data_hash) : null,
         nextItemIndex: BigInt(data.next_item_index),
         ownerAddress: asMaybeAddressFriendly(data.owner_address),
     };
