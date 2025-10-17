@@ -21,6 +21,7 @@ module.exports = [
             '**/dist-extension/*',
             '**/Packages/TONWalletKit/*',
             '**/TONWalletApp/TONWalletApp/*',
+            '**/androidkit/**',
         ],
     },
 ];
