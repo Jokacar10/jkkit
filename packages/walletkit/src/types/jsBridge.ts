@@ -84,6 +84,8 @@ export interface JSBridgeInjectOptions {
     deviceInfo?: Partial<DeviceInfo>;
     walletInfo?: WalletInfo;
     jsBridgeKey?: string;
+    injectTonKey?: boolean;
+    isWalletBrowser?: boolean;
 }
 
 /**
