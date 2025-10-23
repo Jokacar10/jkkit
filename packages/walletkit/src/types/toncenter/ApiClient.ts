@@ -19,6 +19,8 @@ import type { FullAccountState, GetResult } from './api';
 import type { NftItemsResponse } from './NftItemsResponse';
 import { RawStackItem } from '../../utils/tvmStack';
 import { ResponseUserJettons } from '../export/responses/jettons';
+import { AddressFriendly } from '../primitive';
+import { Event } from './AccountEvent';
 
 export interface LimitRequest {
     limit?: number;
@@ -55,7 +57,8 @@ export type GetPendingTransactionsRequest =
       };
 
 export type GetTraceRequest = {
-    traceId: Array<string>;
+    account?: Address | string;
+    traceId?: Array<string>;
 };
 
 export type GetPendingTraceRequest = {
@@ -69,9 +72,14 @@ export interface GetJettonsByOwnerRequest {
 }
 
 export interface GetJettonsByAddressRequest {
-    address: Address | string;
+    address: AddressFriendly;
     offset?: number;
     limit?: number;
+}
+
+export interface GetEventsResponse {
+    events: Event[];
+    nextFrom: number;
 }
 
 export interface ApiClient {
@@ -100,4 +108,6 @@ export interface ApiClient {
 
     jettonsByAddress(request: GetJettonsByAddressRequest): Promise<ToncenterResponseJettonMasters>;
     jettonsByOwnerAddress(request: GetJettonsByOwnerRequest): Promise<ResponseUserJettons>;
+
+    getEvents(account: Address | string, nextFrom?: number): Promise<GetEventsResponse>;
 }

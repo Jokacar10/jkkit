@@ -25,6 +25,7 @@ import {
     NftItemsByOwnerRequest,
     NftItemsRequest,
     TransactionsByAddressRequest,
+    GetEventsResponse,
 } from '../types/toncenter/ApiClient';
 import { NftItemsResponseV3, toNftItemsResponse } from '../types/toncenter/v3/NftItemsResponseV3';
 import { NftItemsResponse } from '../types/toncenter/NftItemsResponse';
@@ -47,6 +48,7 @@ import {
     ROOT_DNS_RESOLVER_MAINNET,
     ROOT_DNS_RESOLVER_TESTNET,
 } from '../types/toncenter/dnsResolve';
+import { Action, createAction, toAccount } from '../types/toncenter/AccountEvent';
 
 const log = globalLogger.createChild('ApiClientToncenter');
 
@@ -516,6 +518,36 @@ export class ApiClientToncenter implements ApiClient {
             description: '',
             decimals: 9,
         };
+    }
+
+    async getEvents(account: Address | string, nextFrom?: number): Promise<GetEventsResponse> {
+        if (account instanceof Address) {
+            account = account.toString();
+        }
+        const list = await this.getJson<ToncenterTracesResponse>('/api/v3/traces', {
+            account,
+            end_lt: nextFrom,
+            include_actions: true,
+        });
+        const last = list.traces[list.traces.length - 1];
+        const out: GetEventsResponse = { events: [], nextFrom: Number(last.start_lt) };
+        for (const trace of list.traces) {
+            const actions: Action[] = [];
+            const list = trace.actions || [];
+            for (const action of list) {
+                actions.push(createAction(action));
+            }
+            out.events.push({
+                eventId: Base64ToHex(trace.trace_id),
+                account: toAccount(account),
+                timestamp: trace.start_utime,
+                actions,
+                isScam: false, // TODO implement detect isScam for Event
+                lt: Number(trace.start_lt),
+                inProgress: trace.is_incomplete,
+            });
+        }
+        return out;
     }
 }
 
