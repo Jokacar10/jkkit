@@ -318,6 +318,9 @@ importers:
       '@ton/crypto':
         specifier: ^3.3.0
         version: 3.3.0
+      '@ton/crypto-primitives':
+        specifier: ^2.1.0
+        version: 2.1.0
       '@ton/walletkit':
         specifier: workspace:*
         version: link:../walletkit
