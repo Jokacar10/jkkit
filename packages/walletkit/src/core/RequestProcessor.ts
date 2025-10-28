@@ -97,18 +97,8 @@ export class RequestProcessor {
                 }
 
                 // Create session for this connection'
-                // Use event.domain if set (for internal browser), otherwise parse from manifest URL
-                let domain = event.domain;
-                if (!domain && event.preview.manifest?.url) {
-                    try {
-                        const url = new URL(event.preview.manifest.url);
-                        domain = url.hostname;
-                    } catch {
-                        domain = 'unknown';
-                    }
-                }
-                domain = domain || 'unknown';
-                
+                const url = new URL(event.preview.manifest?.url || '');
+                const domain = url.hostname;
                 const newSession = await this.sessionManager.createSession(
                     event.from || (await getSecureRandomBytes(32)).toString('hex'),
                     event.preview.manifest?.name || '',
@@ -118,7 +108,6 @@ export class RequestProcessor {
                     wallet,
                     {
                         isJsBridge: event.isJsBridge,
-                        tabId: event.tabId?.toString(),
                     },
                 );
                 // Create bridge session

@@ -309,16 +309,17 @@ export class TonWalletKit implements ITonWalletKit {
             await this.sessionManager.removeSession(sessionId);
             
             // Send disconnect notification to dApp AFTER removing the session
-            if (session?.isJsBridge && session?.tabId) {
-                // For JS bridge sessions, send as an event (not a response)
-                // Include the session ID in the payload so the dApp knows which session to disconnect
-                await this.bridgeManager.sendJsBridgeEvent(
-                    session.tabId,
+            if (session?.isJsBridge) {
+                // For JS bridge sessions, send disconnect to specific session
+                await this.bridgeManager.sendJsBridgeResponse(
+                    sessionId, // Use sessionId to route to correct WebView
+                    true,
+                    null,
                     {
                         event: 'disconnect',
                         id: Date.now(),
                         payload: {
-                            items: [sessionId], // Array of session IDs to disconnect
+                            items: [sessionId],
                         },
                     },
                 );

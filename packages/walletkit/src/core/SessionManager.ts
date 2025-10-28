@@ -47,7 +47,7 @@ export class SessionManager {
         dAppIconUrl: string,
         dAppDescription: string,
         wallet?: IWallet,
-        { disablePersist = false, isJsBridge = false, tabId }: { disablePersist?: boolean; isJsBridge?: boolean; tabId?: string } = {},
+        { disablePersist = false, isJsBridge = false }: { disablePersist?: boolean; isJsBridge?: boolean } = {},
     ): Promise<SessionData> {
         const now = new Date();
         // const randomKeyPair = keyPairFromSeed(Buffer.from(crypto.getRandomValues(new Uint8Array(32))));
@@ -64,7 +64,6 @@ export class SessionManager {
             dAppIconUrl: dAppIconUrl,
             dAppDescription: dAppDescription,
             isJsBridge,
-            tabId,
         };
 
         if (disablePersist) {
@@ -90,7 +89,6 @@ export class SessionManager {
             dAppIconUrl: session.dAppIconUrl,
             dAppDescription: session.dAppDescription,
             isJsBridge: session.isJsBridge,
-            tabId: session.tabId,
         };
     }
 
@@ -114,16 +112,16 @@ export class SessionManager {
                 dAppIconUrl: session.dAppIconUrl,
                 dAppDescription: session.dAppDescription,
                 isJsBridge: session.isJsBridge,
-                tabId: session.tabId,
             };
         }
         return undefined;
     }
 
     async getSessionByDomain(domain: string): Promise<SessionData | undefined> {
-        // Ensure sessions are loaded
-        await this.loadSessions();
-
+        // const session = this.sessions(domain);
+        // if (session) {
+        //     return this.getSession(session.sessionId);
+        // }
         for (const session of this.sessions.values()) {
             if (session.domain === domain) {
                 return this.getSession(session.sessionId);
@@ -296,9 +294,7 @@ export class SessionManager {
                 publicKey: session.publicKey,
                 dAppIconUrl: session.dAppIconUrl,
                 dAppDescription: session.dAppDescription,
-                // CRITICAL: Include JS Bridge fields for internal browser sessions
                 isJsBridge: session.isJsBridge,
-                tabId: session.tabId,
             }));
 
             await this.storage.set(this.storageKey, sessionMetadata);

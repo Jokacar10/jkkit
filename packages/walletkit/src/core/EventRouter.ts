@@ -72,10 +72,8 @@ export class EventRouter {
 
         try {
             // Find appropriate handler
-            let handlerFound = false;
             for (const handler of this.handlers) {
                 if (handler.canHandle(event)) {
-                    handlerFound = true;
                     const result = await handler.handle(event);
                     if ('error' in result) {
                         this.notifyErrorCallback({ incomingEvent: event, result: result });
@@ -90,34 +88,8 @@ export class EventRouter {
                     break;
                 }
             }
-            if (!handlerFound) {
-                log.error('No handler found for event', { 
-                    method: event.method, 
-                    eventId: event.id,
-                    availableHandlers: this.handlers.map(h => h.constructor.name)
-                });
-            }
         } catch (error) {
-            log.error('Error routing event', { 
-                error, 
-                method: event.method,
-                eventId: event.id
-            });
-            
-            // Send error response to dApp so it doesn't hang
-            const errorResponse: WalletResponseTemplateError = {
-                id: String(event.id),
-                error: {
-                    code: 500,
-                    message: error instanceof Error ? error.message : 'Internal wallet error',
-                },
-            };
-            
-            try {
-                await this.bridgeManager.sendResponse(event, errorResponse);
-            } catch (sendError) {
-                log.error('Failed to send error response', { sendError, originalError: error });
-            }
+            log.error('Error routing event', { error });
         }
     }
 

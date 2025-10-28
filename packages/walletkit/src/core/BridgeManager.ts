@@ -281,32 +281,6 @@ export class BridgeManager {
         }
     }
 
-    async sendJsBridgeEvent(
-        sessionId: string,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        event: any,
-        options?: {
-            traceId?: string;
-        },
-    ): Promise<void> {
-        const source = this.config.jsBridgeKey + '-tonconnect';
-        const message = {
-            type: 'TONCONNECT_BRIDGE_EVENT',
-            source: source,
-            event: event,
-            traceId: options?.traceId,
-        };
-
-        // Use custom transport if provided, otherwise use default chrome.tabs.sendMessage
-        if (this.jsBridgeTransport) {
-            await this.jsBridgeTransport(sessionId, message);
-        } else {
-            // Default: use chrome extension messaging
-            // eslint-disable-next-line no-undef
-            await chrome.tabs.sendMessage(parseInt(sessionId), message);
-        }
-    }
-
     /**
      * Close bridge connection
      */
@@ -541,7 +515,7 @@ export class BridgeManager {
                 messageId: messageInfo.messageId,
             });
         } else if (event.method == 'send' && event?.params?.length === 1) {
-            const queuedEvent = {
+            this.eventQueue.push({
                 ...event,
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 ...(event as any).params[0],
@@ -549,18 +523,7 @@ export class BridgeManager {
                 tabId: messageInfo.tabId,
                 domain: messageInfo.domain,
                 messageId: messageInfo.messageId,
-            };
-            this.eventQueue.push(queuedEvent);
-        } else if (event.method === 'signData' || event.method === 'sendTransaction') {
-            // Internal browser already extracted the inner request, so we can queue it directly
-            const queuedEvent = {
-                ...event,
-                isJsBridge: true,
-                tabId: messageInfo.tabId,
-                domain: messageInfo.domain,
-                messageId: messageInfo.messageId,
-            };
-            this.eventQueue.push(queuedEvent);
+            });
         }
 
         // Trigger processing (don't wait for it to complete)
@@ -685,19 +648,10 @@ export class BridgeManager {
 
                 log.info('Event stored durably', { eventId: rawEvent.id, method: rawEvent.method });
 
-                // Route events based on their source and type:
-                // 1. JS Bridge events - route immediately for synchronous response (internal browser/extension)
-                // 2. HTTP Bridge connect events - route immediately to establish session
-                // 3. Other HTTP Bridge events - processed asynchronously by EventProcessor
-                if (rawEvent.isJsBridge) {
-                    // All JS Bridge events need immediate routing for synchronous response
-                    await this.eventRouter.routeEvent(rawEvent);
-                } else if (rawEvent.method === 'connect') {
-                    // HTTP Bridge connect events need immediate routing to establish session
-                    // Subsequent requests for that session will be handled by EventProcessor
+                // todo - fire on emit, not inside bridge
+                if (rawEvent.method == 'connect' || rawEvent.isJsBridge) {
                     await this.eventRouter.routeEvent(rawEvent);
                 }
-                // Other HTTP bridge events are processed asynchronously by EventProcessor
             } catch (error) {
                 log.error('Failed to store event durably', {
                     eventId: rawEvent.id,

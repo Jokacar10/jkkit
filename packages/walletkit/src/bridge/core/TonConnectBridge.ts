@@ -126,12 +126,7 @@ export class TonConnectBridge {
      * Cleanup resources
      */
     destroy(): void {
-        // Clear listeners
         this.eventListeners.length = 0;
-        
-        // Cleanup transport
-        if (this.transport && typeof (this.transport as any).destroy === 'function') {
-            (this.transport as any).destroy();
-        }
+        this.transport.destroy();
     }
 }
