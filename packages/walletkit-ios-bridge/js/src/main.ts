@@ -434,5 +434,12 @@ window.initWalletKit = async (configuration, storage) => {
                 throw error;
             }
         },
+
+        async sendTransaction(wallet, transaction) {
+            if (!initialized) throw new Error('WalletKit Bridge not initialized');
+            console.log('🪙 Bridge: Sending transaction:', transaction);
+
+            await walletKit.handleNewTransaction(wallet, transaction);
+        },
     };
 };
