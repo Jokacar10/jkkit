@@ -217,6 +217,7 @@ describe('AccountEvent', () => {
         const actual = toEvent(traces.traces[0], account, addressBook);
         expect(actual.actions).toEqual([
             {
+                id: '0x8d213f8019c3819383f171ba9d6618be1a314164083302354bff2fc91245bb80',
                 type: 'JettonTransfer',
                 status: 'success',
                 JettonTransfer: {
@@ -231,8 +232,8 @@ describe('AccountEvent', () => {
                         isScam: false,
                         isWallet: true,
                     },
-                    sendersWallet: '0:c4072d7b04ab4c504cd223dfde42c8037c6a99272d3624aec2cbff2e72b102dd',
-                    recipientsWallet: '0:9f27ad7db6c58cbfe24c03be35766209dca0292bb7e45482f8b5912fa11bf300',
+                    sendersWallet: 'EQDEBy17BKtMUEzSI9_eQsgDfGqZJy02JK7Cy_8ucrEC3Xiq',
+                    recipientsWallet: 'EQCfJ619tsWMv-JMA741dmIJ3KApK7fkVIL4tZEvoRvzAGpu',
                     amount: 1000000n,
                     comment: 'Hello!',
                     jetton: {
@@ -276,6 +277,75 @@ describe('AccountEvent', () => {
                     '0x027f35335ad0de2d64a62d6ee066f7c85b42bb26667c1e1c922c45bf7060aece',
                     '0xf61b0d813f307936901292b8e7681b9a44d63825e408efca77e54fd56c68f3a9',
                     '0x33f7326c8a709967f5611a1c88b9f4c52e2ec95fe59b5f09a2bf89162945bb71',
+                ],
+            },
+        ]);
+    });
+
+    it('ft received', async () => {
+        const traces = loadData<ToncenterTracesResponse>('ft-received-traces');
+        const actual = toEvent(traces.traces[0], account, addressBook);
+        expect(actual.actions).toEqual([
+            {
+                id: '0x63ca0d794bd993043441e0a58108b9004c7bfda04844cb534f1423eebf80173f',
+                type: 'JettonTransfer',
+                status: 'success',
+                JettonTransfer: {
+                    sender: {
+                        address: 'EQBONmT67oFPvbbByzbXK6xS0V4YbBHs1mT-Gz8afP2AHYFo',
+                        isScam: false,
+                        isWallet: true,
+                    },
+                    recipient: {
+                        address: 'EQCdqXGvONLwOr3zCNX5FjapflorB6ZsOdcdfLrjsDLt3Fy9',
+                        name: 'tolya.ton',
+                        isScam: false,
+                        isWallet: true,
+                    },
+                    sendersWallet: 'EQCfJ619tsWMv-JMA741dmIJ3KApK7fkVIL4tZEvoRvzAGpu',
+                    recipientsWallet: 'EQDEBy17BKtMUEzSI9_eQsgDfGqZJy02JK7Cy_8ucrEC3Xiq',
+                    amount: 3000000n,
+                    jetton: {
+                        address: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
+                        name: 'Tether USD',
+                        symbol: 'USD₮',
+                        decimals: 6,
+                        image: 'https://cache.tonapi.io/imgproxy/T3PB4s7oprNVaJkwqbGg54nexKE0zzKhcrPv8jcWYzU/rs:fill:200:200:1/g:no/aHR0cHM6Ly90ZXRoZXIudG8vaW1hZ2VzL2xvZ29DaXJjbGUucG5n.webp',
+                        verification: 'whitelist',
+                        score: 100,
+                    },
+                },
+                simple_preview: {
+                    name: 'Jetton Transfer',
+                    description: 'Transferring 3 USD₮',
+                    value: '3 USD₮',
+                    valueImage:
+                        'https://cache.tonapi.io/imgproxy/T3PB4s7oprNVaJkwqbGg54nexKE0zzKhcrPv8jcWYzU/rs:fill:200:200:1/g:no/aHR0cHM6Ly90ZXRoZXIudG8vaW1hZ2VzL2xvZ29DaXJjbGUucG5n.webp',
+                    accounts: [
+                        {
+                            address: 'EQCdqXGvONLwOr3zCNX5FjapflorB6ZsOdcdfLrjsDLt3Fy9',
+                            name: 'tolya.ton',
+                            isScam: false,
+                            isWallet: true,
+                        },
+                        {
+                            address: 'EQBONmT67oFPvbbByzbXK6xS0V4YbBHs1mT-Gz8afP2AHYFo',
+                            isScam: false,
+                            isWallet: true,
+                        },
+                        {
+                            address: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
+                            name: 'usdt-minter.ton',
+                            isScam: false,
+                            isWallet: false,
+                        },
+                    ],
+                },
+                base_transactions: [
+                    '0x1f749e3135d21971ad64978a1b5964ad50ea798d174c5a3febab06842af79c14',
+                    '0x37927129a79cdc7461aaeb302f4e60858744aa4b779ee94e97e2de848d5feac2',
+                    '0x7e56951504c267cff862abec672eaa4c9b92188422c51b22e45c9653f8254675',
+                    '0x723851abd85c7ed7e7be4ecc4ed2b4496f81851b8ae18bdf178af0397d36a9df',
                 ],
             },
         ]);
