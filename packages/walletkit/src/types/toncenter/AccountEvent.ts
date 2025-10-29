@@ -9,6 +9,7 @@ import {
 } from './emulation';
 import { AddressFriendly, asAddressFriendly, Hex } from '../primitive';
 import { Base64ToHex } from '../../utils/base64';
+import { computeStatus, parseIncomingTonTransfers, parseOutgoingTonTransfers } from './parsers/TonTransfer';
 
 export type AddressBook = Record<AddressFriendly, string>;
 
@@ -34,10 +35,12 @@ export interface Event {
     transactions: Record<string, ToncenterTransaction>;
 }
 
+export type StatusAction = 'success' | 'failure';
+
 export interface TypedAction {
     type: string;
     id: Hex;
-    status: string;
+    status: StatusAction;
     simplePreview: SimplePreview;
     baseTransactions: Hex[];
 }
@@ -89,7 +92,20 @@ export type Action = TypedAction | TonTransferAction | SmartContractExecAction |
 
 export function toEvent(data: ToncenterTraceItem, account: string, addressBook: AddressBook = {}): Event {
     const actions: Action[] = [];
-    const _list = data.transactions || []; // TODO pare transactions into Actions
+    const accountFriendly = asAddressFriendly(account);
+    const transactions: Record<string, ToncenterTransaction> = data.transactions || {};
+    for (const txHash of Object.keys(transactions)) {
+        const tx = transactions[txHash];
+        const txAccount = asAddressFriendly(tx.account);
+        if (txAccount !== accountFriendly) {
+            continue;
+        }
+        const status = computeStatus(tx);
+        actions.push(
+            ...parseOutgoingTonTransfers(tx, addressBook, status),
+            ...parseIncomingTonTransfers(tx, addressBook, status),
+        );
+    }
     return {
         eventId: Base64ToHex(data.trace_id),
         account: toAccount(account, addressBook),
@@ -136,8 +152,8 @@ export function createTonTransferAction(data: EmulationAction, addressBook: Addr
         id: Base64ToHex(data.action_id),
         status: data.success ? 'success' : 'failure',
         TonTransfer: {
-            sender: toAccount(details.source),
-            recipient: toAccount(details.destination),
+            sender: toAccount(details.source, addressBook),
+            recipient: toAccount(details.destination, addressBook),
             amount: BigInt(details.value),
             comment: details.comment ? details.comment : undefined,
         },
@@ -174,11 +190,15 @@ export interface Account {
     isWallet: boolean;
 }
 
-export function toAccount(address: string, addressBook: AddressBook = {}): Account {
-    return {
+export function toAccount(address: string, addressBook: AddressBook): Account {
+    const out: Account = {
         address: asAddressFriendly(address),
-        name: addressBook[address],
         isScam: false, // TODO implement detect isScam for Account
         isWallet: true, // TODO implement detect isWallet for Account
     };
+    const name = addressBook[asAddressFriendly(address)];
+    if (name) {
+        out.name = name;
+    }
+    return out;
 }
