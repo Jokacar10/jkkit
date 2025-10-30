@@ -304,11 +304,6 @@ export class TonWalletKit implements ITonWalletKit {
             // Get session to check if it's a JS bridge session
             const session = await this.sessionManager.getSession(sessionId);
 
-            // Remove the session from storage FIRST (before sending disconnect event)
-            // This prevents the WebView from reconnecting if it reloads
-            await this.sessionManager.removeSession(sessionId);
-
-            // Send disconnect notification to dApp AFTER removing the session
             if (session?.isJsBridge) {
                 // For JS bridge sessions, send disconnect to specific session
                 await this.bridgeManager.sendJsBridgeResponse(
@@ -340,6 +335,8 @@ export class TonWalletKit implements ITonWalletKit {
                     session,
                 );
             }
+
+            await this.sessionManager.removeSession(sessionId);
         };
         if (sessionId) {
             try {
