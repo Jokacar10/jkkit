@@ -15,11 +15,12 @@ import {
     JettonTransferAction,
     SimplePreview,
 } from '../AccountEvent';
-import { EmulationMessage, ToncenterTraceItem, ToncenterTransaction } from '../emulation';
+import { ToncenterTraceItem, ToncenterTransaction } from '../emulation';
 import { asAddressFriendly, Hex } from '../../primitive';
 import { Base64ToHex } from '../../../utils/base64';
+import { getDecoded, extractOpFromBody, matchOpWithMap } from './body';
 
-type Decoded = { [key: string]: unknown } | null | undefined;
+//
 
 // TODO it need will be refactored
 export function parseJettonActions(
@@ -128,16 +129,6 @@ export function parseJettonActions(
         }
 
     return actions;
-}
-
-function getDecoded(msg?: EmulationMessage | null): Decoded {
-    if (!msg) return null;
-    const mc = msg.message_content as unknown;
-    if (isRecord(mc)) {
-        const d = mc.decoded as unknown;
-        return isRecord(d) ? (d as Record<string, unknown>) : null;
-    }
-    return null;
 }
 
 function extractCommentFromDecoded(decoded?: unknown): string | null {
@@ -281,40 +272,19 @@ function collectBaseTransactionsReceived(item: ToncenterTraceItem, ownerFriendly
 
 function getTxType(tx: ToncenterTransaction): string | '' {
     const fromBody = extractOpFromBody(tx.in_msg);
-    return matchJettonOp(fromBody || tx.in_msg?.opcode || '', [
-        'jetton_transfer',
-        'jetton_internal_transfer',
-        'jetton_notify',
-        'excess',
-    ]);
+    return matchOpWithMap(
+        fromBody || tx.in_msg?.opcode || '',
+        ['jetton_transfer', 'jetton_internal_transfer', 'jetton_notify', 'excess'],
+        {
+            '0x0f8a7ea5': 'jetton_transfer',
+            '0x178d4519': 'jetton_internal_transfer',
+            '0x7362d09c': 'jetton_notify',
+            '0xd53276db': 'excess',
+        },
+    );
 }
 
-function matchJettonOp(op: string, types: string[]): string | '' {
-    if (!op) return '';
-    const map: Record<string, string> = {
-        '0x0f8a7ea5': 'jetton_transfer',
-        '0x178d4519': 'jetton_internal_transfer',
-        '0x7362d09c': 'jetton_notify',
-        '0xd53276db': 'excess',
-    };
-    const normalized = map[op] ?? op; // if it's already '@type', keep as-is
-    return types.includes(normalized) ? normalized : '';
-}
-
-function extractOpFromBody(msg?: EmulationMessage | null): string | null {
-    if (!msg) return null;
-    const decoded = getDecoded(msg);
-    if (decoded && typeof decoded === 'object') {
-        const t = (decoded as Record<string, unknown>)['@type'];
-        if (typeof t === 'string' && t.length > 0) return t;
-        // Some bodies can wrap payload in cell_reference/value; try to descend one level
-        const val = (decoded as Record<string, unknown>)['value'];
-        if (val && typeof val === 'object' && typeof (val as Record<string, unknown>)['@type'] === 'string') {
-            return (val as Record<string, unknown>)['@type'] as string;
-        }
-    }
-    return null;
-}
+// using shared extractOpFromBody
 
 function buildJettonInfo(
     item: ToncenterTraceItem,

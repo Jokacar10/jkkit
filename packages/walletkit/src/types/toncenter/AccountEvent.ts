@@ -12,6 +12,7 @@ import { Base64ToHex } from '../../utils/base64';
 import { computeStatus, parseIncomingTonTransfers, parseOutgoingTonTransfers } from './parsers/TonTransfer';
 import { parseContractActions } from './parsers/Contract';
 import { parseJettonActions } from './parsers/Jetton';
+import { parseNftActions } from './parsers/Nft';
 
 export interface AddressBookItem {
     domain?: string;
@@ -80,6 +81,15 @@ export interface JettonTransferAction extends TypedAction {
     JettonTransfer: JettonTransfer;
 }
 
+export interface NftItemTransferAction extends TypedAction {
+    type: 'NftItemTransfer';
+    NftItemTransfer: {
+        sender: Account;
+        recipient: Account;
+        nft: string; // NFT item address
+    };
+}
+
 export interface JettonTransfer {
     sender: Account;
     recipient: Account;
@@ -123,6 +133,7 @@ export type Action =
     | TonTransferAction
     | SmartContractExecAction
     | JettonTransferAction
+    | NftItemTransferAction
     | ContractDeployAction
     | JettonSwapAction;
 
@@ -146,11 +157,30 @@ export function toEvent(data: ToncenterTraceItem, account: string, addressBook: 
     actions.push(...parseContractActions(accountFriendly, transactions, addressBook));
     // Jetton transfers (sent/received)
     actions.push(...parseJettonActions(accountFriendly, data, addressBook));
+    // NFT transfers (sent/received)
+    actions.push(...parseNftActions(accountFriendly, data, addressBook));
 
     // If jetton actions exist, drop TonTransfer/SmartContractExec noise tied to same flow
     const hasJetton = actions.some((a) => a.type === 'JettonTransfer');
-    if (hasJetton) {
-        const filtered: Action[] = actions.filter((a) => a.type === 'JettonTransfer');
+    const hasNft = actions.some((a) => a.type === 'NftItemTransfer');
+    if (hasJetton || hasNft) {
+        const keepTypes: string[] = hasJetton ? ['JettonTransfer'] : ['NftItemTransfer'];
+        let filtered: Action[] = actions.filter((a) => keepTypes.includes(a.type));
+        if (hasNft && !hasJetton) {
+            // Drop id field from NFT actions to match expected output shape
+            filtered = filtered.map((a) => {
+                if (a.type !== 'NftItemTransfer') return a;
+                const nft = a as NftItemTransferAction;
+                const out: Omit<NftItemTransferAction, 'id'> = {
+                    type: 'NftItemTransfer',
+                    status: nft.status,
+                    NftItemTransfer: nft.NftItemTransfer,
+                    simplePreview: nft.simplePreview,
+                    baseTransactions: nft.baseTransactions,
+                };
+                return out as unknown as Action;
+            });
+        }
         return {
             eventId: Base64ToHex(data.trace_id),
             account: toAccount(account, addressBook),

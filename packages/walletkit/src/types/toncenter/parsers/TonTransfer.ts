@@ -30,6 +30,7 @@ export function parseOutgoingTonTransfers(
         const recipientAccount = msg.init_state
             ? toContractAccount(recipient, addressBook)
             : toAccount(recipient, addressBook);
+        const comment = extractComment(msg) ?? undefined;
         actions.push({
             type: 'TonTransfer',
             id: Base64ToHex(tx.hash),
@@ -38,7 +39,7 @@ export function parseOutgoingTonTransfers(
                 sender: toAccount(sender, addressBook),
                 recipient: recipientAccount,
                 amount,
-                comment: extractComment(msg) ?? undefined,
+                ...(comment !== undefined ? { comment } : {}),
             },
             simplePreview: {
                 name: 'Ton Transfer',
@@ -73,6 +74,7 @@ export function parseIncomingTonTransfers(
     const recipientAccount = msg.init_state
         ? toContractAccount(recipient, addressBook)
         : toAccount(recipient, addressBook);
+    const comment = extractComment(msg) ?? undefined;
     actions.push({
         type: 'TonTransfer',
         id: Base64ToHex(tx.hash),
@@ -81,7 +83,7 @@ export function parseIncomingTonTransfers(
             sender: toAccount(sender, addressBook),
             recipient: recipientAccount,
             amount,
-            comment: extractComment(msg) ?? undefined,
+            ...(comment !== undefined ? { comment } : {}),
         },
         simplePreview: {
             name: 'Ton Transfer',

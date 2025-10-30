@@ -39,6 +39,7 @@ export function parseContractActions(
 
             const contractAddress = msg.destination;
             const tonAttached = BigInt(Number(msg.value || '0'));
+            // For unknown calls we keep raw opcode to match expectations
             const operation = msg.opcode;
             const child = findChildTransactionByInMsgHash(transactions, msg.hash);
             const baseTx: Hex = child ? Base64ToHex(child.hash) : Base64ToHex(tx.hash);
