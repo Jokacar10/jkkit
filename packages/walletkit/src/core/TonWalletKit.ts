@@ -162,7 +162,7 @@ export class TonWalletKit implements ITonWalletKit {
             this.eventProcessor.startRecoveryLoop();
 
             // Start no-wallet event processing (for connect events)
-            await this.eventProcessor.startNoWalletProcessing();
+            await this.eventProcessor.startProcessing();
 
             this.isInitialized = true;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any

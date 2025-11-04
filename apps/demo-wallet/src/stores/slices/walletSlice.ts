@@ -28,6 +28,8 @@ import {
     MnemonicToKeyPair,
     type WalletSigner,
     Uint8ArrayToHex,
+    WalletKitError,
+    ERROR_CODES,
 } from '@ton/walletkit';
 import { createWalletInitConfigLedger, createLedgerPath, createWalletV4R2Ledger } from '@ton/v4ledger-adapter';
 import TransportWebHID from '@ledgerhq/hw-transport-webhid';
@@ -391,8 +393,6 @@ export const createWalletSlice: WalletSliceCreator = (set: SetState, get) => ({
 
         // Set up wallet kit event listeners
         const onTransactionRequest = async (event: EventTransactionRequest) => {
-            log.info('Transaction request received:', event);
-
             const wallet = await walletKit.getWallet(event.walletAddress ?? '');
             if (!wallet) {
                 log.error('Wallet not found for transaction request');
@@ -1141,6 +1141,14 @@ export const createWalletSlice: WalletSliceCreator = (set: SetState, get) => ({
             });
         } catch (error) {
             log.error('Failed to reject transaction request:', error);
+            if (error instanceof WalletKitError && error.code === ERROR_CODES.SESSION_NOT_FOUND) {
+                set((state) => {
+                    state.wallet.pendingTransactionRequest = undefined;
+                    state.wallet.isTransactionModalOpen = false;
+                });
+                toast.error('Could not properly reject transaction request: Session not found');
+                return;
+            }
             throw error;
         }
     },
