@@ -119,10 +119,10 @@ export function injectBridge(window: Window, options: JSBridgeInjectOptions, arg
     console.log(`TonConnect JS Bridge injected for ${config.jsBridgeKey} - forwarding to extension`);
 
     // 7. Setup iframe watcher
-    // const iframeWatcher = new IframeWatcher(() => {
-    //     transport.requestContentScriptInjection();
-    // });
-    // iframeWatcher.start();
+    const iframeWatcher = new IframeWatcher(() => {
+        transport.requestContentScriptInjection();
+    });
+    iframeWatcher.start();
 
     // 8. Return cleanup function
     return;
