@@ -15,20 +15,16 @@ import {
     TonProofParsedMessage,
 } from '@ton/walletkit';
 
-import { ApiClient } from '../../../walletkit/src';
-
 export class SwiftWalletAdapter implements IWalletAdapter {
     private swiftWalletAdapter;
-    readonly client: ApiClient;
 
     publicKey: Hex;
     version: string;
 
-    constructor(swiftWalletAdapter: IWalletAdapter, client: ApiClient) {
+    constructor(swiftWalletAdapter: IWalletAdapter) {
         this.swiftWalletAdapter = swiftWalletAdapter;
         this.publicKey = this.swiftWalletAdapter.publicKey;
         this.version = this.swiftWalletAdapter.version;
-        this.client = client;
     }
 
     getNetwork(): CHAIN {
