@@ -92,3 +92,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Publish NPM package
+        run: |
+          pnpm publish --filter="@ton/walletkit" --dry-run --access=public --tag=alpha
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
