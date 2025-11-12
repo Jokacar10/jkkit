@@ -7,26 +7,21 @@
  */
 
 import { Transport, injectBridgeCode } from '@ton/walletkit/bridge';
-import { TONCONNECT_BRIDGE_EVENT } from '../../../walletkit/src/bridge/utils/messageTypes';
 import { InjectedToExtensionBridgeRequestPayload } from '@ton/walletkit';
+
+import { TONCONNECT_BRIDGE_EVENT } from '../../../walletkit/src/bridge/utils/messageTypes';
 import { RESTORE_CONNECTION_TIMEOUT, DEFAULT_REQUEST_TIMEOUT } from '../../../walletkit/src/bridge/utils/timeouts';
 
 declare global {
     interface Window {
-        id: String,
+        id: string;
         injectWalletKit: (options) => void;
     }
 }
 
 window.injectWalletKit = (options) => {
-    try {
-        injectBridgeCode(window, options, new SwiftTransport(window));
-
-        console.log('TonConnect bridge injected - forwarding to extension');
-    } catch (error) {
-        console.error('Failed to inject TonConnect bridge:', error);
-    }
-}
+    injectBridgeCode(window, options, new SwiftTransport(window));
+};
 
 window.id = crypto.randomUUID();
 
@@ -69,9 +64,11 @@ class SwiftTransport implements Transport {
 
     async send(request: Omit<InjectedToExtensionBridgeRequestPayload, 'id'>): Promise<unknown> {
         let timeout = request.method === 'restoreConnection' ? RESTORE_CONNECTION_TIMEOUT : DEFAULT_REQUEST_TIMEOUT;
-        let response = await window.webkit.messageHandlers.walletKitInjectionBridge.postMessage(
-            { ...request, frameID: window.id, timeout: timeout }
-        );
+        let response = await window.webkit.messageHandlers.walletKitInjectionBridge.postMessage({
+            ...request,
+            frameID: window.id,
+            timeout: timeout,
+        });
 
         if (response.success) {
             return Promise.resolve(response.payload);
@@ -92,4 +89,3 @@ class SwiftTransport implements Transport {
 
     destroy(): void {}
 }
-

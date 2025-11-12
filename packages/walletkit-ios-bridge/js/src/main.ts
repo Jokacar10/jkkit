@@ -8,6 +8,7 @@
 
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 import {
     MemoryStorageAdapter,
     Signer,
@@ -16,10 +17,12 @@ import {
     WalletSigner,
     TonWalletKit,
     BridgeEventMessageInfo,
-    InjectedToExtensionBridgeRequestPayload
+    InjectedToExtensionBridgeRequestPayload,
+    IWalletAdapter
 } from '@ton/walletkit';
 
 import { SwiftStorageAdapter } from './SwiftStorageAdapter';
+import { SwiftWalletAdapter } from './SwiftWalletAdapter';
 
 declare global {
     interface Window {
@@ -43,8 +46,7 @@ window.initWalletKit = async (configuration, storage, bridgeTransport) => {
         walletManifest: configuration.walletManifest,
         deviceInfo: configuration.deviceInfo,
         bridge: configuration.bridge,
-        eventProcessor: {
-        },
+        eventProcessor: {},
         apiClient: configuration.apiClient,
 
         storage: storage ? new SwiftStorageAdapter(storage) : new MemoryStorageAdapter({}),
@@ -115,52 +117,34 @@ window.initWalletKit = async (configuration, storage, bridgeTransport) => {
             console.log('🗑️ All event listeners removed');
         },
 
-        async createV4R2WalletUsingMnemonic(mnemonic, parameters) {
+        async createSignerFromMnemonic(mnemonic) {
+            if (!initialized) throw new Error('WalletKit Bridge not initialized');
+
+            console.log('➕ Bridge: Creating signer from mnemonic');
+
+            if (!mnemonic) {
+                throw new Error('Mnemonic is required to create signer');
+            }
+
+            return await Signer.fromMnemonic(mnemonic, { type: 'ton' });
+        },
+
+        async createSignerFromPrivateKey(privateKey) {
+            if (!initialized) throw new Error('WalletKit Bridge not initialized');
+
+            console.log('➕ Bridge: Creating signer from private key');
+
+            if (!privateKey) {
+                throw new Error('Private key is required to create signer');
+            }
+
+            return await Signer.fromPrivateKey(privateKey);
+        },
+
+        async createV4R2WalletAdapter(signer, parameters) {
             if (!initialized) throw new Error('WalletKit Bridge not initialized');
 
             console.log('➕ Bridge: Creating V4R2 wallet using mnemonic');
-
-            if (!mnemonic) {
-                throw new Error('Mnemonic required for mnemonic wallet type');
-            }
-
-            // Use Signer.fromMnemonic to create signer with publicKey
-            const signer = await Signer.fromMnemonic(mnemonic, { type: 'ton' });
-
-            // Create adapter with the appropriate version
-            return await WalletV4R2Adapter.create(signer, {
-                client: walletKit.getApiClient(),
-                network: parameters.network,
-            });
-        },
-
-        async createV4R2WalletUsingSecretKey(secretKey, parameters) {
-            if (!initialized) throw new Error('WalletKit Bridge not initialized');
-
-            console.log('➕ Bridge: Creating V4R2 wallet using secret key');
-
-            if (!secretKey) {
-                throw new Error('Secret key required for secret key wallet type');
-            }
-
-            // Use Signer.fromMnemonic to create signer with publicKey
-            const signer = await Signer.fromPrivateKey(secretKey);
-
-            // Create adapter with the appropriate version
-            return await WalletV4R2Adapter.create(signer, {
-                client: walletKit.getApiClient(),
-                network: parameters.network,
-            });
-        },
-
-        async createV4R2WalletUsingSigner(signer, parameters) {
-            if (!initialized) throw new Error('WalletKit Bridge not initialized');
-
-            console.log('➕ Bridge: Creating V4R2 wallet');
-
-            if (!signer) {
-                throw new Error('Signer required for wallet creation');
-            }
 
             const customSigner: WalletSigner = {
                 sign: async (bytes: Iterable<number>) => {
@@ -169,68 +153,16 @@ window.initWalletKit = async (configuration, storage, bridgeTransport) => {
                 publicKey: signer.publicKey(),
             };
 
-            // Create adapter with the appropriate version
             return await WalletV4R2Adapter.create(customSigner, {
                 client: walletKit.getApiClient(),
                 network: parameters.network,
             });
         },
 
-        async processInjectedBridgeRequest(
-                messageInfo: BridgeEventMessageInfo,
-                request: InjectedToExtensionBridgeRequestPayload,
-        ): Promise<unknown> {
-            if (!initialized) throw new Error('WalletKit Bridge not initialized');
-
-            return walletKit.processInjectedBridgeRequest(messageInfo, request);
-        },
-
-        async createV5R1WalletUsingMnemonic(mnemonic, parameters) {
+        async createV5R1WalletAdapter(signer, parameters) {
             if (!initialized) throw new Error('WalletKit Bridge not initialized');
 
             console.log('➕ Bridge: Creating V5R1 wallet using mnemonic');
-
-            if (!mnemonic) {
-                throw new Error('Mnemonic required for mnemonic wallet type');
-            }
-
-            // Use Signer.fromMnemonic to create signer with publicKey
-            const signer = await Signer.fromMnemonic(mnemonic, { type: 'ton' });
-
-            // Create adapter with the appropriate version
-            return await WalletV5R1Adapter.create(signer, {
-                client: walletKit.getApiClient(),
-                network: parameters.network,
-            });
-        },
-
-        async createV5R1WalletUsingSecretKey(secretKey, parameters) {
-            if (!initialized) throw new Error('WalletKit Bridge not initialized');
-
-            console.log('➕ Bridge: Creating V5R1 wallet using secret key');
-
-            if (!secretKey) {
-                throw new Error('Secret key required for secret key wallet type');
-            }
-
-            // Use Signer.fromMnemonic to create signer with publicKey
-            const signer = await Signer.fromPrivateKey(secretKey);
-
-            // Create adapter with the appropriate version
-            return await WalletV5R1Adapter.create(signer, {
-                client: walletKit.getApiClient(),
-                network: parameters.network,
-            });
-        },
-
-        async createV5R1WalletUsingSigner(signer, parameters) {
-            if (!initialized) throw new Error('WalletKit Bridge not initialized');
-
-            console.log('➕ Bridge: Creating V5R1 wallet');
-
-            if (!signer) {
-                throw new Error('Signer required for wallet creation');
-            }
 
             const customSigner: WalletSigner = {
                 sign: async (bytes: Iterable<number>) => {
@@ -238,12 +170,19 @@ window.initWalletKit = async (configuration, storage, bridgeTransport) => {
                 },
                 publicKey: signer.publicKey(),
             };
-
-            // Create adapter with the appropriate version
             return await WalletV5R1Adapter.create(customSigner, {
                 client: walletKit.getApiClient(),
                 network: parameters.network,
             });
+        },
+
+        async processInjectedBridgeRequest(
+            messageInfo: BridgeEventMessageInfo,
+            request: InjectedToExtensionBridgeRequestPayload,
+        ): Promise<unknown> {
+            if (!initialized) throw new Error('WalletKit Bridge not initialized');
+
+            return walletKit.processInjectedBridgeRequest(messageInfo, request);
         },
 
         // Wallet management
@@ -251,13 +190,22 @@ window.initWalletKit = async (configuration, storage, bridgeTransport) => {
             if (!initialized) throw new Error('WalletKit Bridge not initialized');
             console.log('➕ Bridge: Adding wallet:');
 
-            const wallet = await walletKit.addWallet(walletAdapter);
+            const swiftWalletAdapter = new SwiftWalletAdapter(walletAdapter, walletKit.getApiClient());
+            const wallet = await walletKit.addWallet(swiftWalletAdapter);
+            
             if (wallet) {
                 console.log('✅ Wallet added:', wallet.getAddress());
             } else {
                 console.log('✅ Wallet added: undefined');
             }
             return wallet;
+        },
+
+        getWallet(address) {
+            if (!initialized) throw new Error('WalletKit Bridge not initialized');
+
+            console.log('🔍 Bridge: Getting wallet for address:', address);
+            return walletKit.getWallet(address);
         },
 
         async removeWallet(address) {
