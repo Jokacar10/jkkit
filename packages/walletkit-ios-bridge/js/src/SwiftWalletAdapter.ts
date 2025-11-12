@@ -6,7 +6,15 @@
  *
  */
 
-import { IWalletAdapter, Hex, CHAIN, ConnectTransactionParamContent, PrepareSignDataResult, TonProofParsedMessage } from '@ton/walletkit';
+import {
+    IWalletAdapter,
+    Hex,
+    CHAIN,
+    ConnectTransactionParamContent,
+    PrepareSignDataResult,
+    TonProofParsedMessage,
+} from '@ton/walletkit';
+
 import { ApiClient } from '../../../walletkit/src';
 
 export class SwiftWalletAdapter implements IWalletAdapter {

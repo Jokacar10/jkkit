@@ -18,7 +18,7 @@ import {
     TonWalletKit,
     BridgeEventMessageInfo,
     InjectedToExtensionBridgeRequestPayload,
-    IWalletAdapter
+    IWalletAdapter,
 } from '@ton/walletkit';
 
 import { SwiftStorageAdapter } from './SwiftStorageAdapter';
@@ -192,7 +192,7 @@ window.initWalletKit = async (configuration, storage, bridgeTransport) => {
 
             const swiftWalletAdapter = new SwiftWalletAdapter(walletAdapter, walletKit.getApiClient());
             const wallet = await walletKit.addWallet(swiftWalletAdapter);
-            
+
             if (wallet) {
                 console.log('✅ Wallet added:', wallet.getAddress());
             } else {
