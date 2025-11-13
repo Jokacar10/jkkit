@@ -12,7 +12,7 @@
 import type { WalletKitBridgeEvent, WalletKitBridgeApi, WalletKitApiMethod, CallContext } from '../types';
 import { postToNative } from './nativeBridge';
 import { emitCallDiagnostic } from './diagnostics';
-import { debugLog, logError } from '../utils/logger';
+import { log, error } from '../utils/logger';
 
 let apiRef: WalletKitBridgeApi | undefined;
 
@@ -35,13 +35,13 @@ export function emit(type: WalletKitBridgeEvent['type'], data?: WalletKitBridgeE
  * @param error - Optional error to report.
  */
 export function respond(id: string, result?: unknown, error?: { message: string }): void {
-    debugLog('[walletkitBridge] 🟢 respond() called with:');
-    debugLog('[walletkitBridge] 🟢 id:', id);
-    debugLog('[walletkitBridge] 🟢 result:', result);
-    debugLog('[walletkitBridge] 🟢 error:', error);
-    debugLog('[walletkitBridge] 🟢 About to call postToNative...');
+    log('[walletkitBridge] 🟢 respond() called with:');
+    log('[walletkitBridge] 🟢 id:', id);
+    log('[walletkitBridge] 🟢 result:', result);
+    log('[walletkitBridge] 🟢 error:', error);
+    log('[walletkitBridge] 🟢 About to call postToNative...');
     postToNative({ kind: 'response', id, result, error });
-    debugLog('[walletkitBridge] 🟢 postToNative completed');
+    log('[walletkitBridge] 🟢 postToNative completed');
 }
 
 /**
@@ -59,21 +59,21 @@ async function invokeApiMethod(
     params: unknown,
     context: CallContext,
 ): Promise<unknown> {
-    debugLog(`[walletkitBridge] handleCall ${method}, looking up api[${method}]`);
+    log(`[walletkitBridge] handleCall ${method}, looking up api[${method}]`);
     const fn = api[method];
-    debugLog(`[walletkitBridge] fn found:`, typeof fn);
+    log(`[walletkitBridge] fn found:`, typeof fn);
     if (typeof fn !== 'function') {
         throw new Error(`Unknown method ${String(method)}`);
     }
-    debugLog(`[walletkitBridge] about to call fn for ${method}`);
+    log(`[walletkitBridge] about to call fn for ${method}`);
     const value = await (fn as (args: unknown, context?: CallContext) => Promise<unknown> | unknown).call(
         api,
         params as never,
         context,
     );
-    debugLog(`[walletkitBridge] fn returned for ${method}`);
-    debugLog(`[walletkitBridge] 🔵 fn returned value:`, value);
-    debugLog(`[walletkitBridge] 🔵 value type:`, typeof value);
+    log(`[walletkitBridge] fn returned for ${method}`);
+    log(`[walletkitBridge] 🔵 fn returned value:`, value);
+    log(`[walletkitBridge] 🔵 value type:`, typeof value);
     return value;
 }
 
@@ -96,10 +96,10 @@ export async function handleCall(id: string, method: WalletKitApiMethod, params?
         respond(id, value);
     } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        logError(`[walletkitBridge] handleCall error for ${method}:`, err);
-        logError(`[walletkitBridge] error type:`, typeof err);
-        logError(`[walletkitBridge] error message:`, message);
-        logError(`[walletkitBridge] error stack:`, err instanceof Error ? err.stack : 'no stack');
+        error(`[walletkitBridge] handleCall error for ${method}:`, err);
+        error(`[walletkitBridge] error type:`, typeof err);
+        error(`[walletkitBridge] error message:`, message);
+        error(`[walletkitBridge] error stack:`, err instanceof Error ? err.stack : 'no stack');
         emitCallDiagnostic(id, method, 'error', message);
         respond(id, undefined, { message });
     }

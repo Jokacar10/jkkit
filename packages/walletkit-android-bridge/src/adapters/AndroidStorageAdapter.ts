@@ -8,7 +8,7 @@
 
 import { StorageAdapter } from '@ton/walletkit';
 
-import { debugLog, logError } from '../utils/logger';
+import { log, error } from '../utils/logger';
 
 type AndroidStorageBridge = {
     storageGet: (key: string) => string | null;
@@ -39,13 +39,13 @@ export class AndroidStorageAdapter implements StorageAdapter {
     async get<T>(key: string): Promise<T | null> {
         try {
             const value = this.androidBridge.storageGet(key);
-            debugLog('[AndroidStorageAdapter] get:', key, '=', value ? `${value.substring(0, 100)}...` : 'null');
+            log('[AndroidStorageAdapter] get:', key, '=', value ? `${value.substring(0, 100)}...` : 'null');
             if (!value) {
                 return null;
             }
             return JSON.parse(value) as T;
-        } catch (error) {
-            logError('[AndroidStorageAdapter] Failed to get key:', key, error);
+        } catch (err) {
+            error('[AndroidStorageAdapter] Failed to get key:', key, err);
             return null;
         }
     }
@@ -53,28 +53,28 @@ export class AndroidStorageAdapter implements StorageAdapter {
     async set<T>(key: string, value: T): Promise<void> {
         try {
             const serialized = JSON.stringify(value);
-            debugLog('[AndroidStorageAdapter] set:', key, '=', serialized.substring(0, 100) + '...');
+            log('[AndroidStorageAdapter] set:', key, '=', serialized.substring(0, 100) + '...');
             this.androidBridge.storageSet(key, serialized);
-        } catch (error) {
-            logError('[AndroidStorageAdapter] Failed to set key:', key, error);
+        } catch (err) {
+            error('[AndroidStorageAdapter] Failed to set key:', key, err);
         }
     }
 
     async remove(key: string): Promise<void> {
         try {
-            debugLog('[AndroidStorageAdapter] remove:', key);
+            log('[AndroidStorageAdapter] remove:', key);
             this.androidBridge.storageRemove(key);
-        } catch (error) {
-            logError('[AndroidStorageAdapter] Failed to remove key:', key, error);
+        } catch (err) {
+            error('[AndroidStorageAdapter] Failed to remove key:', key, err);
         }
     }
 
     async clear(): Promise<void> {
         try {
-            debugLog('[AndroidStorageAdapter] clear: clearing all storage');
+            log('[AndroidStorageAdapter] clear: clearing all storage');
             this.androidBridge.storageClear();
-        } catch (error) {
-            logError('[AndroidStorageAdapter] Failed to clear storage:', error);
+        } catch (err) {
+            error('[AndroidStorageAdapter] Failed to clear storage:', err);
         }
     }
 }

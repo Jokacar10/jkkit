@@ -21,7 +21,7 @@ import type {
 } from '../types';
 import { callBridge } from '../utils/bridgeWrapper';
 import { walletKit } from '../core/state';
-import { debugWarn } from '../utils/logger';
+import { warn } from '../utils/logger';
 
 /**
  * Retrieves recent transactions for a wallet.
@@ -61,8 +61,8 @@ export async function createTransferTonTransaction(args: CreateTransferTonTransa
                 const previewResult = await wallet.getTransactionPreview(transaction);
                 const preview = previewResult?.preview ?? previewResult;
                 return { transaction, preview };
-            } catch (error) {
-                debugWarn('[walletkitBridge] getTransactionPreview failed', error);
+            } catch (err) {
+                warn('[walletkitBridge] getTransactionPreview failed', err);
             }
         }
 
@@ -92,8 +92,8 @@ export async function createTransferMultiTonTransaction(args: CreateTransferMult
                 const previewResult = await wallet.getTransactionPreview(transaction);
                 const preview = previewResult?.preview ?? previewResult;
                 return { transaction, preview };
-            } catch (error) {
-                debugWarn('[walletkitBridge] getTransactionPreview failed', error);
+            } catch (err) {
+                warn('[walletkitBridge] getTransactionPreview failed', err);
             }
         }
 

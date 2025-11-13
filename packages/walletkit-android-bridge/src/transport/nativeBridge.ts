@@ -11,7 +11,7 @@
  */
 import type { BridgePayload } from '../types';
 import { bigIntReplacer } from '../utils/serialization';
-import { debugLog, logError } from '../utils/logger';
+import { log, error } from '../utils/logger';
 
 /**
  * Resolves WalletKit's native bridge implementation exposed on the global scope.
@@ -57,7 +57,7 @@ export function postToNative(payload: BridgePayload): void {
             value: payload,
             stack: new Error('postToNative non-object payload').stack,
         };
-        logError('[walletkitBridge] postToNative received non-object payload', diagnostic);
+        error('[walletkitBridge] postToNative received non-object payload', diagnostic);
         throw new Error('Invalid payload - must be an object');
     }
     const json = JSON.stringify(payload, bigIntReplacer);
@@ -74,5 +74,5 @@ export function postToNative(payload: BridgePayload): void {
     if (payload.kind === 'event') {
         throw new Error('Native bridge not available - cannot deliver event');
     }
-    debugLog('[walletkitBridge] → native (no handler)', payload);
+    log('[walletkitBridge] → native (no handler)', payload);
 }

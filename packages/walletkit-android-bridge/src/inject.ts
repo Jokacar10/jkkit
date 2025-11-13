@@ -12,7 +12,7 @@ import { Buffer } from 'buffer';
 import { injectBridgeCode } from '@ton/walletkit/bridge';
 import type { InjectedToExtensionBridgeRequestPayload } from '@ton/walletkit';
 
-import { logError } from './utils/logger';
+import { error } from './utils/logger';
 
 type DeviceFeature = string | { name: string; maxMessages?: number; types?: string[] };
 
@@ -226,9 +226,9 @@ class AndroidWebViewTransport implements Transport {
                     pending.resolve(response.payload);
                 }
             }
-        } catch (error) {
-            logError('[AndroidTransport] Failed to pull/process response:', error);
-            pending.reject(error as Error);
+        } catch (err) {
+            error('[AndroidTransport] Failed to pull/process response:', err);
+            pending.reject(err as Error);
         }
     }
 
@@ -245,15 +245,15 @@ class AndroidWebViewTransport implements Transport {
                         this.eventCallbacks.forEach((callback) => {
                             try {
                                 callback(data.event);
-                            } catch (error) {
-                                logError('[AndroidTransport] Event callback error:', error);
+                            } catch (err) {
+                                error('[AndroidTransport] Event callback error:', err);
                             }
                         });
                     }
                 }
             }
-        } catch (error) {
-            logError('[AndroidTransport] Failed to pull/process event:', error);
+        } catch (err) {
+            error('[AndroidTransport] Failed to pull/process event:', err);
         }
     }
 

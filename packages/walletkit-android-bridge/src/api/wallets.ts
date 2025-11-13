@@ -34,11 +34,19 @@ type AdapterInstance = WalletKitAdapter;
 
 /**
  * Lists all wallets with metadata.
- * Returns raw WalletKit wallet objects - Kotlin handles mapping to WalletDescriptor.
+ * Enriches wallet objects with address property by calling getAddress() if needed.
  */
 export async function getWallets(): Promise<WalletKitWallet[]> {
     return callBridge('getWallets', async () => {
-        return (walletKit.getWallets?.() ?? []) as WalletKitWallet[];
+        const wallets = (walletKit.getWallets?.() ?? []) as WalletKitWallet[];
+        // Ensure each wallet has the address property populated
+        return wallets.map((wallet) => {
+            // If address is not set, call getAddress() to populate it
+            if (!wallet.address && wallet.getAddress) {
+                (wallet as { address: string }).address = wallet.getAddress();
+            }
+            return wallet;
+        });
     });
 }
 
@@ -186,7 +194,7 @@ export async function createAdapter(args: CreateAdapterArgs) {
 
 /**
  * Adds a wallet to WalletKit using an adapter.
- * Returns raw wallet object - Kotlin extracts address and publicKey.
+ * Enriches wallet object with address property by calling getAddress().
  */
 export async function addWallet(args: AddWalletArgs) {
     return callBridge('addWallet', async () => {
@@ -199,6 +207,11 @@ export async function addWallet(args: AddWalletArgs) {
 
         if (!wallet) {
             throw new Error('Failed to add wallet - may already exist');
+        }
+
+        // Ensure address property is populated
+        if (!wallet.address && wallet.getAddress) {
+            (wallet as { address: string }).address = wallet.getAddress();
         }
 
         // Clean up the adapter from store after use
