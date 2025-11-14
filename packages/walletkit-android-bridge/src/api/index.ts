@@ -37,6 +37,7 @@ const apiImpl: WalletKitBridgeApi = {
     // Wallets
     createSigner: wallets.createSigner,
     createAdapter: wallets.createAdapter,
+    getAdapterAddress: wallets.getAdapterAddress,
     addWallet: wallets.addWallet,
     getWallets: wallets.getWallets,
     getWallet: wallets.getWallet,
