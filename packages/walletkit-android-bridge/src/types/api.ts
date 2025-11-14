@@ -138,10 +138,13 @@ export interface GetNftsArgs {
     address: string;
     limit?: number;
     offset?: number;
+    collectionAddress?: string;
+    indirectOwnership?: boolean;
 }
 
 export interface GetNftArgs {
     address: string;
+    nftAddress: string;
 }
 
 export interface CreateTransferNftTransactionArgs {
@@ -206,7 +209,9 @@ export interface EmitBrowserBridgeRequestArgs {
     request: string;
 }
 
-export type HandleTonConnectUrlArgs = unknown;
+export interface HandleTonConnectUrlArgs {
+    url: string;
+}
 
 export interface WalletDescriptor {
     address: string;

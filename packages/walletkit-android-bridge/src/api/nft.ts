@@ -25,9 +25,12 @@ import { callBridge, callOnWalletBridge } from '../utils/bridgeWrapper';
  */
 export async function getNfts(args: GetNftsArgs) {
     return callBridge('getNfts', async () => {
-        const limit = args.limit && args.limit > 0 ? args.limit : 100;
-        const offset = args.offset && args.offset >= 0 ? args.offset : 0;
-        return await callOnWalletBridge(args.address, 'getNfts', { limit, offset });
+        return await callOnWalletBridge(args.address, 'getNfts', {
+            limit: args.limit,
+            offset: args.offset,
+            collectionAddress: args.collectionAddress,
+            indirectOwnership: args.indirectOwnership,
+        });
     });
 }
 
@@ -36,7 +39,7 @@ export async function getNfts(args: GetNftsArgs) {
  */
 export async function getNft(args: GetNftArgs) {
     return callBridge('getNft', async () => {
-        return await callOnWalletBridge(args.address, 'getNft');
+        return await callOnWalletBridge(args.address, 'getNft', args.nftAddress);
     });
 }
 
@@ -45,14 +48,12 @@ export async function getNft(args: GetNftArgs) {
  */
 export async function createTransferNftTransaction(args: CreateTransferNftTransactionArgs) {
     return callBridge('createTransferNftTransaction', async () => {
-        const params = {
+        return await callOnWalletBridge(args.address, 'createTransferNftTransaction', {
             nftAddress: args.nftAddress,
             toAddress: args.toAddress,
             transferAmount: args.transferAmount,
             comment: args.comment,
-        };
-
-        return await callOnWalletBridge(args.address, 'createTransferNftTransaction', params);
+        });
     });
 }
 
@@ -61,12 +62,10 @@ export async function createTransferNftTransaction(args: CreateTransferNftTransa
  */
 export async function createTransferNftRawTransaction(args: CreateTransferNftRawTransactionArgs) {
     return callBridge('createTransferNftRawTransaction', async () => {
-        const params = {
+        return await callOnWalletBridge(args.address, 'createTransferNftRawTransaction', {
             nftAddress: args.nftAddress,
             transferAmount: args.transferAmount,
             transferMessage: args.transferMessage,
-        };
-
-        return await callOnWalletBridge(args.address, 'createTransferNftRawTransaction', params);
+        });
     });
 }
