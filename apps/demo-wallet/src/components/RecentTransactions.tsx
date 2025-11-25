@@ -98,13 +98,13 @@ export const RecentTransactions: React.FC = memo(() => {
 
             // Determine if this is initial load or pagination
             const isInitial = currentPage === 0 && eventItems.length === 0;
-            
+
             if (isInitial) {
                 setIsInitialLoading(true);
             } else {
                 setIsPaginating(true);
             }
-            
+
             setError(null);
             try {
                 const offset = currentPage * limit;
@@ -241,11 +241,18 @@ export const RecentTransactions: React.FC = memo(() => {
                                 </div>
                             </div>
                         )}
-                        
-                        <div className={`space-y-3 transition-opacity duration-200 ${isPaginating ? 'opacity-50' : 'opacity-100'}`}>
+
+                        <div
+                            className={`space-y-3 transition-opacity duration-200 ${isPaginating ? 'opacity-50' : 'opacity-100'}`}
+                        >
                             {/* Pending transactions */}
                             {pendingTransactions.map((p) => (
-                                <TraceRow key={`pending-${p.id}`} traceId={p.id} externalHash={p.messageHash} isPending />
+                                <TraceRow
+                                    key={`pending-${p.id}`}
+                                    traceId={p.id}
+                                    externalHash={p.messageHash}
+                                    isPending
+                                />
                             ))}
 
                             {/* Confirmed transactions */}
@@ -310,12 +317,7 @@ export const RecentTransactions: React.FC = memo(() => {
                                     />
                                 </svg>
                             ) : (
-                                <svg
-                                    className="w-4 h-4 mr-1"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
+                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
@@ -330,9 +332,7 @@ export const RecentTransactions: React.FC = memo(() => {
                         <div />
                     )}
 
-                    <div className="text-sm text-gray-700">
-                        Page {currentPage + 1}
-                    </div>
+                    <div className="text-sm text-gray-700">Page {currentPage + 1}</div>
 
                     {hasNextEvents ? (
                         <button
@@ -363,12 +363,7 @@ export const RecentTransactions: React.FC = memo(() => {
                                     />
                                 </svg>
                             ) : (
-                                <svg
-                                    className="w-4 h-4 ml-1"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
+                                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path
                                         strokeLinecap="round"
                                         strokeLinejoin="round"

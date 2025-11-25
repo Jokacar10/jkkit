@@ -219,14 +219,51 @@ export type Action =
     | ContractDeployAction
     | JettonSwapAction;
 
+/**
+ * Helper: Build Event structure from parsed data
+ */
+function buildEvent(data: ToncenterTraceItem, account: string, actions: Action[], addressBook: AddressBook): Event {
+    return {
+        eventId: Base64ToHex(data.trace_id),
+        account: toAccount(account, addressBook),
+        timestamp: data.start_utime,
+        actions,
+        isScam: false,
+        lt: Number(data.start_lt),
+        inProgress: data.is_incomplete,
+        trace: data.trace,
+        transactions: data.transactions,
+    };
+}
+
+/**
+ * Helper: Filter actions based on priority (Jetton/NFT take precedence over TON transfers)
+ */
+function filterActionsByPriority(actions: Action[]): Action[] {
+    const hasJetton = actions.some((a) => a.type === 'JettonTransfer');
+    const hasNft = actions.some((a) => a.type === 'NftItemTransfer');
+
+    // If high-priority actions exist, filter out low-level TON transfer noise
+    if (hasJetton || hasNft) {
+        const keepTypes = hasJetton ? ['JettonTransfer'] : ['NftItemTransfer'];
+        return actions.filter((a) => keepTypes.includes(a.type));
+    }
+
+    return actions;
+}
+
+/**
+ * Parse trace item into structured Event with typed actions
+ */
 export function toEvent(data: ToncenterTraceItem, account: string, addressBook: AddressBook = {}): Event {
-    const actions: Action[] = [];
     const accountFriendly = asAddressFriendly(account);
     const transactions: Record<string, ToncenterTransaction> = data.transactions || {};
+    const actions: Action[] = [];
+
+    // Parse TON transfers from owner's transactions
     for (const txHash of Object.keys(transactions)) {
         const tx = transactions[txHash];
-        const txAccount = asAddressFriendly(tx.account);
-        if (txAccount !== accountFriendly) {
+        if (asAddressFriendly(tx.account) !== accountFriendly) {
             continue;
         }
         const status = computeStatus(tx);
@@ -235,57 +272,18 @@ export function toEvent(data: ToncenterTraceItem, account: string, addressBook: 
             ...parseIncomingTonTransfers(tx, addressBook, status),
         );
     }
-    // Smart-contract related actions (exec + deploy)
-    actions.push(...parseContractActions(accountFriendly, transactions, addressBook));
-    // Jetton transfers (sent/received)
-    actions.push(...parseJettonActions(accountFriendly, data, addressBook));
-    // NFT transfers (sent/received)
-    actions.push(...parseNftActions(accountFriendly, data, addressBook));
 
-    // If jetton actions exist, drop TonTransfer/SmartContractExec noise tied to same flow
-    const hasJetton = actions.some((a) => a.type === 'JettonTransfer');
-    const hasNft = actions.some((a) => a.type === 'NftItemTransfer');
-    if (hasJetton || hasNft) {
-        const keepTypes: string[] = hasJetton ? ['JettonTransfer'] : ['NftItemTransfer'];
-        let filtered: Action[] = actions.filter((a) => keepTypes.includes(a.type));
-        if (hasNft && !hasJetton) {
-            // Drop id field from NFT actions to match expected output shape
-            filtered = filtered.map((a) => {
-                if (a.type !== 'NftItemTransfer') return a;
-                const nft = a as NftItemTransferAction;
-                const out: Omit<NftItemTransferAction, 'id'> = {
-                    type: 'NftItemTransfer',
-                    status: nft.status,
-                    NftItemTransfer: nft.NftItemTransfer,
-                    simplePreview: nft.simplePreview,
-                    baseTransactions: nft.baseTransactions,
-                };
-                return out as unknown as Action;
-            });
-        }
-        return {
-            eventId: Base64ToHex(data.trace_id),
-            account: toAccount(account, addressBook),
-            timestamp: data.start_utime,
-            actions: filtered,
-            isScam: false,
-            lt: Number(data.start_lt),
-            inProgress: data.is_incomplete,
-            trace: data.trace,
-            transactions: data.transactions,
-        };
-    }
-    return {
-        eventId: Base64ToHex(data.trace_id),
-        account: toAccount(account, addressBook),
-        timestamp: data.start_utime,
-        actions,
-        isScam: false, // TODO implement detect isScam for Event
-        lt: Number(data.start_lt),
-        inProgress: data.is_incomplete,
-        trace: data.trace,
-        transactions: data.transactions,
-    };
+    // Parse contract interactions, jettons, and NFTs
+    actions.push(
+        ...parseContractActions(accountFriendly, transactions, addressBook),
+        ...parseJettonActions(accountFriendly, data, addressBook),
+        ...parseNftActions(accountFriendly, data, addressBook),
+    );
+
+    // Filter by priority: Jetton/NFT actions hide underlying TON transfers
+    const filteredActions = filterActionsByPriority(actions);
+
+    return buildEvent(data, account, filteredActions, addressBook);
 }
 
 export function emulationEvent(data: ToncenterEmulationResponse, account?: string): Event {
