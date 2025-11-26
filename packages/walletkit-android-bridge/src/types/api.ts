@@ -138,10 +138,13 @@ export interface GetNftsArgs {
     address: string;
     limit?: number;
     offset?: number;
+    collectionAddress?: string;
+    indirectOwnership?: boolean;
 }
 
 export interface GetNftArgs {
     address: string;
+    nftAddress: string;
 }
 
 export interface CreateTransferNftTransactionArgs {
@@ -206,7 +209,9 @@ export interface EmitBrowserBridgeRequestArgs {
     request: string;
 }
 
-export type HandleTonConnectUrlArgs = unknown;
+export interface HandleTonConnectUrlArgs {
+    url: string;
+}
 
 export interface WalletDescriptor {
     address: string;
@@ -225,6 +230,7 @@ export interface WalletKitBridgeApi {
     createTonMnemonic(args?: CreateTonMnemonicArgs): PromiseOrValue<{ items: string[] }>;
     createSigner(args: CreateSignerArgs): PromiseOrValue<{ signerId: string; publicKey: string }>;
     createAdapter(args: CreateAdapterArgs): PromiseOrValue<{ adapterId: string; address: string }>;
+    getAdapterAddress(args: { adapterId: string }): PromiseOrValue<{ address: string }>;
     addWallet(args: AddWalletArgs): PromiseOrValue<{ address: string; publicKey: string }>;
     getWallets(): PromiseOrValue<WalletDescriptor[]>;
     getWallet(args: { address: string }): PromiseOrValue<WalletDescriptor | null>;

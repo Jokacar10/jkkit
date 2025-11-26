@@ -8,7 +8,7 @@
 
 import { Buffer as NodeBuffer } from 'buffer';
 
-import { debugLog, debugWarn, logError } from '../utils/logger';
+import { log, warn, error } from '../utils/logger';
 
 type NativeStorageBridge = {
     storageGet: (key: string) => string | null | undefined;
@@ -30,7 +30,7 @@ function ensureBuffer(scope: GlobalWithBridge) {
             writable: true,
             configurable: true,
         });
-        debugLog('[walletkitBridge] ✅ Buffer polyfill injected');
+        log('[walletkitBridge] ✅ Buffer polyfill injected');
     }
 }
 
@@ -49,7 +49,7 @@ export function setupNativeBridge() {
     const bridge = scope.WalletKitNative;
 
     if (!bridge) {
-        debugWarn('[walletkitBridge] WalletKitNative bridge not found, storage will not be available');
+        warn('[walletkitBridge] WalletKitNative bridge not found, storage will not be available');
         return;
     }
 
@@ -60,19 +60,19 @@ export function setupNativeBridge() {
         typeof bridge.storageRemove !== 'function' ||
         typeof bridge.storageClear !== 'function'
     ) {
-        debugWarn('[walletkitBridge] Bridge is missing storage methods, WalletKitNativeStorage will not be available');
+        warn('[walletkitBridge] Bridge is missing storage methods, WalletKitNativeStorage will not be available');
         return;
     }
 
     // Create a secure storage implementation that redirects to the native bridge
     try {
-        const nativeStorage: Storage = {
+        const nativeStorage = {
             getItem(key: string): string | null {
                 try {
                     const value = bridge.storageGet(key);
                     return value === undefined || value === null ? null : String(value);
                 } catch (err) {
-                    logError('[walletkitBridge] Error in WalletKitNativeStorage.getItem:', err);
+                    error('[walletkitBridge] Error in WalletKitNativeStorage.getItem:', err);
                     return null;
                 }
             },
@@ -81,7 +81,7 @@ export function setupNativeBridge() {
                 try {
                     bridge.storageSet(key, String(value));
                 } catch (err) {
-                    logError('[walletkitBridge] Error in WalletKitNativeStorage.setItem:', err);
+                    error('[walletkitBridge] Error in WalletKitNativeStorage.setItem:', err);
                 }
             },
 
@@ -89,7 +89,7 @@ export function setupNativeBridge() {
                 try {
                     bridge.storageRemove(key);
                 } catch (err) {
-                    logError('[walletkitBridge] Error in WalletKitNativeStorage.removeItem:', err);
+                    error('[walletkitBridge] Error in WalletKitNativeStorage.removeItem:', err);
                 }
             },
 
@@ -97,22 +97,10 @@ export function setupNativeBridge() {
                 try {
                     bridge.storageClear();
                 } catch (err) {
-                    logError('[walletkitBridge] Error in WalletKitNativeStorage.clear:', err);
+                    error('[walletkitBridge] Error in WalletKitNativeStorage.clear:', err);
                 }
             },
-
-            get length(): number {
-                // Note: The native bridge doesn't provide a length method
-                // This is a limitation but shouldn't affect most use cases
-                return 0;
-            },
-
-            key(_index: number): string | null {
-                // Note: The native bridge doesn't provide a key enumeration method
-                // This is a limitation but shouldn't affect most use cases
-                return null;
-            },
-        };
+        } as Storage;
 
         // Expose the native storage without clobbering existing properties
         if (typeof scope.WalletKitNativeStorage === 'undefined') {
@@ -121,12 +109,12 @@ export function setupNativeBridge() {
                 writable: false,
                 configurable: true,
             });
-            debugLog('[walletkitBridge] ✅ WalletKitNativeStorage exposed for secure native storage');
+            log('[walletkitBridge] ✅ WalletKitNativeStorage exposed for secure native storage');
         } else {
-            debugWarn('[walletkitBridge] WalletKitNativeStorage already present, not overriding');
+            warn('[walletkitBridge] WalletKitNativeStorage already present, not overriding');
         }
     } catch (err) {
-        logError('[walletkitBridge] Failed to expose WalletKitNativeStorage:', err);
+        error('[walletkitBridge] Failed to expose WalletKitNativeStorage:', err);
     }
 }
 

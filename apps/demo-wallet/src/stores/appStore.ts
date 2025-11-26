@@ -209,7 +209,7 @@ if (typeof window !== 'undefined') {
     const persistedNetwork = store.auth.network || 'testnet';
     log.info(`Initializing WalletKit with persisted network: ${persistedNetwork}`);
 
-    store.initializeWalletKit(persistedNetwork);
+    await store.initializeWalletKit(persistedNetwork);
 }
 
 // Hook for accessing WalletKit instance
@@ -251,9 +251,9 @@ export const useWallet = () =>
             currentWallet: state.wallet.currentWallet,
             savedWallets: state.wallet.savedWallets,
             activeWalletId: state.wallet.activeWalletId,
+            loadAllWallets: state.loadAllWallets,
             createWallet: state.createWallet,
             importWallet: state.importWallet,
-            loadWallet: state.loadWallet,
             clearWallet: state.clearWallet,
             updateBalance: state.updateBalance,
             addTransaction: state.addTransaction,

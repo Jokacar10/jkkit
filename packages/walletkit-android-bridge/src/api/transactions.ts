@@ -21,7 +21,7 @@ import type {
 } from '../types';
 import { callBridge } from '../utils/bridgeWrapper';
 import { walletKit } from '../core/state';
-import { debugWarn } from '../utils/logger';
+import { warn } from '../utils/logger';
 
 /**
  * Retrieves recent transactions for a wallet.
@@ -34,7 +34,7 @@ export async function getRecentTransactions(args: GetRecentTransactionsArgs): Pr
             throw new Error(`Wallet not found for address ${args.address}`);
         }
 
-        const response = await wallet.client.getAccountTransactions({
+        const response = await wallet.getClient().getAccountTransactions({
             address: [args.address],
             limit: args.limit || 10,
         });
@@ -61,8 +61,8 @@ export async function createTransferTonTransaction(args: CreateTransferTonTransa
                 const previewResult = await wallet.getTransactionPreview(transaction);
                 const preview = previewResult?.preview ?? previewResult;
                 return { transaction, preview };
-            } catch (error) {
-                debugWarn('[walletkitBridge] getTransactionPreview failed', error);
+            } catch (err) {
+                warn('[walletkitBridge] getTransactionPreview failed', err);
             }
         }
 
@@ -92,8 +92,8 @@ export async function createTransferMultiTonTransaction(args: CreateTransferMult
                 const previewResult = await wallet.getTransactionPreview(transaction);
                 const preview = previewResult?.preview ?? previewResult;
                 return { transaction, preview };
-            } catch (error) {
-                debugWarn('[walletkitBridge] getTransactionPreview failed', error);
+            } catch (err) {
+                warn('[walletkitBridge] getTransactionPreview failed', err);
             }
         }
 

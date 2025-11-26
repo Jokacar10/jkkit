@@ -25,11 +25,10 @@ import { callBridge, callOnWalletBridge } from '../utils/bridgeWrapper';
  */
 export async function getJettons(args: GetJettonsArgs) {
     return callBridge('getJettons', async () => {
-        const limit =
-            Number.isFinite(args.limit) && (args.limit as number) > 0 ? Math.floor(args.limit as number) : 100;
-        const offset =
-            Number.isFinite(args.offset) && (args.offset as number) >= 0 ? Math.floor(args.offset as number) : 0;
-        return await callOnWalletBridge(args.address, 'getJettons', { limit, offset });
+        return await callOnWalletBridge(args.address, 'getJettons', {
+            limit: args.limit,
+            offset: args.offset,
+        });
     });
 }
 
@@ -38,14 +37,12 @@ export async function getJettons(args: GetJettonsArgs) {
  */
 export async function createTransferJettonTransaction(args: CreateTransferJettonTransactionArgs) {
     return callBridge('createTransferJettonTransaction', async () => {
-        const params = {
+        return await callOnWalletBridge(args.address, 'createTransferJettonTransaction', {
             jettonAddress: args.jettonAddress,
             amount: args.amount,
             toAddress: args.toAddress,
             comment: args.comment,
-        };
-
-        return await callOnWalletBridge(args.address, 'createTransferJettonTransaction', params);
+        });
     });
 }
 
@@ -54,10 +51,6 @@ export async function createTransferJettonTransaction(args: CreateTransferJetton
  */
 export async function getJettonBalance(args: GetJettonBalanceArgs) {
     return callBridge('getJettonBalance', async () => {
-        if (!args.jettonAddress) {
-            throw new Error('Jetton address is required');
-        }
-
         return await callOnWalletBridge(args.address, 'getJettonBalance', args.jettonAddress);
     });
 }
@@ -67,10 +60,6 @@ export async function getJettonBalance(args: GetJettonBalanceArgs) {
  */
 export async function getJettonWalletAddress(args: GetJettonWalletAddressArgs) {
     return callBridge('getJettonWalletAddress', async () => {
-        if (!args.jettonAddress) {
-            throw new Error('Jetton address is required');
-        }
-
         return await callOnWalletBridge(args.address, 'getJettonWalletAddress', args.jettonAddress);
     });
 }

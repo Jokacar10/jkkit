@@ -5,6 +5,52 @@
 - **[WalletKit Integration Guide](packages/walletkit/DOCUMENTATION.md)** - Getting started with `@ton/walletkit` - setup, handling requests, and basic operations
 - **[Browser Extension Build](apps/demo-wallet/EXTENSION.md)** - How to build and load the demo wallet as a Chrome extension
 - **[JS Bridge Usage](packages/walletkit/examples/js-bridge-usage.md)** - Implementing TonConnect JS Bridge for browser extension wallets
+- **[npm @ton/walletkit](https://www.npmjs.com/package/@ton/walletkit)** - provides npm package everything needed to integrate TON Connect into your wallet
+- **[iOS WalletKit](https://github.com/ton-connect/kit-ios)** - Swift Package providing TON wallet capabilities for iOS and macOS
+- **[Android WalletKit ](https://github.com/ton-connect/kit-android)** - Kotlin/Java Package providing TON wallet capabilities for Android
+ 
+## Quick start
+
+```bash
+pnpm add @ton/walletkit
+```
+
+```ts
+import { 
+  TonWalletKit,      // Main SDK class
+  Signer,            // Handles cryptographic signing
+  WalletV5R1Adapter, // Latest wallet version (recommended)
+  CHAIN,             // Network constants (MAINNET/TESTNET)
+} from '@ton/walletkit';
+
+const kit = new TonWalletKit({
+  network: CHAIN.MAINNET,
+  bridge: {
+    bridgeUrl: 'https://conmnect.ton.org/bridge',  // TON Connect bridge for dApp communication
+  },
+});
+
+// Wait for initialization to complete
+await kit.waitForReady();
+
+// Add a wallet from mnemonic (24-word seed phrase)
+const signer = await Signer.fromMnemonic(['word1', 'word2', '...'], { type: 'ton' });
+const walletAdapter = await WalletV5R1Adapter.create(signer, {
+  client: kit.getApiClient(),
+  network: CHAIN.MAINNET,
+});
+
+await kit.addWallet(walletAdapter);
+```
+
+See [WalletKit Integration Guide](packages/walletkit/DOCUMENTATION.md#1-initialize-the-kit)
+
+### Web platform
+
+- [How to initialize the TON Connect's](https://docs.ton.org/ecosystem/ton-connect/walletkit/web/init)
+- [How to manage TON wallets](https://docs.ton.org/ecosystem/ton-connect/walletkit/web/wallets)
+- [How to handle connections](https://docs.ton.org/ecosystem/ton-connect/walletkit/web/connections)
+- [How to handle other events](https://docs.ton.org/ecosystem/ton-connect/walletkit/web/events)
 
 ## Testing
 
@@ -45,7 +91,7 @@ DAPP_URL="https://allure-test-runner.vercel.app/e2e" # (optional) target app url
 VITE_BRIDGE_URL="http://localhost:8081/bridge" # (optional) use local bridge url in web app
 E2E_SLOW_MO="500" # (optional) Slows down Playwright operations by the specified amount of milliseconds
 # (optional) mode extension
-E2E_WALLET_SOURCE_EXTENSION="apps/demo-wallet/dist-extension"
+E2E_WALLET_SOURCE_EXTENSION="apps/demo-wallet/dist-extension-chrome"
 # (optional) mode web
 E2E_WALLET_SOURCE="http://localhost:5173/"
 ```

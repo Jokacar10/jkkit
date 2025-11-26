@@ -12,7 +12,7 @@
  * Simplified bridge for wallet creation, listing, removal, and state retrieval.
  */
 
-import { CHAIN, type Hex } from '@ton/walletkit';
+import { type Hex } from '@ton/walletkit';
 
 import type {
     RemoveWalletArgs,
@@ -34,11 +34,19 @@ type AdapterInstance = WalletKitAdapter;
 
 /**
  * Lists all wallets with metadata.
- * Returns raw WalletKit wallet objects - Kotlin handles mapping to WalletDescriptor.
+ * Enriches wallet objects with address property by calling getAddress() if needed.
  */
 export async function getWallets(): Promise<WalletKitWallet[]> {
     return callBridge('getWallets', async () => {
-        return (walletKit.getWallets?.() ?? []) as WalletKitWallet[];
+        const wallets = (walletKit.getWallets?.() ?? []) as WalletKitWallet[];
+        // Ensure each wallet has the address property populated
+        return wallets.map((wallet) => {
+            // If address is not set, call getAddress() to populate it
+            if (!wallet.address && wallet.getAddress) {
+                (wallet as { address: string }).address = wallet.getAddress();
+            }
+            return wallet;
+        });
     });
 }
 
@@ -147,30 +155,26 @@ export async function createSigner(args: CreateSignerArgs) {
 /**
  * Creates a wallet adapter from a signer.
  * Supports both regular signers (from mnemonic/secretKey) and custom signers (hardware wallets).
- * Returns raw adapter object - Kotlin generates adapterId and extracts address.
+ * Returns adapter ID - Kotlin is responsible for all mapping and transformation.
  */
 export async function createAdapter(args: CreateAdapterArgs) {
     return callBridge('createAdapter', async () => {
         const signer = await getSigner(args);
-        const network = args.network === 'mainnet' ? CHAIN.MAINNET : CHAIN.TESTNET;
-
-        const workchain = args.workchain !== undefined ? args.workchain : 0;
-        const walletId = args.walletId !== undefined ? args.walletId : undefined;
 
         let adapter: AdapterInstance;
         if (args.walletVersion === 'v5r1') {
             adapter = (await WalletV5R1Adapter!.create(signer, {
                 client: walletKit.getApiClient(),
-                network,
-                workchain,
-                ...(walletId !== undefined && { walletId }),
+                network: args.network,
+                workchain: args.workchain,
+                walletId: args.walletId,
             })) as AdapterInstance;
         } else if (args.walletVersion === 'v4r2') {
             adapter = (await WalletV4R2Adapter!.create(signer, {
                 client: walletKit.getApiClient(),
-                network,
-                workchain,
-                ...(walletId !== undefined && { walletId }),
+                network: args.network,
+                workchain: args.workchain,
+                walletId: args.walletId,
             })) as AdapterInstance;
         } else {
             throw new Error(`Unsupported wallet version: ${args.walletVersion}`);
@@ -180,13 +184,29 @@ export async function createAdapter(args: CreateAdapterArgs) {
         const tempId = `adapter_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         adapterStore.set(tempId, adapter);
 
+        // Return only the temp ID and the raw adapter object
+        // Kotlin is responsible for extracting any needed properties
         return { _tempId: tempId, adapter };
+    });
+}
+/**
+ * Gets the address from a stored adapter by calling its getAddress() method.
+ * This is needed because adapter properties are now methods, not serializable properties.
+ */
+export async function getAdapterAddress(args: { adapterId: string }) {
+    return callBridge('getAdapterAddress', async () => {
+        const adapter = adapterStore.get(args.adapterId);
+        if (!adapter) {
+            throw new Error(`Adapter not found: ${args.adapterId}`);
+        }
+
+        return { address: adapter.getAddress() };
     });
 }
 
 /**
  * Adds a wallet to WalletKit using an adapter.
- * Returns raw wallet object - Kotlin extracts address and publicKey.
+ * Enriches wallet object with address property by calling getAddress().
  */
 export async function addWallet(args: AddWalletArgs) {
     return callBridge('addWallet', async () => {
@@ -199,6 +219,11 @@ export async function addWallet(args: AddWalletArgs) {
 
         if (!wallet) {
             throw new Error('Failed to add wallet - may already exist');
+        }
+
+        // Ensure address property is populated
+        if (!wallet.address && wallet.getAddress) {
+            (wallet as { address: string }).address = wallet.getAddress();
         }
 
         // Clean up the adapter from store after use

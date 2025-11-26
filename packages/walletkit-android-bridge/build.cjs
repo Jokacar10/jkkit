@@ -122,6 +122,15 @@ async function buildAll() {
     console.log(`\n📁 Output directory: ${buildDir}`);
     console.log('   - walletkit-android-bridge.mjs (Main bridge for RPC)');
     console.log('   - inject.mjs (Internal browser injection)');
+
+    // Copy index.html to dist
+    const indexHtmlSrc = path.resolve(__dirname, 'index.html');
+    const indexHtmlDest = path.resolve(buildDir, 'index.html');
+    if (fs.existsSync(indexHtmlSrc)) {
+        await fs.promises.copyFile(indexHtmlSrc, indexHtmlDest);
+        console.log('   - index.html (WebView entry point)');
+    }
+
     console.log('\n💡 Bundles will be copied to Android SDK assets by Gradle task syncWalletKitWebViewAssets');
 
     // Generate checksums if requested

@@ -23,11 +23,7 @@ import { ensureInternalBrowserResolverMap } from '../utils/internalBrowserResolv
  */
 export async function handleTonConnectUrl(args: HandleTonConnectUrlArgs) {
     return callBridge('handleTonConnectUrl', async () => {
-        if (!args || typeof args !== 'string') {
-            throw new Error('TON Connect URL string is required');
-        }
-
-        return await walletKit.handleTonConnectUrl(args);
+        return await walletKit.handleTonConnectUrl(args.url);
     });
 }
 
@@ -60,7 +56,7 @@ export async function disconnectSession(args?: DisconnectSessionArgs) {
 export async function processInternalBrowserRequest(args: ProcessInternalBrowserRequestArgs) {
     return callBridge('processInternalBrowserRequest', async () => {
         // Extract domain from URL if provided, otherwise use default
-        const domain = args.url ? new URL(args.url).hostname : 'internal-browser';
+        const domain = args.url ? new URL(args.url).host : 'internal-browser';
 
         const messageInfo = {
             messageId: args.messageId,

@@ -7,16 +7,18 @@ on:
 
 jobs:
   release:
-    runs-on: [self-hosted, k8s, linux]
-    container:
-      image: node:22-slim
-      options: --user root
+    runs-on: ubuntu-latest
+    # runs-on: [self-hosted, k8s, linux]
+    environment: Release
+    # container:
+    #   image: node:22-slim
+    #   options: --user root
     
     steps:
-      - name: Install git
-        run: |
-          apt-get update
-          apt-get install -y git
+      # - name: Install git
+      #   run: |
+      #     apt-get update
+      #     apt-get install -y git
 
       - name: Checkout code
         uses: actions/checkout@v5
@@ -49,6 +51,7 @@ jobs:
         with:
           node-version: '${{ env.NVMRC }}'
           cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

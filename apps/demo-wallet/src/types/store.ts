@@ -113,7 +113,7 @@ export interface NftsSlice {
 // Wallet slice interface
 export interface WalletSlice extends WalletState {
     // WalletKit initialization
-    initializeWalletKit: (network?: 'mainnet' | 'testnet') => Promise<ITonWalletKit | undefined>;
+    initializeWalletKit: (network?: 'mainnet' | 'testnet') => Promise<void>;
 
     // Multi-wallet actions
     createWallet: (mnemonic: string[], name?: string, version?: 'v5r1' | 'v4r2') => Promise<string>; // Returns wallet ID
@@ -126,7 +126,6 @@ export interface WalletSlice extends WalletState {
     loadSavedWalletsIntoKit: (walletKit: ITonWalletKit) => Promise<void>;
 
     // Legacy actions (for backward compatibility)
-    loadWallet: () => Promise<void>;
     clearWallet: () => void;
     updateBalance: () => Promise<void>;
     addTransaction: (transaction: PreviewTransaction) => void;

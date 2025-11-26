@@ -7,15 +7,28 @@
  */
 
 /**
- * Conditional logging utility for the Android WalletKit bridge.
+ * Flexible logging utility for the Android WalletKit bridge.
  *
- * Logs are disabled by default in production and can be enabled by setting:
- * window.__WALLETKIT_DEBUG__ = true;
+ * Logging can be controlled by setting the log level from the Android SDK:
+ * window.__WALLETKIT_LOG_LEVEL__ = 'DEBUG'; // OFF, ERROR, WARN, INFO, DEBUG
  *
- * This allows for debugging in production when needed without flooding logs.
+ * Default is 'OFF' in production for performance.
  */
 
-type DebugWindow = Window & { __WALLETKIT_DEBUG__?: boolean };
+/**
+ * Log levels in order of verbosity
+ */
+export enum LogLevel {
+    OFF = 0,
+    ERROR = 1,
+    WARN = 2,
+    INFO = 3,
+    DEBUG = 4,
+}
+
+type LogLevelString = 'OFF' | 'ERROR' | 'WARN' | 'INFO' | 'DEBUG';
+
+type LogWindow = Window & { __WALLETKIT_LOG_LEVEL__?: LogLevelString };
 
 type ConsoleLike = {
     log?: (...args: unknown[]) => void;
@@ -23,48 +36,53 @@ type ConsoleLike = {
     error?: (...args: unknown[]) => void;
 };
 
-const debugWindow = window as DebugWindow;
-const DEBUG_ENABLED = Boolean(debugWindow.__WALLETKIT_DEBUG__);
-
+const logWindow = window as LogWindow;
 const consoleRef = (globalThis as { console?: ConsoleLike }).console;
 
 /**
- * Debug logger - only logs when DEBUG_ENABLED is true
+ * Get the current log level from window
  */
-export const debugLog = (...args: unknown[]): void => {
-    if (DEBUG_ENABLED) {
-        consoleRef?.log?.(...args);
+function getCurrentLogLevel(): LogLevel {
+    const levelStr = logWindow.__WALLETKIT_LOG_LEVEL__ || 'OFF';
+    return LogLevel[levelStr] ?? LogLevel.OFF;
+}
+
+/**
+ * Debug logger - logs detailed debugging information
+ * Only logs when level is DEBUG or higher
+ */
+export const log = (...args: unknown[]): void => {
+    if (getCurrentLogLevel() >= LogLevel.DEBUG) {
+        consoleRef?.log?.('[WalletKit]', ...args);
     }
 };
 
 /**
- * Warning logger - only logs when DEBUG_ENABLED is true
+ * Info logger - logs informational messages
+ * Only logs when level is INFO or higher
  */
-export const debugWarn = (...args: unknown[]): void => {
-    if (DEBUG_ENABLED) {
-        consoleRef?.warn?.(...args);
+export const info = (...args: unknown[]): void => {
+    if (getCurrentLogLevel() >= LogLevel.INFO) {
+        consoleRef?.log?.('[WalletKit]', ...args);
     }
 };
 
 /**
- * Error logger - only logs when DEBUG_ENABLED is true
+ * Warning logger - logs warnings
+ * Only logs when level is WARN or higher
  */
-export const debugError = (...args: unknown[]): void => {
-    if (DEBUG_ENABLED) {
-        consoleRef?.error?.(...args);
+export const warn = (...args: unknown[]): void => {
+    if (getCurrentLogLevel() >= LogLevel.WARN) {
+        consoleRef?.warn?.('[WalletKit]', ...args);
     }
 };
 
 /**
- * Always log errors (for critical failures that should always be visible)
+ * Error logger - logs errors
+ * Only logs when level is ERROR or higher
  */
-export const logError = (...args: unknown[]): void => {
-    consoleRef?.error?.(...args);
-};
-
-/**
- * Always log warnings (for important warnings that should always be visible)
- */
-export const logWarn = (...args: unknown[]): void => {
-    consoleRef?.warn?.(...args);
+export const error = (...args: unknown[]): void => {
+    if (getCurrentLogLevel() >= LogLevel.ERROR) {
+        consoleRef?.error?.('[WalletKit]', ...args);
+    }
 };

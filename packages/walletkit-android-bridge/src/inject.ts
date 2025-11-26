@@ -7,29 +7,17 @@
  */
 
 // Bridge injection for Android internal browser
-import { Buffer } from 'buffer';
+import { injectBridgeCode, TONCONNECT_BRIDGE_EVENT, TONCONNECT_BRIDGE_REQUEST } from '@ton/walletkit/bridge';
+import type { InjectedToExtensionBridgeRequestPayload, JSBridgeInjectOptions } from '@ton/walletkit';
+import type { Transport } from '@ton/walletkit';
 
-import { injectBridgeCode } from '@ton/walletkit/bridge';
-import type { InjectedToExtensionBridgeRequestPayload } from '@ton/walletkit';
+import { error } from './utils/logger';
 
-import { logError } from './utils/logger';
-
-type DeviceFeature = string | { name: string; maxMessages?: number; types?: string[] };
-
-type WalletPlatform = 'ios' | 'android' | 'macos' | 'windows' | 'linux' | 'chrome' | 'firefox' | 'safari';
-
-interface WalletInfoPayload {
-    name: string;
-    app_name: string;
-    about_url: string;
-    image: string;
-    platforms: WalletPlatform[];
-    jsBridgeKey: string;
-    injected: boolean;
-    embedded: boolean;
-    tondns: string;
-    bridgeUrl: string;
-    features: DeviceFeature[];
+declare global {
+    interface Window {
+        injectWalletKit: (options: JSBridgeInjectOptions) => void;
+        AndroidTonConnect?: TonConnectBridge;
+    }
 }
 
 type TonConnectBridge = {
@@ -42,9 +30,7 @@ type TonConnectBridge = {
 };
 
 type TonConnectWindow = Window & {
-    Buffer?: typeof Buffer;
     __tonconnect_frameId?: string;
-    AndroidTonConnect?: TonConnectBridge;
     tonkeeper?: {
         tonconnect?: {
             isWalletBrowser?: boolean;
@@ -52,18 +38,7 @@ type TonConnectWindow = Window & {
     };
 };
 
-// Import Transport type - it's available as internal export
-interface Transport {
-    send(request: Omit<InjectedToExtensionBridgeRequestPayload, 'id'>): Promise<unknown>;
-    onEvent(callback: (event: unknown) => void): void;
-    isAvailable(): boolean;
-    requestContentScriptInjection?(): void;
-    destroy(): void;
-}
-
 const tonWindow = window as TonConnectWindow;
-tonWindow.Buffer = Buffer;
-globalThis.Buffer = Buffer;
 
 // Generate unique frame ID
 const frameId =
@@ -72,58 +47,6 @@ const frameId =
         window === window.top ? 'main' : `frame-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
 
 const isAndroidWebView = typeof tonWindow.AndroidTonConnect !== 'undefined';
-
-// Device info matching demo wallet extension format
-const deviceInfo: {
-    platform: 'android';
-    appName: string;
-    appVersion: string;
-    maxProtocolVersion: number;
-    features: DeviceFeature[];
-} = {
-    platform: 'android',
-    appName: 'Tonkeeper',
-    appVersion: '1.0.0',
-    maxProtocolVersion: 2,
-    features: [
-        'SendTransaction',
-        {
-            name: 'SendTransaction',
-            maxMessages: 4,
-        },
-        {
-            name: 'SignData',
-            types: ['text', 'binary', 'cell'],
-        },
-    ],
-};
-
-// Wallet info matching demo wallet extension format
-// NOTE: TonConnect SDK expects snake_case properties (app_name, about_url, image)
-// even though the TypeScript types use camelCase
-const walletInfo: WalletInfoPayload = {
-    name: 'tonkeeper', // key for wallet
-    app_name: 'Tonkeeper', // SDK expects app_name not appName
-    about_url: 'https://tonkeeper.com', // SDK expects about_url not aboutUrl
-    image: 'https://tonkeeper.com/assets/tonconnect-icon.png', // SDK expects image not imageUrl
-    platforms: ['ios', 'android', 'macos', 'windows', 'linux', 'chrome', 'firefox', 'safari'], // supported platforms
-    jsBridgeKey: 'tonkeeper', // window key for wallet bridge
-    injected: true, // wallet is injected into the page (via injectBridgeCode)
-    embedded: true, // dApp IS embedded in wallet (wallet's internal browser) - tells dApp to prefer injected bridge
-    tondns: 'tonkeeper.ton', // tondns for wallet
-    bridgeUrl: 'https://bridge.tonapi.io/bridge', // url for wallet bridge
-    features: [
-        'SendTransaction',
-        {
-            name: 'SendTransaction',
-            maxMessages: 4,
-        },
-        {
-            name: 'SignData',
-            types: ['text', 'binary', 'cell'],
-        },
-    ],
-};
 
 /**
  * Android WebView Transport Implementation
@@ -226,9 +149,9 @@ class AndroidWebViewTransport implements Transport {
                     pending.resolve(response.payload);
                 }
             }
-        } catch (error) {
-            logError('[AndroidTransport] Failed to pull/process response:', error);
-            pending.reject(error as Error);
+        } catch (err) {
+            error('[AndroidTransport] Failed to pull/process response:', err);
+            pending.reject(err as Error);
         }
     }
 
@@ -241,19 +164,19 @@ class AndroidWebViewTransport implements Transport {
                 const eventStr = bridge.pullEvent(frameId);
                 if (eventStr) {
                     const data = JSON.parse(eventStr) as { type?: string; event?: unknown };
-                    if (data.type === 'TONCONNECT_BRIDGE_EVENT' && data.event) {
+                    if (data.type === TONCONNECT_BRIDGE_EVENT && data.event) {
                         this.eventCallbacks.forEach((callback) => {
                             try {
                                 callback(data.event);
-                            } catch (error) {
-                                logError('[AndroidTransport] Event callback error:', error);
+                            } catch (err) {
+                                error('[AndroidTransport] Event callback error:', err);
                             }
                         });
                     }
                 }
             }
-        } catch (error) {
-            logError('[AndroidTransport] Failed to pull/process event:', error);
+        } catch (err) {
+            error('[AndroidTransport] Failed to pull/process event:', err);
         }
     }
 
@@ -266,7 +189,7 @@ class AndroidWebViewTransport implements Transport {
 
         bridge.postMessage(
             JSON.stringify({
-                type: 'TONCONNECT_BRIDGE_REQUEST',
+                type: TONCONNECT_BRIDGE_REQUEST,
                 messageId,
                 method: request.method || 'unknown',
                 params: request.params || {},
@@ -296,17 +219,25 @@ class AndroidWebViewTransport implements Transport {
         const iframes = document.querySelectorAll('iframe');
         iframes.forEach((iframe) => {
             try {
-                const iframeWindow = iframe.contentWindow as TonConnectWindow;
-                if (iframeWindow && !iframeWindow.tonkeeper?.tonconnect) {
-                    injectBridgeCode(
-                        iframeWindow,
-                        {
-                            deviceInfo,
-                            walletInfo,
-                            isWalletBrowser: true,
-                        },
-                        new AndroidWebViewTransport(),
-                    );
+                const iframeWindowRaw = iframe.contentWindow;
+                if (!iframeWindowRaw) {
+                    return;
+                }
+
+                if (iframeWindowRaw === window) {
+                    return;
+                }
+
+                // Check if bridge already exists in this iframe
+                const iframeWindow = iframeWindowRaw as TonConnectWindow;
+                const hasExtension = !!iframeWindow.tonkeeper?.tonconnect;
+
+                if (!hasExtension) {
+                    // Re-inject with the same options that were passed to the parent window
+                    const mainWindow = window as TonConnectWindow & { __walletKitOptions?: JSBridgeInjectOptions };
+                    if (iframeWindow.injectWalletKit && mainWindow.__walletKitOptions) {
+                        iframeWindow.injectWalletKit(mainWindow.__walletKitOptions);
+                    }
                 }
             } catch (_e) {
                 // Cross-origin iframe - will use postMessage bridge
@@ -331,9 +262,20 @@ class AndroidWebViewTransport implements Transport {
 }
 
 /**
- * Android WebView Bridge - Uses broadcast pattern for iframe support.
- * Same-origin iframes: Direct injection | Cross-origin iframes: postMessage relay
+ * Injection function called by Android with config from WalletKit
+ * Matches iOS pattern: window.injectWalletKit(options)
  */
-const transport: Transport | undefined = isAndroidWebView ? new AndroidWebViewTransport() : undefined;
+window.injectWalletKit = (options: JSBridgeInjectOptions) => {
+    try {
+        // Store options for iframe injection
+        (window as TonConnectWindow & { __walletKitOptions?: JSBridgeInjectOptions }).__walletKitOptions = options;
 
-injectBridgeCode(window, { deviceInfo, walletInfo, isWalletBrowser: true }, transport);
+        // Create custom transport for Android or undefined for default behavior
+        const transport: Transport | undefined = isAndroidWebView ? new AndroidWebViewTransport() : undefined;
+
+        // Inject wallet with configuration from Android SDK
+        injectBridgeCode(window, options, transport);
+    } catch (_error) {
+        // Silent fail - errors logged internally
+    }
+};
