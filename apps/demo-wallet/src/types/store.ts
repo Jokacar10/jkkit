@@ -22,7 +22,6 @@ import type {
 
 import type {
     AuthState,
-    PreviewTransaction,
     SavedWallet,
     QueuedRequest,
     QueuedRequestData,
@@ -61,7 +60,11 @@ export interface WalletManagementSlice {
         address?: string;
         balance?: string;
         publicKey?: string;
-        transactions: PreviewTransaction[];
+
+        // Event history for active wallet
+        events: unknown[];
+        hasNextEvents: boolean;
+
         currentWallet?: IWallet;
         hasWallet: boolean;
         isAuthenticated: boolean;
@@ -81,11 +84,8 @@ export interface WalletManagementSlice {
     clearWallet: () => void;
     updateBalance: () => Promise<void>;
     // Events-based history
-    addEvent: (event: unknown) => void;
+    // addEvent: (event: unknown) => void;
     loadEvents: (limit?: number, offset?: number) => Promise<void>;
-    // Legacy compatibility for older UI/hooks
-    addTransaction: (transaction: PreviewTransaction) => void;
-    loadTransactions: (limit?: number) => Promise<void>;
 
     // Getters
     getDecryptedMnemonic: (walletId?: string) => Promise<string[] | null>;
