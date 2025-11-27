@@ -6,12 +6,6 @@
  *
  */
 
-const VERSION = '0.0.1';
-
-export function getVersion(): string {
-    return VERSION;
-}
-
-export function getEventsSubsystem(): string {
-    return 'wallet';
-}
+export * from './TransactionStates';
+export * from './TonTransferCard';
+export * from './ActionCard';

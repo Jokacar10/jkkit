@@ -6,18 +6,13 @@
  *
  */
 
-import { type IWallet, type ITonWalletKit, type ToncenterTransaction } from '@ton/walletkit';
+import { type IWallet, type ITonWalletKit } from '@ton/walletkit';
 import { createLedgerPath } from '@ton/v4ledger-adapter';
 
 import { SimpleEncryption } from '../../utils';
 import { createComponentLogger } from '../../utils/logger';
-import {
-    createWalletAdapter,
-    generateWalletId,
-    generateWalletName,
-    transformToncenterTransaction,
-} from '../../utils/walletAdapterFactory';
-import type { PreviewTransaction, LedgerConfig, SavedWallet } from '../../types/wallet';
+import { createWalletAdapter, generateWalletId, generateWalletName } from '../../utils/walletAdapterFactory';
+import type { LedgerConfig, SavedWallet } from '../../types/wallet';
 import type { SetState, WalletManagementSliceCreator } from '../../types/store';
 
 const log = createComponentLogger('WalletManagementSlice');
@@ -29,7 +24,8 @@ export const createWalletManagementSlice: WalletManagementSliceCreator = (set: S
         address: undefined,
         balance: undefined,
         publicKey: undefined,
-        transactions: [],
+        events: [],
+        hasNextEvents: false,
         currentWallet: undefined,
         hasWallet: false,
         isAuthenticated: false,
@@ -336,10 +332,10 @@ export const createWalletManagementSlice: WalletManagementSliceCreator = (set: S
                 state.walletManagement.publicKey = savedWallet.publicKey;
                 state.walletManagement.balance = balance.toString();
                 state.walletManagement.currentWallet = wallet;
-                state.walletManagement.transactions = [];
+                state.walletManagement.events = [];
             });
 
-            await get().loadTransactions();
+            await get().loadEvents();
 
             log.info(`Switched to wallet ${walletId} successfully`);
         } catch (error) {
@@ -371,7 +367,7 @@ export const createWalletManagementSlice: WalletManagementSliceCreator = (set: S
                     state.walletManagement.publicKey = undefined;
                     state.walletManagement.balance = undefined;
                     state.walletManagement.currentWallet = undefined;
-                    state.walletManagement.transactions = [];
+                    state.walletManagement.events = [];
                 }
             }
         });
@@ -532,7 +528,7 @@ export const createWalletManagementSlice: WalletManagementSliceCreator = (set: S
             state.walletManagement.address = undefined;
             state.walletManagement.balance = undefined;
             state.walletManagement.publicKey = undefined;
-            state.walletManagement.transactions = [];
+            state.walletManagement.events = [];
             state.walletManagement.currentWallet = undefined;
             state.tonConnect.pendingConnectRequest = undefined;
             state.tonConnect.isConnectModalOpen = false;
@@ -563,16 +559,10 @@ export const createWalletManagementSlice: WalletManagementSliceCreator = (set: S
         }
     },
 
-    addTransaction: (transaction: PreviewTransaction) => {
-        set((state) => {
-            state.walletManagement.transactions = [transaction, ...state.walletManagement.transactions];
-        });
-    },
-
-    loadTransactions: async (limit = 10) => {
+    loadEvents: async (limit = 10, offset = 0) => {
         const state = get();
         if (!state.walletManagement.address) {
-            log.warn('No wallet address available to load transactions');
+            log.warn('No wallet address available to load events');
             return;
         }
 
@@ -581,26 +571,23 @@ export const createWalletManagementSlice: WalletManagementSliceCreator = (set: S
         }
 
         try {
-            log.info('Loading transactions for address:', state.walletManagement.address);
+            log.info('Loading events for address:', state.walletManagement.address, 'limit:', limit, 'offset:', offset);
 
-            const response = await state.walletCore.walletKit.getApiClient().getAccountTransactions({
-                address: [state.walletManagement.address],
+            const response = await state.walletCore.walletKit.getApiClient().getEvents({
+                account: state.walletManagement.address,
                 limit,
-                offset: 0,
+                offset,
             });
-
-            const transformedTransactions = response.transactions.map((tx: ToncenterTransaction) =>
-                transformToncenterTransaction(tx),
-            );
 
             set((state) => {
-                state.walletManagement.transactions = transformedTransactions;
+                state.walletManagement.events = response.events;
+                state.walletManagement.hasNextEvents = response.hasNext;
             });
 
-            log.info(`Loaded ${transformedTransactions.length} transactions`);
+            log.info(`Loaded ${response.events.length} events`);
         } catch (error) {
-            log.error('Error loading transactions:', error);
-            throw new Error('Failed to load transactions');
+            log.error('Error loading events:', error);
+            throw new Error('Failed to load events');
         }
     },
 
