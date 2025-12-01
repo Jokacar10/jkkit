@@ -18,7 +18,8 @@
     "build:extension:firefox": "cross-env VITE_APP_ENV=extension TARGET=firefox vite build --config vite.extension.config.ts",
     "build:website": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "clean": "git clean -xdf .cache .turbo dist dist-extension node_modules"
   },
   "dependencies": {
     "@ledgerhq/hw-transport-webhid": "^6.30.9",
@@ -37,8 +38,8 @@
     "immer": "^10.2.0",
     "lucide-react": "^0.544.0",
     "next-themes": "^0.4.6",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
+    "react": "catalog:",
+    "react-dom": "catalog:",
     "react-router-dom": "^7.9.5",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
@@ -51,8 +52,8 @@
     "@eslint/js": "^9.39.1",
     "@playwright/test": "^1.56.1",
     "@types/chrome": "^0.1.28",
-    "@types/react": "^19.2.3",
-    "@types/react-dom": "^19.2.3",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
     "@types/webextension-polyfill": "^0.12.4",
     "@vitejs/plugin-react": "^5.1.0",
     "allure-js-commons": "^3.4.2",
