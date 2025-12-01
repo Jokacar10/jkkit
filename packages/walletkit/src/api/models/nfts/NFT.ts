@@ -18,5 +18,5 @@ export interface NFT {
     onwerAddress?: Address;
     realOwnerAddress?: Address;
     saleContractAddress?: Address;
-    content?: { [key: string]: string };
+    metadata?: { [key: string]: string };
 }

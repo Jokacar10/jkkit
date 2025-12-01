@@ -9,6 +9,8 @@ export interface Jetton {
     balance?: TokenAmount;
     info?: TokenInfo;
     decimalsCount?: number;
+    verification?: JettonVerification;
+    metadata?: { [key: string]: string };
     extra?: { [key: string]: unknown };
 }
 
@@ -18,6 +20,7 @@ export interface JettonVerification {
     warnings?: string[];
 }
 
+// Check source of jetton verification in some wallet JSON using toncenter api
 export declare enum JettonVerificationSource {
     toncenter = 'toncenter',
     community = 'community',

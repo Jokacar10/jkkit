@@ -29,11 +29,6 @@ export interface TokenInfo {
     symbol?: string;
 
     /** 
-     * Type of the asset 
-     */
-    type?: AssetType;
-
-    /** 
      * Indicates if the token info is valid 
      */
     isValid?: boolean;

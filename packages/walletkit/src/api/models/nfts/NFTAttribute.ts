@@ -6,6 +6,11 @@ export interface NFTAttribute {
     traitType?: string;
 
     /**
+     * Display type of the attribute
+     */
+    displayType?: string;
+    
+    /**
      * Value of the attribute
      */
     value?: string;

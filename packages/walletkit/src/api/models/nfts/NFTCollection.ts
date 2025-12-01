@@ -6,9 +6,14 @@ export interface NFTCollection {
     name?: string;
     image?: TokenImage;
     description?: string;
+    /**
+     * Index of the next item in the collection
+     * @format bigInt
+     */
+    nextItemIndex?: string;
     codeHash?: Hex;
     dataHash?: Hex;
     ownerAddress?: Address;
-    content?: { [key: string]: string };
+    metadata?: { [key: string]: string };
     extra?: { [key: string]: unknown };
 }
