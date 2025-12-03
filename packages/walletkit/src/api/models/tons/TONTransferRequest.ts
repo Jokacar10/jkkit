@@ -1,6 +1,6 @@
 import { SendMode } from "@ton/core";
 import { ExtraCurrencies } from "../core/ExtraCurrencies";
-import { Address, Base64String } from "../core/Primitives";
+import { UserFriendlyAddress, Base64String } from "../core/Primitives";
 import { TokenAmount } from "../core/TokenAmount";
 
 export interface TONTransferRequest {
@@ -12,7 +12,7 @@ export interface TONTransferRequest {
     /**
      * Recipient address
      */
-    recipientAddress: Address;
+    recipientAddress: UserFriendlyAddress;
 
     /**
      * Optional send mode

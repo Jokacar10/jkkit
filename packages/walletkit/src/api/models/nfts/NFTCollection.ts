@@ -1,11 +1,11 @@
 import { TokenImage } from "../core/TokenImage";
-import { Address, Hex } from "../core/primitives";
+import { UserFriendlyAddress, Hex } from "../core/primitives";
 
 export interface NFTCollection {
     /**
      * The blockchain address of the NFT collection contract
      */
-    address: Address;
+    address: UserFriendlyAddress;
 
     /**
      * The name of the NFT collection
@@ -40,7 +40,7 @@ export interface NFTCollection {
     /**
      * The blockchain address of the collection owner
      */
-    ownerAddress?: Address;
+    ownerAddress?: UserFriendlyAddress;
 
     /**
      * The content metadata of the collection

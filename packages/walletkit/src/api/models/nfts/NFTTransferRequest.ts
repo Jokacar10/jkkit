@@ -1,11 +1,11 @@
-import { Address } from "../core/primitives";
+import { UserFriendlyAddress } from "../core/primitives";
 import { TokenAmount } from "../core/TokenAmount";
 
 export interface NFTTransferRequest {
     /**
      * NFT contract address
      */
-    nftAddress: Address;
+    nftAddress: UserFriendlyAddress;
 
     /**
      * Amount to transfer in nanotons, default is "100000000" (0.1 TON)
@@ -15,7 +15,7 @@ export interface NFTTransferRequest {
     /**
      * Recipient address
      */
-    recipientAddress: Address;
+    recipientAddress: UserFriendlyAddress;
 
     /**
      * Optional comment for the transfer

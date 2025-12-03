@@ -1,5 +1,5 @@
 import { 
-    Address, 
+    UserFriendlyAddress, 
     Base64String, 
     Hex 
 } from "../core/Primitives";
@@ -9,7 +9,7 @@ export interface ProofMessage {
      * @format int
      */
     workchain: number;
-    address: Address;
+    address: UserFriendlyAddress;
     timestamp: number;
     domain?: ProofMessageDomain;
     payload: string;

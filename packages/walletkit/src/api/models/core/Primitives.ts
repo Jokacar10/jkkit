@@ -1,5 +1,5 @@
 
-export type Address = string; // User-friendly address representation
+export type UserFriendlyAddress = string; // User-friendly address representation
 export type Hex = string; // Hexadecimal string representation
 export type Base64String = string; // Base64-encoded string representation
 export type LogicalTime = string;

@@ -1,11 +1,11 @@
-import { Address } from "../core/primitives";
+import { UserFriendlyAddress } from "../core/primitives";
 import { TokenAmount } from "../core/TokenAmount";
 
 export interface JettonsTransferRequest {
     /**
      * Jetton contract address
      */
-    jettonAddress: Address;
+    jettonAddress: UserFriendlyAddress;
 
     /**
      * Amount to transfer in jeton's smallest unit
@@ -15,7 +15,7 @@ export interface JettonsTransferRequest {
     /**
      * Recipient address
      */
-    recipientAddress: Address;
+    recipientAddress: UserFriendlyAddress;
 
     /**
      * Optional comment for the transfer

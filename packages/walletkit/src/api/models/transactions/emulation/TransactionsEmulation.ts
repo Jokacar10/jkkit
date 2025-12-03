@@ -1,7 +1,7 @@
 
 import { AddressBookEntry } from "../../core/AddressBook";
 import { ExtraCurrencies } from "../../core/ExtraCurrencies";
-import { Base64String, Address } from "../../core/Primitives";
+import { Base64String, UserFriendlyAddress } from "../../core/Primitives";
 import { TokenImage } from "../../core/TokenImage";
 import { TokenAmount } from "../../core/TokenAmount";
 import { Transaction } from "../Transaction";
@@ -58,7 +58,7 @@ export type TransactionEmulationActionDetails =
 
 export interface TransactionEmulationJettonSwapDetails {
     dex: string; // e.g. "stonfi"
-    sender: Address; // address
+    sender: UserFriendlyAddress; // address
     assetIn: string; // jetton master
     assetOut: string; // jetton master
     dexIncomingTransfer?: TransactionEmulationJettonTransfer;
@@ -68,10 +68,10 @@ export interface TransactionEmulationJettonSwapDetails {
 
 export interface TransactionEmulationJettonTransfer {
     asset: string;
-    source: Address;
-    destination: Address;
-    sourceJettonWallet?: Address;
-    destinationJettonWallet?: Address;
+    source: UserFriendlyAddress;
+    destination: UserFriendlyAddress;
+    sourceJettonWallet?: UserFriendlyAddress;
+    destinationJettonWallet?: UserFriendlyAddress;
     amount: TokenAmount;
 }
 
@@ -115,8 +115,8 @@ export type TransactionEmulationTokenInfoBase {
 
 export interface TransactionEmulationTokenInfoJettonWallets extends TransactionEmulationTokenInfoBase {
     balance: TokenAmount;
-    jetton: Address; // jetton master address
-    owner: Address;
+    jetton: UserFriendlyAddress; // jetton master address
+    owner: UserFriendlyAddress;
 }
 
 export interface TransactionEmulationTokenInfoJettonMasters extends TransactionEmulationTokenInfoBase {

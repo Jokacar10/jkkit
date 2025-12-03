@@ -1,4 +1,4 @@
-import { Address } from "../core/Primitives";
+import { UserFriendlyAddress } from "../core/Primitives";
 import { TokenAmount } from "../core/TokenAmount";
 import { TokenInfo } from "../core/TokenInfo";
 
@@ -6,17 +6,17 @@ export interface Jetton {
     /**
      * The Jetton contract address
      */
-    address: Address;
+    address: UserFriendlyAddress;
 
     /**
      * The Jetton wallet address
      */
-    walletAddress?: Address;
+    walletAddress?: UserFriendlyAddress;
 
     /**
      * The blockchain address of the Jetton master contract
      */
-    masterAddress?: Address;
+    masterAddress?: UserFriendlyAddress;
 
     /**
      * The current jetton balance

@@ -1,9 +1,9 @@
-import { Address, Hex } from "../core/Primitives";
+import { UserFriendlyAddress, Hex } from "../core/Primitives";
 import { Network } from "./Network";
 import { SignData } from "./SignData";
 
 export interface PreparedSignData {
-    address: Address;
+    address: UserFriendlyAddress;
     timestamp: number;
     domain: string;
     payload: PreparedSignDataPayload;

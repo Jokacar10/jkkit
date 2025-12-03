@@ -1,5 +1,5 @@
 import { DAppInfo } from '../core/DAppInfo';
-import { Address } from '../core/Primitives';
+import { UserFriendlyAddress } from '../core/Primitives';
 
 export type BridgeEvent = {
     /**
@@ -12,7 +12,7 @@ export type BridgeEvent = {
     /**
      * The wallet address associated with the event.
      */
-    walletAddress?: Address;
+    walletAddress?: UserFriendlyAddress;
 
     /**
      * The domain associated with the event.

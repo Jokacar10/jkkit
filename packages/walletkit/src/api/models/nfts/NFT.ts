@@ -1,4 +1,4 @@
-import { Address, Hex } from "../core/primitives";
+import { UserFriendlyAddress, Hex } from "../core/primitives";
 import { TokenInfo } from "../core/TokenInfo";
 import { NFTAttribute } from "./NFTAttribute";
 import { NFTCollection } from "./NFTCollection";
@@ -7,7 +7,7 @@ export interface NFT {
     /**
      * NFT address
      */
-    address: Address;
+    address: UserFriendlyAddress;
 
     /**
      * The index of the item within its collection
@@ -30,7 +30,7 @@ export interface NFT {
     /**
      * The address of the auction contract, if applicable.
      */
-    auctionContractAddress?: Address;
+    auctionContractAddress?: UserFriendlyAddress;
 
     /**
      * The hash of the item's smart contract code
@@ -58,17 +58,17 @@ export interface NFT {
     /**
      * The address of the current owner
      */
-    ownerAddress?: Address;
+    ownerAddress?: UserFriendlyAddress;
 
     /**
      * The address of the real owner (if different from ownerAddress, e.g. when on sale).
      */
-    realOwnerAddress?: Address;
+    realOwnerAddress?: UserFriendlyAddress;
 
     /**
      * The address of the sale contract, if applicable.
      */
-    saleContractAddress?: Address;
+    saleContractAddress?: UserFriendlyAddress;
 
     /**
      * The content metadata of the NFT item

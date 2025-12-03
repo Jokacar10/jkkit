@@ -1,7 +1,7 @@
 import { 
     Base64String, 
     LogicalTime, 
-    Address 
+    UserFriendlyAddress 
 } from "../core/Primitives";
 import { ExtraCurrencies } from "../core/ExtraCurrencies";
 import { TokenAmount } from "../core/TokenAmount";
@@ -189,12 +189,12 @@ export interface TransactionMessage {
     /**
      * The source address of the message
      */
-    source?: Address;
+    source?: UserFriendlyAddress;
 
     /**
      * The destination address of the message
      */
-    destination?: Address;
+    destination?: UserFriendlyAddress;
 
     /**
      * The amount of nanos transferred with the message

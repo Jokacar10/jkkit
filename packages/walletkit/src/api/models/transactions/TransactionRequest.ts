@@ -1,7 +1,7 @@
 import { ExtraCurrencies } from "../core/ExtraCurrencies";
 import { Network } from "../core/Network";
 import { 
-    Address, 
+    UserFriendlyAddress, 
     Base64String, 
 } from "../core/Primitives";
 import { SendMode } from "../core/SendMode";
@@ -11,14 +11,14 @@ export interface TransactionRequest {
     messages: TransactionRequestMessage[];
     network?: Network;
     validUntil?: number;
-    fromAddress?: Address;
+    fromAddress?: UserFriendlyAddress;
 }
     
 export interface TransactionRequestMessage {
     /**
      * Recipient address
      */
-    recipientAddress: Address;
+    recipientAddress: UserFriendlyAddress;
 
     /**
      * Amount to transfer in nanounits
