@@ -39,7 +39,7 @@ export interface PreparedSignData {
 /**
  * Payload structure for prepared sign data.
  */
-export declare type PreparedSignDataPayload = {
+export interface PreparedSignDataPayload = {
     /**
      * Network where the signing will occur
      */

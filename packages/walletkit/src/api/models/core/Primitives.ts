@@ -12,7 +12,7 @@
 export type UserFriendlyAddress = string;
 
 /**
- * Hexadecimal string representation (e.g., "0a1b2c3d...")
+ * Hexadecimal string representation (e.g., "0x0a1b2c3d...")
  */
 export type Hex = string;
 
@@ -29,7 +29,7 @@ export type LogicalTime = string;
 /**
  * Generic result status for operations.
  */
-export declare enum Result {
+export enum Result {
     /**
      * Operation completed successfully
      */

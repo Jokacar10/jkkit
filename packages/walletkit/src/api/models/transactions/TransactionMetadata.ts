@@ -40,7 +40,7 @@ export type TransactionTokenInfo =
 /**
  * Base token information shared by all token types.
  */
-export type TransactionTokenInfoBase = {
+export interface TransactionTokenInfoBase {
     /**
      * Indicates if the token contract is valid
      */
@@ -53,7 +53,7 @@ export type TransactionTokenInfoBase = {
      * Additional metadata for the token, such as image sizes, decimal precision, external links, and marketplaces
      */
     extra: { [key: string]: unknown };
-};
+}
 
 /**
  * Token information for Jetton wallet contracts.

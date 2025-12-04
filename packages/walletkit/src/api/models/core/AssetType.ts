@@ -9,7 +9,7 @@
 /**
  * Types of assets supported on the TON blockchain.
  */
-export declare enum AssetType {
+export enum AssetType {
     /**
      * Native TON cryptocurrency
      */

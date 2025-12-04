@@ -11,7 +11,7 @@ import { UserFriendlyAddress } from '../core/Primitives';
 /**
  * Base event type for TON Connect bridge communication.
  */
-export type BridgeEvent = {
+export interface BridgeEvent {
     /**
      * Unique identifier for the bridge event
      */
@@ -41,4 +41,4 @@ export type BridgeEvent = {
     isLocal?: boolean;
     messageId?: string;
     traceId?: string;
-};
+}
