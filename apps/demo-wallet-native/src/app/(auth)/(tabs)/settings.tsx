@@ -12,7 +12,7 @@ import { StyleSheet } from 'react-native-unistyles';
 
 import { ScreenHeader } from '@/core/components/screen-header';
 import { ScreenWrapper } from '@/core/components/screen-wrapper';
-import { DangerZoneSection, RecoveryPhraseSection, WalletInfoSection } from '@/features/settings';
+import { RecoveryPhraseSection, WalletInfoSection } from '@/features/settings';
 
 const SettingsScreen: FC = () => {
     return (
@@ -24,7 +24,7 @@ const SettingsScreen: FC = () => {
             <View style={styles.content}>
                 <WalletInfoSection />
                 <RecoveryPhraseSection />
-                <DangerZoneSection />
+                {/*<DangerZoneSection />*/}
             </View>
         </ScreenWrapper>
     );
