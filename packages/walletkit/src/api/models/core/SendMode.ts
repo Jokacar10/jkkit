@@ -14,6 +14,9 @@ export interface SendMode {
     flags: SendModeFlag[];
 }
 
+/**
+ * @format int
+ */
 export enum SendModeBase {
     /**
      * Ordinary message
@@ -29,6 +32,9 @@ export enum SendModeBase {
     CARRY_ALL_REMAINING_BALANCE = 128,
 }
 
+/**
+ * @format int
+ */
 export enum SendModeFlag {
     /**
      * Destroy the current account if its resulting balance is zero (often used with Mode 128)

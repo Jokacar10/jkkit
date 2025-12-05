@@ -19,41 +19,22 @@ echo "📁 TypeScript input: $TYPESCRIPT_INPUT"
 echo "📄 Output file: $OUTPUT_FILE"
 echo ""
 
-# Step 1: Check if ts-json-schema-generator is installed
-echo "🔍 Checking for ts-json-schema-generator..."
-if ! command -v ts-json-schema-generator &> /dev/null; then
-    echo "⚠️  ts-json-schema-generator not found. Installing..."
-    npm install -g ts-json-schema-generator
-fi
-
-# Step 2: Validate TypeScript input
+# Step 1: Validate TypeScript input
 if [ ! -d "$TYPESCRIPT_INPUT" ] && [ ! -f "$TYPESCRIPT_INPUT" ]; then
     echo "❌ Error: TypeScript input not found at '$TYPESCRIPT_INPUT'"
     exit 1
 fi
 
-# Step 3: Generate JSON Schema from TypeScript
-echo "📝 Generating JSON Schema from TypeScript..."
-
-# Determine the path pattern based on input type
-if [ -d "$TYPESCRIPT_INPUT" ]; then
-    PATH_PATTERN="$TYPESCRIPT_INPUT/**/*.ts"
-else
-    PATH_PATTERN="$TYPESCRIPT_INPUT"
-fi
-
-ts-json-schema-generator \
-    --path "$PATH_PATTERN" \
-    --type "*" \
-    --out "$TEMP_SCHEMA" \
-    --expose all \
-    --jsDoc extended \
-    --no-type-check
-
+# Step 2: Generate JSON Schema using custom generator (with x-enum-varnames)
+echo "📝 Step 1: Generating JSON Schema with enum member names..."
+node "$SCRIPT_DIR/generate-json-schema.js" "$TYPESCRIPT_INPUT/**/*.ts" "$TEMP_SCHEMA" || {
+    echo "❌ Failed to generate JSON Schema"
+    exit 1
+}
 echo "✅ JSON Schema generated: $TEMP_SCHEMA"
 
-# Step 4: Convert JSON Schema to OpenAPI spec
-echo "📝 Step 1: Converting JSON Schema to OpenAPI spec..."
+# Step 3: Convert JSON Schema to OpenAPI spec
+echo "📝 Step 2: Converting JSON Schema to OpenAPI spec..."
 
 # Check if @openapi-contrib/json-schema-to-openapi-schema is available
 npx --yes @openapi-contrib/json-schema-to-openapi-schema --help &> /dev/null || {
@@ -68,8 +49,8 @@ NODE_PATH=$(npm root -g) node "$SCRIPT_DIR/json-schema-to-openapi-spec.js" "$TEM
     exit 1
 }
 
-# Step 5: Post-process OpenAPI spec (fix integer types, enrich discriminated unions)
-echo "📝 Step 2: Post-processing OpenAPI spec..."
+# Step 4: Post-process OpenAPI spec (fix integer types, enrich discriminated unions)
+echo "📝 Step 3: Post-processing OpenAPI spec..."
 node "$SCRIPT_DIR/postprocess-openapi-spec.js" "$OUTPUT_FILE" "$OUTPUT_FILE" || {
     echo "❌ Failed to post-process OpenAPI spec"
     rm -f "$TEMP_SCHEMA"

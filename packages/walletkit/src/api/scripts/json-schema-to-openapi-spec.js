@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Converts JSON Schema to OpenAPI 3.0 specification
- * 
+ *
  * Usage: node json-schema-to-openapi-spec.js <input-schema.json> <output-openapi.json>
  */
 
@@ -33,30 +33,30 @@ if (!schemaFile || !outputFile) {
 try {
     const schemaContent = fs.readFileSync(schemaFile, 'utf8');
     const schema = JSON.parse(schemaContent);
-    
+
     // Extract definitions/schemas
     const schemas = schema.definitions || schema.$defs || {};
-    
+
     // Convert each schema to OpenAPI format
     const openapiSchemas = {};
     for (const [name, schemaObj] of Object.entries(schemas)) {
         openapiSchemas[name] = convertFn(schemaObj);
     }
-    
+
     // Create OpenAPI spec
     const openapi = {
         openapi: '3.0.0',
         info: {
             title: 'Generated API from TypeScript',
             version: '1.0.0',
-            description: 'Auto-generated OpenAPI specification from TypeScript models'
+            description: 'Auto-generated OpenAPI specification from TypeScript models',
         },
         paths: {},
         components: {
-            schemas: openapiSchemas
-        }
+            schemas: openapiSchemas,
+        },
     };
-    
+
     fs.writeFileSync(outputFile, JSON.stringify(openapi, null, 2));
     console.log('✅ OpenAPI spec created: ' + outputFile);
 } catch (error) {
