@@ -7,6 +7,7 @@
  */
 
 import { Ionicons } from '@expo/vector-icons';
+import { useWallet } from '@ton/demo-core';
 import { setStringAsync } from 'expo-clipboard';
 import { type FC, useState } from 'react';
 import { Alert, ScrollView, View } from 'react-native';
@@ -20,18 +21,18 @@ import { Block } from '@/core/components/block';
 import { getErrorMessage } from '@/core/utils/errors/get-error-message';
 import { useAppToasts } from '@/features/toasts';
 import { MnemonicView } from '@/features/wallets';
-import { mnemonicStorage } from '@/features/wallets/storages/mnemonic-storage';
 
 export const RecoveryPhraseSection: FC = () => {
     const [showMnemonic, setShowMnemonic] = useState(false);
-    const [mnemonic, setMnemonic] = useState<string>('');
+    const [mnemonic, setMnemonic] = useState<string[]>([]);
 
+    const { getDecryptedMnemonic } = useWallet();
     const { theme } = useUnistyles();
     const { toast } = useAppToasts();
 
     const handleShowMnemonic = async () => {
         try {
-            const storedMnemonic = await mnemonicStorage.getMnemonic();
+            const storedMnemonic = await getDecryptedMnemonic();
             if (storedMnemonic) {
                 setMnemonic(storedMnemonic);
                 setShowMnemonic(true);
@@ -45,12 +46,12 @@ export const RecoveryPhraseSection: FC = () => {
 
     const handleHideMnemonic = () => {
         setShowMnemonic(false);
-        setMnemonic('');
+        setMnemonic([]);
     };
 
     const handleCopyMnemonic = async () => {
         try {
-            await setStringAsync(mnemonic);
+            await setStringAsync(mnemonic.join(' '));
             toast({ type: 'success', title: 'Copied!' });
         } catch (error) {
             toast({ type: 'error', title: getErrorMessage(error, 'Failed to copy to clipboard') });

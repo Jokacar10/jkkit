@@ -19,7 +19,6 @@ import { createNftsSlice } from './slices/nftsSlice';
 import type { AppState } from '../types/store';
 import type { StorageAdapter } from '../adapters/storage/types';
 import type { WalletKitConfig } from '../types/wallet';
-import { isExtension } from '../utils/isExtension';
 
 const STORE_VERSION = 2;
 
@@ -248,13 +247,6 @@ export function createWalletStore(options: CreateWalletStoreOptions = {}) {
             },
         ),
     );
-
-    // Initialize wallet kit on first load (browser/mobile only)
-    if (!isExtension()) {
-        const storeState = store.getState();
-        log.info(`Initializing WalletKit`);
-        storeState.initializeWalletKit();
-    }
 
     return store;
 }

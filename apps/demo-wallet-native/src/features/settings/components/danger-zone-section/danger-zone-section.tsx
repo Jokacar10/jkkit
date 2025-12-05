@@ -7,6 +7,8 @@
  */
 
 import { Ionicons } from '@expo/vector-icons';
+import { useWallet } from '@ton/demo-core';
+import { router } from 'expo-router';
 import type { FC } from 'react';
 import { Alert, View } from 'react-native';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
@@ -14,11 +16,10 @@ import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 import { AppButton } from '@/core/components/app-button';
 import { AppText } from '@/core/components/app-text';
 import { Block } from '@/core/components/block';
-import { getErrorMessage } from '@/core/utils/errors/get-error-message';
-import { deleteWallet } from '@/features/wallets';
 
 export const DangerZoneSection: FC = () => {
     const { theme } = useUnistyles();
+    const { clearWallet } = useWallet();
 
     const handleDeleteAccount = () => {
         Alert.alert(
@@ -29,13 +30,9 @@ export const DangerZoneSection: FC = () => {
                 {
                     text: 'Delete',
                     style: 'destructive',
-                    onPress: async () => {
-                        try {
-                            await deleteWallet();
-                            Alert.alert('Success', 'Account deleted successfully');
-                        } catch (error) {
-                            Alert.alert('Error', getErrorMessage(error, 'Failed to delete account'));
-                        }
+                    onPress: () => {
+                        clearWallet();
+                        router.replace('/(non-auth)/welcome');
                     },
                 },
             ],
@@ -73,8 +70,6 @@ const styles = StyleSheet.create(({ sizes, colors }) => ({
         textAlign: 'center',
     },
     dangerBlock: {
-        borderLeftWidth: 4,
-        borderLeftColor: colors.error.default,
         marginBottom: 20,
     },
     dangerContent: {

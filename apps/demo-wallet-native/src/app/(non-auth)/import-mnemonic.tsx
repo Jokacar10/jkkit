@@ -18,11 +18,18 @@ import { AppText } from '@/core/components/app-text';
 import { Block } from '@/core/components/block';
 import { ScreenHeader } from '@/core/components/screen-header';
 import { ScreenWrapper } from '@/core/components/screen-wrapper';
+import { TabControl } from '@/core/components/tab-control';
 
 const regexp = /\s+/;
 
+const networkOptions = [
+    { value: 'testnet' as const, label: 'Testnet' },
+    { value: 'mainnet' as const, label: 'Mainnet' },
+];
+
 const ImportMnemonicScreen: FC = () => {
     const [mnemonic, setMnemonic] = useState('');
+    const [network, setNetwork] = useState<'mainnet' | 'testnet'>('testnet');
     const [isLoading, setIsLoading] = useState(false);
     const [, setError] = useState('');
 
@@ -38,7 +45,7 @@ const ImportMnemonicScreen: FC = () => {
             setIsLoading(true);
             setError('');
             const words = mnemonic.trim().toLowerCase().split(regexp).filter(Boolean);
-            await importWallet(words);
+            await importWallet(words, undefined, undefined, network);
             router.replace('/(auth)/(tabs)/wallet');
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Failed to import wallet';
@@ -89,11 +96,15 @@ const ImportMnemonicScreen: FC = () => {
                     </AppText>
                 </View>
 
-                <Block>
-                    <AppText style={styles.infoText}>
-                        💡 Separate words with spaces. The phrase is case-insensitive.
+                <View style={styles.networkSection}>
+                    <AppText style={styles.sectionLabel}>Network</AppText>
+                    <TabControl options={networkOptions} selectedOption={network} onOptionPress={setNetwork} />
+                    <AppText style={styles.networkHint} textType="caption1">
+                        {network === 'testnet'
+                            ? 'Use testnet for development and testing with test TON.'
+                            : 'Use mainnet for real transactions with real TON.'}
                     </AppText>
-                </Block>
+                </View>
             </View>
 
             <View style={styles.buttons}>
@@ -144,10 +155,17 @@ const styles = StyleSheet.create(({ sizes, colors }) => ({
         color: colors.text.secondary,
         textAlign: 'right',
     },
-    infoText: {
-        color: colors.text.default,
-        fontSize: 14,
-        lineHeight: 20,
+    networkSection: {
+        gap: sizes.space.vertical / 2,
+    },
+    sectionLabel: {
+        color: colors.text.highlight,
+        marginBottom: sizes.space.vertical / 2,
+    },
+    networkHint: {
+        marginTop: sizes.space.vertical / 2,
+        color: colors.text.secondary,
+        textAlign: 'center',
     },
     buttons: {
         marginTop: sizes.space.vertical,

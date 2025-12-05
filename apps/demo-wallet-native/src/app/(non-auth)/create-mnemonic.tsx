@@ -18,11 +18,18 @@ import { AppText } from '@/core/components/app-text';
 import { InfoBlock } from '@/core/components/info-block';
 import { ScreenHeader } from '@/core/components/screen-header';
 import { ScreenWrapper } from '@/core/components/screen-wrapper';
+import { TabControl } from '@/core/components/tab-control';
 import { getErrorMessage } from '@/core/utils/errors/get-error-message';
 import { MnemonicView } from '@/features/wallets';
 
+const networkOptions = [
+    { value: 'testnet' as const, label: 'Testnet' },
+    { value: 'mainnet' as const, label: 'Mainnet' },
+];
+
 const CreateMnemonicScreen: FC = () => {
     const [mnemonic, setMnemonic] = useState<string[]>([]);
+    const [network, setNetwork] = useState<'mainnet' | 'testnet'>('testnet');
     const [isWarningShown, setIsWarningShown] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -47,7 +54,7 @@ const CreateMnemonicScreen: FC = () => {
     const handleContinue = async () => {
         try {
             setIsLoading(true);
-            await createWallet(mnemonic);
+            await createWallet(mnemonic, undefined, undefined, network);
             router.replace('/(auth)/(tabs)/wallet');
         } catch (err) {
             Alert.alert('Error', getErrorMessage(err));
@@ -74,6 +81,22 @@ const CreateMnemonicScreen: FC = () => {
                 </View>
 
                 {!isWarningShown && <MnemonicView isLoading={isLoading && mnemonic.length === 0} mnemonic={mnemonic} />}
+
+                {!isWarningShown && mnemonic.length > 0 && (
+                    <View style={styles.networkSection}>
+                        <AppText style={styles.sectionLabel}>Network</AppText>
+                        <TabControl
+                            options={networkOptions}
+                            selectedOption={network}
+                            onOptionPress={setNetwork}
+                        />
+                        <AppText style={styles.networkHint}>
+                            {network === 'testnet'
+                                ? 'Use testnet for development and testing with test TON.'
+                                : 'Use mainnet for real transactions with real TON.'}
+                        </AppText>
+                    </View>
+                )}
 
                 {isWarningShown && (
                     <InfoBlock.Container>
@@ -127,6 +150,19 @@ const styles = StyleSheet.create(({ sizes, colors }) => ({
     subtitle: {
         color: colors.text.secondary,
         lineHeight: 20,
+    },
+    networkSection: {
+        gap: sizes.space.vertical / 2,
+    },
+    sectionLabel: {
+        color: colors.text.highlight,
+        fontSize: 14,
+        fontWeight: '500',
+    },
+    networkHint: {
+        color: colors.text.secondary,
+        fontSize: 12,
+        lineHeight: 16,
     },
     iconWrapper: {
         backgroundColor: colors.warning.default,

@@ -6,25 +6,15 @@
  *
  */
 
-import { useAuth } from '@ton/demo-core';
-import { type FC, useState } from 'react';
+import type { FC } from 'react';
 import { useWallet } from '@ton/demo-core';
-import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet, useUnistyles } from 'react-native-unistyles';
-
-import { NetworkSelectorSheet } from '../network-selector-sheet';
 
 import { DataBlock } from '@/core/components/data-block';
-import { ActiveTouchAction } from '@/core/components/active-touch-action';
 
 export const WalletInfoSection: FC = () => {
-    const { address, publicKey } = useWallet();
-    const { network } = useAuth();
-    const [isNetworkSelectorOpen, setIsNetworkSelectorOpen] = useState(false);
-
-    const { theme } = useUnistyles();
-
-    const networkLabel = network === 'mainnet' ? 'Mainnet' : 'Testnet';
+    const { address, publicKey, getActiveWallet } = useWallet();
+    const activeWallet = getActiveWallet();
+    const networkLabel = activeWallet?.network === 'mainnet' ? 'Mainnet' : 'Testnet';
 
     return (
         <DataBlock.Container>
@@ -52,23 +42,10 @@ export const WalletInfoSection: FC = () => {
                 <DataBlock.Key>
                     <DataBlock.Text>Network</DataBlock.Text>
                 </DataBlock.Key>
-
-                <ActiveTouchAction onPress={() => setIsNetworkSelectorOpen(true)}>
-                    <DataBlock.Value style={styles.networkSelector}>
-                        <DataBlock.Text>{networkLabel}</DataBlock.Text>
-                        <Ionicons name="chevron-down" size={14} color={theme.colors.text.secondary} />
-                    </DataBlock.Value>
-                </ActiveTouchAction>
+                <DataBlock.Value>
+                    <DataBlock.Text>{networkLabel}</DataBlock.Text>
+                </DataBlock.Value>
             </DataBlock.Row>
-
-            <NetworkSelectorSheet isOpen={isNetworkSelectorOpen} onClose={() => setIsNetworkSelectorOpen(false)} />
         </DataBlock.Container>
     );
 };
-
-const styles = StyleSheet.create(({ sizes }) => ({
-    networkSelector: {
-        alignItems: 'center',
-        gap: sizes.space.horizontal / 4,
-    },
-}));
