@@ -667,6 +667,77 @@ class OpenAPIReferenceTypeFormatter {
 }
 
 // ============================================================================
+// Custom Schema Generator
+// ============================================================================
+
+/**
+ * Custom SchemaGenerator that ensures all root types are included in definitions.
+ * When using type: '*', the standard generator only includes types that are
+ * referenced by other types. This custom generator wraps root types in
+ * DefinitionType so they are all included.
+ */
+class AllTypesSchemaGenerator extends tsj.SchemaGenerator {
+    createSchemaFromNodes(rootNodes) {
+        const roots = rootNodes.map((rootNode) => {
+            const rootType = this.nodeParser.createType(rootNode, new tsj.Context());
+            return { rootNode, rootType };
+        });
+
+        const definitions = {};
+
+        for (const root of roots) {
+            // Wrap root type in DefinitionType if it isn't already
+            let wrappedType = root.rootType;
+            if (!(wrappedType instanceof tsj.DefinitionType)) {
+                // Try to get the type name from the node
+                const name = this.getTypeName(root.rootNode);
+                if (name) {
+                    wrappedType = new tsj.DefinitionType(name, root.rootType);
+                }
+            }
+
+            // Get children including the wrapped root type
+            this.appendRootChildDefinitions(wrappedType, definitions);
+        }
+
+        return {
+            $schema: 'http://json-schema.org/draft-07/schema#',
+            definitions,
+        };
+    }
+
+    getTypeName(node) {
+        if (node.name) {
+            return node.name.getText ? node.name.getText() : node.name.escapedText;
+        }
+        return null;
+    }
+
+    appendRootChildDefinitions(rootType, childDefinitions) {
+        const seen = new Set();
+
+        const children = this.typeFormatter
+            .getChildren(rootType)
+            .filter((child) => child instanceof tsj.DefinitionType)
+            .filter((child) => {
+                const id = child.getId();
+                if (!seen.has(id)) {
+                    seen.add(id);
+                    return true;
+                }
+                return false;
+            });
+
+        for (const child of children) {
+            const name = child.getName();
+            if (!(name in childDefinitions)) {
+                childDefinitions[name] = this.typeFormatter.getDefinition(child.getType());
+            }
+        }
+    }
+}
+
+// ============================================================================
 // Main
 // ============================================================================
 
@@ -706,7 +777,7 @@ try {
         fmt.addTypeFormatter(new DiscriminatedUnionTypeFormatter(circularReferenceTypeFormatter));
     });
 
-    const generator = new tsj.SchemaGenerator(program, parser, formatter, config);
+    const generator = new AllTypesSchemaGenerator(program, parser, formatter, config);
     const schema = generator.createSchema(config.type);
 
     fs.writeFileSync(outputPath, JSON.stringify(schema, null, 2));
