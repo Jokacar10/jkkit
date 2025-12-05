@@ -55,13 +55,23 @@ import {
 } from '@ton/walletkit';
 
 const kit = new TonWalletKit({
-  network: CHAIN.MAINNET,
-  // Optional API configuration
-  apiClient: {
-    // Optional API key for Toncenter get on https://t.me/toncenter
-    key: process.env.APP_TONCENTER_KEY,
-    url: 'https://toncenter.com', // default
-    // or use self-hosted from https://github.com/toncenter/ton-http-api
+  // Multi-network API configuration
+  networks: {
+    [CHAIN.MAINNET]: {
+      apiClient: {
+        // Optional API key for Toncenter get on https://t.me/toncenter
+        key: process.env.APP_TONCENTER_KEY,
+        url: 'https://toncenter.com', // default
+        // or use self-hosted from https://github.com/toncenter/ton-http-api
+      },
+    },
+    // Optionally configure testnet as well
+    // [CHAIN.TESTNET]: {
+    //   apiClient: {
+    //     key: process.env.APP_TONCENTER_KEY_TESTNET,
+    //     url: 'https://testnet.toncenter.com',
+    //   },
+    // },
   },
   bridge: {
     // TON Connect bridge for dApp communication
@@ -78,7 +88,7 @@ const mnemonic = process.env.APP_MNEMONIC!.split(' ');
 const signer = await Signer.fromMnemonic(mnemonic, { type: 'ton' });
 
 const walletV5R1Adapter = await WalletV5R1Adapter.create(signer, {
-  client: kit.getApiClient(),
+  client: kit.getApiClient(CHAIN.MAINNET),
   network: CHAIN.MAINNET,
 });
 
@@ -414,7 +424,7 @@ async function rejectTx() {
 
 **Live Demo**: [https://walletkit-demo-wallet.vercel.app/](https://walletkit-demo-wallet.vercel.app/)
 
-See `apps/demo-wallet` for the full implementation. The store slices [stores/slices/walletCoreSlice.ts](/apps/demo-wallet/src/stores/slices/walletCoreSlice.ts) and [stores/slices/tonConnectSlice.ts](/apps/demo-wallet/src/stores/slices/tonConnectSlice.ts) show how to:
+See `apps/demo-wallet` for the full implementation. The store slices [walletCoreSlice.ts](/packages/demo-core/src/store/slices/walletCoreSlice.ts) and [tonConnectSlice.ts](/packages/demo-core/src/store/slices/tonConnectSlice.ts) show how to:
 
 - Initialize the kit and add a wallet from mnemonic
 - Wire `onConnectRequest` and `onTransactionRequest` to open modals
