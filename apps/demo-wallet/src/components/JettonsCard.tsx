@@ -7,8 +7,8 @@
  */
 
 import React, { useEffect } from 'react';
+import { useJettons, useWallet } from '@ton/demo-core';
 
-import { useJettons, useWallet } from '../stores';
 import { Button } from './Button';
 import { Card } from './Card';
 import { JettonRow } from './JettonRow';

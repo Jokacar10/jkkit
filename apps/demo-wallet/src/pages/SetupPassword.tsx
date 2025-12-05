@@ -8,8 +8,8 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@ton/demo-core';
 
-import { useAuth } from '../stores';
 import { Layout, Button, Input, Card } from '../components';
 
 export const SetupPassword: React.FC = () => {
