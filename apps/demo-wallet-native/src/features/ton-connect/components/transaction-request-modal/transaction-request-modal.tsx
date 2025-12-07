@@ -58,6 +58,7 @@ export const TransactionRequestModal: FC<TransactionRequestModalProps> = ({ requ
             setIsLoading(false);
             setShowSuccess(true);
         } catch (error) {
+            // eslint-disable-next-line no-console
             console.error('Failed to approve transaction:', error);
             setIsLoading(false);
         }

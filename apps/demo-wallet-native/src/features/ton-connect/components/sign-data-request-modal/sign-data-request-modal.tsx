@@ -55,6 +55,7 @@ export const SignDataRequestModal: FC<SignDataRequestModalProps> = ({ request, i
             setIsLoading(false);
             setShowSuccess(true);
         } catch (error) {
+            // eslint-disable-next-line no-console
             console.error('Failed to approve sign data request:', error);
             setIsLoading(false);
         }

@@ -24,6 +24,7 @@ const ScanQrScreen: FC = () => {
                 await handleTonConnectUrl(data.trim());
                 router.back();
             } catch (error) {
+                // eslint-disable-next-line no-console
                 console.error('Failed to connect to dApp:', error);
                 Alert.alert(
                     'Connection Failed',

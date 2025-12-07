@@ -6,7 +6,6 @@
  *
  */
 
-import { RadialGradient } from '@shopify/react-native-skia';
 import { setStringAsync } from 'expo-clipboard';
 import { type FC, useMemo, useState } from 'react';
 import type { LayoutChangeEvent, ViewProps } from 'react-native';

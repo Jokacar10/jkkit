@@ -39,6 +39,7 @@ export const TonConnectLinkInput: FC<TonConnectLinkInputProps> = ({
                 onChangeText(text);
             }
         } catch (error) {
+            // eslint-disable-next-line no-console
             console.error('Failed to paste from clipboard:', error);
         }
     }, [onChangeText]);

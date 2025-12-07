@@ -27,6 +27,7 @@ export const DevelopmentToolsSection: FC = () => {
             await walletKit.disconnect();
             Alert.alert('Success', 'All sessions disconnected');
         } catch (err) {
+            // eslint-disable-next-line no-console
             console.error('Failed to disconnect sessions:', err);
             Alert.alert('Error', 'Failed to disconnect sessions');
         }
@@ -43,9 +44,7 @@ export const DevelopmentToolsSection: FC = () => {
                     <Ionicons color={theme.colors.accent.primary} name="code-slash-outline" size={24} />
                     <View style={styles.info}>
                         <AppText style={styles.title}>Disconnect All Sessions</AppText>
-                        <AppText style={styles.description}>
-                            Test disconnect event functionality
-                        </AppText>
+                        <AppText style={styles.description}>Test disconnect event functionality</AppText>
                     </View>
                 </View>
                 <AppButton.Container colorScheme="secondary" onPress={handleTestDisconnectAll}>

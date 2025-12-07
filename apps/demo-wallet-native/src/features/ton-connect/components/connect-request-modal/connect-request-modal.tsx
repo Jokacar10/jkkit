@@ -68,6 +68,7 @@ export const ConnectRequestModal: FC<ConnectRequestModalProps> = ({ request, isO
         try {
             await onApprove(selectedWallet);
         } catch (error) {
+            // eslint-disable-next-line no-console
             console.error('Failed to approve connection:', error);
         } finally {
             setIsLoading(false);
@@ -126,7 +127,7 @@ export const ConnectRequestModal: FC<ConnectRequestModalProps> = ({ request, isO
                         </View>
                     )}
 
-                    <WarningBox icon={false}>
+                    <WarningBox>
                         Only connect to trusted applications. This will give the dApp access to your wallet address and
                         allow it to request transactions.
                     </WarningBox>

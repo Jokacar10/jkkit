@@ -25,7 +25,7 @@ import { WalletSwitcher } from '@/features/wallets';
 const WalletHomeScreen: FC = () => {
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [isWalletSwitcherOpen, setIsWalletSwitcherOpen] = useState(false);
-    
+
     const { address, savedWallets, activeWalletId, switchWallet, removeWallet, renameWallet, updateBalance } =
         useWallet();
     const { loadUserJettons } = useJettons();

@@ -33,6 +33,7 @@ const ConnectDAppScreen: FC = () => {
                 setTonConnectUrl('');
                 router.back();
             } catch (error) {
+                // eslint-disable-next-line no-console
                 console.error('Failed to connect to dApp:', error);
                 Alert.alert('Connection Failed', 'Failed to connect to the dApp. Please check the URL and try again.');
             } finally {

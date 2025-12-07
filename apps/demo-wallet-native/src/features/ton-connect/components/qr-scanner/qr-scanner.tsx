@@ -11,7 +11,6 @@ import { type FC, useState, useCallback } from 'react';
 import { View, Alert, Linking } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 
-import { AppButton } from '@/core/components/app-button';
 import { AppText } from '@/core/components/app-text';
 
 interface QrScannerProps {
