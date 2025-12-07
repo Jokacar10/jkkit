@@ -6,4 +6,4 @@
  *
  */
 
-export { ConnectDAppSheet } from './connect-dapp-sheet';
+export { TonConnectLinkInput } from './ton-connect-link-input';

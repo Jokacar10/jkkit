@@ -21,13 +21,11 @@ import { ScreenWrapper } from '@/core/components/screen-wrapper';
 import { noop } from '@/core/utils/noop';
 import { JettonList, TonBalanceCard } from '@/features/balances';
 import { WalletSwitcher } from '@/features/wallets';
-import { ConnectDAppSheet } from '@/features/ton-connect';
 
 const WalletHomeScreen: FC = () => {
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [isWalletSwitcherOpen, setIsWalletSwitcherOpen] = useState(false);
-    const [isConnectDAppOpen, setIsConnectDAppOpen] = useState(false);
-
+    
     const { address, savedWallets, activeWalletId, switchWallet, removeWallet, renameWallet, updateBalance } =
         useWallet();
     const { loadUserJettons } = useJettons();
@@ -99,7 +97,7 @@ const WalletHomeScreen: FC = () => {
                 </ActiveTouchAction>
 
                 <ScreenHeader.RightSide>
-                    <ActiveTouchAction onPress={() => setIsConnectDAppOpen(true)}>
+                    <ActiveTouchAction onPress={() => router.push('/connect-dapp')}>
                         <AntDesign color={theme.colors.text.secondary} name="scan" size={20} />
                     </ActiveTouchAction>
 
@@ -138,9 +136,6 @@ const WalletHomeScreen: FC = () => {
             </View>
 
             <JettonList />
-
-            {/* Connect to dApp Sheet */}
-            <ConnectDAppSheet isOpen={isConnectDAppOpen} onClose={() => setIsConnectDAppOpen(false)} />
         </ScreenWrapper>
     );
 };
