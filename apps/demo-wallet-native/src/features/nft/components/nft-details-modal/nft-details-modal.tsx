@@ -18,10 +18,10 @@ import { getCollectionName, getNftDescription, getNftImage, getNftName, getColle
 
 import { AppText } from '@/core/components/app-text';
 import { AppModal } from '@/core/components/app-modal';
-import { ActiveTouchAction } from '@/core/components/active-touch-action';
 import { Block } from '@/core/components/block';
 import { useAppToasts } from '@/features/toasts';
 import { getErrorMessage } from '@/core/utils/errors/get-error-message';
+import { ScreenHeader } from '@/core/components/screen-header';
 
 interface NftDetailsModalProps {
     nft: NftItem | null;
@@ -63,21 +63,15 @@ export const NftDetailsModal: FC<NftDetailsModalProps> = ({ nft, visible, onClos
 
     return (
         <AppModal visible={visible} onRequestClose={onClose}>
-            <View style={styles.header}>
-                <AppText style={styles.headerTitle} textType="h4" numberOfLines={1}>
-                    {nftName}
-                </AppText>
+            <ScrollView contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
+                <ScreenHeader.Container>
+                    <ScreenHeader.Title>{nftName}</ScreenHeader.Title>
 
-                <ActiveTouchAction onPress={onClose}>
-                    <Ionicons color={theme.colors.text.secondary} name="close" size={24} />
-                </ActiveTouchAction>
-            </View>
+                    <ScreenHeader.RightSide>
+                        <ScreenHeader.CloseButton onClose={onClose} />
+                    </ScreenHeader.RightSide>
+                </ScreenHeader.Container>
 
-            <ScrollView
-                style={styles.content}
-                contentContainerStyle={styles.contentContainer}
-                showsVerticalScrollIndicator={false}
-            >
                 <Block style={styles.block}>
                     <View style={styles.imageContainer}>
                         {nftImage ? (
@@ -140,23 +134,13 @@ export const NftDetailsModal: FC<NftDetailsModalProps> = ({ nft, visible, onClos
 };
 
 const styles = StyleSheet.create(({ sizes, colors }, runtime) => ({
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: sizes.page.paddingHorizontal,
-        paddingVertical: sizes.space.vertical * 2,
-    },
-    headerTitle: {
-        color: colors.text.highlight,
-        flex: 1,
-        marginRight: sizes.space.horizontal,
-    },
-    content: {
-        paddingHorizontal: sizes.page.paddingHorizontal,
-    },
     contentContainer: {
         paddingBottom: runtime.insets.bottom + sizes.page.paddingBottom,
+        paddingVertical: sizes.block.paddingVertical,
+        paddingHorizontal: sizes.page.paddingHorizontal,
+        marginLeft: runtime.insets.left,
+        marginRight: runtime.insets.right,
+        gap: sizes.space.vertical,
     },
     block: {
         overflow: 'hidden',

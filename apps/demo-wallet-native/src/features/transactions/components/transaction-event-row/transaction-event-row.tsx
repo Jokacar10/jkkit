@@ -18,6 +18,7 @@ import { ActiveTouchAction } from '@/core/components/active-touch-action';
 import { AppText } from '@/core/components/app-text';
 import { Block } from '@/core/components/block';
 import { Column, Row } from '@/core/components/grid';
+import { isOutgoingTx } from '@/features/transactions/utils';
 
 interface TransactionEventRowProps {
     event: Event;
@@ -52,7 +53,7 @@ export const TransactionEventRow: FC<TransactionEventRowProps> = memo(({ event, 
     const { description, value, accounts, valueImage } = simplePreview;
 
     // Determine if this is an outgoing action by checking if myAddress is the first account (sender)
-    const isOutgoing = accounts.length > 0 && accounts[0]?.address === myAddress;
+    const isOutgoing = isOutgoingTx(accounts, myAddress);
     const isFailed = status === 'failure';
 
     // Determine icon and colors based on action type and status

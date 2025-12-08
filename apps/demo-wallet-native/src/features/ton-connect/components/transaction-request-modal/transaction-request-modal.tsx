@@ -107,9 +107,9 @@ export const TransactionRequestModal: FC<TransactionRequestModalProps> = ({ requ
                             </View>
                         ) : (
                             <View style={styles.transfersList}>
-                                {request.preview.moneyFlow.ourTransfers.map((transfer) => (
+                                {request.preview.moneyFlow.ourTransfers.map((transfer, index) => (
                                     <JettonFlowItem
-                                        key={transfer.type === 'jetton' ? transfer.jetton.toString() : transfer.type}
+                                        key={index}
                                         jettonAddress={
                                             transfer.type === 'jetton' ? transfer.jetton : transfer.type.toUpperCase()
                                         }

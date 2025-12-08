@@ -11,4 +11,5 @@ export { TransactionEventRow } from './components/transaction-event-row';
 export { TransactionEmptyState } from './components/transaction-empty-state';
 export { TransactionLoadingState } from './components/transaction-loading-state';
 export { TransactionErrorState } from './components/transaction-error-state';
+export { TransactionDetailsModal } from './components/transaction-details-modal';
 export { useTransactionEvents } from './hooks';
