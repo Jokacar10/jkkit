@@ -8,8 +8,8 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { CreateTonMnemonic } from '@ton/walletkit';
+import { useWallet, useAuth } from '@ton/demo-core';
 
-import { useWallet, useAuth } from '../stores';
 import { createComponentLogger } from '../utils/logger';
 
 // Create logger for TON wallet hook
@@ -27,8 +27,7 @@ interface UseTonWalletReturn {
     initializeWallet: () => Promise<void>;
     createNewWallet: () => Promise<string[]>;
     createLedgerWallet: () => Promise<void>;
-    importWallet: (mnemonic: string[], version?: 'v5r1' | 'v4r2') => Promise<void>;
-    sendTransaction: (to: string, amount: string) => Promise<void>;
+    importWallet: (mnemonic: string[], version?: 'v5r1' | 'v4r2', network?: 'mainnet' | 'testnet') => Promise<void>;
 }
 
 export const useTonWallet = (): UseTonWalletReturn => {
@@ -97,7 +96,7 @@ export const useTonWallet = (): UseTonWalletReturn => {
     }, [tonKit, walletStore]);
 
     const importWallet = useCallback(
-        async (mnemonic: string[], version?: 'v5r1' | 'v4r2'): Promise<void> => {
+        async (mnemonic: string[], version?: 'v5r1' | 'v4r2', network?: 'mainnet' | 'testnet'): Promise<void> => {
             if (!tonKit) throw new Error('TON Kit not initialized');
 
             try {
@@ -111,42 +110,9 @@ export const useTonWallet = (): UseTonWalletReturn => {
                 }
 
                 // Import wallet
-                await walletStore.importWallet(mnemonic, undefined, version);
+                await walletStore.importWallet(mnemonic, undefined, version, network);
             } catch (err) {
                 const errorMessage = err instanceof Error ? err.message : 'Failed to import wallet';
-                setError(errorMessage);
-                throw new Error(errorMessage);
-            }
-        },
-        [tonKit, walletStore],
-    );
-
-    const sendTransaction = useCallback(
-        async (to: string, amount: string): Promise<void> => {
-            if (!tonKit) throw new Error('TON Kit not initialized');
-
-            try {
-                setError(null);
-
-                // Get mnemonic from store
-                const mnemonic = await walletStore.getDecryptedMnemonic();
-                if (!mnemonic) throw new Error('No wallet available');
-
-                // Mock transaction sending - just simulate it
-                await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
-
-                // Add transaction to history
-                walletStore.addTransaction({
-                    id: Date.now().toString(),
-                    messageHash: '',
-                    type: 'send',
-                    amount,
-                    address: to,
-                    timestamp: Date.now(),
-                    status: 'confirmed', // Mock as confirmed immediately
-                });
-            } catch (err) {
-                const errorMessage = err instanceof Error ? err.message : 'Failed to send transaction';
                 setError(errorMessage);
                 throw new Error(errorMessage);
             }
@@ -169,6 +135,5 @@ export const useTonWallet = (): UseTonWalletReturn => {
         createNewWallet,
         createLedgerWallet,
         importWallet,
-        sendTransaction,
     };
 };

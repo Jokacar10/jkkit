@@ -9,9 +9,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { AddressJetton, TonTransferParams } from '@ton/walletkit';
+import { useWallet, useJettons, useWalletKit } from '@ton/demo-core';
 
 import { Layout, Button, Input, Card } from '../components';
-import { useWallet, useJettons, useWalletKit } from '../stores';
 import { createComponentLogger } from '../utils/logger';
 
 // Create logger for send transaction
@@ -122,7 +122,7 @@ export const SendTransaction: React.FC = () => {
                 const result = await currentWallet.createTransferTonTransaction(tonTransferParams);
                 // display Preview result.preview in a modal
                 if (walletKit) {
-                    await currentWallet.sendTransaction(result);
+                    await walletKit.handleNewTransaction(currentWallet, result);
                 }
 
                 log.info('TON transfer completed', {

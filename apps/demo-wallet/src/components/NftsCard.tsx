@@ -8,8 +8,8 @@
 
 import React, { useEffect, useState } from 'react';
 import type { NftItem } from '@ton/walletkit';
+import { useNfts, useWallet } from '@ton/demo-core';
 
-import { useNfts, useWallet } from '../stores';
 import { Button } from './Button';
 import { Card } from './Card';
 

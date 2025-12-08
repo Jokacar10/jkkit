@@ -39,6 +39,7 @@
     "build:clean": "rimraf dist",
     "build:cjs": "tsc -p tsconfig.json",
     "build:esm": "tsc -p tsconfig.esm.json",
-    "dev": "tsc -p tsconfig.esm.json --watch"
+    "dev": "tsc -p tsconfig.esm.json --watch",
+    "clean": "git clean -xdf dist node_modules .turbo"
   }
 }

@@ -12,6 +12,7 @@ window.Buffer = Buffer;
 if (globalThis && !globalThis.Buffer) {
     globalThis.Buffer = Buffer;
 }
+
 import { ExtensionTransport, injectBridgeCode, type MessageSender, type MessageListener } from '@ton/walletkit/bridge';
 import { onMessage, sendMessage, setNamespace } from '@truecarry/webext-bridge/window';
 

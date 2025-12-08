@@ -8,15 +8,15 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 import type { EventSignDataRequest } from '@ton/walletkit';
+import type { SavedWallet } from '@ton/demo-core';
+import { useAuth } from '@ton/demo-core';
 
 import { Button } from './Button';
 import { Card } from './Card';
 import { DAppInfo } from './DAppInfo';
 import { WalletPreview } from './WalletPreview';
 import { HoldToSignButton } from './HoldToSignButton';
-import type { SavedWallet } from '../types/wallet';
 import { createComponentLogger } from '../utils/logger';
-import { useAuth } from '../stores';
 
 // Create logger for sign data request modal
 const log = createComponentLogger('SignDataRequestModal');

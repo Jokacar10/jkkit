@@ -1,6 +1,6 @@
 {
   "name": "@ton/walletkit",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Wallet kit for TON Connect",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -40,6 +40,7 @@
     "quality": "pnpm test:coverage",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --max-warnings 0 --fix",
+    "clean": "git clean -xdf dist node_modules .turbo"
     "generate-openapi-spec": "src/api/scripts/generate-openapi-spec.sh"
   },
   "keywords": [
@@ -48,8 +49,11 @@
     "connect",
     "tonconnect"
   ],
-  "author": "",
+  "author": "TON Tech",
   "files": [
+    "DEVELOPMENT.md",
+    "README.md",
+    "LICENSE",
     "dist"
   ],
   "dependencies": {
@@ -75,6 +79,7 @@
     "@types/webextension-polyfill": "^0.12.4",
     "@vitest/coverage-v8": "4.0.8",
     "@vitest/ui": "^4.0.8",
+    "chalk": "^5.6.2",
     "dotenv": "^17.2.3",
     "eslint": "^9.39.1",
     "jest": "^30.2.0",

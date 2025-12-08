@@ -8,8 +8,8 @@
 
 import React, { useEffect, useState } from 'react';
 import type { AddressJetton } from '@ton/walletkit';
+import { useJettons } from '@ton/demo-core';
 
-import { useJettons } from '../stores';
 import { createComponentLogger } from '../utils/logger';
 import { Button } from './Button';
 

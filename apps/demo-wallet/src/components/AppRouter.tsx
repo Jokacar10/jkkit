@@ -8,8 +8,8 @@
 
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useWalletStore, useWallet } from '@ton/demo-core';
 
-import { useStore, useWallet } from '../stores';
 import { ProtectedRoute } from './ProtectedRoute';
 import {
     SetupPassword,
@@ -23,8 +23,8 @@ import {
 
 export const AppRouter: React.FC = () => {
     // const { isPasswordSet, isUnlocked } = useAuth();
-    const isPasswordSet = useStore((state) => state.auth.isPasswordSet);
-    const isUnlocked = useStore((state) => state.auth.isUnlocked);
+    const isPasswordSet = useWalletStore((state) => state.auth.isPasswordSet);
+    const isUnlocked = useWalletStore((state) => state.auth.isUnlocked);
     const { hasWallet } = useWallet();
 
     const getInitialRoute = () => {

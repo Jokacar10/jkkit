@@ -44,6 +44,11 @@ export default defineConfig({
             htmlViteConfig: {
                 build: {
                     outDir,
+                    rollupOptions: {
+                        output: {
+                            inlineDynamicImports: true,
+                        },
+                    },
                 },
             },
             scriptViteConfig: {

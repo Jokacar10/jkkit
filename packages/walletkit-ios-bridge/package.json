@@ -7,7 +7,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "node build.js"
+    "build": "node build.js",
+    "clean": "git clean -xdf dist node_modules .turbo"
   },
   "dependencies": {
     "@ton/crypto": "^3.3.0",

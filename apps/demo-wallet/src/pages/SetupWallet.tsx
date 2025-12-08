@@ -8,10 +8,10 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth, useWallet } from '@ton/demo-core';
 
 import { Layout, Button, Card, MnemonicDisplay, ImportWallet } from '../components';
 import { useTonWallet } from '../hooks';
-import { useAuth, useWallet } from '../stores';
 
 type SetupMode = 'select' | 'create' | 'import' | 'ledger';
 
@@ -48,6 +48,7 @@ export const SetupWallet: React.FC = () => {
         mnemonicArray: string[],
         interfaceType: 'signer' | 'mnemonic',
         version?: 'v5r1' | 'v4r2',
+        network?: 'mainnet' | 'testnet',
     ) => {
         setError('');
         setIsLoading(true);
@@ -60,7 +61,7 @@ export const SetupWallet: React.FC = () => {
             // Set the wallet interface type before importing
             setUseWalletInterfaceType(interfaceType);
 
-            await importWallet(mnemonicArray, version);
+            await importWallet(mnemonicArray, version, network);
             navigate('/wallet');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to import wallet');

@@ -7,19 +7,20 @@
  */
 
 import React, { memo, useEffect, useMemo, useState } from 'react';
-import type { EventTransactionRequest, JettonInfo, MoneyFlowSelf } from '@ton/walletkit';
+import { CHAIN, type EventTransactionRequest, type JettonInfo, type MoneyFlowSelf } from '@ton/walletkit';
 import { Address } from '@ton/core';
+import { useWalletKit, useAuth, useWalletStore, type SavedWallet } from '@ton/demo-core';
 
+import { ActionPreviewList } from './ActionPreviewList';
 import { Button } from './Button';
 import { Card } from './Card';
 import { DAppInfo } from './DAppInfo';
 import { WalletPreview } from './WalletPreview';
 import { HoldToSignButton } from './HoldToSignButton';
-import type { SavedWallet } from '../types/wallet';
 import { createComponentLogger } from '../utils/logger';
 import { formatUnits } from '../utils/units';
-import { useWalletKit, useAuth } from '../stores';
 // Create logger for transaction request modal
+
 const log = createComponentLogger('TransactionRequestModal');
 
 interface TransactionRequestModalProps {
@@ -181,6 +182,15 @@ export const TransactionRequestModal: React.FC<TransactionRequestModalProps> = (
                                         )}
                                     </div>
                                 </div>
+                                {/* Parsed Actions from Emulation */}
+                                {request.preview.emulationResult && (
+                                    <ActionPreviewList
+                                        emulationResult={request.preview.emulationResult}
+                                        walletAddress={request.walletAddress || currentWallet?.address}
+                                        className="mt-4"
+                                        title="Actions:"
+                                    />
+                                )}
                             </>
                         )}
 
@@ -250,9 +260,19 @@ export const TransactionRequestModal: React.FC<TransactionRequestModalProps> = (
     );
 };
 
+function useActiveWalletNetwork(): 'mainnet' | 'testnet' {
+    const savedWallets = useWalletStore((state) => state.walletManagement.savedWallets);
+    const activeWalletId = useWalletStore((state) => state.walletManagement.activeWalletId);
+    const activeWallet = savedWallets.find((w) => w.id === activeWalletId);
+    return activeWallet?.network || 'testnet';
+}
+
 function useJettonInfo(jettonAddress: Address | string | null) {
     const walletKit = useWalletKit();
+    const network = useActiveWalletNetwork();
     const [jettonInfo, setJettonInfo] = useState<JettonInfo | null>(null);
+    const chainNetwork = network === 'mainnet' ? CHAIN.MAINNET : CHAIN.TESTNET;
+
     useEffect(() => {
         if (!jettonAddress) {
             setJettonInfo(null);
@@ -262,11 +282,11 @@ function useJettonInfo(jettonAddress: Address | string | null) {
             if (!jettonAddress) {
                 return;
             }
-            const jettonInfo = await walletKit?.jettons?.getJettonInfo(jettonAddress.toString());
+            const jettonInfo = await walletKit?.jettons?.getJettonInfo(jettonAddress.toString(), chainNetwork);
             setJettonInfo(jettonInfo ?? null);
         }
         updateJettonInfo();
-    }, [jettonAddress, walletKit]);
+    }, [jettonAddress, walletKit, chainNetwork]);
     return jettonInfo;
 }
 
@@ -383,3 +403,5 @@ export const JettonFlow = memo(function JettonFlow({ transfers }: { transfers: M
         </div>
     );
 });
+
+// no-op

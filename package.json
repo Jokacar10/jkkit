@@ -5,12 +5,19 @@
   "private": true,
   "scripts": {
     "kit": "pnpm --filter @ton/walletkit",
+    "demo-wallet": "pnpm --filter demo-wallet",
+    "demo-wallet-native": "pnpm --filter demo-wallet-native",
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --max-warnings 0 --fix",
     "quality": "turbo quality",
     "e2e": "turbo e2e",
+    "clean": "git clean -xdf node_modules",
+    "clean:workspaces": "turbo run clean",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "pnpm build && changeset publish"
     "generate-openapi-spec": "turbo generate-openapi-spec"
   },
   "prettier": "@ton/toolchain/prettier",

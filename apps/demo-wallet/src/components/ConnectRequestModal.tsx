@@ -8,12 +8,12 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import type { EventConnectRequest, IWallet } from '@ton/walletkit';
+import type { SavedWallet } from '@ton/demo-core';
 
 import { Button } from './Button';
 import { Card } from './Card';
 import { DAppInfo } from './DAppInfo';
 import { WalletPreview } from './WalletPreview';
-import type { SavedWallet } from '../types/wallet';
 import { createComponentLogger } from '../utils/logger';
 
 // Create logger for connect request modal
@@ -192,6 +192,7 @@ export const ConnectRequestModal: React.FC<ConnectRequestModalProps> = ({
                                                                 publicKey: '',
                                                                 walletType: 'mnemonic',
                                                                 walletInterfaceType: 'mnemonic',
+                                                                network: 'mainnet',
                                                                 createdAt: Date.now(),
                                                             }
                                                         }
@@ -224,6 +225,7 @@ export const ConnectRequestModal: React.FC<ConnectRequestModalProps> = ({
                                                         publicKey: '',
                                                         walletType: 'mnemonic',
                                                         walletInterfaceType: 'mnemonic',
+                                                        network: 'mainnet',
                                                         createdAt: Date.now(),
                                                     }
                                                 }
