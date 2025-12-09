@@ -6,23 +6,20 @@
  *
  */
 
-import type { NftTransferParamsHuman } from "../../types/nfts";
-import type { NFTTransferRequest } from "../models/nfts/NFTTransferRequest";
-import { Mapper } from "./Mapper";
+import type { NftTransferParamsHuman } from '../../types/nfts';
+import type { NFTTransferRequest } from '../models/nfts/NFTTransferRequest';
+import { Mapper } from './Mapper';
 
 /**
  * Maps API NFTTransferRequest to internal NftTransferParamsHuman.
  */
-export class NFTTransferRequestMapper extends Mapper<
-  NFTTransferRequest,
-  NftTransferParamsHuman
-> {
-  map(input: NFTTransferRequest): NftTransferParamsHuman {
-    return {
-      nftAddress: input.nftAddress,
-      toAddress: input.recipientAddress,
-      transferAmount: input.transferAmount ?? "100000000",
-      comment: input.comment,
-    };
-  }
+export class NFTTransferRequestMapper extends Mapper<NFTTransferRequest, NftTransferParamsHuman> {
+    map(input: NFTTransferRequest): NftTransferParamsHuman {
+        return {
+            nftAddress: input.nftAddress,
+            toAddress: input.recipientAddress,
+            transferAmount: input.transferAmount ?? '100000000',
+            comment: input.comment,
+        };
+    }
 }

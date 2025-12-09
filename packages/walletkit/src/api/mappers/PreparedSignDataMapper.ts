@@ -6,46 +6,43 @@
  *
  */
 
-import { SignDataPayload } from "@tonconnect/protocol";
+import { SignDataPayload } from '@tonconnect/protocol';
 
-import type { SignDataParams } from "../../utils/signData/sign";
-import type { PreparedSignData } from "../models/core/PreparedSignData";
-import { Mapper } from "./Mapper";
-import { NetworkMapper } from "./NetworkMapper";
+import type { SignDataParams } from '../../utils/signData/sign';
+import type { PreparedSignData } from '../models/core/PreparedSignData';
+import { Mapper } from './Mapper';
+import { NetworkMapper } from './NetworkMapper';
 
 /**
  * Maps API PreparedSignData to internal SignDataParams.
  */
-export class PreparedSignDataMapper extends Mapper<
-  PreparedSignData,
-  SignDataParams
-> {
-  private networkMapper = new NetworkMapper();
+export class PreparedSignDataMapper extends Mapper<PreparedSignData, SignDataParams> {
+    private networkMapper = new NetworkMapper();
 
-  map(input: PreparedSignData): SignDataParams {
-    // Convert SignData to SignDataPayload
-    let payload: SignDataPayload;
-    const data = input.payload.data;
+    map(input: PreparedSignData): SignDataParams {
+        // Convert SignData to SignDataPayload
+        let payload: SignDataPayload;
+        const data = input.payload.data;
 
-    if (!data) {
-      // Default to empty text payload
-      payload = { type: "text", text: "" };
-    } else if (data.type === "text") {
-      payload = { type: "text", text: data.value.content };
-    } else if (data.type === "binary") {
-      payload = { type: "binary", bytes: data.value.content };
-    } else {
-      payload = {
-        type: "cell",
-        schema: data.value.schema,
-        cell: data.value.content,
-      };
+        if (!data) {
+            // Default to empty text payload
+            payload = { type: 'text', text: '' };
+        } else if (data.type === 'text') {
+            payload = { type: 'text', text: data.value.content };
+        } else if (data.type === 'binary') {
+            payload = { type: 'binary', bytes: data.value.content };
+        } else {
+            payload = {
+                type: 'cell',
+                schema: data.value.schema,
+                cell: data.value.content,
+            };
+        }
+
+        return {
+            payload,
+            domain: input.domain,
+            address: input.address,
+        };
     }
-
-    return {
-      payload,
-      domain: input.domain,
-      address: input.address,
-    };
-  }
 }

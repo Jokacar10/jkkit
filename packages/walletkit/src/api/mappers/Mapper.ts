@@ -12,10 +12,10 @@
  * @template Output - The target type to map to
  */
 export abstract class Mapper<Input, Output> {
-  /**
-   * Maps the input type to the output type.
-   * @param input - The source object to map
-   * @returns The mapped output object
-   */
-  abstract map(input: Input): Output;
+    /**
+     * Maps the input type to the output type.
+     * @param input - The source object to map
+     * @returns The mapped output object
+     */
+    abstract map(input: Input): Output;
 }

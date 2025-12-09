@@ -6,23 +6,20 @@
  *
  */
 
-import type { JettonTransferParams } from "../../types/jettons";
-import type { JettonsTransferRequest } from "../models/jettons/JettonsTransferRequest";
-import { Mapper } from "./Mapper";
+import type { JettonTransferParams } from '../../types/jettons';
+import type { JettonsTransferRequest } from '../models/jettons/JettonsTransferRequest';
+import { Mapper } from './Mapper';
 
 /**
  * Maps API JettonsTransferRequest to internal JettonTransferParams.
  */
-export class JettonsTransferRequestMapper extends Mapper<
-  JettonsTransferRequest,
-  JettonTransferParams
-> {
-  map(input: JettonsTransferRequest): JettonTransferParams {
-    return {
-      jettonAddress: input.jettonAddress,
-      amount: input.transferAmount,
-      toAddress: input.recipientAddress,
-      comment: input.comment,
-    };
-  }
+export class JettonsTransferRequestMapper extends Mapper<JettonsTransferRequest, JettonTransferParams> {
+    map(input: JettonsTransferRequest): JettonTransferParams {
+        return {
+            jettonAddress: input.jettonAddress,
+            amount: input.transferAmount,
+            toAddress: input.recipientAddress,
+            comment: input.comment,
+        };
+    }
 }

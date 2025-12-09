@@ -6,14 +6,14 @@
  *
  */
 
-export { Wallet } from "./Wallet";
-export { WalletKit } from "./WalletKit";
+export { Wallet } from './Wallet';
+export { WalletKit } from './WalletKit';
 export type {
-  WalletKitConfiguration,
-  ApiClientConfiguration,
-  NetworkConfiguration,
-  NetworkAdaptersConfiguration,
-  AnalyticsConfiguration,
-  ValidationConfiguration,
-  DevConfiguration,
-} from "./WalletKitConfiguration";
+    WalletKitConfiguration,
+    ApiClientConfiguration,
+    NetworkConfiguration,
+    NetworkAdaptersConfiguration,
+    AnalyticsConfiguration,
+    ValidationConfiguration,
+    DevConfiguration,
+} from './WalletKitConfiguration';

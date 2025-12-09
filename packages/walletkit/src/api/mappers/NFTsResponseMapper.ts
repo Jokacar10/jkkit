@@ -6,20 +6,20 @@
  *
  */
 
-import { NftItems } from "../..";
-import type { NFTsResponse } from "../models/nfts/NFTsResponse";
-import { Mapper } from "./Mapper";
-import { NFTMapper } from "./NftMapper";
+import { NftItems } from '../..';
+import type { NFTsResponse } from '../models/nfts/NFTsResponse';
+import { Mapper } from './Mapper';
+import { NFTMapper } from './NftMapper';
 
 /**
  * Maps array of NftItem to API NFTsResponse model.
  */
 export class NFTsResponseMapper extends Mapper<NftItems, NFTsResponse> {
-  private nftMapper = new NFTMapper();
+    private nftMapper = new NFTMapper();
 
-  map(input: NftItems): NFTsResponse {
-    return {
-      nfts: input.items.map((nft) => this.nftMapper.map(nft)),
-    };
-  }
+    map(input: NftItems): NFTsResponse {
+        return {
+            nfts: input.items.map((nft) => this.nftMapper.map(nft)),
+        };
+    }
 }

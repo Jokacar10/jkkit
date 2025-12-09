@@ -6,20 +6,17 @@
  *
  */
 
-import type { EventSignDataResponse } from "../../types/events";
-import type { SignDataApprovalResponse } from "../models/bridge/SignDataApprovalResponse";
-import { Mapper } from "./Mapper";
+import type { EventSignDataResponse } from '../../types/events';
+import type { SignDataApprovalResponse } from '../models/bridge/SignDataApprovalResponse';
+import { Mapper } from './Mapper';
 
 /**
  * Maps EventSignDataResponse to API SignDataApprovalResponse model.
  */
-export class SignDataApprovalResponseMapper extends Mapper<
-  EventSignDataResponse,
-  SignDataApprovalResponse
-> {
-  map(input: EventSignDataResponse): SignDataApprovalResponse {
-    return {
-      signature: input.signature,
-    };
-  }
+export class SignDataApprovalResponseMapper extends Mapper<EventSignDataResponse, SignDataApprovalResponse> {
+    map(input: EventSignDataResponse): SignDataApprovalResponse {
+        return {
+            signature: input.signature,
+        };
+    }
 }

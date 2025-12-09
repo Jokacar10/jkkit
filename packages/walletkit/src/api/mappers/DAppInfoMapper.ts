@@ -6,20 +6,20 @@
  *
  */
 
-import type { DAppInfo as _DAppInfo } from "../../types/events";
-import type { DAppInfo } from "../models/core/DAppInfo";
-import { Mapper } from "./Mapper";
+import type { DAppInfo as _DAppInfo } from '../../types/events';
+import type { DAppInfo } from '../models/core/DAppInfo';
+import { Mapper } from './Mapper';
 
 /**
  * Maps internal DAppInfo to API DAppInfo model.
  */
 export class DAppInfoMapper extends Mapper<_DAppInfo, DAppInfo> {
-  map(input: _DAppInfo): DAppInfo {
-    return {
-      name: input.name,
-      description: input.description,
-      url: input.url,
-      iconUrl: input.iconUrl,
-    };
-  }
+    map(input: _DAppInfo): DAppInfo {
+        return {
+            name: input.name,
+            description: input.description,
+            url: input.url,
+            iconUrl: input.iconUrl,
+        };
+    }
 }

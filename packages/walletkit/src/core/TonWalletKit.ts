@@ -125,7 +125,9 @@ export class TonWalletKit implements ITonWalletKit {
             // Get the wallet to determine its network - use walletId if available, fall back to walletAddress
             const wallet = session.walletId ? this.walletManager?.getWallet(session.walletId) : undefined;
             if (!wallet) {
-                log.error('Wallet not found for session', { walletId: session.walletId });
+                log.error('Wallet not found for session', {
+                    walletId: session.walletId,
+                });
                 return;
             }
 
@@ -181,7 +183,9 @@ export class TonWalletKit implements ITonWalletKit {
             this.isInitialized = true;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
-            log.error('TonWalletKit initialization failed', { error: error?.toString() });
+            log.error('TonWalletKit initialization failed', {
+                error: error?.toString(),
+            });
             throw error;
         }
     }
@@ -286,7 +290,10 @@ export class TonWalletKit implements ITonWalletKit {
                 ERROR_CODES.NETWORK_NOT_CONFIGURED,
                 `No API client configured for wallet network ${walletNetwork}`,
                 undefined,
-                { walletNetwork, configuredNetworks: this.networkManager.getConfiguredNetworks() },
+                {
+                    walletNetwork,
+                    configuredNetworks: this.networkManager.getConfiguredNetworks(),
+                },
             );
         }
 
@@ -370,7 +377,10 @@ export class TonWalletKit implements ITonWalletKit {
                         100,
                     );
                 } catch (error) {
-                    log.error('Failed to send disconnect to bridge', { sessionId, error });
+                    log.error('Failed to send disconnect to bridge', {
+                        sessionId,
+                        error,
+                    });
                 }
             }
 
@@ -389,7 +399,10 @@ export class TonWalletKit implements ITonWalletKit {
                     try {
                         await removeSession(session.sessionId);
                     } catch (error) {
-                        log.error('Failed to remove session', { sessionId: session.sessionId, error });
+                        log.error('Failed to remove session', {
+                            sessionId: session.sessionId,
+                            error,
+                        });
                     }
                 }
             }

@@ -6,14 +6,14 @@
  *
  */
 
-import type { LogicalTime } from "../models/core/Primitives";
-import { Mapper } from "./Mapper";
+import type { LogicalTime } from '../models/core/Primitives';
+import { Mapper } from './Mapper';
 
 /**
  * Maps internal string to API LogicalTime model.
  */
 export class LogicalTimeMapper extends Mapper<string, LogicalTime> {
-  map(input: string): LogicalTime {
-    return input;
-  }
+    map(input: string): LogicalTime {
+        return input;
+    }
 }

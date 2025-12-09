@@ -6,43 +6,35 @@
  *
  */
 
-import type { EventDisconnect } from "../../types/events";
-import type {
-  DisconnectionEvent,
-  DisconnectionEventPreview,
-} from "../models/bridge/DisconnectionEvent";
-import { Mapper } from "./Mapper";
-import { DAppInfoMapper } from "./DAppInfoMapper";
+import type { EventDisconnect } from '../../types/events';
+import type { DisconnectionEvent, DisconnectionEventPreview } from '../models/bridge/DisconnectionEvent';
+import { Mapper } from './Mapper';
+import { DAppInfoMapper } from './DAppInfoMapper';
 
 /**
  * Maps EventDisconnect to API DisconnectionEvent model.
  */
-export class DisconnectionEventMapper extends Mapper<
-  EventDisconnect,
-  DisconnectionEvent
-> {
-  private dAppInfoMapper = new DAppInfoMapper();
+export class DisconnectionEventMapper extends Mapper<EventDisconnect, DisconnectionEvent> {
+    private dAppInfoMapper = new DAppInfoMapper();
 
-  map(input: EventDisconnect): DisconnectionEvent {
-    const preview: DisconnectionEventPreview = {
-      reason: input.reason,
-      dAppInfo: input.dAppInfo
-        ? this.dAppInfoMapper.map(input.dAppInfo)
-        : undefined,
-    };
+    map(input: EventDisconnect): DisconnectionEvent {
+        const preview: DisconnectionEventPreview = {
+            reason: input.reason,
+            dAppInfo: input.dAppInfo ? this.dAppInfoMapper.map(input.dAppInfo) : undefined,
+        };
 
-    return {
-      id: input.id,
-      from: input.from,
-      walletAddress: input.walletAddress,
-      domain: input.domain,
-      isJsBridge: input.isJsBridge,
-      tabId: input.tabId,
-      sessionId: input.sessionId,
-      isLocal: input.isLocal,
-      messageId: input.messageId,
-      traceId: input.traceId,
-      preview,
-    };
-  }
+        return {
+            id: input.id,
+            from: input.from,
+            walletAddress: input.walletAddress,
+            domain: input.domain,
+            isJsBridge: input.isJsBridge,
+            tabId: input.tabId,
+            sessionId: input.sessionId,
+            isLocal: input.isLocal,
+            messageId: input.messageId,
+            traceId: input.traceId,
+            preview,
+        };
+    }
 }

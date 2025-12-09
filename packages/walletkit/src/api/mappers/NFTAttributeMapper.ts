@@ -6,18 +6,18 @@
  *
  */
 
-import type { NftItemAttribute } from "../../types/toncenter/NftItem";
-import type { NFTAttribute } from "../models/nfts/NFTAttribute";
-import { Mapper } from "./Mapper";
+import type { NftItemAttribute } from '../../types/toncenter/NftItem';
+import type { NFTAttribute } from '../models/nfts/NFTAttribute';
+import { Mapper } from './Mapper';
 
 /**
  * Maps NftItemAttribute to API NFTAttribute model.
  */
 export class NFTAttributeMapper extends Mapper<NftItemAttribute, NFTAttribute> {
-  map(input: NftItemAttribute): NFTAttribute {
-    return {
-      traitType: input.trait_type,
-      value: input.value,
-    };
-  }
+    map(input: NftItemAttribute): NFTAttribute {
+        return {
+            traitType: input.trait_type,
+            value: input.value,
+        };
+    }
 }
