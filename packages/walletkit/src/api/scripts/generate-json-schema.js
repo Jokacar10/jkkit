@@ -439,8 +439,12 @@ class DiscriminatedUnionNodeParser {
     }
 
     isPrimitiveType(typeNode) {
-        const primitiveKinds = [ts.SyntaxKind.StringKeyword, ts.SyntaxKind.NumberKeyword, ts.SyntaxKind.BooleanKeyword];
+        const primitiveKinds = [ts.SyntaxKind.StringKeyword, ts.SyntaxKind.NumberKeyword, ts.SyntaxKind.BooleanKeyword, ts.SyntaxKind.UnknownKeyword, ts.SyntaxKind.AnyKeyword];
         if (primitiveKinds.includes(typeNode.kind)) {
+            return true;
+        }
+        // Handle arrays of primitives (e.g., unknown[])
+        if (typeNode.kind === ts.SyntaxKind.ArrayType) {
             return true;
         }
         if (typeNode.kind === ts.SyntaxKind.TypeLiteral) {

@@ -28,7 +28,8 @@
     "clean": {
       "cache": false
     },
-	"generate-openapi-spec": {
+    "generate-openapi-spec": {
       "dependsOn": ["^generate-openapi-spec"]
-  	}
+    }
+  }
 }
