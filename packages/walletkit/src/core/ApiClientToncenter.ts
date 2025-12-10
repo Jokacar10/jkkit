@@ -176,7 +176,7 @@ export class ApiClientToncenter implements ApiClient {
         };
     }
 
-    async getAccountState(address: UserFriendlyAddress, seqno?: number): Promise<AccountState> {
+    async getAccountState(address: UserFriendlyAddress, seqno?: number): Promise<FullAccountState> {
         const query: Record<string, unknown> = { include_boc: true, address: [address] };
         if (typeof seqno === 'number') query.seqno = seqno.toString();
         const raw = await this.getJson<V2AddressInformation>('/api/v3/addressInformation', query);
