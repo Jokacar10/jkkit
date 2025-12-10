@@ -45,7 +45,7 @@ export class DemoWallet extends WalletApp {
         await this.close();
     }
 
-    async connectBy(url: string, shouldSkipConnect: boolean = false): Promise<void> {
+    async connectBy(url: string, shouldSkipConnect: boolean = false, confirm: boolean = true): Promise<void> {
         const app = await this.open();
         await app.getByTestId('tonconnect-url').fill(url);
         await app.getByTestId('tonconnect-process').click();
@@ -53,7 +53,7 @@ export class DemoWallet extends WalletApp {
         if (shouldSkipConnect) {
             return;
         }
-        await this.connect();
+        await this.connect(confirm);
     }
 
     async connect(confirm: boolean = true, skipConnect: boolean = false): Promise<void> {
