@@ -46,6 +46,8 @@ import {
 } from '../types/toncenter/dnsResolve';
 import { toAddressBook, toEvent } from '../types/toncenter/AccountEvent';
 import {
+    Jetton,
+    JettonsResponse,
     Network,
     NFTsRequest,
     NFTsResponse,
@@ -428,7 +430,7 @@ export class ApiClientToncenter implements ApiClient {
         });
     }
 
-    async jettonsByOwnerAddress(request: GetJettonsByOwnerRequest): Promise<ResponseUserJettons> {
+    async jettonsByOwnerAddress(request: GetJettonsByOwnerRequest): Promise<JettonsResponse> {
         const offset = request.offset ?? 0;
         const limit = request.limit ?? 50;
         const rawResponse = await this.getJson<ToncenterResponseJettonWallets>('/api/v3/jetton/wallets', {
@@ -437,42 +439,35 @@ export class ApiClientToncenter implements ApiClient {
             limit,
         });
 
-        return this.mapToResponseUserJettons(rawResponse, offset, limit);
+        return this.mapToResponseUserJettons(rawResponse);
     }
 
-    private mapToResponseUserJettons(
-        rawResponse: ToncenterResponseJettonWallets,
-        offset: number,
-        limit: number,
-    ): ResponseUserJettons {
-        const userJettons: AddressJetton[] = rawResponse.jetton_wallets.map((wallet) => {
+    private mapToResponseUserJettons(rawResponse: ToncenterResponseJettonWallets): JettonsResponse {
+        const userJettons: Jetton[] = rawResponse.jetton_wallets.map((wallet) => {
             const jettonInfo = this.extractJettonInfoFromMetadata(wallet.jetton, rawResponse.metadata);
-            return {
+            const jetton: Jetton = {
                 address: wallet.jetton,
+                walletAddress: wallet.address,
                 balance: wallet.balance,
-                jettonWalletAddress: wallet.address,
-                usdValue: '0',
-                name: jettonInfo.name,
-                symbol: jettonInfo.symbol,
-                description: jettonInfo.description,
-                decimals: jettonInfo.decimals,
-                image: jettonInfo.image,
-                verification: jettonInfo.verification,
-                metadata: jettonInfo.metadata,
-                totalSupply: jettonInfo.totalSupply,
-                uri: jettonInfo.uri,
-                image_data: jettonInfo.image_data,
-                lastActivity: wallet.last_transaction_lt,
+                info: {
+                    name: jettonInfo.name,
+                    description: jettonInfo.description,
+                    image: {
+                        url: jettonInfo.image,
+                        data: jettonInfo.image_data,
+                    },
+                    symbol: jettonInfo.symbol,
+                },
+                decimalsNumber: jettonInfo.decimals,
+                // ????
+                // extra: rawResponse.metadata[wallet.jetton]?.token_info,
             };
+            return jetton;
         });
 
         return {
             jettons: userJettons,
-            address_book: rawResponse.address_book,
-            pagination: {
-                offset,
-                limit,
-            },
+            addressBook: {},
         };
     }
 
