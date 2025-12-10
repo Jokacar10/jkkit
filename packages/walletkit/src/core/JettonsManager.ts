@@ -287,7 +287,6 @@ export class JettonsManager implements JettonsAPI {
     /**
      * Normalize jetton address for consistent caching
      */
-    // ????
     private normalizeAddress(address: string): string {
         if (address === 'TON') {
             return 'TON';

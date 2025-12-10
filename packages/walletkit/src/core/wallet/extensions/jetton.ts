@@ -141,12 +141,11 @@ export class WalletJettonClass implements WalletJettonInterface {
         }
     }
 
-    // ????
     async getJettons(this: Wallet, params?: JettonsRequest): Promise<JettonsResponse> {
         return this.getClient().jettonsByOwnerAddress({
-            ...params,
-
             ownerAddress: this.getAddress(),
+            offset: params?.pagination.offset,
+            limit: params?.pagination.limit,
         });
     }
 }
