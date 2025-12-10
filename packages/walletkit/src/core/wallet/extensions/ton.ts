@@ -6,7 +6,7 @@
  *
  */
 
-import { beginCell, Address } from '@ton/core';
+import { beginCell } from '@ton/core';
 
 import { isValidAddress } from '../../../utils/address';
 import { isValidNanotonAmount, validateTransactionMessage } from '../../../validation';

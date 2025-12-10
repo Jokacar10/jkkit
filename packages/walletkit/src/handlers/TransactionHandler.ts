@@ -14,7 +14,7 @@ import {
     WalletResponseTemplateError,
 } from '@tonconnect/protocol';
 
-import type { EventTransactionRequest, TransactionPreview, ValidationResult, TonWalletKitOptions } from '../types';
+import type { EventTransactionRequest, ValidationResult, TonWalletKitOptions } from '../types';
 import {
     type RawBridgeEvent,
     type EventHandler,

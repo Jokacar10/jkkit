@@ -6,8 +6,6 @@
  *
  */
 
-import { Address } from '@ton/core';
-
 import { UserFriendlyAddress, Hex } from '../core/Primitives';
 import { Network } from './Network';
 import { SignData } from './SignData';

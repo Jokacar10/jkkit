@@ -6,7 +6,6 @@
  *
  */
 
-import { NftCollection } from '../NftCollection';
 import { asAddressFriendly, asMaybeAddressFriendly } from '../../primitive';
 import { Base64ToHex } from '../../../utils/base64';
 import { NFTCollection } from '../../../api/models';

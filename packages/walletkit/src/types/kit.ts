@@ -20,7 +20,6 @@ import type {
     EventTransactionResponse,
 } from './events';
 import type { JettonsAPI } from './jettons';
-import { ConnectTransactionParamContent } from './internal';
 import { ApiClient } from './toncenter/ApiClient';
 import { Wallet, WalletAdapter } from '../api/interfaces';
 import { Network } from '../api/models/core/Network';

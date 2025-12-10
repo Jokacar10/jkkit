@@ -21,7 +21,6 @@ import {
     MessageRelaxed,
     internal,
 } from '@ton/core';
-import { CHAIN } from '@tonconnect/protocol';
 
 import { WalletV4R2, WalletV4R2Config } from './WalletV4R2';
 import { WalletV4R2CodeCell } from './WalletV4R2.source';
@@ -235,7 +234,7 @@ export class WalletV4R2Adapter implements WalletAdapter {
      */
     async isDeployed(): Promise<boolean> {
         try {
-            const state = await this.client.getAccountState(this.walletContract.address.toString);
+            const state = await this.client.getAccountState(this.walletContract.address.toString());
             return state.status === 'active';
         } catch (error) {
             log.warn('Failed to check deployment status', { error });

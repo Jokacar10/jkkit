@@ -29,7 +29,6 @@ import type {
     EventSignDataApproval,
     TonWalletKitOptions,
 } from '../types';
-import type { ConnectTransactionParamContent } from '../types/internal';
 import type { SessionManager } from './SessionManager';
 import type { BridgeManager } from './BridgeManager';
 import { globalLogger } from './Logger';
@@ -51,7 +50,7 @@ import { getUnixtime } from '../utils/time';
 import { getEventsSubsystem, getVersion } from '../utils/version';
 import { Base64Normalize, Base64ToHex } from '../utils/base64';
 import { getAddressFromWalletId } from '../utils/walletId';
-import { PreparedSignData, TransactionRequest } from '../api/models';
+import { TransactionRequest } from '../api/models';
 import { PrepareSignData } from '../utils/signData/sign';
 import { Wallet } from '../api/interfaces';
 

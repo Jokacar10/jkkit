@@ -7,7 +7,6 @@
  */
 
 import { AddressBook } from '../core/AddressBook';
-import { TransactionAddressMetadata } from '../transactions/TransactionMetadata';
 import { NFT } from './NFT';
 
 /**

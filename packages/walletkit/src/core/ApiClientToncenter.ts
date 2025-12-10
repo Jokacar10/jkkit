@@ -46,7 +46,6 @@ import {
 } from '../types/toncenter/dnsResolve';
 import { toAddressBook, toEvent } from '../types/toncenter/AccountEvent';
 import {
-    AccountState,
     Base64String,
     Jetton,
     JettonsResponse,

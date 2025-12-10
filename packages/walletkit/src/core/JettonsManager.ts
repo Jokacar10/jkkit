@@ -15,7 +15,7 @@ import { LRUCache } from 'lru-cache';
 import type { EmulationTokenInfoMasters } from '../types/toncenter/emulation';
 import { globalLogger } from './Logger';
 import { EventEmitter } from './EventEmitter';
-import { JettonInfo, AddressJetton, JettonError, JettonErrorCode, JettonsAPI } from '../types/jettons';
+import { JettonInfo, JettonError, JettonErrorCode, JettonsAPI } from '../types/jettons';
 import { NetworkManager } from './NetworkManager';
 import { Jetton, Network } from '../api/models';
 

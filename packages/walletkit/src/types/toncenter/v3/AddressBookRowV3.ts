@@ -6,8 +6,6 @@
  *
  */
 
-import { Address } from '@ton/core';
-
 import { AddressBook, AddressBookEntry } from '../../../api/models';
 import { asAddressFriendly } from '../../primitive';
 import { EmulationAddressMetadata } from '../emulation';
