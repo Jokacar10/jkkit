@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
 /**
  * Converts JSON Schema to OpenAPI 3.0 specification
  *

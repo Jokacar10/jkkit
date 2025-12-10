@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
 /**
  * Custom JSON Schema generator that preserves enum member names.
  * Uses ts-json-schema-generator with custom EnumType and formatter.
@@ -68,7 +69,7 @@ class EnumNodeParserWithNames {
         return node.kind === ts.SyntaxKind.EnumDeclaration;
     }
 
-    createType(node, context) {
+    createType(node) {
         const members = [...node.members];
 
         const values = [];

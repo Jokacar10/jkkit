@@ -6,7 +6,7 @@
  *
  */
 
-import { UserFriendlyAddress, Hex, Base64String, LogicalTime } from '../core/Primitives';
+import { UserFriendlyAddress, Hex, LogicalTime } from '../core/Primitives';
 import { ExtraCurrencies } from '../core/ExtraCurrencies';
 import { TokenAmount } from '../core/TokenAmount';
 import { Transaction } from './Transaction';
