@@ -37,7 +37,7 @@ export interface Transaction {
     /**
      * Hash of the transaction
      */
-    hash: Hex;
+    hash: string;
 
     /**
      * The logical time of the transaction
@@ -53,12 +53,12 @@ export interface Transaction {
      * Masterchain block sequence number
      * @format int
      */
-    msBlockSeqno: number;
+    mcBlockSeqno: number;
 
     /**
      * External hash of the trace
      */
-    traceExternalHash: Hex;
+    traceExternalHash: string;
 
     /**
      * ID of the trace
@@ -68,7 +68,7 @@ export interface Transaction {
     /**
      * The hash of the previous transaction
      */
-    previousTransactionHash?: Hex;
+    previousTransactionHash?: string;
 
     /**
      * The logical time of the previous transaction
@@ -132,7 +132,7 @@ export interface AccountState {
     /**
      * The state hash of the account
      */
-    hash: Hex;
+    hash: string;
 
     /**
      * The account's balance in nanotons
@@ -152,17 +152,17 @@ export interface AccountState {
     /**
      * The hash of the frozen account state, if the account is frozen
      */
-    frozenHash?: Hex;
+    frozenHash?: string;
 
     /**
      * The hash of the contract's data section
      */
-    dataHash?: Hex;
+    dataHash?: string;
 
     /**
      * The hash of the smart contract code
      */
-    codeHash?: Hex;
+    codeHash?: string;
 }
 
 /**
@@ -238,9 +238,8 @@ export interface TransactionMessage {
 
     /**
      * The opcode included in the message payload
-     * @format int
      */
-    opcode?: number;
+    opcode?: string;
 
     /**
      * IHR(Immediate hypercube routing) enabled/disabled
@@ -272,11 +271,6 @@ export interface TransactionMessage {
      * The content body of the message
      */
     messageContent?: TransactionMessageContent;
-
-    /**
-     * The initial state of the contract, if provided by the message
-     */
-    initState?: TransactionMessageContent;
 }
 
 /**
@@ -514,7 +508,7 @@ export interface TransactionAction {
      * The number of messages created in the action phase
      * @format int
      */
-    messagesCreatedCount: number;
+    messagesCreatedNumber: number;
 
     /**
      * The hash of the action list

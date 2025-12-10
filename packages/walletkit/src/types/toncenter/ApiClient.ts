@@ -116,7 +116,7 @@ export interface ApiClient {
 
     getPendingTransactions(request: GetPendingTransactionsRequest): Promise<TransactionsResponse>;
 
-    getTrace(request: GetTraceRequest): Promise<ToncenterTracesResponse>;
+    getTrace(request: GetTraceRequest): Promise<TransactionEmulatedTrace>;
     getPendingTrace(request: GetPendingTraceRequest): Promise<ToncenterTracesResponse>;
 
     resolveDnsWallet(domain: string): Promise<string | null>;

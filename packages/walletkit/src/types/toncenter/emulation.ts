@@ -10,15 +10,20 @@ import {
     AccountState,
     AccountStatus,
     Transaction,
+    TransactionMessage,
+    TransactionDescription,
+    TransactionBlockRef,
     TransactionTraceNode,
     TransactionTraceAction,
     TransactionTraceActionDetails,
     TransactionTraceActionJettonSwapDetails,
     TransactionTraceActionCallContractDetails,
     TransactionTraceActionTONTransferDetails,
+    TransactionEmulatedTrace,
+    TransactionsResponse,
 } from '../../api/models';
-import { asAddressFriendly, asHex } from '../primitive';
-import { AddressBookRowV3, MetadataV3 } from './v3/AddressBookRowV3';
+import { asAddressFriendly, asHex, asMaybeAddressFriendly } from '../primitive';
+import { AddressBookRowV3, MetadataV3, toAddressBook } from './v3/AddressBookRowV3';
 // Types for Toncenter emulation endpoint response
 
 // Root response
@@ -31,6 +36,23 @@ export interface ToncenterEmulationResponse extends MetadataV3 {
     data_cells: Record<string, string>; // base64-encoded cells by data hash
     rand_seed: string;
     is_incomplete: boolean;
+}
+
+export function toTransactionEmulatedTrace(response: ToncenterEmulationResponse): TransactionEmulatedTrace {
+    return {
+        mcBlockSeqno: response.mc_block_seqno,
+        trace: toTransactionTraceNode(response.trace),
+        transactions: Object.fromEntries(
+            Object.entries(response.transactions).map(([hash, tx]) => [asHex(hash), toTransaction(tx)]),
+        ),
+        actions: response.actions.map(toTransactionTraceAction),
+        randSeed: asHex(response.rand_seed),
+        isIncomplete: response.is_incomplete,
+        codeCells: Object.fromEntries(Object.entries(response.code_cells).map(([hash, cell]) => [asHex(hash), cell])),
+        dataCells: Object.fromEntries(Object.entries(response.data_cells).map(([hash, cell]) => [asHex(hash), cell])),
+        metadata: {}, // to be filled later
+        addressBook: {}, // to be filled later
+    };
 }
 
 function toTransactionTraceNode(node: EmulationTraceNode): TransactionTraceNode {
@@ -48,6 +70,13 @@ export interface ToncenterTracesResponse extends MetadataV3 {
 export interface ToncenterTransactionsResponse {
     transactions: ToncenterTransaction[];
     address_book: Record<string, AddressBookRowV3>;
+}
+
+export function toTransactionsResponse(response: ToncenterTransactionsResponse): TransactionsResponse {
+    return {
+        transactions: response.transactions.map(toTransaction),
+        addressBook: toAddressBook(response.address_book),
+    };
 }
 
 export interface ToncenterTraceItem {
@@ -107,6 +136,31 @@ export interface ToncenterTransaction {
     trace_id?: string;
 }
 
+function toTransaction(tx: ToncenterTransaction): Transaction {
+    return {
+        account: asAddressFriendly(tx.account),
+        accountStateBefore: toAccountState(tx.account_state_before),
+        accountStateAfter: toAccountState(tx.account_state_after),
+        description: toTransactionDescription(tx.description),
+        hash: asHex(tx.hash),
+        logicalTime: tx.lt,
+        now: tx.now,
+        mcBlockSeqno: tx.mc_block_seqno,
+        traceExternalHash: asHex(tx.trace_external_hash),
+        traceId: tx.trace_id ?? undefined,
+        previousTransactionHash: tx.prev_trans_hash ? asHex(tx.prev_trans_hash) : undefined,
+        previousTransactionLogicalTime: tx.prev_trans_lt ?? undefined,
+        origStatus: toAccountStatus(tx.orig_status),
+        endStatus: toAccountStatus(tx.end_status),
+        totalFees: tx.total_fees,
+        totalFeesExtraCurrencies: tx.total_fees_extra_currencies,
+        blockRef: toTransactionBlockRef(tx.block_ref),
+        inMessage: tx.in_msg ? toTransactionMessage(tx.in_msg) : undefined,
+        outMessages: tx.out_msgs.map(toTransactionMessage),
+        isEmulated: tx.emulated,
+    };
+}
+
 export type EmulationAccountStatus = 'active' | 'frozen' | 'uninit';
 
 function toAccountStatus(status: EmulationAccountStatus | string): AccountStatus {
@@ -124,6 +178,14 @@ export interface EmulationBlockRef {
     workchain: number;
     shard: string;
     seqno: number;
+}
+
+function toTransactionBlockRef(ref: EmulationBlockRef): TransactionBlockRef {
+    return {
+        workchain: ref.workchain,
+        shard: ref.shard,
+        seqno: ref.seqno,
+    };
 }
 
 export interface EmulationTransactionDescription {
@@ -175,6 +237,59 @@ export interface EmulationTransactionDescription {
     };
 }
 
+function toTransactionDescription(desc: EmulationTransactionDescription): TransactionDescription {
+    return {
+        type: desc.type,
+        isAborted: desc.aborted,
+        isDestroyed: desc.destroyed,
+        isCreditFirst: desc.credit_first,
+        isTock: desc.is_tock,
+        isInstalled: desc.installed,
+        storagePhase: {
+            storageFeesCollected: desc.storage_ph.storage_fees_collected,
+            statusChange: desc.storage_ph.status_change,
+        },
+        creditPhase: desc.credit_ph
+            ? {
+                  credit: desc.credit_ph.credit,
+              }
+            : undefined,
+        computePhase: {
+            isSkipped: desc.compute_ph.skipped,
+            isSuccess: desc.compute_ph.success,
+            isMessageStateUsed: desc.compute_ph.msg_state_used,
+            isAccountActivated: desc.compute_ph.account_activated,
+            gasFees: desc.compute_ph.gas_fees,
+            gasUsed: desc.compute_ph.gas_used,
+            gasLimit: desc.compute_ph.gas_limit,
+            gasCredit: desc.compute_ph.gas_credit,
+            mode: desc.compute_ph.mode,
+            exitCode: desc.compute_ph.exit_code,
+            vmStepsNumber: desc.compute_ph.vm_steps,
+            vmInitStateHash: desc.compute_ph.vm_init_state_hash,
+            vmFinalStateHash: desc.compute_ph.vm_final_state_hash,
+        },
+        action: {
+            isSuccess: desc.action.success,
+            isValid: desc.action.valid,
+            hasNoFunds: desc.action.no_funds,
+            statusChange: desc.action.status_change,
+            totalForwardingFees: desc.action.total_fwd_fees,
+            totalActionFees: desc.action.total_action_fees,
+            resultCode: desc.action.result_code,
+            totalActionsNumber: desc.action.tot_actions,
+            specActionsNumber: desc.action.spec_actions,
+            skippedActionsNumber: desc.action.skipped_actions,
+            messagesCreatedNumber: desc.action.msgs_created,
+            actionListHash: desc.action.action_list_hash,
+            totalMessagesSize: {
+                cells: desc.action.tot_msg_size.cells,
+                bits: desc.action.tot_msg_size.bits,
+            },
+        },
+    };
+}
+
 export interface EmulationMessage {
     hash: string;
     source: string | null;
@@ -197,6 +312,31 @@ export interface EmulationMessage {
     };
     init_state: unknown | null;
     hash_norm?: string; // present on external message in some responses
+}
+
+function toTransactionMessage(msg: EmulationMessage): TransactionMessage {
+    return {
+        hash: asHex(msg.hash),
+        normalizedHash: msg.hash_norm ? asHex(msg.hash_norm) : undefined,
+        source: asMaybeAddressFriendly(msg.source) ?? undefined,
+        destination: asMaybeAddressFriendly(msg.destination) ?? undefined,
+        value: msg.value ?? undefined,
+        valueExtraCurrencies: msg.value_extra_currencies,
+        fwdFee: msg.fwd_fee ?? undefined,
+        ihrFee: msg.ihr_fee ?? undefined,
+        creationLogicalTime: msg.created_lt ?? undefined,
+        createdAt: msg.created_at ? Number(msg.created_at) : undefined,
+        ihrDisabled: msg.ihr_disabled ?? undefined,
+        isBounce: msg.bounce ?? undefined,
+        isBounced: msg.bounced ?? undefined,
+        importFee: msg.import_fee ?? undefined,
+        opcode: msg.opcode ?? undefined,
+        messageContent: {
+            hash: asHex(msg.message_content.hash),
+            body: msg.message_content.body,
+            decoded: msg.message_content.decoded ?? undefined,
+        },
+    };
 }
 
 export interface EmulationAccountState {
@@ -342,27 +482,21 @@ function toTransactionTraceActionJettonSwapDetails(
         dex: details.dex,
         sender: asAddressFriendly(details.sender),
         dexIncomingTransfer: {
-            asset: toUserFriendlyAddress(details.dex_incoming_transfer.asset),
-            source: toUserFriendlyAddress(details.dex_incoming_transfer.source),
-            destination: toUserFriendlyAddress(details.dex_incoming_transfer.destination),
-            sourceJettonWallet: details.dex_incoming_transfer.source_jetton_wallet
-                ? toUserFriendlyAddress(details.dex_incoming_transfer.source_jetton_wallet)
-                : undefined,
-            destinationJettonWallet: details.dex_incoming_transfer.destination_jetton_wallet
-                ? toUserFriendlyAddress(details.dex_incoming_transfer.destination_jetton_wallet)
-                : undefined,
+            asset: asAddressFriendly(details.dex_incoming_transfer.asset),
+            source: asAddressFriendly(details.dex_incoming_transfer.source),
+            destination: asAddressFriendly(details.dex_incoming_transfer.destination),
+            sourceJettonWallet: asMaybeAddressFriendly(details.dex_incoming_transfer.source_jetton_wallet) ?? undefined,
+            destinationJettonWallet:
+                asMaybeAddressFriendly(details.dex_incoming_transfer.destination_jetton_wallet) ?? undefined,
             amount: details.dex_incoming_transfer.amount,
         },
         dexOutgoingTransfer: {
-            asset: toUserFriendlyAddress(details.dex_outgoing_transfer.asset),
-            source: toUserFriendlyAddress(details.dex_outgoing_transfer.source),
-            destination: toUserFriendlyAddress(details.dex_outgoing_transfer.destination),
-            sourceJettonWallet: details.dex_outgoing_transfer.source_jetton_wallet
-                ? toUserFriendlyAddress(details.dex_outgoing_transfer.source_jetton_wallet)
-                : undefined,
-            destinationJettonWallet: details.dex_outgoing_transfer.destination_jetton_wallet
-                ? toUserFriendlyAddress(details.dex_outgoing_transfer.destination_jetton_wallet)
-                : undefined,
+            asset: asAddressFriendly(details.dex_outgoing_transfer.asset),
+            source: asAddressFriendly(details.dex_outgoing_transfer.source),
+            destination: asAddressFriendly(details.dex_outgoing_transfer.destination),
+            sourceJettonWallet: asMaybeAddressFriendly(details.dex_outgoing_transfer.source_jetton_wallet) ?? undefined,
+            destinationJettonWallet:
+                asMaybeAddressFriendly(details.dex_outgoing_transfer.destination_jetton_wallet) ?? undefined,
             amount: details.dex_outgoing_transfer.amount,
         },
         peerSwaps: details.peer_swaps,
@@ -374,8 +508,8 @@ function toTransactionTraceActionCallContractDetails(
 ): TransactionTraceActionCallContractDetails {
     return {
         opcode: details.opcode,
-        source: toUserFriendlyAddress(details.source),
-        destination: toUserFriendlyAddress(details.destination),
+        source: asAddressFriendly(details.source),
+        destination: asAddressFriendly(details.destination),
         value: details.value,
         valueExtraCurrencies: details.extra_currencies ?? undefined,
     };
@@ -385,8 +519,8 @@ function toTransactionTraceActionTONTransferDetails(
     details: EmulationTonTransferDetails,
 ): TransactionTraceActionTONTransferDetails {
     return {
-        source: toUserFriendlyAddress(details.source),
-        destination: toUserFriendlyAddress(details.destination),
+        source: asAddressFriendly(details.source),
+        destination: asAddressFriendly(details.destination),
         value: details.value,
         valueExtraCurrencies: details.value_extra_currencies,
         comment: details.comment ?? undefined,

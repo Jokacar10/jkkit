@@ -11,7 +11,7 @@ import { CHAIN } from '@tonconnect/protocol';
 
 import { Base64ToBigInt, Uint8ArrayToBase64, Base64Normalize, Base64ToHex } from '../utils/base64';
 import { FullAccountState, GetResult, TransactionId } from '../types/toncenter/api';
-import { ToncenterEmulationResponse } from '../types';
+import { JettonInfo, ToncenterEmulationResponse } from '../types';
 import { RawStackItem } from '../utils/tvmStack';
 import {
     ApiClient,
@@ -32,9 +32,9 @@ import {
     ToncenterTracesResponse,
     ToncenterTransactionsResponse,
     EmulationTokenInfoMasters,
+    toTransactionEmulatedTrace,
+    toTransactionsResponse,
 } from '../types/toncenter/emulation';
-import { ResponseUserJettons } from '../types/export/responses/jettons';
-import { AddressJetton, JettonInfo } from '../types/jettons';
 import { CallForSuccess } from '../utils/retry';
 import { globalLogger } from './Logger';
 import { DNSRecordsResponseV3, toDnsRecords } from '../types/toncenter/v3/DNSRecordsResponseV3';
@@ -142,7 +142,8 @@ export class ApiClientToncenter implements ApiClient {
             messages,
         };
         if (typeof seqno === 'number') props.mc_block_seqno = seqno;
-        return this.postJson<ToncenterEmulationResponse>('/api/emulate/v1/emulateTonConnect', props);
+        const response = await this.postJson<ToncenterEmulationResponse>('/api/v3/emulation', props);
+        return toTransactionEmulatedTrace(response);
     }
 
     async sendBoc(boc: string | Uint8Array): Promise<string> {
@@ -308,7 +309,7 @@ export class ApiClientToncenter implements ApiClient {
             limit,
             offset,
         });
-        return response;
+        return toTransactionsResponse(response);
     }
 
     async getTransactionsByHash(request: GetTransactionByHashRequest): Promise<TransactionsResponse> {
@@ -319,7 +320,7 @@ export class ApiClientToncenter implements ApiClient {
             msg_hash: msgHash ? [msgHash] : undefined,
             body_hash: bodyHash ? [bodyHash] : undefined,
         });
-        return response;
+        return toTransactionsResponse(response);
     }
 
     async getPendingTransactions(request: GetPendingTransactionsRequest): Promise<TransactionsResponse> {
@@ -329,7 +330,7 @@ export class ApiClientToncenter implements ApiClient {
             account: accounts,
             trace_id: traceId,
         });
-        return response;
+        return toTransactionsResponse(response);
     }
 
     async getTrace(request: GetTraceRequest): Promise<ToncenterTracesResponse> {

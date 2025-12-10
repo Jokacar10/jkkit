@@ -57,20 +57,11 @@ export type { UserNFTsRequest } from './nfts/UserNFTsRequest';
 export type { TONTransferRequest } from './tons/TONTransferRequest';
 
 // Transaction models
-export type { Transaction, AccountState, AccountStatus, TransactionBlockRef } from './transactions/Transaction';
+export * from './transactions/Transaction';
 export type { TransactionAddressMetadata, TransactionAddressMetadataEntry } from './transactions/TransactionMetadata';
 export type { TransactionMoneyFlow } from './transactions/TransactionMoneyFlow';
 export type { TransactionRequest, TransactionRequestMessage } from './transactions/TransactionRequest';
-export type {
-    TransactionTrace,
-    TransactionTraceNode,
-    TransactionTraceAction,
-    TransactionTraceActionDetails,
-    TransactionTraceActionJettonSwapDetails,
-    TransactionTraceActionJettonTransfer,
-    TransactionTraceActionCallContractDetails,
-    TransactionTraceActionTONTransferDetails,
-} from './transactions/TransactionTrace';
+export * from './transactions/TransactionTrace';
 export type { TransactionEmulatedPreview } from './transactions/emulation/TransactionEmulatedPreview';
 export type { TransactionEmulatedTrace } from './transactions/emulation/TransactionEmulatedTrace';
 export type { SendTransactionResponse } from './transactions/SendTransactionResponse';
