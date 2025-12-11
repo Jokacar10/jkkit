@@ -6,8 +6,8 @@
  *
  */
 
+import { UserFriendlyAddress } from '../../api/models';
 import { AddressBookRow } from './AddressBookRow';
-import { UserFriendlyAddress } from '../primitive';
 import { NftItems } from './NftItems';
 import { NftMetadata } from './NftMetadata';
 

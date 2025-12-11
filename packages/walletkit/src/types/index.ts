@@ -22,7 +22,6 @@ export type {
     EventDisconnect,
     EventRequestError,
     ConnectPreview,
-    TransactionPreview,
     SignDataPreview,
 } from './events';
 

@@ -6,7 +6,7 @@
  *
  */
 
-import { UserFriendlyAddress, Hex } from '../primitive';
+import { Hex, UserFriendlyAddress } from '../../api/models';
 
 export interface NftCollection {
     address: UserFriendlyAddress;

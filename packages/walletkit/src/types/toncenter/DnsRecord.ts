@@ -6,7 +6,7 @@
  *
  */
 
-import { UserFriendlyAddress } from '../primitive';
+import { UserFriendlyAddress } from '../../api/models';
 
 export interface DnsRecord {
     dnsNextResolver: string | null;

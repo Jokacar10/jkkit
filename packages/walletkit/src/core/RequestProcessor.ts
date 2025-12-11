@@ -19,6 +19,7 @@ import {
     SendTransactionRpcResponseSuccess,
     SignDataRpcResponseSuccess,
     TonProofItemReplySuccess,
+    SignDataPayload as TonConnectSignDataPayload,
 } from '@tonconnect/protocol';
 import { getSecureRandomBytes } from '@ton/crypto';
 
@@ -50,7 +51,7 @@ import { getUnixtime } from '../utils/time';
 import { getEventsSubsystem, getVersion } from '../utils/version';
 import { Base64Normalize, Base64ToHex } from '../utils/base64';
 import { getAddressFromWalletId } from '../utils/walletId';
-import { TransactionRequest } from '../api/models';
+import { TransactionRequest, SignDataPayload } from '../api/models';
 import { PrepareSignData } from '../utils/signData/sign';
 import { Wallet } from '../api/interfaces';
 
@@ -533,7 +534,7 @@ export class RequestProcessor {
                         address: event.result.address,
                         timestamp: event.result.timestamp,
                         domain: event.result.domain,
-                        payload: event.result.payload,
+                        payload: toTonConnectSignDataPayload(event.result.payload),
                     },
                 };
 
@@ -630,7 +631,7 @@ export class RequestProcessor {
                         address: Address.parse(signData.address).toRawString(),
                         timestamp: signData.timestamp,
                         domain: signData.domain,
-                        payload: signData.payload,
+                        payload: toTonConnectSignDataPayload(signData.payload),
                     },
                 };
 
@@ -888,4 +889,40 @@ export async function signTransactionInternal(wallet: Wallet, request: Transacti
     });
 
     return signedBoc;
+}
+
+function toTonConnectSignDataPayload(payload: SignDataPayload): TonConnectSignDataPayload {
+    let network: CHAIN | undefined;
+
+    if (payload.network?.chainId === CHAIN.MAINNET) {
+        network = CHAIN.MAINNET;
+    } else if (payload.network?.chainId === CHAIN.TESTNET) {
+        network = CHAIN.TESTNET;
+    } else {
+        network = undefined;
+    }
+
+    if (payload.data.type === 'text') {
+        return {
+            network: network,
+            from: payload.fromAddress,
+            type: 'text',
+            text: payload.data.value.content,
+        };
+    } else if (payload.data.type === 'cell') {
+        return {
+            network: network,
+            from: payload.fromAddress,
+            type: 'cell',
+            schema: payload.data.value.schema,
+            cell: payload.data.value.content,
+        };
+    } else {
+        return {
+            network: network,
+            from: payload.fromAddress,
+            type: 'binary',
+            bytes: payload.data.value.content,
+        };
+    }
 }
