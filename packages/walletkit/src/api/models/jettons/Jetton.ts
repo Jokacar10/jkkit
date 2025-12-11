@@ -22,17 +22,17 @@ export interface Jetton {
     /**
      * The Jetton wallet address
      */
-    walletAddress?: UserFriendlyAddress;
+    walletAddress: UserFriendlyAddress;
 
     /**
      * The current jetton balance
      */
-    balance?: TokenAmount;
+    balance: TokenAmount;
 
     /**
      * Information about the token
      */
-    info?: TokenInfo;
+    info: TokenInfo;
 
     /**
      * The number of decimal places used by the token
