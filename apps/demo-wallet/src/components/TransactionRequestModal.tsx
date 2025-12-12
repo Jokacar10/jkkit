@@ -190,7 +190,7 @@ export const TransactionRequestModal: React.FC<TransactionRequestModalProps> = (
                                 {/* Parsed Actions from Emulation */}
                                 {request.preview.result && (
                                     <ActionPreviewList
-                                        emulationResult={request.dAppInfo}
+                                        emulationResult={request.preview.emulationResult}
                                         walletAddress={request.walletAddress || currentWallet?.address}
                                         className="mt-4"
                                         title="Actions:"

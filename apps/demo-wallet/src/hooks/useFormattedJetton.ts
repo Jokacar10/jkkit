@@ -30,5 +30,5 @@ export const useFormattedJetton = (jetton?: Jetton | null) => {
         if (!jetton) return;
 
         return formatJetton(jetton);
-    }, [formatJetton]);
+    }, [formatJetton, jetton]);
 };
