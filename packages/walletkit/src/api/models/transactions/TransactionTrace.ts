@@ -223,7 +223,7 @@ export interface TransactionTraceActionCallContractDetails {
     /**
      * Value transferred during the contract call.
      */
-    value: TokenAmount;
+    value?: TokenAmount;
 
     /**
      * Extra currencies sent with the call.
@@ -245,7 +245,7 @@ export interface TransactionTraceActionTONTransferDetails {
     /**
      * Amount of TON transferred (in nanotons).
      */
-    value: TokenAmount;
+    value?: TokenAmount;
 
     /**
      * Extra currencies sent with the transfer.
@@ -260,5 +260,5 @@ export interface TransactionTraceActionTONTransferDetails {
     /**
      * Indicates if the payload or comment was encrypted.
      */
-    isEncrypted: boolean;
+    isEncrypted?: boolean;
 }

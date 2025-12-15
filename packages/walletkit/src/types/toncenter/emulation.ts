@@ -45,16 +45,16 @@ export function toTransactionEmulatedTrace(response: ToncenterEmulationResponse)
         mcBlockSeqno: response.mc_block_seqno,
         trace: toTransactionTraceNode(response.trace),
         transactions: Object.fromEntries(
-            Object.entries(response.transactions).map(([hash, tx]) => [Base64ToHex(hash), toTransaction(tx)]),
+            Object.entries(response.transactions ?? {}).map(([hash, tx]) => [Base64ToHex(hash), toTransaction(tx)]),
         ),
         actions: response.actions.map(toTransactionTraceAction),
         randSeed: Base64ToHex(response.rand_seed),
         isIncomplete: response.is_incomplete,
         codeCells: Object.fromEntries(
-            Object.entries(response.code_cells).map(([hash, cell]) => [Base64ToHex(hash), cell]),
+            Object.entries(response.code_cells ?? {}).map(([hash, cell]) => [Base64ToHex(hash), cell]),
         ),
         dataCells: Object.fromEntries(
-            Object.entries(response.data_cells).map(([hash, cell]) => [Base64ToHex(hash), cell]),
+            Object.entries(response.data_cells ?? {}).map(([hash, cell]) => [Base64ToHex(hash), cell]),
         ),
         metadata: {}, // to be filled later
         addressBook: {}, // to be filled later
@@ -63,9 +63,9 @@ export function toTransactionEmulatedTrace(response: ToncenterEmulationResponse)
 
 function toTransactionTraceNode(node: EmulationTraceNode): TransactionTraceNode {
     return {
-        txHash: Base64ToHex(node.tx_hash),
+        txHash: node.tx_hash ? Base64ToHex(node.tx_hash) : undefined,
         inMsgHash: node.in_msg_hash ? Base64ToHex(node.in_msg_hash) : undefined,
-        children: node.children.map(toTransactionTraceNode),
+        children: node.children?.map(toTransactionTraceNode) ?? [],
     };
 }
 
@@ -80,7 +80,7 @@ export interface ToncenterTransactionsResponse {
 
 export function toTransactionsResponse(response: ToncenterTransactionsResponse): TransactionsResponse {
     return {
-        transactions: response.transactions.map(toTransaction),
+        transactions: response.transactions?.map(toTransaction) ?? [],
         addressBook: toAddressBook(response.address_book),
     };
 }
@@ -364,7 +364,7 @@ function toAccountState(state: EmulationAccountState): AccountState {
         hash: Base64ToHex(state.hash),
         balance: state.balance,
         extraCurrencies: state.extra_currencies ?? undefined,
-        accountStatus: toAccountStatus(state.account_status),
+        accountStatus: state.account_status ? toAccountStatus(state.account_status) : undefined,
         frozenHash: state.frozen_hash ? Base64ToHex(state.frozen_hash) : undefined,
         dataHash: state.data_hash ? Base64ToHex(state.data_hash) : undefined,
         codeHash: state.code_hash ? Base64ToHex(state.code_hash) : undefined,
@@ -457,7 +457,7 @@ function toTransactionTraceAction(action: EmulationAction): TransactionTraceActi
         isSuccess: action.success,
         traceExternalHash: Base64ToHex(action.trace_external_hash),
         // Filter out invalid addresses
-        accounts: action.accounts
+        accounts: (action.accounts ?? [])
             .map(asMaybeAddressFriendly)
             .filter((addr): addr is UserFriendlyAddress => addr !== null),
         details: toTransactionTraceActionDetails(action),

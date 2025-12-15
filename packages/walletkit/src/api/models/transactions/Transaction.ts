@@ -147,7 +147,7 @@ export interface AccountState {
     /**
      * The status of the account
      */
-    accountStatus: AccountStatus;
+    accountStatus?: AccountStatus;
 
     /**
      * The hash of the frozen account state, if the account is frozen
