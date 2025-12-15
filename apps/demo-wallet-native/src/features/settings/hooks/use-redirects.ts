@@ -6,20 +6,22 @@
  *
  */
 
-import { router } from 'expo-router';
+import { router, useSegments } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useWalletStore, useWallet } from '@ton/demo-core';
 
-export const useInitialRedirect = (isRouterLoading: boolean): void => {
+export const useRedirects = (isRouterLoading: boolean): void => {
     const [isRedirected, setIsRedirected] = useState(false);
 
     const isStoreHydrated = useWalletStore((state) => state.isHydrated);
     const isPasswordSet = useWalletStore((state) => state.auth.isPasswordSet);
     const isUnlocked = useWalletStore((state) => state.auth.isUnlocked);
     const { hasWallet } = useWallet();
+    const segments = useSegments();
 
     const isReady = !isRouterLoading && isStoreHydrated;
 
+    // Initial redirect when the app becomes ready
     useEffect(() => {
         if (!isReady || isRedirected) return;
 
@@ -45,4 +47,16 @@ export const useInitialRedirect = (isRouterLoading: boolean): void => {
 
         router.replace('/(auth)/(tabs)/wallet');
     }, [isReady, isRedirected, isPasswordSet, isUnlocked, hasWallet]);
+
+    // If the user is already unlocked but has no wallet, do not allow staying in the auth group.
+    // Redirect to the wallet creation flow.
+    useEffect(() => {
+        if (isUnlocked && isStoreHydrated) {
+            const inAuthGroup = segments[0] === '(auth)';
+
+            if (!hasWallet && inAuthGroup) {
+                router.replace('/(non-auth)/add-new-wallet');
+            }
+        }
+    }, [isUnlocked, isStoreHydrated, segments, hasWallet]);
 };

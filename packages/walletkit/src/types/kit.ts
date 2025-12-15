@@ -102,7 +102,7 @@ export interface ITonWalletKit {
     ): Promise<void>;
 
     /** Approve a sign data request */
-    signDataRequest(event: SignDataRequestEvent): Promise<SignDataApprovalResponse>;
+    approveSignDataRequest(event: SignDataRequestEvent): Promise<SignDataApprovalResponse>;
 
     /** Reject a sign data request */
     rejectSignDataRequest(event: SignDataRequestEvent, reason?: string): Promise<void>;

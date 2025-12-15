@@ -41,7 +41,6 @@ import {
     TransactionRequest,
     UserFriendlyAddress,
     Hex,
-    asHex,
 } from '../../api/models';
 
 const log = globalLogger.createChild('WalletV5R1Adapter');

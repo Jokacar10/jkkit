@@ -17,6 +17,8 @@ import {
     SEND_TRANSACTION_ERROR_CODES,
     SendTransactionRpcResponseError,
     SendTransactionRpcResponseSuccess,
+    SIGN_DATA_ERROR_CODES,
+    SignDataRpcResponseError,
     SignDataRpcResponseSuccess,
     TonProofItemReplySuccess,
     SignDataPayload as TonConnectSignDataPayload,
@@ -692,10 +694,19 @@ export class RequestProcessor {
      */
     async rejectSignDataRequest(event: SignDataRequestEvent, reason?: string): Promise<void> {
         try {
-            const response = {
-                error: 'USER_REJECTED',
-                reason: reason || 'User rejected data signing',
-            };
+            const response: SignDataRpcResponseError =
+                typeof reason === 'string' || typeof reason === 'undefined'
+                    ? {
+                          error: {
+                              code: SIGN_DATA_ERROR_CODES.USER_REJECTS_ERROR,
+                              message: reason || 'User rejected transaction',
+                          },
+                          id: event.id,
+                      }
+                    : {
+                          error: reason,
+                          id: event.id,
+                      };
 
             await this.bridgeManager.sendResponse(event, response);
             const wallet = this.getWalletFromEvent(event);

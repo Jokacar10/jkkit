@@ -11,8 +11,8 @@ import { type FC, type PropsWithChildren, useEffect } from 'react';
 import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { useWalletStore } from '@ton/demo-core';
-import { useInitialRedirect } from 'src/features/settings/hooks/use-initial-redirect';
 
+import { useRedirects } from '../../hooks/use-redirects';
 import { useAppFonts } from '../../hooks/use-app-fonts';
 import { useTheme } from '../../hooks/use-theme';
 import { useWalletDataUpdater } from '../../hooks/use-wallet-data-updater';
@@ -32,7 +32,7 @@ export const AppWrapper: FC<PropsWithChildren> = ({ children }) => {
 
     const isLoaderShown = !(isFontsLoaded || isFontsError) || !isStoreHydrated;
 
-    useInitialRedirect(isLoaderShown);
+    useRedirects(isLoaderShown);
     useWalletDataUpdater();
 
     useEffect(() => {
