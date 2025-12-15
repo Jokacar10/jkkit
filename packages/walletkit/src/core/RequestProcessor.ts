@@ -43,7 +43,6 @@ import {
     EventTransactionApproval,
     EventTransactionResponse,
 } from '../types/events';
-import { asHex } from '../types/primitive';
 import { AnalyticsApi } from '../analytics/sender';
 import { WalletKitError, ERROR_CODES } from '../errors';
 import { uuidv7 } from '../utils/uuid';
@@ -51,7 +50,7 @@ import { getUnixtime } from '../utils/time';
 import { getEventsSubsystem, getVersion } from '../utils/version';
 import { Base64Normalize, Base64ToHex } from '../utils/base64';
 import { getAddressFromWalletId } from '../utils/walletId';
-import { TransactionRequest, SignDataPayload } from '../api/models';
+import { TransactionRequest, SignDataPayload, asHex } from '../api/models';
 import { PrepareSignData } from '../utils/signData/sign';
 import { Wallet } from '../api/interfaces';
 

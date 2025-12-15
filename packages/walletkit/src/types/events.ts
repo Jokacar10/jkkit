@@ -23,8 +23,8 @@ import {
     RawBridgeEventTransaction,
     RawBridgeEvent,
 } from './internal';
-import { Base64String, Hex } from './primitive';
-import { SignDataPayload, TransactionEmulatedPreview, TransactionRequest } from '../api/models';
+import { Base64String } from './primitive';
+import { SignDataPayload, TransactionEmulatedPreview, TransactionRequest, Hex } from '../api/models';
 
 // export type EventConnectRequest = ConnectRequest;
 
