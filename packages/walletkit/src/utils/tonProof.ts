@@ -14,7 +14,7 @@ import { sha256_sync } from '@ton/crypto';
 import { ed25519 } from '@noble/curves/ed25519';
 
 import { Base64ToHex, HexToUint8Array, Uint8ArrayToHex } from './base64';
-import { Base64String, ProofMessage, asHex, Hex } from '../api/models';
+import { Base64String, ProofMessage, Hex } from '../api/models';
 
 interface Domain {
     lengthBytes: number; // uint32 `json:"lengthBytes"`
