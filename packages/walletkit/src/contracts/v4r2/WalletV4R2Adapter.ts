@@ -40,7 +40,6 @@ import {
     ProofMessage,
     TransactionRequest,
     UserFriendlyAddress,
-    asHex,
     Hex,
 } from '../../api/models';
 

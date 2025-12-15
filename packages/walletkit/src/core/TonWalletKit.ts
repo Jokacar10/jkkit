@@ -13,7 +13,6 @@ import {
     CHAIN,
     CONNECT_EVENT_ERROR_CODES,
     ConnectEventSuccess,
-    ConnectItem,
     ConnectRequest,
     DisconnectEvent,
     SendTransactionRpcResponseError,
