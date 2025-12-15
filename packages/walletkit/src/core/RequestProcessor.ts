@@ -48,7 +48,7 @@ import { WalletKitError, ERROR_CODES } from '../errors';
 import { uuidv7 } from '../utils/uuid';
 import { getUnixtime } from '../utils/time';
 import { getEventsSubsystem, getVersion } from '../utils/version';
-import { Base64Normalize, Base64ToHex } from '../utils/base64';
+import { Base64Normalize, Base64ToHex, HexToBase64 } from '../utils/base64';
 import { getAddressFromWalletId } from '../utils/walletId';
 import { TransactionRequest, SignDataPayload, asHex } from '../api/models';
 import { PrepareSignData } from '../utils/signData/sign';
@@ -620,7 +620,7 @@ export class RequestProcessor {
                     address: wallet.getAddress(),
                 });
                 const signature = await wallet.getSignedSignData(signData);
-                const signatureBase64 = Buffer.from(signature.slice(2), 'hex').toString('base64');
+                const signatureBase64 = HexToBase64(signature);
 
                 // Send approval response
                 const response: SignDataRpcResponseSuccess = {
@@ -669,7 +669,7 @@ export class RequestProcessor {
                         client_id: event.from,
                     },
                 ]);
-                return { signature: asHex(signature) };
+                return { signature: signature };
             }
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
