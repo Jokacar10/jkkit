@@ -37,7 +37,7 @@ import type {
 import type { SessionManager } from './SessionManager';
 import type { BridgeManager } from './BridgeManager';
 import { globalLogger } from './Logger';
-import { createTonProofMessage } from '../utils/tonProof';
+import { CreateTonProofMessage } from '../utils/tonProof';
 import { CallForSuccess } from '../utils/retry';
 import { getDeviceInfoWithDefaults } from '../utils/getDefaultWalletConfig';
 import type { WalletManager } from './WalletManager';
@@ -811,7 +811,7 @@ export class RequestProcessor {
             // const walletKeyPair = secretKeyToED25519(decryptedData.seed);
 
             const timestamp = Math.floor(Date.now() / 1000);
-            const signMessage = createTonProofMessage({
+            const signMessage = CreateTonProofMessage({
                 address: Address.parse(address),
                 domain,
                 payload: proofItem.payload,
