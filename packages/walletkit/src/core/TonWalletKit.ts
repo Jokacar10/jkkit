@@ -13,6 +13,7 @@ import {
     CHAIN,
     CONNECT_EVENT_ERROR_CODES,
     ConnectEventSuccess,
+    ConnectItem,
     ConnectRequest,
     DisconnectEvent,
     SendTransactionRpcResponseError,
@@ -37,9 +38,11 @@ import { JettonsManager } from './JettonsManager';
 import type { JettonsAPI } from '../types/jettons';
 import {
     BridgeEventBase,
+    ConnectTransactionParamContent,
     RawBridgeEventConnect,
     RawBridgeEventRestoreConnection,
     RawBridgeEventTransaction,
+    toConnectTransactionParamContent,
 } from '../types/internal';
 import { EventEmitter } from './EventEmitter';
 import { StorageEventProcessor } from './EventProcessor';
@@ -520,7 +523,7 @@ export class TonWalletKit implements ITonWalletKit {
         const bridgeEvent: RawBridgeEventTransaction = {
             id: Date.now().toString(),
             method: 'sendTransaction',
-            params: [JSON.stringify(data)],
+            params: [JSON.stringify(toConnectTransactionParamContent(data))],
             from: '',
             domain: '',
             isLocal: true,
