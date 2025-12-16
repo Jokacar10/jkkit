@@ -134,6 +134,7 @@ export const ImportWallet: React.FC<ImportWalletProps> = ({ onImport, onBack, is
                         <div className="flex rounded-lg border border-gray-200 overflow-hidden">
                             <button
                                 type="button"
+                                data-testid="version-select-v5r1"
                                 onClick={() => setWalletVersion('v5r1')}
                                 className={`px-3 py-1.5 text-xs font-medium transition-all ${
                                     walletVersion === 'v5r1'
@@ -145,6 +146,7 @@ export const ImportWallet: React.FC<ImportWalletProps> = ({ onImport, onBack, is
                             </button>
                             <button
                                 type="button"
+                                data-testid="version-select-v4r2"
                                 onClick={() => setWalletVersion('v4r2')}
                                 className={`px-3 py-1.5 text-xs font-medium transition-all border-l border-gray-200 ${
                                     walletVersion === 'v4r2'
@@ -166,6 +168,7 @@ export const ImportWallet: React.FC<ImportWalletProps> = ({ onImport, onBack, is
                         <div className="flex rounded-lg border border-gray-200 overflow-hidden">
                             <button
                                 type="button"
+                                data-testid="interface-select-mnemonic"
                                 onClick={() => setInterfaceType('mnemonic')}
                                 className={`px-3 py-1.5 text-xs font-medium transition-all ${
                                     interfaceType === 'mnemonic'
@@ -177,6 +180,7 @@ export const ImportWallet: React.FC<ImportWalletProps> = ({ onImport, onBack, is
                             </button>
                             <button
                                 type="button"
+                                data-testid="interface-select-signer"
                                 onClick={() => setInterfaceType('signer')}
                                 className={`px-3 py-1.5 text-xs font-medium transition-all border-l border-gray-200 ${
                                     interfaceType === 'signer'
@@ -192,10 +196,13 @@ export const ImportWallet: React.FC<ImportWalletProps> = ({ onImport, onBack, is
 
                 {/* Word Count & Actions */}
                 <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm text-gray-500">{filledCount}/24 words</span>
+                    <span className="text-sm text-gray-500" data-testid="word-count">
+                        {filledCount}/24 words
+                    </span>
                     <div className="flex space-x-3">
                         <button
                             onClick={clearAll}
+                            data-testid="clear-mnemonic"
                             className="text-xs text-gray-500 hover:text-gray-700 underline"
                             type="button"
                         >
@@ -203,6 +210,7 @@ export const ImportWallet: React.FC<ImportWalletProps> = ({ onImport, onBack, is
                         </button>
                         <button
                             onClick={() => navigator.clipboard?.readText().then(processPastedText)}
+                            data-testid="paste-mnemonic"
                             className="text-xs text-blue-600 hover:text-blue-800 underline"
                             type="button"
                         >
@@ -212,7 +220,7 @@ export const ImportWallet: React.FC<ImportWalletProps> = ({ onImport, onBack, is
                 </div>
 
                 {/* Individual Word Inputs */}
-                <div className="grid grid-cols-4 gap-1.5 mb-3">
+                <div className="grid grid-cols-4 gap-1.5 mb-3" data-testid="mnemonic-input-grid">
                     {words.map((word, index) => (
                         <div key={index} className="relative">
                             <input
@@ -226,6 +234,7 @@ export const ImportWallet: React.FC<ImportWalletProps> = ({ onImport, onBack, is
                                 onPaste={handlePaste}
                                 onFocus={() => setActiveInput(index)}
                                 placeholder={`${index + 1}`}
+                                data-testid={`mnemonic-input-${index + 1}`}
                                 className={`w-full px-1.5 py-1.5 text-xs border rounded text-center font-mono transition-colors ${
                                     word
                                         ? 'border-green-300 bg-green-50 text-green-800'

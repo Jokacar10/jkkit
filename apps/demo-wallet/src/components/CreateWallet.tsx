@@ -88,7 +88,7 @@ const MnemonicGrid: React.FC<{ mnemonic: string[] }> = ({ mnemonic }) => {
     };
 
     return (
-        <div className="space-y-3">
+        <div className="space-y-3" data-testid="mnemonic-grid">
             {/* Warning */}
             <div className="bg-yellow-50 border-yellow-200 rounded-md p-3">
                 <div className="flex">
@@ -108,9 +108,13 @@ const MnemonicGrid: React.FC<{ mnemonic: string[] }> = ({ mnemonic }) => {
             </div>
 
             {/* Mnemonic Grid */}
-            <div className="grid grid-cols-4 gap-1">
+            <div className="grid grid-cols-4 gap-1" data-testid="mnemonic-words">
                 {mnemonic.map((word, index) => (
-                    <div key={index} className="bg-gray-50 border border-gray-200 rounded p-1 text-center">
+                    <div
+                        key={index}
+                        className="bg-gray-50 border border-gray-200 rounded p-1 text-center"
+                        data-testid={`mnemonic-word-${index + 1}`}
+                    >
                         <span className="text-gray-400 text-[10px]">{index + 1}.</span>
                         <div className="font-medium text-[10px] text-gray-900 truncate">{word}</div>
                     </div>
@@ -121,6 +125,7 @@ const MnemonicGrid: React.FC<{ mnemonic: string[] }> = ({ mnemonic }) => {
             <div className="flex justify-center">
                 <button
                     onClick={handleCopyMnemonic}
+                    data-testid="copy-mnemonic"
                     className="flex items-center space-x-1 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded text-xs border border-gray-300 transition-colors"
                 >
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -196,7 +201,7 @@ export const CreateWallet: React.FC<CreateWalletProps> = ({ onConfirm, isLoading
 
                         {!showMnemonic && !isGenerating && mnemonic.length > 0 && (
                             <div className="absolute inset-0 flex items-center justify-center">
-                                <Button onClick={() => setShowMnemonic(true)} size="sm">
+                                <Button data-testid="reveal-mnemonic" onClick={() => setShowMnemonic(true)} size="sm">
                                     Click to reveal
                                 </Button>
                             </div>
@@ -209,6 +214,7 @@ export const CreateWallet: React.FC<CreateWalletProps> = ({ onConfirm, isLoading
                                 <input
                                     type="checkbox"
                                     id="saved"
+                                    data-testid="saved-checkbox"
                                     checked={isSaved}
                                     onChange={(e) => setIsSaved(e.target.checked)}
                                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
@@ -217,6 +223,7 @@ export const CreateWallet: React.FC<CreateWalletProps> = ({ onConfirm, isLoading
                             </label>
 
                             <Button
+                                data-testid="create-wallet-confirm"
                                 onClick={handleConfirm}
                                 disabled={!isSaved || isLoading}
                                 isLoading={isLoading}
@@ -227,7 +234,13 @@ export const CreateWallet: React.FC<CreateWalletProps> = ({ onConfirm, isLoading
                         </div>
                     )}
 
-                    <Button variant="secondary" onClick={generateMnemonic} disabled={isGenerating} className="w-full">
+                    <Button
+                        data-testid="generate-new-phrase"
+                        variant="secondary"
+                        onClick={generateMnemonic}
+                        disabled={isGenerating}
+                        className="w-full"
+                    >
                         Generate New Phrase
                     </Button>
 
