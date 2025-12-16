@@ -11,6 +11,8 @@
 import { CHAIN } from '@tonconnect/protocol';
 
 import type { Network } from '../api/models/core/Network';
+import type { UserFriendlyAddress } from '../api/models';
+import { asMaybeAddressFriendly } from '../types/primitive';
 
 /**
  * Wallet ID format: "network:address"
@@ -31,14 +33,14 @@ export function createWalletId(network: Network, address: string): WalletId {
  * Parses a wallet ID into network and address components
  * Returns undefined if the wallet ID is invalid
  */
-export function parseWalletId(walletId: WalletId): { network: Network; address: string } | undefined {
+export function parseWalletId(walletId: WalletId): { network: Network; address: UserFriendlyAddress } | undefined {
     const colonIndex = walletId.indexOf(':');
     if (colonIndex === -1) {
         return undefined;
     }
 
     const networkStr = walletId.substring(0, colonIndex);
-    const address = walletId.substring(colonIndex + 1);
+    const address = asMaybeAddressFriendly(walletId.substring(colonIndex + 1));
 
     if (networkStr !== CHAIN.MAINNET && networkStr !== CHAIN.TESTNET) {
         return undefined;
@@ -58,9 +60,9 @@ export function parseWalletId(walletId: WalletId): { network: Network; address: 
  * Extracts the address from a wallet ID
  * Returns the original string if it's not a valid wallet ID (for backwards compatibility)
  */
-export function getAddressFromWalletId(walletId: WalletId): string {
+export function getAddressFromWalletId(walletId: WalletId): UserFriendlyAddress | undefined {
     const parsed = parseWalletId(walletId);
-    return parsed?.address ?? walletId;
+    return parsed?.address;
 }
 
 /**

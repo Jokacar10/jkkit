@@ -33,12 +33,17 @@ window.initWalletKit = async (configuration, storage, bridgeTransport) => {
         bridgeTransport({ sessionID, messageID: message.messageId, message });
     };
 
+    const networks = {};
+    if (configuration.networkConfigurations) {
+        for (const netConfig of configuration.networkConfigurations) {
+            networks[netConfig.network.chainId] = {
+                apiClient: netConfig.apiClient,
+            };
+        }
+    }
+
     const walletKit = new TonWalletKit({
-        networks: {
-            [configuration.network]: {
-                apiClient: configuration.apiClient,
-            },
-        },
+        networks,
         walletManifest: configuration.walletManifest,
         deviceInfo: configuration.deviceInfo,
         bridge: configuration.bridge,
