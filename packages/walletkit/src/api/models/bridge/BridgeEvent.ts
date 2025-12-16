@@ -38,7 +38,7 @@ export interface BridgeEvent {
     /**
      * Browser tab ID for JS Bridge events
      */
-    tabId?: number;
+    tabId?: string;
     /**
      * Session identifier for the connection
      */
