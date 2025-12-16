@@ -10,7 +10,7 @@ import { setStringAsync } from 'expo-clipboard';
 import { useMemo, useState } from 'react';
 import type { FC } from 'react';
 import type { LayoutChangeEvent, ViewProps } from 'react-native';
-import QRCode from 'react-native-qrcode-skia';
+import QRCode from 'react-native-qrcode-svg';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 
 import { AppButton } from '@/core/components/app-button';
@@ -63,16 +63,7 @@ export const AddressQrcode: FC<Props> = ({ address, style, ...props }) => {
                 </AppButton.Container>
             </Row>
 
-            <QRCode
-                shapeOptions={{
-                    shape: 'rounded',
-                    eyePatternShape: 'square',
-                    eyePatternGap: 0,
-                    gap: 0,
-                }}
-                size={qrCodeSize}
-                value={address}
-            />
+            <QRCode size={qrCodeSize} value={address} />
         </Block>
     );
 };
@@ -80,6 +71,7 @@ export const AddressQrcode: FC<Props> = ({ address, style, ...props }) => {
 const styles = StyleSheet.create(({ colors, sizes, fonts }) => ({
     container: {
         paddingBottom: 50,
+        alignItems: 'center',
     },
     header: {
         marginBottom: 15,
