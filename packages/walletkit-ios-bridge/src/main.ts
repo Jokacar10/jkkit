@@ -158,7 +158,7 @@ window.initWalletKit = async (configuration, storage, bridgeTransport) => {
 
             return await WalletV4R2Adapter.create(this.jsSigner(signer), {
                 client: walletKit.getApiClient(network),
-                network: parameters.network,
+                network: network,
             });
         },
 
@@ -176,7 +176,7 @@ window.initWalletKit = async (configuration, storage, bridgeTransport) => {
 
             return await WalletV5R1Adapter.create(this.jsSigner(signer), {
                 client: walletKit.getApiClient(network),
-                network: parameters.network,
+                network: network,
             });
         },
 
