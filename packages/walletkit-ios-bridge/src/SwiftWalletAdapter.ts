@@ -6,7 +6,7 @@
  *
  */
 
-import {
+import type {
     WalletAdapter,
     Hex,
     ApiClient,
@@ -18,7 +18,7 @@ import {
     ProofMessage,
 } from '@ton/walletkit';
 
-import { WalletId } from '../../walletkit/dist/cjs';
+import type { WalletId } from '../../walletkit/dist/cjs';
 
 export class SwiftWalletAdapter implements WalletAdapter {
     private swiftWalletAdapter: WalletAdapter;

@@ -6,8 +6,8 @@
  *
  */
 
-import { TokenImage } from '../core/TokenImage';
-import { UserFriendlyAddress, Hex } from '../core/Primitives';
+import type { TokenImage } from '../core/TokenImage';
+import type { UserFriendlyAddress, Hex } from '../core/Primitives';
 
 /**
  * NFT collection on the TON blockchain (TEP-62 standard).

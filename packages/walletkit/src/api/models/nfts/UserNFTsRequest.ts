@@ -6,7 +6,7 @@
  *
  */
 
-import { Pagination, UserFriendlyAddress } from '../core/Primitives';
+import type { Pagination, UserFriendlyAddress } from '../core/Primitives';
 
 /**
  * Request parameters for fetching NFT tokens.

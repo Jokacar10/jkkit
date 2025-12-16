@@ -6,7 +6,7 @@
  *
  */
 
-import { Hex } from '../models/core/Primitives';
+import type { Hex } from '../models/core/Primitives';
 
 export type ISigner = (bytes: Iterable<number>) => Promise<Hex>;
 

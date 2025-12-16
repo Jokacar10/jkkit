@@ -7,7 +7,7 @@
  */
 
 import { Base64ToHex } from '../..';
-import {
+import type {
     AccountState,
     AccountStatus,
     Transaction,
@@ -25,7 +25,8 @@ import {
     UserFriendlyAddress,
 } from '../../api/models';
 import { asAddressFriendly, asMaybeAddressFriendly } from '../primitive';
-import { AddressBookRowV3, MetadataV3, toAddressBook } from './v3/AddressBookRowV3';
+import type { AddressBookRowV3, MetadataV3 } from './v3/AddressBookRowV3';
+import { toAddressBook } from './v3/AddressBookRowV3';
 // Types for Toncenter emulation endpoint response
 
 // Root response

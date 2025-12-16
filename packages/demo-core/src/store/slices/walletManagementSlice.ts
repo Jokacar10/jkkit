@@ -6,7 +6,8 @@
  *
  */
 
-import { type Wallet, type ITonWalletKit, Network } from '@ton/walletkit';
+import { Network } from '@ton/walletkit';
+import type { Wallet, ITonWalletKit } from '@ton/walletkit';
 import { createLedgerPath } from '@ton/v4ledger-adapter';
 
 import { SimpleEncryption } from '../../utils';

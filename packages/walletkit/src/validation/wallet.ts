@@ -8,7 +8,7 @@
 
 // Wallet-specific validation logic
 
-import { Wallet } from '../api/interfaces';
+import type { Wallet } from '../api/interfaces';
 import type { ValidationResult, ValidationContext } from './types';
 
 /**

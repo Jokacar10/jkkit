@@ -6,21 +6,11 @@
  *
  */
 
-import {
-    Address,
-    beginCell,
-    Cell,
-    Contract,
-    contractAddress,
-    Dictionary,
-    Sender,
-    SendMode,
-    ContractProvider,
-    AccountStatus,
-} from '@ton/core';
+import type { Address, Cell, Contract, Sender, ContractProvider, AccountStatus } from '@ton/core';
+import { beginCell, contractAddress, Dictionary, SendMode } from '@ton/core';
 
-import { ApiClient } from '../../types/toncenter/ApiClient';
-import { WalletOptions } from '../Wallet';
+import type { ApiClient } from '../../types/toncenter/ApiClient';
+import type { WalletOptions } from '../Wallet';
 import { defaultWalletIdV5R1 } from './WalletV5R1Adapter';
 import { ParseStack } from '../../utils/tvmStack';
 

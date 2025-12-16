@@ -8,7 +8,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Base64Normalize, Network, type TransactionMessage } from '@ton/walletkit';
+import { Base64Normalize, Network } from '@ton/walletkit';
+import type { TransactionMessage } from '@ton/walletkit';
 import { useWalletKit, useWalletStore } from '@ton/demo-core';
 
 interface TransactionDetailData {

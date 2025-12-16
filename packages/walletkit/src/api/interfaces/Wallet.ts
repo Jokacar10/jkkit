@@ -6,7 +6,7 @@
  *
  */
 
-import {
+import type {
     TokenAmount,
     TONTransferRequest,
     TransactionEmulatedPreview,
@@ -22,7 +22,7 @@ import {
     NFTTransferRequest,
     NFTRawTransferRequest,
 } from '../models';
-import { WalletAdapter } from './WalletAdapter';
+import type { WalletAdapter } from './WalletAdapter';
 
 export type Wallet = WalletAdapter & WalletTonInterface & WalletJettonInterface & WalletNftInterface;
 

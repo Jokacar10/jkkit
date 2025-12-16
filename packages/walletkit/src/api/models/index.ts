@@ -28,7 +28,7 @@ export type { BridgeEvent } from './bridge/BridgeEvent';
 export type {
     ConnectionRequestEvent,
     ConnectionRequestEventPreview,
-    ConnectionRequestEventRequestedItem as ConnectionRequestEventPreviewRequestedItem,
+    ConnectionRequestEventRequestedItem,
     ConnectionRequestEventPreviewPermission,
 } from './bridge/ConnectionRequestEvent';
 export type { DisconnectionEvent } from './bridge/DisconnectionEvent';

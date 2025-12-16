@@ -6,7 +6,7 @@
  *
  */
 
-import { Base64String, Hex } from '../core/Primitives';
+import type { Base64String, Hex } from '../core/Primitives';
 
 /**
  * Message structure used for TON Connect proof of ownership.

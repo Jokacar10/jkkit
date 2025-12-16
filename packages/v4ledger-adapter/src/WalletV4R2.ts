@@ -8,20 +8,11 @@
 
 // WalletV4R2 contract implementation
 
-import {
-    Address,
-    beginCell,
-    Cell,
-    Contract,
-    contractAddress,
-    ContractProvider,
-    SendMode,
-    Sender,
-    MessageRelaxed,
-    storeMessageRelaxed,
-} from '@ton/core';
-import { Maybe } from '@ton/core/dist/utils/maybe';
-import { ApiClient, ParseStack } from '@ton/walletkit';
+import type { Address, Cell, Contract, ContractProvider, Sender, MessageRelaxed } from '@ton/core';
+import { beginCell, contractAddress, SendMode, storeMessageRelaxed } from '@ton/core';
+import type { Maybe } from '@ton/core/dist/utils/maybe';
+import type { ApiClient } from '@ton/walletkit';
+import { ParseStack } from '@ton/walletkit';
 
 // const log = globalLogger.createChild('WalletV4R2');
 const log = {

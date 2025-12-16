@@ -6,9 +6,9 @@
  *
  */
 
-import { UserFriendlyAddress, Hex } from '../core/Primitives';
-import { Network } from './Network';
-import { SignData } from './SignData';
+import type { UserFriendlyAddress, Hex } from '../core/Primitives';
+import type { Network } from './Network';
+import type { SignData } from './SignData';
 
 /**
  * Prepared sign data ready for signing by the wallet.

@@ -6,9 +6,9 @@
  *
  */
 
-import { UserFriendlyAddress, Hex } from '../../api/models';
+import type { UserFriendlyAddress, Hex } from '../../api/models';
 import type { NftCollection } from './NftCollection';
-import { TokenInfo } from './TokenInfo';
+import type { TokenInfo } from './TokenInfo';
 
 export interface NftItemAttribute {
     trait_type: string;

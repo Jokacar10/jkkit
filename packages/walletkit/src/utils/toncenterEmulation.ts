@@ -9,24 +9,19 @@
 import { Address, Cell } from '@ton/core';
 import { parseInternal } from '@truecarry/tlb-abi';
 
-import {
-    EmulationTokenInfoWallets,
-    ToncenterEmulationResponse,
-    toTransactionEmulatedTrace,
-} from '../types/toncenter/emulation';
-import { ErrorInfo } from '../errors/WalletKitError';
+import type { EmulationTokenInfoWallets, ToncenterEmulationResponse } from '../types/toncenter/emulation';
+import { toTransactionEmulatedTrace } from '../types/toncenter/emulation';
+import type { ErrorInfo } from '../errors/WalletKitError';
 import { ERROR_CODES } from '../errors/codes';
 import { CallForSuccess } from './retry';
-import {
-    Result,
+import type {
     TransactionEmulatedPreview,
     TransactionTraceMoneyFlow,
     TransactionTraceMoneyFlowItem,
     TransactionRequest,
-    SendModeToValue,
-    AssetType,
 } from '../api/models';
-import { Wallet } from '../api/interfaces';
+import { Result, SendModeToValue, AssetType } from '../api/models';
+import type { Wallet } from '../api/interfaces';
 
 // import { ConnectMessageTransactionMessage } from '@/types/connect';
 

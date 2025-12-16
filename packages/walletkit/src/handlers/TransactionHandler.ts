@@ -7,20 +7,16 @@
  */
 
 import { Address } from '@ton/core';
-import {
-    CHAIN,
-    SEND_TRANSACTION_ERROR_CODES,
-    SendTransactionRpcResponseError,
-    WalletResponseTemplateError,
-} from '@tonconnect/protocol';
+import type { SendTransactionRpcResponseError, WalletResponseTemplateError } from '@tonconnect/protocol';
+import { CHAIN, SEND_TRANSACTION_ERROR_CODES } from '@tonconnect/protocol';
 
 import type { ValidationResult, TonWalletKitOptions } from '../types';
-import {
-    type RawBridgeEvent,
-    type EventHandler,
-    type RawBridgeEventTransaction,
-    type ConnectTransactionParamContent,
-    toTransactionRequest,
+import { toTransactionRequest } from '../types/internal';
+import type {
+    RawBridgeEvent,
+    EventHandler,
+    RawBridgeEventTransaction,
+    ConnectTransactionParamContent,
 } from '../types/internal';
 import { validateTransactionMessages as validateTonConnectTransactionMessages } from '../validation/transaction';
 import { globalLogger } from '../core/Logger';
@@ -29,17 +25,18 @@ import { createTransactionPreview as createTransactionPreviewHelper } from '../u
 import { BasicHandler } from './BasicHandler';
 import { CallForSuccess } from '../utils/retry';
 import type { EventEmitter } from '../core/EventEmitter';
-import { WalletManager } from '../core/WalletManager';
-import { ReturnWithValidationResult } from '../validation/types';
+import type { WalletManager } from '../core/WalletManager';
+import type { ReturnWithValidationResult } from '../validation/types';
 import { WalletKitError, ERROR_CODES } from '../errors';
-import { AnalyticsApi } from '../analytics/sender';
+import type { AnalyticsApi } from '../analytics/sender';
 import { getEventsSubsystem, getVersion } from '../utils/version';
 import { uuidv7 } from '../utils/uuid';
 import { getUnixtime } from '../utils/time';
 import { Base64Normalize } from '../utils/base64';
 import { getAddressFromWalletId } from '../utils/walletId';
-import { Wallet } from '../api/interfaces';
-import { Result, TransactionEmulatedPreview, TransactionRequest, TransactionRequestEvent } from '../api/models';
+import type { Wallet } from '../api/interfaces';
+import type { TransactionEmulatedPreview, TransactionRequest, TransactionRequestEvent } from '../api/models';
+import { Result } from '../api/models';
 
 const log = globalLogger.createChild('TransactionHandler');
 

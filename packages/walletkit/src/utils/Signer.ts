@@ -13,7 +13,7 @@ import { keyPairFromSeed } from '@ton/crypto';
 import { MnemonicToKeyPair } from './mnemonic';
 import { createWalletSigner } from './sign';
 import { Uint8ArrayToHex } from './base64';
-import { WalletSigner } from '../api/interfaces';
+import type { WalletSigner } from '../api/interfaces';
 
 /**
  * Utility class for creating wallet signers from various sources

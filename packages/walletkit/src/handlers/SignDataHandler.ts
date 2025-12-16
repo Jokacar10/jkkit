@@ -8,7 +8,7 @@
 
 // Sign data request handler
 
-import { SignDataPayload as TonConnectSignDataPayload } from '@tonconnect/protocol';
+import type { SignDataPayload as TonConnectSignDataPayload } from '@tonconnect/protocol';
 import { parseTLB } from '@ton-community/tlb-runtime';
 
 import type { TonWalletKitOptions } from '../types';
@@ -17,14 +17,15 @@ import { BasicHandler } from './BasicHandler';
 import { globalLogger } from '../core/Logger';
 import { validateSignDataPayload } from '../validation/signData';
 import { WalletKitError, ERROR_CODES } from '../errors';
-import { AnalyticsApi } from '../analytics/sender';
+import type { AnalyticsApi } from '../analytics/sender';
 import { uuidv7 } from '../utils/uuid';
 import { getUnixtime } from '../utils/time';
 import { getEventsSubsystem, getVersion } from '../utils/version';
 import { Base64Normalize } from '../utils/base64';
-import { WalletManager } from '../core/WalletManager';
+import type { WalletManager } from '../core/WalletManager';
 import { getAddressFromWalletId } from '../utils/walletId';
-import { SignDataPayload, Network, SignData, SignDataRequestEvent, SignDataPreview } from '../api/models';
+import type { SignDataPayload, SignData, SignDataRequestEvent, SignDataPreview } from '../api/models';
+import { Network } from '../api/models';
 
 const log = globalLogger.createChild('SignDataHandler');
 

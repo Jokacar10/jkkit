@@ -9,17 +9,18 @@
 // Minimal TonWalletKit - Pure orchestration layer
 
 import { Address } from '@ton/core';
-import {
-    CHAIN,
+import type {
     CONNECT_EVENT_ERROR_CODES,
     ConnectEventSuccess,
     ConnectRequest,
     DisconnectEvent,
     SendTransactionRpcResponseError,
 } from '@tonconnect/protocol';
+import { CHAIN } from '@tonconnect/protocol';
 
 import type { ITonWalletKit, TonWalletKitOptions, SessionInfo } from '../types';
-import { Initializer, type InitializationResult, wrapWalletInterface } from './Initializer';
+import { Initializer, wrapWalletInterface } from './Initializer';
+import type { InitializationResult } from './Initializer';
 import { globalLogger } from './Logger';
 import type { WalletManager } from './WalletManager';
 import type { SessionManager } from './SessionManager';
@@ -27,25 +28,26 @@ import type { EventRouter } from './EventRouter';
 import type { RequestProcessor } from './RequestProcessor';
 import { JettonsManager } from './JettonsManager';
 import type { JettonsAPI } from '../types/jettons';
-import {
+import type {
     RawBridgeEventConnect,
     RawBridgeEventRestoreConnection,
     RawBridgeEventTransaction,
-    toConnectTransactionParamContent,
 } from '../types/internal';
+import { toConnectTransactionParamContent } from '../types/internal';
 import { EventEmitter } from './EventEmitter';
-import { StorageEventProcessor } from './EventProcessor';
-import { BridgeManager } from './BridgeManager';
+import type { StorageEventProcessor } from './EventProcessor';
+import type { BridgeManager } from './BridgeManager';
 import type { BridgeEventMessageInfo, InjectedToExtensionBridgeRequestPayload } from '../types/jsBridge';
-import { ApiClient } from '../types/toncenter/ApiClient';
+import type { ApiClient } from '../types/toncenter/ApiClient';
 import { getDeviceInfoWithDefaults } from '../utils/getDefaultWalletConfig';
 import { AnalyticsApi } from '../analytics/sender';
 import { WalletKitError, ERROR_CODES } from '../errors';
 import { CallForSuccess } from '../utils/retry';
 import { NetworkManager } from './NetworkManager';
-import { createWalletId, WalletId } from '../utils/walletId';
-import { Wallet, WalletAdapter } from '../api/interfaces';
-import {
+import type { WalletId } from '../utils/walletId';
+import { createWalletId } from '../utils/walletId';
+import type { Wallet, WalletAdapter } from '../api/interfaces';
+import type {
     Network,
     TransactionRequest,
     UserFriendlyAddress,

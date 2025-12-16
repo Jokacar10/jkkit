@@ -6,11 +6,9 @@
  *
  */
 
-import {
-    type Wallet,
-    SEND_TRANSACTION_ERROR_CODES,
-    WalletKitError,
-    ERROR_CODES,
+import { SEND_TRANSACTION_ERROR_CODES, WalletKitError, ERROR_CODES } from '@ton/walletkit';
+import type {
+    Wallet,
     TransactionRequestEvent,
     ConnectionRequestEvent,
     SignDataRequestEvent,

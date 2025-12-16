@@ -6,9 +6,9 @@
  *
  */
 
-import { Hex, Base64String, LogicalTime, UserFriendlyAddress } from '../core/Primitives';
-import { ExtraCurrencies } from '../core/ExtraCurrencies';
-import { TokenAmount } from '../core/TokenAmount';
+import type { Hex, Base64String, LogicalTime, UserFriendlyAddress } from '../core/Primitives';
+import type { ExtraCurrencies } from '../core/ExtraCurrencies';
+import type { TokenAmount } from '../core/TokenAmount';
 
 /**
  * Transaction on the TON blockchain.

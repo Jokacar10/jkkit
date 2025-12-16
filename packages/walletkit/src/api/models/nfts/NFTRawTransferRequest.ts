@@ -6,8 +6,8 @@
  *
  */
 
-import { Base64String, UserFriendlyAddress } from '../core/Primitives';
-import { TokenAmount } from '../core/TokenAmount';
+import type { Base64String, UserFriendlyAddress } from '../core/Primitives';
+import type { TokenAmount } from '../core/TokenAmount';
 
 /**
  * Request raw parameters for transferring an NFT to another address.

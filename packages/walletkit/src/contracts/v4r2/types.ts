@@ -6,9 +6,9 @@
  *
  */
 
-import { ApiClient } from '../../types/toncenter/ApiClient';
-import { Hex, Network } from '../../api/models';
-import { WalletSigner } from '../../api/interfaces';
+import type { ApiClient } from '../../types/toncenter/ApiClient';
+import type { Hex, Network } from '../../api/models';
+import type { WalletSigner } from '../../api/interfaces';
 
 /**
  * Configuration for creating a WalletV4R2 adapter

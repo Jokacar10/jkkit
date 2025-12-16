@@ -7,14 +7,12 @@
  */
 
 import { Address } from '@ton/core';
-import { CHAIN } from '@tonconnect/protocol';
 import { ed25519 } from '@noble/curves/ed25519';
-import type { Wallet } from '@tonconnect/sdk';
-import type { TonProofItemReplySuccess } from '@tonconnect/protocol';
 
-import { SignatureVerify, CreateTonProofMessageBytes, ConvertTonProofMessage, createTonProofMessage } from './tonProof';
+import { SignatureVerify, CreateTonProofMessageBytes, CreateTonProofMessage } from './tonProof';
 import { Uint8ArrayToHex } from './base64';
-import { asHex, ProofMessage } from '../api/models';
+import type { ProofMessage } from '../api/models';
+import { asHex } from '../api/models';
 
 describe('tonProof', () => {
     describe('SignatureVerify', () => {
@@ -116,84 +114,6 @@ describe('tonProof', () => {
         });
     });
 
-    describe('ConvertTonProofMessage', () => {
-        const mockWallet: Wallet = {
-            device: {
-                platform: 'browser',
-                appName: 'TestWallet',
-                appVersion: '1.0.0',
-                maxProtocolVersion: 2,
-                features: [],
-            },
-            provider: 'http',
-            account: {
-                address: 'EQBynBO23ywHy_CgarY9NK9FTz0yDsG82PtcbSTQgGoXwiuA',
-                chain: CHAIN.MAINNET,
-                walletStateInit:
-                    'te6cckECFgEAAwQAAgE0ARUBFP8A9KQT9LzyyAsCAgEgAxACAUgEBwLm0AHQ0wMhcbCSXwTgItdJwSCSXwTgAtMfIYIQcGx1Z70ighBibG5jvbAighBkc3RyvbCSXwXgA/pAMCD6RAHIygfL/8nQ7UTQgQFA1yH0BDBcgQEI9ApvoTGzkl8H4AXTP8glghBwbHVnupI4MOMNA4IQZHN0teleEgUBEgGggVsQbwHIgSDXSYEBC7ry4Igg1wsKIIEE/7ry0ImDCbry4IjPFgEGASH2zwHIygfL/8nQIPQEBXAggQCAPIEBCPQWyPQAye1UBAgLAgFIERICAUgVEAC5sv4gBD0hY+l/gOEEIsSe9DqgCDXIdBVMTyBQJugFMjLBxLMzMsHAs8WcM8WAcnQIIEBCPQOb6Ex8BrI9ADQUP4L+ChSQMcF8B3IUATPFslQBMzJcfsAVGVlYgIBWA0OALm18FAHIgCDXIdcLHwLwH8jwH4C8BnI8B+AvAZyPAfgLwGcjwH4C8BnI8B+AhA2X/4DcBSBqhBrYWFmZnEbZ2dxE2tnYRNlZKE5ciJujinQ0wfUAvsA1DDQMwHwGsjJ0CByIAg10mBAQu68uCIINcLCiCBBP+68tCJgwm68uCIzxYSyz/JcfsAABGwpAAVa5GwABVrgbAAdO1E0NIAAZfTP9M/0j/SAdACAVgTFAAB1AIBIBYVABGwr7tRNDSAAGAAdbJu40NWlwZnM6Ly9RbVJUZ3F0aGNTYklLQ2pNYk1iaWNMejdNAA=',
-            },
-            connectItems: {
-                tonProof: {
-                    name: 'ton_proof',
-                    proof: {
-                        timestamp: 1700000000,
-                        domain: { lengthBytes: 11, value: 'example.com' },
-                        signature: 'SGVsbG8gV29ybGQ=',
-                        payload: 'test-payload',
-                    },
-                },
-            },
-        };
-
-        const mockTonProof: TonProofItemReplySuccess = {
-            name: 'ton_proof',
-            proof: {
-                timestamp: 1700000000,
-                domain: { lengthBytes: 11, value: 'example.com' },
-                signature: 'SGVsbG8gV29ybGQ=',
-                payload: 'test-payload',
-            },
-        };
-
-        it('should convert wallet info to parsed message', () => {
-            const result = ConvertTonProofMessage(mockWallet, mockTonProof);
-
-            expect(result.workchain).toBe(0);
-            expect(result.domain.lengthBytes).toBe(11);
-            expect(result.domain.value).toBe('example.com');
-            expect(result.payload).toBe('test-payload');
-            expect(result.timestamp).toBe(1700000000);
-            expect(result.stateInit).toBe(mockWallet.account.walletStateInit);
-        });
-
-        it('should parse address correctly', () => {
-            const result = ConvertTonProofMessage(mockWallet, mockTonProof);
-
-            expect(result.addressHash).toMatch(/^0x[0-9a-f]{64}$/);
-        });
-
-        it('should convert signature to hex', () => {
-            const result = ConvertTonProofMessage(mockWallet, mockTonProof);
-
-            expect(result.signature).toBeDefined();
-            expect(result.signature).toMatch(/^0x[0-9a-f]+$/);
-        });
-
-        it('should handle masterchain address', () => {
-            const masterchainWallet: Wallet = {
-                ...mockWallet,
-                account: {
-                    ...mockWallet.account,
-                    address: 'Ef8zMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzM0vF',
-                },
-            };
-
-            const result = ConvertTonProofMessage(masterchainWallet, mockTonProof);
-
-            expect(result.workchain).toBe(-1);
-        });
-    });
-
     describe('createTonProofMessage', () => {
         const testAddress = Address.parse('EQBynBO23ywHy_CgarY9NK9FTz0yDsG82PtcbSTQgGoXwiuA');
         const testDomain = { lengthBytes: 11, value: 'example.com' };
@@ -202,7 +122,7 @@ describe('tonProof', () => {
         const testTimestamp = 1700000000;
 
         it('should create ton proof message with correct fields', () => {
-            const result = createTonProofMessage({
+            const result = CreateTonProofMessage({
                 address: testAddress,
                 domain: testDomain,
                 payload: testPayload,
@@ -220,7 +140,7 @@ describe('tonProof', () => {
         });
 
         it('should not include signature field', () => {
-            const result = createTonProofMessage({
+            const result = CreateTonProofMessage({
                 address: testAddress,
                 domain: testDomain,
                 payload: testPayload,
@@ -234,7 +154,7 @@ describe('tonProof', () => {
         it('should handle workchain 0 address', () => {
             const workchain0Address = Address.parse('EQBynBO23ywHy_CgarY9NK9FTz0yDsG82PtcbSTQgGoXwiuA');
 
-            const result = createTonProofMessage({
+            const result = CreateTonProofMessage({
                 address: workchain0Address,
                 domain: testDomain,
                 payload: testPayload,
@@ -248,7 +168,7 @@ describe('tonProof', () => {
         it('should handle masterchain address', () => {
             const masterchainAddress = Address.parse('Ef8zMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzM0vF');
 
-            const result = createTonProofMessage({
+            const result = CreateTonProofMessage({
                 address: masterchainAddress,
                 domain: testDomain,
                 payload: testPayload,
@@ -260,7 +180,7 @@ describe('tonProof', () => {
         });
 
         it('should produce message compatible with CreateTonProofMessageBytes', async () => {
-            const message = createTonProofMessage({
+            const message = CreateTonProofMessage({
                 address: testAddress,
                 domain: testDomain,
                 payload: testPayload,
@@ -286,7 +206,7 @@ describe('tonProof', () => {
             const stateInit = 'base64-state-init';
             const timestamp = Math.floor(Date.now() / 1000);
 
-            const message = createTonProofMessage({
+            const message = CreateTonProofMessage({
                 address,
                 domain,
                 payload,
@@ -309,7 +229,7 @@ describe('tonProof', () => {
             const stateInit = 'base64-state-init';
             const timestamp = Math.floor(Date.now() / 1000);
 
-            const originalMessage = createTonProofMessage({
+            const originalMessage = CreateTonProofMessage({
                 address,
                 domain,
                 payload: 'original-payload',
@@ -320,7 +240,7 @@ describe('tonProof', () => {
             const originalBytes = await CreateTonProofMessageBytes(originalMessage);
             const signature = ed25519.sign(originalBytes, privateKey);
 
-            const tamperedMessage = createTonProofMessage({
+            const tamperedMessage = CreateTonProofMessage({
                 address,
                 domain,
                 payload: 'tampered-payload',

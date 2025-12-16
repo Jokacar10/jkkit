@@ -8,12 +8,13 @@
 
 // Wallet management with validation and persistence
 
-import { Storage } from '../storage';
+import type { Storage } from '../storage';
 import { validateWallet } from '../validation';
 import { globalLogger } from './Logger';
-import { createWalletId, WalletId } from '../utils/walletId';
-import { Network } from '../api/models';
-import { Wallet, WalletAdapter } from '../api/interfaces';
+import type { WalletId } from '../utils/walletId';
+import { createWalletId } from '../utils/walletId';
+import type { Network } from '../api/models';
+import type { Wallet, WalletAdapter } from '../api/interfaces';
 
 const _log = globalLogger.createChild('WalletManager');
 

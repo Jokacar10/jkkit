@@ -6,12 +6,13 @@
  *
  */
 
-import { NftTransferMessage, storeNftTransferMessage } from '@ton-community/assets-sdk';
+import type { NftTransferMessage } from '@ton-community/assets-sdk';
+import { storeNftTransferMessage } from '@ton-community/assets-sdk';
 import { Address, beginCell, Cell } from '@ton/core';
 
 import { validateTransactionMessage } from '../../../validation';
-import { Wallet, WalletNftInterface } from '../../../api/interfaces';
-import {
+import type { Wallet, WalletNftInterface } from '../../../api/interfaces';
+import type {
     NFT,
     NFTRawTransferRequest,
     NFTsRequest,
@@ -20,8 +21,8 @@ import {
     TransactionRequest,
     TransactionRequestMessage,
     UserFriendlyAddress,
-    SendModeFlag,
 } from '../../../api/models';
+import { SendModeFlag } from '../../../api/models';
 
 export class WalletNftClass implements WalletNftInterface {
     async getNfts(this: Wallet, params: NFTsRequest): Promise<NFTsResponse> {

@@ -10,16 +10,15 @@
 
 import { CHAIN } from '@tonconnect/protocol';
 import { TonTransport } from '@ton-community/ton-ledger';
-import Transport from '@ledgerhq/hw-transport';
+import type Transport from '@ledgerhq/hw-transport';
+import type { WalletAdapter, ApiClient } from '@ton/walletkit';
 import {
-    WalletAdapter,
-    ApiClient,
     Network,
     // globalLogger,
 } from '@ton/walletkit';
 
 import { WalletV4R2LedgerAdapter } from './WalletV4R2LedgerAdapter';
-import { WalletInitConfigLedgerInterface } from './types';
+import type { WalletInitConfigLedgerInterface } from './types';
 
 // const log = globalLogger.createChild('WalletV4R2Utils');
 const log = {

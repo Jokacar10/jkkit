@@ -8,12 +8,12 @@
 
 // Disconnect event handler
 
-import { SessionManager } from '../core/SessionManager';
+import type { SessionManager } from '../core/SessionManager';
 import type { RawBridgeEvent, EventHandler, RawBridgeEventDisconnect } from '../types/internal';
 import { BasicHandler } from './BasicHandler';
 import { WalletKitError, ERROR_CODES } from '../errors';
 import { getAddressFromWalletId } from '../utils/walletId';
-import { DisconnectionEvent } from '../api/models';
+import type { DisconnectionEvent } from '../api/models';
 
 export class DisconnectHandler
     extends BasicHandler<DisconnectionEvent>

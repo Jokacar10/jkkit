@@ -6,8 +6,8 @@
  *
  */
 
-import { AddressBook } from '../core/AddressBook';
-import { Transaction } from './Transaction';
+import type { AddressBook } from '../core/AddressBook';
+import type { Transaction } from './Transaction';
 
 export interface TransactionsResponse {
     transactions: Transaction[];

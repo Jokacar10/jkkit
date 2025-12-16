@@ -10,15 +10,8 @@
 import 'dotenv/config';
 import util from 'util';
 
-import {
-    ApiClientToncenter,
-    ConnectTransactionParamMessage,
-    CHAIN,
-    Signer,
-    WalletV5R1Adapter,
-    wrapWalletInterface,
-    Wallet,
-} from '../src';
+import type { ConnectTransactionParamMessage, Wallet } from '../src';
+import { ApiClientToncenter, CHAIN, Signer, WalletV5R1Adapter, wrapWalletInterface } from '../src';
 
 // eslint-disable-next-line no-console
 const logInfo = console.log;

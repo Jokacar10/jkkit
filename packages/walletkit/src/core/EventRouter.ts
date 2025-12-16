@@ -17,11 +17,11 @@ import { DisconnectHandler } from '../handlers/DisconnectHandler';
 import { validateBridgeEvent } from '../validation/events';
 import { globalLogger } from './Logger';
 import type { EventEmitter } from './EventEmitter';
-import { SessionManager } from './SessionManager';
-import { WalletManager } from './WalletManager';
-import { BridgeManager } from './BridgeManager';
-import { AnalyticsApi } from '../analytics/sender';
-import {
+import type { SessionManager } from './SessionManager';
+import type { WalletManager } from './WalletManager';
+import type { BridgeManager } from './BridgeManager';
+import type { AnalyticsApi } from '../analytics/sender';
+import type {
     TransactionRequestEvent,
     BridgeEvent,
     RequestErrorEvent,

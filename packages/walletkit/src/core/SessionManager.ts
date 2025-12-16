@@ -13,10 +13,11 @@ import { SessionCrypto } from '@tonconnect/protocol';
 import type { SessionInfo } from '../types';
 import type { WalletManager } from '../core/WalletManager';
 import type { SessionData } from '../types/internal';
-import { Storage } from '../storage';
+import type { Storage } from '../storage';
 import { globalLogger } from './Logger';
-import { createWalletId, WalletId } from '../utils/walletId';
-import { Wallet } from '../api/interfaces';
+import type { WalletId } from '../utils/walletId';
+import { createWalletId } from '../utils/walletId';
+import type { Wallet } from '../api/interfaces';
 
 const log = globalLogger.createChild('SessionManager');
 

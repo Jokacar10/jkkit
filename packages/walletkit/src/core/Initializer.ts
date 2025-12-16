@@ -8,7 +8,8 @@
 
 // Initialization and setup logic
 
-import { TonWalletKitOptions, DEFAULT_DURABLE_EVENTS_CONFIG } from '../types';
+import type { TonWalletKitOptions } from '../types';
+import { DEFAULT_DURABLE_EVENTS_CONFIG } from '../types';
 import type { StorageAdapter, StorageConfig } from '../storage';
 import { createStorageAdapter, Storage } from '../storage';
 import { WalletManager } from './WalletManager';
@@ -23,9 +24,9 @@ import { StorageEventProcessor } from './EventProcessor';
 import { WalletTonClass } from './wallet/extensions/ton';
 import { WalletJettonClass } from './wallet/extensions/jetton';
 import { WalletNftClass } from './wallet/extensions/nft';
-import { AnalyticsApi } from '../analytics/sender';
-import { NetworkManager } from './NetworkManager';
-import { Wallet, WalletAdapter } from '../api/interfaces';
+import type { AnalyticsApi } from '../analytics/sender';
+import type { NetworkManager } from './NetworkManager';
+import type { Wallet, WalletAdapter } from '../api/interfaces';
 
 const log = globalLogger.createChild('Initializer');
 

@@ -6,7 +6,7 @@
  *
  */
 
-import { UserFriendlyAddress } from './Primitives';
+import type { UserFriendlyAddress } from './Primitives';
 
 /**
  * Map of raw addresses to their metadata entries.

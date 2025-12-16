@@ -6,9 +6,9 @@
  *
  */
 
-import { AddressBook, AddressBookEntry } from '../../../api/models';
+import type { AddressBook, AddressBookEntry } from '../../../api/models';
 import { asAddressFriendly } from '../../primitive';
-import { EmulationAddressMetadata } from '../emulation';
+import type { EmulationAddressMetadata } from '../emulation';
 
 export interface MetadataV3 {
     address_book: Record<string, AddressBookRowV3>;

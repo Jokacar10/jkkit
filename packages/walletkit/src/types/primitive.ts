@@ -6,9 +6,10 @@
  *
  */
 
-import { Address, beginCell, Cell } from '@ton/core';
+import type { Cell } from '@ton/core';
+import { Address, beginCell } from '@ton/core';
 
-import { UserFriendlyAddress } from '../api/models';
+import type { UserFriendlyAddress } from '../api/models';
 
 export type Base64String = string;
 

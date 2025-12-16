@@ -11,7 +11,9 @@ import util from 'util';
 // import { Address } from '@ton/core'; // Not used in this example
 import * as dotenv from 'dotenv';
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid';
-import { ApiClientToncenter, Network, type TransactionRequestMessage, Wallet } from '@ton/walletkit';
+import type { Wallet } from '@ton/walletkit';
+import { ApiClientToncenter, Network } from '@ton/walletkit';
+import type { TransactionRequestMessage } from '@ton/walletkit';
 import { wrapWalletInterface } from '@ton/walletkit';
 
 import { createLedgerPath, createWalletV4R2Ledger } from '../utils';

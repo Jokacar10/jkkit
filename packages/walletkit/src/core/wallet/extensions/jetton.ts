@@ -13,17 +13,17 @@ import { validateTransactionMessage } from '../../../validation';
 import { isValidAddress } from '../../../utils/address';
 import { CallForSuccess } from '../../../utils/retry';
 import { ParseStack, SerializeStack } from '../../../utils/tvmStack';
-import { Wallet, WalletJettonInterface } from '../../../api/interfaces';
-import {
+import type { Wallet, WalletJettonInterface } from '../../../api/interfaces';
+import type {
     JettonsRequest,
     JettonsResponse,
     JettonsTransferRequest,
-    SendModeFlag,
     TokenAmount,
     TransactionRequest,
     TransactionRequestMessage,
     UserFriendlyAddress,
 } from '../../../api/models';
+import { SendModeFlag } from '../../../api/models';
 
 export class WalletJettonClass implements WalletJettonInterface {
     async createTransferJettonTransaction(

@@ -10,8 +10,8 @@
 
 import { CHAIN } from '@tonconnect/protocol';
 
-import { ApiClient } from '../types/toncenter/ApiClient';
-import { ApiClientConfig, TonWalletKitOptions } from '../types/config';
+import type { ApiClient } from '../types/toncenter/ApiClient';
+import type { ApiClientConfig, TonWalletKitOptions } from '../types/config';
 import { ApiClientToncenter } from './ApiClientToncenter';
 import { globalLogger } from './Logger';
 import { WalletKitError, ERROR_CODES } from '../errors';

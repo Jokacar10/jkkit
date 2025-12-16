@@ -6,8 +6,8 @@
  *
  */
 
-import { NftItemAttribute } from './NftItem';
-import { TokenInfo as APITokenInfo } from '../../api/models';
+import type { NftItemAttribute } from './NftItem';
+import type { TokenInfo as APITokenInfo } from '../../api/models';
 
 export interface TokenInfo {
     description?: string;

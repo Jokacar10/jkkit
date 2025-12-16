@@ -8,42 +8,36 @@
 
 // WalletV4R2 Ledger adapter that implements WalletInterface
 
-import {
-    Address,
-    beginCell,
-    Cell,
-    loadStateInit,
-    SendMode,
-    StateInit,
-    storeMessage,
-    storeStateInit,
-    external,
-} from '@ton/core';
+import type { StateInit } from '@ton/core';
+import { Address, beginCell, Cell, loadStateInit, SendMode, storeMessage, storeStateInit, external } from '@ton/core';
 import { CHAIN, toHexString } from '@tonconnect/protocol';
 import { TonTransport } from '@ton-community/ton-ledger';
-import Transport from '@ledgerhq/hw-transport';
-import {
+import type Transport from '@ledgerhq/hw-transport';
+import type {
     WalletAdapter,
     ApiClient,
-    formatWalletAddress,
-    CallForSuccess,
     Hex,
-    HexToBigInt,
-    Uint8ArrayToHex,
-    HexToUint8Array,
-    createWalletId,
     WalletId,
-    Network,
     Base64String,
     TransactionRequest,
     PreparedSignData,
     ProofMessage,
 } from '@ton/walletkit';
+import {
+    formatWalletAddress,
+    CallForSuccess,
+    HexToBigInt,
+    Uint8ArrayToHex,
+    HexToUint8Array,
+    createWalletId,
+    Network,
+} from '@ton/walletkit';
 
-import { WalletV4R2, WalletV4R2Config } from './WalletV4R2';
+import type { WalletV4R2Config } from './WalletV4R2';
+import { WalletV4R2 } from './WalletV4R2';
 import { WalletV4R2CodeCell } from './WalletV4R2.source';
 import { defaultWalletIdV4R2 } from './constants';
-import { WalletInitConfigLedgerInterface, WalletV4R2LedgerAdapterConfig } from './types';
+import type { WalletInitConfigLedgerInterface, WalletV4R2LedgerAdapterConfig } from './types';
 
 const log = {
     warn: (_message: string, _error: unknown) => {},

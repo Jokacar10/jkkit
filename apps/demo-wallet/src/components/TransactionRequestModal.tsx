@@ -7,14 +7,11 @@
  */
 
 import React, { memo, useEffect, useMemo, useState } from 'react';
-import {
-    Network,
-    type JettonInfo,
-    type TransactionRequestEvent,
-    type TransactionTraceMoneyFlowItem,
-} from '@ton/walletkit';
+import { Network } from '@ton/walletkit';
+import type { JettonInfo, TransactionRequestEvent, TransactionTraceMoneyFlowItem } from '@ton/walletkit';
 import { Address } from '@ton/core';
-import { useWalletKit, useAuth, useWalletStore, type SavedWallet } from '@ton/demo-core';
+import { useWalletKit, useAuth, useWalletStore } from '@ton/demo-core';
+import type { SavedWallet } from '@ton/demo-core';
 
 import { Button } from './Button';
 import { Card } from './Card';

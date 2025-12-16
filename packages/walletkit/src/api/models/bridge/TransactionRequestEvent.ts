@@ -6,10 +6,10 @@
  *
  */
 
-import { DAppInfo } from '../core/DAppInfo';
-import { TransactionEmulatedPreview } from '../transactions/emulation/TransactionEmulatedPreview';
-import { TransactionRequest } from '../transactions/TransactionRequest';
-import { BridgeEvent } from './BridgeEvent';
+import type { DAppInfo } from '../core/DAppInfo';
+import type { TransactionEmulatedPreview } from '../transactions/emulation/TransactionEmulatedPreview';
+import type { TransactionRequest } from '../transactions/TransactionRequest';
+import type { BridgeEvent } from './BridgeEvent';
 
 /**
  * Event containing a transaction request from a dApp via TON Connect.

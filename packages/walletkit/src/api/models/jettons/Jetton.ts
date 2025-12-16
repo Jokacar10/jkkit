@@ -6,9 +6,9 @@
  *
  */
 
-import { UserFriendlyAddress } from '../core/Primitives';
-import { TokenAmount } from '../core/TokenAmount';
-import { TokenInfo } from '../core/TokenInfo';
+import type { UserFriendlyAddress } from '../core/Primitives';
+import type { TokenAmount } from '../core/TokenAmount';
+import type { TokenInfo } from '../core/TokenInfo';
 
 /**
  * Jetton fungible token on the TON blockchain (TEP-74 standard).

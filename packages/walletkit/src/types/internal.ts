@@ -8,24 +8,18 @@
 
 // Internal types for TonWalletKit modules
 
-import {
+import type {
     ConnectItem,
     SendTransactionRpcRequest,
     SignDataRpcRequest,
-    WalletResponseError as _WalletResponseError,
     WalletResponseTemplateError,
 } from '@tonconnect/protocol';
+import { WalletResponseError as _WalletResponseError } from '@tonconnect/protocol';
 
-import { JSBridgeTransportFunction } from './jsBridge';
-import { WalletId } from '../utils/walletId';
-import {
-    ExtraCurrencies,
-    TransactionRequest,
-    TransactionRequestMessage,
-    BridgeEvent,
-    SendModeFromValue,
-    SendModeToValue,
-} from '../api/models';
+import type { JSBridgeTransportFunction } from './jsBridge';
+import type { WalletId } from '../utils/walletId';
+import type { ExtraCurrencies, TransactionRequest, TransactionRequestMessage, BridgeEvent } from '../api/models';
+import { SendModeFromValue, SendModeToValue } from '../api/models';
 
 // import type { WalletInterface } from './wallet';
 

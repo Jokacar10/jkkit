@@ -6,7 +6,8 @@
  *
  */
 
-import { type ApiClient, Network } from '@ton/walletkit';
+import type { Network } from '@ton/walletkit';
+import type { ApiClient } from '@ton/walletkit';
 import type Transport from '@ledgerhq/hw-transport';
 
 /**

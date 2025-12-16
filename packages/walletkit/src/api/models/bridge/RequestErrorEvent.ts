@@ -6,7 +6,7 @@
  *
  */
 
-import { ResultError } from '../core/Primitives';
+import type { ResultError } from '../core/Primitives';
 
 export interface RequestErrorEvent {
     /**

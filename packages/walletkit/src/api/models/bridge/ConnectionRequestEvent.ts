@@ -6,8 +6,8 @@
  *
  */
 
-import { DAppInfo } from '../core/DAppInfo';
-import { BridgeEvent } from './BridgeEvent';
+import type { DAppInfo } from '../core/DAppInfo';
+import type { BridgeEvent } from './BridgeEvent';
 
 /**
  * Event containing a connection request from a dApp via TON Connect.

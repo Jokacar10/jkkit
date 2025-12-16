@@ -8,7 +8,7 @@
 
 // Jettons API types based on JETTONS.md specification
 
-import { Jetton, Network } from '../api/models';
+import type { Jetton, Network } from '../api/models';
 
 // === Core Jetton Information ===
 export interface JettonInfo {

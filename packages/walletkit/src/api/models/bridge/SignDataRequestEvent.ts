@@ -6,10 +6,10 @@
  *
  */
 
-import { SignDataPayload } from '../core/PreparedSignData';
-import { DAppInfo } from '../core/DAppInfo';
-import { BridgeEvent } from './BridgeEvent';
-import { SignDataBinary, SignDataCell, SignDataText } from '../core/SignData';
+import type { SignDataPayload } from '../core/PreparedSignData';
+import type { DAppInfo } from '../core/DAppInfo';
+import type { BridgeEvent } from './BridgeEvent';
+import type { SignDataBinary, SignDataCell, SignDataText } from '../core/SignData';
 
 /**
  * Event containing a sign data request from a dApp via TON Connect.

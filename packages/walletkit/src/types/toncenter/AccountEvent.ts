@@ -6,7 +6,7 @@
  *
  */
 
-import {
+import type {
     EmulationTraceNode,
     ToncenterEmulationResponse,
     ToncenterTraceItem,
@@ -20,8 +20,8 @@ import { computeStatus, parseIncomingTonTransfers, parseOutgoingTonTransfers } f
 import { parseContractActions } from './parsers/Contract';
 import { parseJettonActions } from './parsers/Jetton';
 import { parseNftActions } from './parsers/Nft';
-import { MetadataV3 } from './v3/AddressBookRowV3';
-import { UserFriendlyAddress, Hex } from '../../api/models';
+import type { MetadataV3 } from './v3/AddressBookRowV3';
+import type { UserFriendlyAddress, Hex } from '../../api/models';
 
 export interface JettonMasterInfo {
     address: string;

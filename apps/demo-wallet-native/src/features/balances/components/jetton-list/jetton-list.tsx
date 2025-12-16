@@ -7,7 +7,8 @@
  */
 
 import { useJettons } from '@ton/demo-core';
-import { type FC, useEffect } from 'react';
+import { useEffect } from 'react';
+import type { FC } from 'react';
 import { View } from 'react-native';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 import { Ionicons } from '@expo/vector-icons';

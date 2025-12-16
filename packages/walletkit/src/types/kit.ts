@@ -8,14 +8,14 @@
 
 // Main TonWalletKit interface definition
 
-import { CONNECT_EVENT_ERROR_CODES, SendTransactionRpcResponseError } from '@tonconnect/protocol';
+import type { CONNECT_EVENT_ERROR_CODES, SendTransactionRpcResponseError } from '@tonconnect/protocol';
 
 import type { JettonsAPI } from './jettons';
-import { ApiClient } from './toncenter/ApiClient';
-import { Wallet, WalletAdapter } from '../api/interfaces';
-import { Network } from '../api/models/core/Network';
-import { WalletId } from '../utils/walletId';
-import {
+import type { ApiClient } from './toncenter/ApiClient';
+import type { Wallet, WalletAdapter } from '../api/interfaces';
+import type { Network } from '../api/models/core/Network';
+import type { WalletId } from '../utils/walletId';
+import type {
     TransactionRequest,
     UserFriendlyAddress,
     TransactionRequestEvent,

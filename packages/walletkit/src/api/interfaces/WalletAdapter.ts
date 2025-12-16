@@ -6,12 +6,12 @@
  *
  */
 
-import { Hex, Base64String, UserFriendlyAddress } from '../models/core/Primitives';
-import { Network } from '../models/core/Network';
-import { ApiClient, WalletId } from '../..';
-import { TransactionRequest } from '../models/transactions/TransactionRequest';
-import { PreparedSignData } from '../models/core/PreparedSignData';
-import { ProofMessage } from '../models/core/ProofMessage';
+import type { Hex, Base64String, UserFriendlyAddress } from '../models/core/Primitives';
+import type { Network } from '../models/core/Network';
+import type { ApiClient, WalletId } from '../..';
+import type { TransactionRequest } from '../models/transactions/TransactionRequest';
+import type { PreparedSignData } from '../models/core/PreparedSignData';
+import type { ProofMessage } from '../models/core/ProofMessage';
 
 /**
  * Core wallet interface that all wallets must implement

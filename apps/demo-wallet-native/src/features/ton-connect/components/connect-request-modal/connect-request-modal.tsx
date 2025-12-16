@@ -7,8 +7,10 @@
  */
 
 import type { EventConnectRequest, Wallet } from '@ton/walletkit';
-import { type SavedWallet, useWallet } from '@ton/demo-core';
-import { type FC, useState, useMemo, useEffect } from 'react';
+import { useWallet } from '@ton/demo-core';
+import type { SavedWallet } from '@ton/demo-core';
+import { useState, useMemo, useEffect } from 'react';
+import type { FC } from 'react';
 import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 

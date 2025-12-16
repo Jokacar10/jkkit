@@ -8,18 +8,23 @@
 
 // Connect request handler
 
-import { CONNECT_EVENT_ERROR_CODES, ConnectItem } from '@tonconnect/protocol';
+import type { ConnectItem } from '@tonconnect/protocol';
+import { CONNECT_EVENT_ERROR_CODES } from '@tonconnect/protocol';
 
 import type { TonWalletKitOptions } from '../types';
 import type { RawBridgeEvent, EventHandler, RawBridgeEventConnect } from '../types/internal';
 import { globalLogger } from '../core/Logger';
 import { BasicHandler } from './BasicHandler';
-import { AnalyticsApi } from '../analytics/sender';
+import type { AnalyticsApi } from '../analytics/sender';
 import { getUnixtime } from '../utils/time';
 import { uuidv7 } from '../utils/uuid';
 import { getEventsSubsystem, getVersion } from '../utils/version';
-import { ConnectionRequestEvent, ConnectionRequestEventPreview } from '../api/models';
-import { ConnectionRequestEventRequestedItem } from '../api/models/bridge/ConnectionRequestEvent';
+import { isValidHost } from '../utils/url';
+import type {
+    ConnectionRequestEvent,
+    ConnectionRequestEventPreview,
+    ConnectionRequestEventRequestedItem,
+} from '../api/models';
 
 const log = globalLogger.createChild('ConnectHandler');
 
@@ -156,6 +161,24 @@ export class ConnectHandler
 
         const dAppUrl = (event?.domain || manifest?.url?.toString() || '').trim();
 
+        // Validate dApp URL from manifest content - set error if invalid
+        let finalManifestFetchErrorCode = manifestFetchErrorCode;
+        if (!finalManifestFetchErrorCode && dAppUrl) {
+            try {
+                const parsedDAppUrl = new URL(dAppUrl);
+                if (!isValidHost(parsedDAppUrl.host)) {
+                    log.warn('Invalid dApp URL in manifest - invalid host format', {
+                        dAppUrl,
+                        host: parsedDAppUrl.host,
+                    });
+                    finalManifestFetchErrorCode = CONNECT_EVENT_ERROR_CODES.MANIFEST_CONTENT_ERROR;
+                }
+            } catch (_) {
+                log.warn('Invalid dApp URL in manifest - failed to parse', { dAppUrl });
+                finalManifestFetchErrorCode = CONNECT_EVENT_ERROR_CODES.MANIFEST_CONTENT_ERROR;
+            }
+        }
+
         const sanitizedManifest = manifest && {
             name: manifest.name?.toString()?.trim() || '',
             description: manifest.description?.toString()?.trim() || '',
@@ -213,7 +236,7 @@ export class ConnectHandler
         try {
             // try to parse url
             const parsedUrl = new URL(manifestUrl);
-            if (parsedUrl.host.indexOf('.') === -1) {
+            if (!isValidHost(parsedUrl.host)) {
                 return {
                     manifest: null,
                     manifestFetchErrorCode: CONNECT_EVENT_ERROR_CODES.MANIFEST_NOT_FOUND_ERROR,

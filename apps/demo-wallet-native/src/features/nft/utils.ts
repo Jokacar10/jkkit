@@ -23,15 +23,15 @@ export const getNftImage = (nft: NFT): string | undefined => {
 };
 
 export const getNftName = (nft: NFT, formatNftIndex: (index: string) => string): string => {
-    if (!nft?.info?.name || !nft?.index) {
-        return '';
-    }
-
-    if (nft?.info?.name) {
+    if (nft.info?.name) {
         return nft.info.name;
     }
 
-    return `NFT ${formatNftIndex(nft.index)}`;
+    if (nft.index) {
+        return `NFT ${formatNftIndex(nft.index)}`;
+    }
+
+    return '';
 };
 
 export const getNftDescription = (nft: NFT): string | null => {

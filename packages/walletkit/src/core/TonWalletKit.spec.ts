@@ -12,8 +12,8 @@ import { mockFn, mocked, useFakeTimers, useRealTimers } from '../../mock.config'
 import { TonWalletKit } from './TonWalletKit';
 import type { TonWalletKitOptions } from '../types';
 import { createDummyWallet, createMockApiClient } from '../contracts/w5/WalletV5R1.fixture';
-import { InjectedToExtensionBridgeRequest, InjectedToExtensionBridgeRequestPayload } from '../types/jsBridge';
-import { TONTransferRequest } from '../api/models';
+import type { InjectedToExtensionBridgeRequest, InjectedToExtensionBridgeRequestPayload } from '../types/jsBridge';
+import type { TONTransferRequest } from '../api/models';
 
 const mockApiClient = createMockApiClient();
 

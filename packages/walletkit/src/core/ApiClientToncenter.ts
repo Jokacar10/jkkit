@@ -6,14 +6,15 @@
  *
  */
 
-import { Address, ExtraCurrency, AccountStatus } from '@ton/core';
+import type { ExtraCurrency, AccountStatus } from '@ton/core';
+import { Address } from '@ton/core';
 import { CHAIN } from '@tonconnect/protocol';
 
 import { Base64ToBigInt, Base64Normalize, Base64ToHex } from '../utils/base64';
-import { FullAccountState, GetResult, TransactionId } from '../types/toncenter/api';
-import { JettonInfo, ToncenterEmulationResponse } from '../types';
-import { RawStackItem } from '../utils/tvmStack';
-import {
+import type { FullAccountState, GetResult, TransactionId } from '../types/toncenter/api';
+import type { JettonInfo, ToncenterEmulationResponse } from '../types';
+import type { RawStackItem } from '../utils/tvmStack';
+import type {
     ApiClient,
     GetJettonsByOwnerRequest,
     GetJettonsByAddressRequest,
@@ -25,19 +26,20 @@ import {
     GetEventsResponse,
     GetEventsRequest,
 } from '../types/toncenter/ApiClient';
-import { NftItemsResponseV3, toNftItemsResponse } from '../types/toncenter/v3/NftItemsResponseV3';
-import {
+import type { NftItemsResponseV3 } from '../types/toncenter/v3/NftItemsResponseV3';
+import { toNftItemsResponse } from '../types/toncenter/v3/NftItemsResponseV3';
+import type {
     ToncenterResponseJettonMasters,
     ToncenterResponseJettonWallets,
     ToncenterTracesResponse,
     ToncenterTransactionsResponse,
     EmulationTokenInfoMasters,
-    toTransactionEmulatedTrace,
-    toTransactionsResponse,
 } from '../types/toncenter/emulation';
+import { toTransactionEmulatedTrace, toTransactionsResponse } from '../types/toncenter/emulation';
 import { CallForSuccess } from '../utils/retry';
 import { globalLogger } from './Logger';
-import { DNSRecordsResponseV3, toDnsRecords } from '../types/toncenter/v3/DNSRecordsResponseV3';
+import type { DNSRecordsResponseV3 } from '../types/toncenter/v3/DNSRecordsResponseV3';
+import { toDnsRecords } from '../types/toncenter/v3/DNSRecordsResponseV3';
 import {
     DnsCategory,
     dnsResolve,
@@ -45,7 +47,7 @@ import {
     ROOT_DNS_RESOLVER_TESTNET,
 } from '../types/toncenter/dnsResolve';
 import { toAddressBook, toEvent } from '../types/toncenter/AccountEvent';
-import {
+import type {
     Base64String,
     Jetton,
     JettonsResponse,

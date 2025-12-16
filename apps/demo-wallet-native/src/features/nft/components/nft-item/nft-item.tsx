@@ -8,7 +8,8 @@
 
 import type { NFT } from '@ton/walletkit';
 import { formatAddress } from '@ton/demo-core';
-import { type FC, memo } from 'react';
+import { memo } from 'react';
+import type { FC } from 'react';
 import { Image, TouchableOpacity, View } from 'react-native';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 import { Ionicons } from '@expo/vector-icons';

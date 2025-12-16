@@ -8,7 +8,8 @@
 
 import { useNfts, useWallet } from '@ton/demo-core';
 import type { NFT } from '@ton/walletkit';
-import { type FC, useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type { FC } from 'react';
 import { View } from 'react-native';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 import { LegendList } from '@legendapp/list';

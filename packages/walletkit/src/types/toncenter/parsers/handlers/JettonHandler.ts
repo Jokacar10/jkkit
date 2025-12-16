@@ -11,22 +11,23 @@
  * Processes jetton transfer and internal transfer messages
  */
 
-import { BaseMessageHandler, MessageHandlerContext } from '../messageHandler';
+import type { MessageHandlerContext } from '../messageHandler';
+import { BaseMessageHandler } from '../messageHandler';
 import { MessageType } from '../opcodes';
-import { DecodedMessage } from '../messageDecoder';
-import {
+import type { DecodedMessage } from '../messageDecoder';
+import type {
     Action,
     JettonTransferAction,
-    toAccount,
     StatusAction,
     SimplePreview,
     Account,
     AddressBook,
 } from '../../AccountEvent';
-import { ToncenterTraceItem, ToncenterTransaction } from '../../emulation';
+import { toAccount } from '../../AccountEvent';
+import type { ToncenterTraceItem, ToncenterTransaction } from '../../emulation';
 import { asAddressFriendly } from '../../../primitive';
 import { Base64ToHex } from '../../../../utils/base64';
-import { Hex } from '../../../../api/models';
+import type { Hex } from '../../../../api/models';
 
 /**
  * Jetton Transfer Handler

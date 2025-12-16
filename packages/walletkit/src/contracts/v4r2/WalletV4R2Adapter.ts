@@ -8,33 +8,34 @@
 
 // WalletV4R2 Ledger adapter that implements WalletInterface
 
+import type { StateInit, MessageRelaxed } from '@ton/core';
 import {
     Address,
     beginCell,
     Cell,
     loadStateInit,
     SendMode,
-    StateInit,
     storeMessage,
     storeStateInit,
     external,
-    MessageRelaxed,
     internal,
 } from '@ton/core';
 
-import { WalletV4R2, WalletV4R2Config } from './WalletV4R2';
+import type { WalletV4R2Config } from './WalletV4R2';
+import { WalletV4R2 } from './WalletV4R2';
 import { WalletV4R2CodeCell } from './WalletV4R2.source';
 import { defaultWalletIdV4R2 } from './constants';
-import { ApiClient } from '../../types/toncenter/ApiClient';
+import type { ApiClient } from '../../types/toncenter/ApiClient';
 import { HexToBigInt, HexToUint8Array } from '../../utils/base64';
 import { formatWalletAddress } from '../../utils/address';
 import { CallForSuccess } from '../../utils/retry';
 import { CreateTonProofMessageBytes } from '../../utils/tonProof';
 import { globalLogger } from '../../core/Logger';
-import { WalletV4R2AdapterConfig } from './types';
-import { createWalletId, WalletId } from '../../utils/walletId';
-import { WalletAdapter, WalletSigner } from '../../api/interfaces';
-import {
+import type { WalletV4R2AdapterConfig } from './types';
+import type { WalletId } from '../../utils/walletId';
+import { createWalletId } from '../../utils/walletId';
+import type { WalletAdapter, WalletSigner } from '../../api/interfaces';
+import type {
     Network,
     PreparedSignData,
     ProofMessage,

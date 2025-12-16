@@ -6,9 +6,11 @@
  *
  */
 
-import { type JettonInfo, Network } from '@ton/walletkit';
+import { Network } from '@ton/walletkit';
+import type { JettonInfo } from '@ton/walletkit';
 import { Address } from '@ton/core';
-import { type FC, useState, useEffect, memo } from 'react';
+import { useState, useEffect, memo } from 'react';
+import type { FC } from 'react';
 import { View, Image } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import type { ITonWalletKit } from '@ton/walletkit';

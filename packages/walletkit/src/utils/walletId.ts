@@ -10,7 +10,7 @@
 
 import { CHAIN } from '@tonconnect/protocol';
 
-import { Network } from '../api/models/core/Network';
+import type { Network } from '../api/models/core/Network';
 
 /**
  * Wallet ID format: "network:address"

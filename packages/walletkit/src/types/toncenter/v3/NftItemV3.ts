@@ -10,7 +10,7 @@ import type { NFTCollectionV3 } from './NFTCollectionV3';
 import { asAddressFriendly, asMaybeAddressFriendly } from '../../primitive';
 import { toNftCollection } from './NFTCollectionV3';
 import { Base64ToHex } from '../../../utils/base64';
-import { NFT } from '../../../api/models';
+import type { NFT } from '../../../api/models';
 
 export interface NftItemV3 {
     address: string;

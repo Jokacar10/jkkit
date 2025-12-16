@@ -8,17 +8,8 @@
 
 // WalletV5R1 adapter that implements WalletInterface
 
-import {
-    Address,
-    beginCell,
-    Cell,
-    Dictionary,
-    loadStateInit,
-    SendMode,
-    StateInit,
-    storeMessage,
-    storeStateInit,
-} from '@ton/core';
+import type { StateInit } from '@ton/core';
+import { Address, beginCell, Cell, Dictionary, loadStateInit, SendMode, storeMessage, storeStateInit } from '@ton/core';
 import { external, internal } from '@ton/core';
 
 import { WalletV5, WalletV5R1Id } from './WalletV5R1';
@@ -29,12 +20,13 @@ import { FakeSignature } from '../../utils/sign';
 import { formatWalletAddress } from '../../utils/address';
 import { CallForSuccess } from '../../utils/retry';
 import { ActionSendMsg, packActionsList } from './actions';
-import { ApiClient } from '../../types/toncenter/ApiClient';
+import type { ApiClient } from '../../types/toncenter/ApiClient';
 import { HexToBigInt, HexToUint8Array } from '../../utils/base64';
 import { CreateTonProofMessageBytes } from '../../utils/tonProof';
-import { createWalletId, WalletId } from '../../utils/walletId';
-import { WalletAdapter, WalletSigner } from '../../api/interfaces';
-import {
+import type { WalletId } from '../../utils/walletId';
+import { createWalletId } from '../../utils/walletId';
+import type { WalletAdapter, WalletSigner } from '../../api/interfaces';
+import type {
     Network,
     PreparedSignData,
     ProofMessage,

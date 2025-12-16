@@ -9,7 +9,8 @@
 import { Address } from '@ton/ton';
 import type { Jetton, TONTransferRequest } from '@ton/walletkit';
 import { router } from 'expo-router';
-import { type FC, useState } from 'react';
+import { useState } from 'react';
+import type { FC } from 'react';
 import { Alert, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import { useWallet, useWalletKit } from '@ton/demo-core';

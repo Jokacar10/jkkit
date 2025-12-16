@@ -9,19 +9,21 @@
 // Request approval and rejection processing
 
 import { Address } from '@ton/core';
-import {
-    CHAIN,
-    CONNECT_EVENT_ERROR_CODES,
+import type {
     ConnectEventError,
     ConnectEventSuccess,
-    SEND_TRANSACTION_ERROR_CODES,
     SendTransactionRpcResponseError,
     SendTransactionRpcResponseSuccess,
-    SIGN_DATA_ERROR_CODES,
     SignDataRpcResponseError,
     SignDataRpcResponseSuccess,
     TonProofItemReplySuccess,
     SignDataPayload as TonConnectSignDataPayload,
+} from '@tonconnect/protocol';
+import {
+    CHAIN,
+    CONNECT_EVENT_ERROR_CODES,
+    SEND_TRANSACTION_ERROR_CODES,
+    SIGN_DATA_ERROR_CODES,
 } from '@tonconnect/protocol';
 import { getSecureRandomBytes } from '@ton/crypto';
 
@@ -29,19 +31,19 @@ import type { EventSignDataApproval, TonWalletKitOptions } from '../types';
 import type { SessionManager } from './SessionManager';
 import type { BridgeManager } from './BridgeManager';
 import { globalLogger } from './Logger';
-import { createTonProofMessage } from '../utils/tonProof';
+import { CreateTonProofMessage } from '../utils/tonProof';
 import { CallForSuccess } from '../utils/retry';
 import { getDeviceInfoWithDefaults } from '../utils/getDefaultWalletConfig';
-import { WalletManager } from './WalletManager';
-import { EventConnectApproval, EventTransactionApproval } from '../types/events';
-import { AnalyticsApi } from '../analytics/sender';
+import type { WalletManager } from './WalletManager';
+import type { EventConnectApproval, EventTransactionApproval } from '../types/events';
+import type { AnalyticsApi } from '../analytics/sender';
 import { WalletKitError, ERROR_CODES } from '../errors';
 import { uuidv7 } from '../utils/uuid';
 import { getUnixtime } from '../utils/time';
 import { getEventsSubsystem, getVersion } from '../utils/version';
 import { Base64Normalize, Base64ToHex, HexToBase64 } from '../utils/base64';
 import { getAddressFromWalletId } from '../utils/walletId';
-import {
+import type {
     TransactionRequest,
     SignDataPayload,
     TransactionRequestEvent,
@@ -51,7 +53,7 @@ import {
     SignDataApprovalResponse,
 } from '../api/models';
 import { PrepareSignData } from '../utils/signData/sign';
-import { Wallet } from '../api/interfaces';
+import type { Wallet } from '../api/interfaces';
 
 const log = globalLogger.createChild('RequestProcessor');
 
@@ -814,7 +816,7 @@ export class RequestProcessor {
             // const walletKeyPair = secretKeyToED25519(decryptedData.seed);
 
             const timestamp = Math.floor(Date.now() / 1000);
-            const signMessage = createTonProofMessage({
+            const signMessage = CreateTonProofMessage({
                 address: Address.parse(address),
                 domain,
                 payload: proofItem.value.payload,

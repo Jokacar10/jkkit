@@ -9,15 +9,17 @@
 // Jettons API Manager - handles jetton information caching and retrieval
 
 import { Address } from '@ton/core';
-import { CHAIN } from '@tonconnect/protocol';
+import type { CHAIN } from '@tonconnect/protocol';
 import { LRUCache } from 'lru-cache';
 
 import type { EmulationTokenInfoMasters } from '../types/toncenter/emulation';
 import { globalLogger } from './Logger';
-import { EventEmitter } from './EventEmitter';
-import { JettonInfo, JettonError, JettonErrorCode, JettonsAPI } from '../types/jettons';
-import { NetworkManager } from './NetworkManager';
-import { Jetton, Network } from '../api/models';
+import type { EventEmitter } from './EventEmitter';
+import type { JettonInfo, JettonsAPI } from '../types/jettons';
+import { JettonError, JettonErrorCode } from '../types/jettons';
+import type { NetworkManager } from './NetworkManager';
+import type { Jetton } from '../api/models';
+import { Network } from '../api/models';
 
 const log = globalLogger.createChild('JettonsManager');
 

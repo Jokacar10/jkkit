@@ -7,7 +7,7 @@
  */
 
 import { Cell, loadMessage } from '@ton/core';
-import { CommonMessageInfoExternalIn } from '@ton/core/src/types/CommonMessageInfo';
+import type { CommonMessageInfoExternalIn } from '@ton/core/src/types/CommonMessageInfo';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { clearAllMocks, mocked } from '../../../mock.config';

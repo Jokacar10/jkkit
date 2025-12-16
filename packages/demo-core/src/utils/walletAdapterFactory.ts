@@ -6,19 +6,17 @@
  *
  */
 
+import type { WalletAdapter, WalletSigner } from '@ton/walletkit';
 import {
     WalletV5R1Adapter,
     WalletV4R2Adapter,
     DefaultSignature,
-    type ITonWalletKit,
     MnemonicToKeyPair,
     Uint8ArrayToHex,
-    type ToncenterTransaction,
-    WalletAdapter,
-    WalletSigner,
     Network,
     Signer,
 } from '@ton/walletkit';
+import type { ITonWalletKit, ToncenterTransaction } from '@ton/walletkit';
 import { createWalletInitConfigLedger, createLedgerPath, createWalletV4R2Ledger } from '@ton/v4ledger-adapter';
 import TransportWebHID from '@ledgerhq/hw-transport-webhid';
 

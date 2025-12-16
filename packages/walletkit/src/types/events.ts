@@ -10,8 +10,8 @@
 
 import type { ConnectEventSuccess } from '@tonconnect/protocol';
 
-import { EventApprovalBase } from './internal';
-import { SignDataPayload } from '../api/models';
+import type { EventApprovalBase } from './internal';
+import type { SignDataPayload } from '../api/models';
 
 export interface EventConnectApproval extends EventApprovalBase {
     result: ConnectApproval;

@@ -6,7 +6,8 @@
  *
  */
 
-import { TonWalletKit, CHAIN, type ITonWalletKit, createDeviceInfo, createWalletManifest } from '@ton/walletkit';
+import { TonWalletKit, CHAIN, createDeviceInfo, createWalletManifest } from '@ton/walletkit';
+import type { ITonWalletKit } from '@ton/walletkit';
 
 import { createComponentLogger } from '../../utils/logger';
 import { isExtension } from '../../utils/isExtension';

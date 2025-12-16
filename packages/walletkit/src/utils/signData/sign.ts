@@ -10,7 +10,7 @@ import { Address } from '@ton/core';
 
 import { createTextBinaryHash, createCellHash } from './hash';
 import { Uint8ArrayToHex } from '../base64';
-import { PreparedSignData, UnpreparedSignData } from '../../api/models';
+import type { PreparedSignData, UnpreparedSignData } from '../../api/models';
 
 /**
  * Signs data according to TON Connect sign-data protocol.

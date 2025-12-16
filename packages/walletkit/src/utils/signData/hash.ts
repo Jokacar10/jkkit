@@ -6,11 +6,12 @@
  *
  */
 
-import { Address, beginCell, Cell } from '@ton/core';
+import type { Address } from '@ton/core';
+import { beginCell, Cell } from '@ton/core';
 import { sha256_sync } from '@ton/crypto';
 
 import { buf as crc32Buf } from './crc32';
-import { SignData, SignDataCell } from '../../api/models';
+import type { SignData, SignDataCell } from '../../api/models';
 
 /**
  * Creates hash for text or binary payload.

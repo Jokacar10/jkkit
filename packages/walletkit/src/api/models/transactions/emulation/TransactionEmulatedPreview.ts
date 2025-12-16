@@ -6,9 +6,9 @@
  *
  */
 
-import { ResultError, Result } from '../../core/Primitives';
-import { TransactionEmulatedTrace } from './TransactionEmulatedTrace';
-import { TransactionTraceMoneyFlow } from '../TransactionTraceMoneyFlow';
+import type { ResultError, Result } from '../../core/Primitives';
+import type { TransactionEmulatedTrace } from './TransactionEmulatedTrace';
+import type { TransactionTraceMoneyFlow } from '../TransactionTraceMoneyFlow';
 
 /**
  * Preview of an emulated transaction showing expected outcome.

@@ -6,15 +6,12 @@
  *
  */
 
-import { TonProofItemReplySuccess } from '@tonconnect/protocol';
-import { Wallet } from '@tonconnect/sdk';
-// import { createHash } from 'crypto'
-import { Address } from '@ton/core';
+import type { Address } from '@ton/core';
 import { sha256_sync } from '@ton/crypto';
 import { ed25519 } from '@noble/curves/ed25519';
 
-import { Base64ToHex, HexToUint8Array, Uint8ArrayToHex } from './base64';
-import { Base64String, ProofMessage, Hex } from '../api/models';
+import { HexToUint8Array, Uint8ArrayToHex } from './base64';
+import type { Base64String, ProofMessage, Hex } from '../api/models';
 
 interface Domain {
     lengthBytes: number; // uint32 `json:"lengthBytes"`
@@ -66,25 +63,7 @@ export async function CreateTonProofMessageBytes(message: ProofMessage): Promise
     return Buffer.from(res);
 }
 
-export function ConvertTonProofMessage(walletInfo: Wallet, tp: TonProofItemReplySuccess): ProofMessage {
-    const address = Address.parse(walletInfo.account.address);
-
-    const res: ProofMessage = {
-        workchain: address.workChain,
-        addressHash: Uint8ArrayToHex(address.hash),
-        domain: {
-            lengthBytes: tp.proof.domain.lengthBytes,
-            value: tp.proof.domain.value,
-        },
-        signature: Base64ToHex(tp.proof.signature),
-        payload: tp.proof.payload,
-        stateInit: walletInfo.account.walletStateInit,
-        timestamp: tp.proof.timestamp,
-    };
-    return res;
-}
-
-export function createTonProofMessage({
+export function CreateTonProofMessage({
     address,
     domain,
     payload,

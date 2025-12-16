@@ -6,9 +6,9 @@
  *
  */
 
-import { TokenAmount } from '../core/TokenAmount';
-import { UserFriendlyAddress } from '../core/Primitives';
-import { AssetType } from '../core/AssetType';
+import type { TokenAmount } from '../core/TokenAmount';
+import type { UserFriendlyAddress } from '../core/Primitives';
+import type { AssetType } from '../core/AssetType';
 
 /**
  * Summary of token flows for a transaction.

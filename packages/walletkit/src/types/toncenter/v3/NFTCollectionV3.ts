@@ -8,7 +8,7 @@
 
 import { asAddressFriendly, asMaybeAddressFriendly } from '../../primitive';
 import { Base64ToHex } from '../../../utils/base64';
-import { NFTCollection } from '../../../api/models';
+import type { NFTCollection } from '../../../api/models';
 
 export interface NFTCollectionV3 {
     address: string;

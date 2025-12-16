@@ -6,7 +6,8 @@
  *
  */
 
-import { type NFT, type NftItem, NFTsResponse } from '@ton/walletkit';
+import type { NFTsResponse } from '@ton/walletkit';
+import type { NFT, NftItem } from '@ton/walletkit';
 
 import { createComponentLogger } from '../../utils/logger';
 import type { SetState, NftsSliceCreator } from '../../types/store';

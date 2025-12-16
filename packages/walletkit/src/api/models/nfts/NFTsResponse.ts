@@ -6,8 +6,8 @@
  *
  */
 
-import { AddressBook } from '../core/AddressBook';
-import { NFT } from './NFT';
+import type { AddressBook } from '../core/AddressBook';
+import type { NFT } from './NFT';
 
 /**
  * Response containing a list of NFT tokens.

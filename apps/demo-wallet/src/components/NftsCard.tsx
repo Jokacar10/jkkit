@@ -63,15 +63,15 @@ export const NftsCard: React.FC<NftsCardProps> = ({ className = '' }) => {
     };
 
     const getNftName = (nft: NFT): string => {
-        if (!nft?.info?.name || !nft?.index) {
-            return '';
-        }
-
-        if (nft?.info?.name) {
+        if (nft.info?.name) {
             return nft.info.name;
         }
 
-        return `NFT ${formatNftIndex(nft.index)}`;
+        if (nft.index) {
+            return `NFT ${formatNftIndex(nft.index)}`;
+        }
+
+        return '';
     };
 
     const getNftDescription = (nft: NFT): string | null => {

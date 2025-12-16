@@ -11,18 +11,18 @@ import { beginCell } from '@ton/core';
 import { isValidAddress } from '../../../utils/address';
 import { isValidNanotonAmount, validateTransactionMessage } from '../../../validation';
 import { CallForSuccess } from '../../../utils/retry';
-import { ApiClient } from '../../../types/toncenter/ApiClient';
+import type { ApiClient } from '../../../types/toncenter/ApiClient';
 import { createTransactionPreview as createTransactionPreviewHelper } from '../../../utils/toncenterEmulation';
 import { ERROR_CODES, WalletKitError } from '../../../errors';
 import { globalLogger } from '../../Logger';
-import {
+import type {
     TONTransferRequest,
     TransactionEmulatedPreview,
     TransactionRequest,
     TransactionRequestMessage,
     SendTransactionResponse,
 } from '../../../api/models';
-import { Wallet, WalletTonInterface } from '../../../api/interfaces';
+import type { Wallet, WalletTonInterface } from '../../../api/interfaces';
 
 const log = globalLogger.createChild('WalletTonClass');
 

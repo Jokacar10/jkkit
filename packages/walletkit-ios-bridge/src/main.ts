@@ -9,17 +9,9 @@
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import {
-    MemoryStorageAdapter,
-    Signer,
-    WalletV4R2Adapter,
-    WalletV5R1Adapter,
-    WalletSigner,
-    TonWalletKit,
-    BridgeEventMessageInfo,
-    InjectedToExtensionBridgeRequestPayload,
-    type WalletAdapter,
-} from '@ton/walletkit';
+import type { WalletSigner, BridgeEventMessageInfo, InjectedToExtensionBridgeRequestPayload } from '@ton/walletkit';
+import { MemoryStorageAdapter, Signer, WalletV4R2Adapter, WalletV5R1Adapter, TonWalletKit } from '@ton/walletkit';
+import type { WalletAdapter } from '@ton/walletkit';
 
 import { SwiftStorageAdapter } from './SwiftStorageAdapter';
 import { SwiftWalletAdapter } from './SwiftWalletAdapter';

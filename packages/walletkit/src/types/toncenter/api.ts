@@ -6,10 +6,10 @@
  *
  */
 
-import { AccountStatus, ExtraCurrency } from '@ton/core';
+import type { AccountStatus, ExtraCurrency } from '@ton/core';
 
-import { RawStackItem } from '../../utils/tvmStack';
-import { Hex } from '../../api/models';
+import type { RawStackItem } from '../../utils/tvmStack';
+import type { Hex } from '../../api/models';
 
 export interface TransactionId {
     lt: string;

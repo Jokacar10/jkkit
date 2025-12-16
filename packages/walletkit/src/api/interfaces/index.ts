@@ -6,7 +6,6 @@
  *
  */
 
-export { Wallet, WalletTonInterface, WalletNftInterface, WalletJettonInterface } from './Wallet';
-export { TonWalletKit } from '../../core/TonWalletKit';
-export { WalletAdapter } from './WalletAdapter';
-export { WalletSigner, ISigner } from './WalletSigner';
+export type { Wallet, WalletTonInterface, WalletNftInterface, WalletJettonInterface } from './Wallet';
+export type { WalletAdapter } from './WalletAdapter';
+export type { WalletSigner, ISigner } from './WalletSigner';

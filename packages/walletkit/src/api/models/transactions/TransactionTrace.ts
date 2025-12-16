@@ -6,10 +6,10 @@
  *
  */
 
-import { UserFriendlyAddress, Hex, LogicalTime } from '../core/Primitives';
-import { ExtraCurrencies } from '../core/ExtraCurrencies';
-import { TokenAmount } from '../core/TokenAmount';
-import { Transaction } from './Transaction';
+import type { UserFriendlyAddress, Hex, LogicalTime } from '../core/Primitives';
+import type { ExtraCurrencies } from '../core/ExtraCurrencies';
+import type { TokenAmount } from '../core/TokenAmount';
+import type { Transaction } from './Transaction';
 
 /**
  * Trace of a transaction execution showing the full message chain.

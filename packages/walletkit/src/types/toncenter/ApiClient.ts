@@ -6,13 +6,13 @@
  *
  */
 
-import { Address } from '@ton/core';
+import type { Address } from '@ton/core';
 
 import type { ToncenterResponseJettonMasters, ToncenterTracesResponse } from './emulation';
 import type { FullAccountState, GetResult } from './api';
-import { RawStackItem } from '../../utils/tvmStack';
-import { Event } from './AccountEvent';
-import {
+import type { RawStackItem } from '../../utils/tvmStack';
+import type { Event } from './AccountEvent';
+import type {
     Base64String,
     UserNFTsRequest,
     NFTsRequest,
