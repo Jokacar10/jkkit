@@ -61,7 +61,7 @@ import type {
     UserFriendlyAddress,
     UserNFTsRequest,
 } from '../api/models';
-import { asAddressFriendly } from '../types/primitive';
+import { asAddressFriendly } from '../utils/address';
 
 const log = globalLogger.createChild('ApiClientToncenter');
 
