@@ -10,8 +10,9 @@ import React, { memo, useEffect, useMemo, useState } from 'react';
 import { Network } from '@ton/walletkit';
 import type { EventTransactionRequest, JettonInfo, TransactionTraceMoneyFlowItem } from '@ton/walletkit';
 import { Address } from '@ton/core';
-import { useWalletKit, useAuth, useWalletStore } from '@ton/demo-core';
+import { useWalletKit, useAuth, useWalletStore, useTransactionRequests } from '@ton/demo-core';
 import type { SavedWallet } from '@ton/demo-core';
+import { toast } from 'sonner';
 
 import { Button } from './Button';
 import { Card } from './Card';
@@ -28,20 +29,13 @@ interface TransactionRequestModalProps {
     request: EventTransactionRequest;
     savedWallets: SavedWallet[];
     isOpen: boolean;
-    onApprove: () => void;
-    onReject: (reason?: string) => void;
 }
 
-export const TransactionRequestModal: React.FC<TransactionRequestModalProps> = ({
-    request,
-    savedWallets,
-    isOpen,
-    onApprove,
-    onReject,
-}) => {
+export const TransactionRequestModal: React.FC<TransactionRequestModalProps> = ({ request, savedWallets, isOpen }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
     const { holdToSign } = useAuth();
+    const { approveTransactionRequest, rejectTransactionRequest } = useTransactionRequests();
 
     // Find the wallet being used for this transaction
     const currentWallet = useMemo(() => {
@@ -61,7 +55,7 @@ export const TransactionRequestModal: React.FC<TransactionRequestModalProps> = (
         setIsLoading(true);
         try {
             // First, perform the actual signing operation
-            await onApprove();
+            await approveTransactionRequest();
 
             // If successful, show success animation
             setIsLoading(false);
@@ -71,12 +65,15 @@ export const TransactionRequestModal: React.FC<TransactionRequestModalProps> = (
             // But we keep showing the success state for visual feedback
         } catch (error) {
             log.error('Failed to approve transaction:', error);
+            toast.error('Failed to approve transaction', {
+                description: (error as Error)?.message,
+            });
             setIsLoading(false);
         }
     };
 
     const handleReject = () => {
-        onReject('User rejected the transaction');
+        rejectTransactionRequest('User rejected the transaction');
     };
 
     if (!isOpen) return null;

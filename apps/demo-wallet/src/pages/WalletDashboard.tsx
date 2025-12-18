@@ -59,8 +59,7 @@ export const WalletDashboard: React.FC = () => {
         approveConnectRequest,
         rejectConnectRequest,
     } = useTonConnect();
-    const { pendingTransactionRequest, isTransactionModalOpen, approveTransactionRequest, rejectTransactionRequest } =
-        useTransactionRequests();
+    const { pendingTransactionRequest, isTransactionModalOpen } = useTransactionRequests();
     const { pendingSignDataRequest, isSignDataModalOpen, approveSignDataRequest, rejectSignDataRequest } =
         useSignDataRequests();
     const { error } = useTonWallet();
@@ -352,8 +351,6 @@ export const WalletDashboard: React.FC = () => {
                     request={pendingTransactionRequest}
                     savedWallets={savedWallets}
                     isOpen={isTransactionModalOpen}
-                    onApprove={approveTransactionRequest}
-                    onReject={rejectTransactionRequest}
                 />
             )}
 

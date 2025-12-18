@@ -156,38 +156,15 @@ export const createTonConnectSlice: TonConnectSliceCreator = (set: SetState, get
             throw new Error('WalletKit not initialized');
         }
 
-        try {
-            try {
-                await state.walletCore.walletKit.approveTransactionRequest(state.tonConnect.pendingTransactionRequest);
-                setTimeout(() => {
-                    set((state) => {
-                        state.tonConnect.pendingTransactionRequest = undefined;
-                        state.tonConnect.isTransactionModalOpen = false;
-                    });
+        await state.walletCore.walletKit.approveTransactionRequest(state.tonConnect.pendingTransactionRequest);
+        setTimeout(() => {
+            set((state) => {
+                state.tonConnect.pendingTransactionRequest = undefined;
+                state.tonConnect.isTransactionModalOpen = false;
+            });
 
-                    state.clearCurrentRequestFromQueue();
-                }, 3000);
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            } catch (error: any) {
-                log.error('Failed to approve transaction request:', state.tonConnect.pendingTransactionRequest);
-                if (error?.message?.toLocaleLowerCase()?.includes('ledger')) {
-                    toast.error('Could not approve transaction request with Ledger, please unlock it and open TON App');
-                } else {
-                    toast.error('Could not approve transaction request');
-                    setTimeout(() => {
-                        set((state) => {
-                            state.tonConnect.pendingTransactionRequest = undefined;
-                            state.tonConnect.isTransactionModalOpen = false;
-                        });
-
-                        state.clearCurrentRequestFromQueue();
-                    }, 3000);
-                }
-            }
-        } catch (error) {
-            log.error('Failed to approve transaction request:', error);
-            throw error;
-        }
+            state.clearCurrentRequestFromQueue();
+        }, 3000);
     },
 
     rejectTransactionRequest: async (reason?: string) => {
