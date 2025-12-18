@@ -6,13 +6,19 @@
  *
  */
 
+// Hooks
 export { useLedgerConnection } from './hooks/use-ledger-connection';
 export type {
     LedgerConnectionStatus,
     UseLedgerConnectionReturn,
     UseLedgerConnectionOptions,
 } from './hooks/use-ledger-connection';
+
+// Utils
 export type { LedgerDevice, ScanSubscription } from './utils/ledger-transport';
 export { scanLedgerDevices, connectToLedgerDevice, disconnectLedgerDevice } from './utils/ledger-transport';
 export { createBLELedgerTransportFactory } from './utils/create-ble-transport-factory';
 export type { LedgerDeviceStorage } from './utils/create-ble-transport-factory';
+
+// Components
+export { DeviceList, DeviceListItem, ScanningIndicator, LedgerInstructions, LedgerSettings } from './components';
