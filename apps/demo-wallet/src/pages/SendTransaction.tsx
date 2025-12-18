@@ -8,7 +8,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { asAddressFriendly } from '@ton/walletkit';
 import type { Jetton, TONTransferRequest } from '@ton/walletkit';
 import { useWallet, useJettons, useWalletKit } from '@ton/demo-core';
 
@@ -118,7 +117,7 @@ export const SendTransaction: React.FC = () => {
                 const nanoTonAmount = Math.floor(inputAmount * 1000000000).toString();
 
                 const tonTransferParams: TONTransferRequest = {
-                    recipientAddress: asAddressFriendly(recipient),
+                    recipientAddress: recipient,
                     transferAmount: nanoTonAmount,
                 };
                 const result = await currentWallet.createTransferTonTransaction(tonTransferParams);
@@ -149,7 +148,7 @@ export const SendTransaction: React.FC = () => {
 
                 // Create jetton transfer transaction
                 const jettonTransaction = await currentWallet.createTransferJettonTransaction({
-                    recipientAddress: asAddressFriendly(recipient),
+                    recipientAddress: recipient,
                     jettonAddress: selectedToken.data.address,
                     transferAmount: jettonAmount,
                 });

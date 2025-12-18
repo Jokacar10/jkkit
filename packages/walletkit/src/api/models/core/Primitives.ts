@@ -10,9 +10,7 @@
  * User-friendly TON address representation (e.g., "EQDtFpEwcFAEcRe5mLVh2N6C0x-_hJEM7W61_JLnSF74p4q2")
  */
 
-declare const userFriendlyAddressBrand: unique symbol;
-
-export type UserFriendlyAddress = string & { readonly [userFriendlyAddressBrand]: never };
+export type UserFriendlyAddress = string;
 
 /**
  * Hexadecimal string representation (e.g., "0x0a1b2c3d...")

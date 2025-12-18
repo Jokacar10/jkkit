@@ -24,7 +24,6 @@ import type {
     ProofMessage,
     UserFriendlyAddress,
 } from '@ton/walletkit';
-import { asAddressFriendly } from '@ton/walletkit';
 import {
     formatWalletAddress,
     CallForSuccess,
@@ -230,7 +229,7 @@ export class WalletV4R2LedgerAdapter implements WalletAdapter {
      */
     async isDeployed(): Promise<boolean> {
         try {
-            const state = await this.client.getAccountState(asAddressFriendly(this.getAddress()));
+            const state = await this.client.getAccountState(this.getAddress().toString());
             return state.status === 'active';
         } catch (error) {
             log.warn('Failed to check deployment status', { error });
