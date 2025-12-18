@@ -869,7 +869,6 @@ export class RequestProcessor {
         const validUntil = event.request.validUntil;
         if (validUntil) {
             const now = Math.floor(Date.now() / 1000);
-            const maxValidUntil = now + 600;
             if (validUntil < now) {
                 throw new WalletKitError(
                     ERROR_CODES.VALIDATION_ERROR,
@@ -877,10 +876,6 @@ export class RequestProcessor {
                     undefined,
                     { validUntil, currentTime: now },
                 );
-            } else if (validUntil > maxValidUntil) {
-                event.request.validUntil = maxValidUntil;
-            } else {
-                event.request.validUntil = validUntil;
             }
         }
 
