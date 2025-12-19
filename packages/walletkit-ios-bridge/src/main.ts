@@ -33,12 +33,17 @@ window.initWalletKit = async (configuration, storage, bridgeTransport) => {
         bridgeTransport({ sessionID, messageID: message.messageId, message });
     };
 
+    const networks = {};
+    if (configuration.networkConfigurations) {
+        for (const netConfig of configuration.networkConfigurations) {
+            networks[netConfig.network.chainId] = {
+                apiClient: netConfig.apiClient,
+            };
+        }
+    }
+
     const walletKit = new TonWalletKit({
-        networks: {
-            [configuration.network]: {
-                apiClient: configuration.apiClient,
-            },
-        },
+        networks,
         walletManifest: configuration.walletManifest,
         deviceInfo: configuration.deviceInfo,
         bridge: configuration.bridge,
@@ -142,7 +147,7 @@ window.initWalletKit = async (configuration, storage, bridgeTransport) => {
             console.log('➕ Bridge: Creating V4R2 wallet using mnemonic');
 
             const configuredNetworks = walletKit.getConfiguredNetworks();
-            const network = configuredNetworks[parameters.network];
+            const network = configuredNetworks.find((net) => net.chainId === parameters.network.chainId);
 
             if (!network) {
                 throw new Error('Network is required to create V4R2 wallet');
@@ -150,7 +155,7 @@ window.initWalletKit = async (configuration, storage, bridgeTransport) => {
 
             return await WalletV4R2Adapter.create(this.jsSigner(signer), {
                 client: walletKit.getApiClient(network),
-                network: parameters.network,
+                network: network,
             });
         },
 
@@ -160,15 +165,15 @@ window.initWalletKit = async (configuration, storage, bridgeTransport) => {
             console.log('➕ Bridge: Creating V5R1 wallet using mnemonic');
 
             const configuredNetworks = walletKit.getConfiguredNetworks();
-            const network = configuredNetworks[parameters.network];
+            const network = configuredNetworks.find((net) => net.chainId === parameters.network.chainId);
 
             if (!network) {
-                throw new Error('Network is required to create V4R2 wallet');
+                throw new Error('Network is required to create V5R1 wallet');
             }
 
             return await WalletV5R1Adapter.create(this.jsSigner(signer), {
                 client: walletKit.getApiClient(network),
-                network: parameters.network,
+                network: network,
             });
         },
 
@@ -210,7 +215,7 @@ window.initWalletKit = async (configuration, storage, bridgeTransport) => {
 
         jsWalletAdapter(walletAdapter): WalletAdapter {
             if (isSwiftObject(walletAdapter)) {
-                return new SwiftWalletAdapter(walletAdapter, walletKit.getApiClient());
+                return new SwiftWalletAdapter(walletAdapter, walletKit.getApiClient(walletAdapter.getNetwork()));
             }
             return walletAdapter;
         },
@@ -348,7 +353,7 @@ window.initWalletKit = async (configuration, storage, bridgeTransport) => {
             console.log('✅ Bridge: Approving sign data request:', request);
 
             try {
-                const result = await walletKit.signDataRequest(request);
+                const result = await walletKit.approveSignDataRequest(request);
                 console.log('✅ Sign data request approved:', result);
                 return result;
             } catch (error) {

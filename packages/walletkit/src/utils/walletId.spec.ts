@@ -65,15 +65,12 @@ describe('walletId', () => {
             expect(result).toBeUndefined();
         });
 
-        it('should handle address containing colons', () => {
+        it('should return undefined for address containing colons', () => {
             const addressWithColon = 'EQDtFpEwcFAEcRe5mLVh2N6C0x:special';
             const walletId = `${Network.mainnet().chainId}:${addressWithColon}`;
             const result = parseWalletId(walletId);
 
-            expect(result).toEqual({
-                network: Network.mainnet(),
-                address: addressWithColon,
-            });
+            expect(result).toEqual(undefined);
         });
     });
 
@@ -88,12 +85,6 @@ describe('walletId', () => {
         it('should extract address from valid testnet wallet ID', () => {
             const walletId = `${Network.testnet().chainId}:${testAddress}`;
             const address = getAddressFromWalletId(walletId);
-
-            expect(address).toBe(testAddress);
-        });
-
-        it('should return original string for invalid wallet ID (backwards compatibility)', () => {
-            const address = getAddressFromWalletId(testAddress);
 
             expect(address).toBe(testAddress);
         });

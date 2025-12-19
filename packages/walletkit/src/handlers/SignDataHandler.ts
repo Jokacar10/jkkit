@@ -11,7 +11,7 @@
 import type { SignDataPayload as TonConnectSignDataPayload } from '@tonconnect/protocol';
 import { parseTLB } from '@ton-community/tlb-runtime';
 
-import type { EventSignDataRequest, SignDataPreview, TonWalletKitOptions } from '../types';
+import type { TonWalletKitOptions } from '../types';
 import type { RawBridgeEvent, EventHandler, RawBridgeEventSignData } from '../types/internal';
 import { BasicHandler } from './BasicHandler';
 import { globalLogger } from '../core/Logger';
@@ -24,21 +24,22 @@ import { getEventsSubsystem, getVersion } from '../utils/version';
 import { Base64Normalize } from '../utils/base64';
 import type { WalletManager } from '../core/WalletManager';
 import { getAddressFromWalletId } from '../utils/walletId';
-import type { SignDataPayload, SignData } from '../api/models';
+import type { SignDataPayload, SignData, SignDataRequestEvent, SignDataPreview, Base64String } from '../api/models';
 import { Network } from '../api/models';
+import { asMaybeAddressFriendly } from '../utils/address';
 
 const log = globalLogger.createChild('SignDataHandler');
 
 export class SignDataHandler
-    extends BasicHandler<EventSignDataRequest>
-    implements EventHandler<EventSignDataRequest, RawBridgeEventSignData>
+    extends BasicHandler<SignDataRequestEvent>
+    implements EventHandler<SignDataRequestEvent, RawBridgeEventSignData>
 {
     private analyticsApi?: AnalyticsApi;
     private walletKitConfig: TonWalletKitOptions;
     private walletManager: WalletManager;
 
     constructor(
-        notify: (event: EventSignDataRequest) => void,
+        notify: (event: SignDataRequestEvent) => void,
         walletKitConfig: TonWalletKitOptions,
         walletManager: WalletManager,
         analyticsApi?: AnalyticsApi,
@@ -53,7 +54,7 @@ export class SignDataHandler
         return event.method === 'signData';
     }
 
-    async handle(event: RawBridgeEventSignData): Promise<EventSignDataRequest> {
+    async handle(event: RawBridgeEventSignData): Promise<SignDataRequestEvent> {
         // Support both walletId (new) and walletAddress (legacy)
         const walletId = event.walletId;
         const walletAddress = event.walletAddress ?? (walletId ? getAddressFromWalletId(walletId) : undefined);
@@ -85,13 +86,16 @@ export class SignDataHandler
             );
         }
 
-        const signEvent: EventSignDataRequest = {
+        const signEvent: SignDataRequestEvent = {
             ...event,
-            request: payload,
-            preview,
+            payload: payload,
+            preview: {
+                dAppInfo: event.dAppInfo ?? {},
+                data: preview,
+            },
             dAppInfo: event.dAppInfo ?? {},
             walletId: walletId ?? (wallet ? this.walletManager.getWalletId(wallet) : ''),
-            walletAddress: walletAddress ?? wallet?.getAddress() ?? '',
+            walletAddress: walletAddress ?? wallet?.getAddress() ?? undefined,
         };
 
         // Send wallet-sign-data-request-received event
@@ -149,7 +153,7 @@ export class SignDataHandler
                 signData = {
                     type: 'binary',
                     value: {
-                        content: parsed.bytes,
+                        content: parsed.bytes as Base64String,
                     },
                 };
             } else if (parsed.type === 'cell') {
@@ -157,7 +161,7 @@ export class SignDataHandler
                     type: 'cell',
                     value: {
                         schema: parsed.schema,
-                        content: parsed.cell,
+                        content: parsed.cell as Base64String,
                     },
                 };
             } else {
@@ -166,7 +170,7 @@ export class SignDataHandler
 
             return {
                 network: parsed.network ? Network.custom(parsed.network) : undefined,
-                fromAddress: parsed.from,
+                fromAddress: asMaybeAddressFriendly(parsed.from) ?? undefined,
                 data: signData,
             };
         } catch (error) {
@@ -181,41 +185,44 @@ export class SignDataHandler
     private createDataPreview(data: SignData, _event: RawBridgeEvent): SignDataPreview | undefined {
         if (data.type === 'text') {
             return {
-                kind: 'text',
-                content: data.value.content,
+                type: 'text',
+                value: {
+                    content: data.value.content,
+                },
             };
         }
 
         if (data.type === 'binary') {
             return {
-                kind: 'binary',
-                content: data.value.content,
+                type: 'binary',
+                value: {
+                    content: data.value.content,
+                },
             };
         }
 
         if (data.type === 'cell') {
-            if (!data.value.schema) {
-                return {
-                    kind: 'cell',
-                    content: data.value.content,
-                };
-            }
             try {
                 const parsed = parseTLB(data.value.schema).deserialize(data.value.content) as unknown as Record<
                     string,
                     unknown
                 >;
                 return {
-                    kind: 'cell',
-                    schema: data.value.schema,
-                    content: data.value.content,
-                    parsed,
+                    type: 'cell',
+                    value: {
+                        schema: data.value.schema,
+                        content: data.value.content,
+                        parsed,
+                    },
                 };
             } catch (error) {
                 log.error('Error deserializing cell', { error });
                 return {
-                    kind: 'cell',
-                    content: data.value.content,
+                    type: 'cell',
+                    value: {
+                        schema: data.value.schema,
+                        content: data.value.content,
+                    },
                 };
             }
         }

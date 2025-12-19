@@ -25,7 +25,10 @@ if [ ! -d "$TYPESCRIPT_INPUT" ] && [ ! -f "$TYPESCRIPT_INPUT" ]; then
     exit 1
 fi
 
-# Step 2: Generate JSON Schema using custom generator (with x-enum-varnames)
+# Step 2: Ensure generated directory exists
+mkdir -p "$SCRIPT_DIR/generated"
+
+# Step 3: Generate JSON Schema using custom generator (with x-enum-varnames)
 echo "📝 Step 1: Generating JSON Schema with enum member names..."
 node "$SCRIPT_DIR/generate-json-schema.js" "$TYPESCRIPT_INPUT/**/*.ts" "$TEMP_SCHEMA" || {
     echo "❌ Failed to generate JSON Schema"
@@ -33,7 +36,7 @@ node "$SCRIPT_DIR/generate-json-schema.js" "$TYPESCRIPT_INPUT/**/*.ts" "$TEMP_SC
 }
 echo "✅ JSON Schema generated: $TEMP_SCHEMA"
 
-# Step 3: Convert JSON Schema to OpenAPI spec
+# Step 4: Convert JSON Schema to OpenAPI spec
 echo "📝 Step 2: Converting JSON Schema to OpenAPI spec..."
 
 # Check if @openapi-contrib/json-schema-to-openapi-schema is available

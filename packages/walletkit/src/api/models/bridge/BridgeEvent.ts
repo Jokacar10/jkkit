@@ -6,6 +6,7 @@
  *
  */
 
+import type { DAppInfo } from '../core/DAppInfo';
 import type { UserFriendlyAddress } from '../core/Primitives';
 
 /**
@@ -15,13 +16,17 @@ export interface BridgeEvent {
     /**
      * Unique identifier for the bridge event
      */
-    id?: string;
+    id: string;
 
     from?: string;
     /**
      * Wallet address associated with the event
      */
     walletAddress?: UserFriendlyAddress;
+    /**
+     * Wallet identifier associated with the event
+     */
+    walletId?: string;
     /**
      * Domain of the dApp that initiated the event
      */
@@ -33,7 +38,7 @@ export interface BridgeEvent {
     /**
      * Browser tab ID for JS Bridge events
      */
-    tabId?: number;
+    tabId?: string;
     /**
      * Session identifier for the connection
      */
@@ -41,4 +46,5 @@ export interface BridgeEvent {
     isLocal?: boolean;
     messageId?: string;
     traceId?: string;
+    dAppInfo?: DAppInfo;
 }

@@ -10,7 +10,7 @@ import { Address } from '@ton/core';
 import type { SendTransactionRpcResponseError, WalletResponseTemplateError } from '@tonconnect/protocol';
 import { CHAIN, SEND_TRANSACTION_ERROR_CODES } from '@tonconnect/protocol';
 
-import type { EventTransactionRequest, ValidationResult, TonWalletKitOptions } from '../types';
+import type { ValidationResult, TonWalletKitOptions } from '../types';
 import { toTransactionRequest } from '../types/internal';
 import type {
     RawBridgeEvent,
@@ -35,21 +35,21 @@ import { getUnixtime } from '../utils/time';
 import { Base64Normalize } from '../utils/base64';
 import { getAddressFromWalletId } from '../utils/walletId';
 import type { Wallet } from '../api/interfaces';
-import type { TransactionEmulatedPreview, TransactionRequest } from '../api/models';
+import type { TransactionEmulatedPreview, TransactionRequest, TransactionRequestEvent } from '../api/models';
 import { Result } from '../api/models';
 
 const log = globalLogger.createChild('TransactionHandler');
 
 export class TransactionHandler
-    extends BasicHandler<EventTransactionRequest>
-    implements EventHandler<EventTransactionRequest, RawBridgeEventTransaction>
+    extends BasicHandler<TransactionRequestEvent>
+    implements EventHandler<TransactionRequestEvent, RawBridgeEventTransaction>
 {
     private eventEmitter: EventEmitter;
     private analyticsApi?: AnalyticsApi;
     private walletKitConfig: TonWalletKitOptions;
 
     constructor(
-        notify: (event: EventTransactionRequest) => void,
+        notify: (event: TransactionRequestEvent) => void,
         eventEmitter: EventEmitter,
         walletKitConfig: TonWalletKitOptions,
         private readonly walletManager: WalletManager,
@@ -64,7 +64,7 @@ export class TransactionHandler
         return event.method === 'sendTransaction';
     }
 
-    async handle(event: RawBridgeEventTransaction): Promise<EventTransactionRequest | WalletResponseTemplateError> {
+    async handle(event: RawBridgeEventTransaction): Promise<TransactionRequestEvent | WalletResponseTemplateError> {
         // Support both walletId (new) and walletAddress (legacy)
         const walletId = event.walletId;
         const walletAddress = event.walletAddress ?? (walletId ? getAddressFromWalletId(walletId) : undefined);
@@ -130,10 +130,13 @@ export class TransactionHandler
             };
         }
 
-        const txEvent: EventTransactionRequest = {
+        const txEvent: TransactionRequestEvent = {
             ...event,
             request,
-            preview,
+            preview: {
+                dAppInfo: event.dAppInfo ?? {},
+                data: preview,
+            },
             dAppInfo: event.dAppInfo ?? {},
             walletId: walletId ?? this.walletManager.getWalletId(wallet),
             walletAddress: walletAddress ?? wallet.getAddress(),

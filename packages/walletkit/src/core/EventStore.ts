@@ -120,7 +120,7 @@ export class StorageEventStore implements EventStore {
     /**
      * Attempt to acquire exclusive lock on an event for processing
      */
-    async acquireLock(eventId: string, walletAddress: string): Promise<StoredEvent | undefined> {
+    async acquireLock(eventId: string, walletId: string): Promise<StoredEvent | undefined> {
         return this.withLock('storage', async () => {
             const allEvents = await this.getAllEventsFromStorage();
             const event = allEvents[eventId];
@@ -143,14 +143,14 @@ export class StorageEventStore implements EventStore {
                 ...event,
                 status: 'processing',
                 processingStartedAt: Date.now(),
-                lockedBy: walletAddress,
+                lockedBy: walletId,
             };
 
             // Save atomically within the lock
             allEvents[eventId] = updatedEvent;
             await this.storage.set(this.storageKey, allEvents);
 
-            log.debug('Event lock acquired', { eventId, walletAddress });
+            log.debug('Event lock acquired', { eventId, walletAddress: walletId });
             return updatedEvent;
         });
     }

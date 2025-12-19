@@ -9,15 +9,15 @@
 import type { StateCreator } from 'zustand';
 import type {
     Wallet,
-    EventConnectRequest,
-    EventTransactionRequest,
-    EventSignDataRequest,
-    EventDisconnect,
     JettonTransfer,
     JettonInfo,
     ITonWalletKit,
     NFT,
     Jetton,
+    ConnectionRequestEvent,
+    TransactionRequestEvent,
+    SignDataRequestEvent,
+    DisconnectionEvent,
 } from '@ton/walletkit';
 
 import type {
@@ -106,36 +106,36 @@ export interface WalletManagementSlice {
 export interface TonConnectSlice {
     tonConnect: {
         requestQueue: RequestQueue;
-        pendingConnectRequest?: EventConnectRequest;
+        pendingConnectRequest?: ConnectionRequestEvent;
         isConnectModalOpen: boolean;
-        pendingTransactionRequest?: EventTransactionRequest;
+        pendingTransactionRequest?: TransactionRequestEvent;
         isTransactionModalOpen: boolean;
-        pendingSignDataRequest?: EventSignDataRequest;
+        pendingSignDataRequest?: SignDataRequestEvent;
         isSignDataModalOpen: boolean;
         disconnectedSessions: DisconnectNotification[];
     };
 
     // TON Connect actions
     handleTonConnectUrl: (url: string) => Promise<void>;
-    showConnectRequest: (request: EventConnectRequest) => void;
+    showConnectRequest: (request: ConnectionRequestEvent) => void;
     approveConnectRequest: (selectedWallet: Wallet) => Promise<void>;
     rejectConnectRequest: (reason?: string) => Promise<void>;
     closeConnectModal: () => void;
 
     // Transaction request actions
-    showTransactionRequest: (request: EventTransactionRequest) => void;
+    showTransactionRequest: (request: TransactionRequestEvent) => void;
     approveTransactionRequest: () => Promise<void>;
     rejectTransactionRequest: (reason?: string) => Promise<void>;
     closeTransactionModal: () => void;
 
     // Sign data request actions
-    showSignDataRequest: (request: EventSignDataRequest) => void;
+    showSignDataRequest: (request: SignDataRequestEvent) => void;
     approveSignDataRequest: () => Promise<void>;
     rejectSignDataRequest: (reason?: string) => Promise<void>;
     closeSignDataModal: () => void;
 
     // Disconnect event actions
-    handleDisconnectEvent: (event: EventDisconnect) => void;
+    handleDisconnectEvent: (event: DisconnectionEvent) => void;
     clearDisconnectNotifications: () => void;
 
     // Queue management

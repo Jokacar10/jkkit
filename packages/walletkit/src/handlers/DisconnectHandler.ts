@@ -9,18 +9,18 @@
 // Disconnect event handler
 
 import type { SessionManager } from '../core/SessionManager';
-import type { EventDisconnect } from '../types';
 import type { RawBridgeEvent, EventHandler, RawBridgeEventDisconnect } from '../types/internal';
 import { BasicHandler } from './BasicHandler';
 import { WalletKitError, ERROR_CODES } from '../errors';
 import { getAddressFromWalletId } from '../utils/walletId';
+import type { DisconnectionEvent } from '../api/models';
 
 export class DisconnectHandler
-    extends BasicHandler<EventDisconnect>
-    implements EventHandler<EventDisconnect, RawBridgeEventDisconnect>
+    extends BasicHandler<DisconnectionEvent>
+    implements EventHandler<DisconnectionEvent, RawBridgeEventDisconnect>
 {
     constructor(
-        notify: (event: EventDisconnect) => void,
+        notify: (event: DisconnectionEvent) => void,
         private readonly sessionManager: SessionManager,
     ) {
         super(notify);
@@ -30,7 +30,7 @@ export class DisconnectHandler
         return event.method === 'disconnect';
     }
 
-    async handle(event: RawBridgeEventDisconnect): Promise<EventDisconnect> {
+    async handle(event: RawBridgeEventDisconnect): Promise<DisconnectionEvent> {
         // Support both walletId (new) and walletAddress (legacy)
         const walletId = event.walletId;
         const walletAddress = event.walletAddress ?? (walletId ? getAddressFromWalletId(walletId) : undefined);
@@ -43,8 +43,12 @@ export class DisconnectHandler
 
         const reason = this.extractDisconnectReason(event);
 
-        const disconnectEvent: EventDisconnect = {
-            reason,
+        const disconnectEvent: DisconnectionEvent = {
+            id: event.id,
+            preview: {
+                reason,
+                dAppInfo: event.dAppInfo ?? {},
+            },
             walletId: walletId ?? '',
             walletAddress: walletAddress,
             dAppInfo: event.dAppInfo ?? {},

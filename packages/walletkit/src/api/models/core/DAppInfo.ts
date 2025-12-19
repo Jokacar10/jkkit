@@ -31,4 +31,10 @@ export interface DAppInfo {
      * @format url
      */
     iconUrl?: string;
+
+    /**
+     * Manifest URL of the dApp
+     * @format url
+     */
+    manifestUrl?: string;
 }
