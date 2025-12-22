@@ -6,13 +6,13 @@
  *
  */
 
-import type { NftTransferMessage } from '@ton-community/assets-sdk';
-import { storeNftTransferMessage } from '@ton-community/assets-sdk';
+import type { Builder } from '@ton/core';
 import { Address, beginCell, Cell } from '@ton/core';
 
 import { validateTransactionMessage } from '../../../validation';
 import type { Wallet, WalletNftInterface } from '../../../api/interfaces';
 import type {
+    Base64String,
     NFT,
     NFTRawTransferRequest,
     NFTsRequest,
@@ -23,6 +23,28 @@ import type {
     UserFriendlyAddress,
 } from '../../../api/models';
 import { SendModeFlag } from '../../../api/models';
+import { OpCode } from '../../../types/toncenter/parsers';
+
+export type NftTransferMessage = {
+    queryId: bigint;
+    newOwner: Address;
+    responseDestination: Address | null;
+    customPayload: Cell | null;
+    forwardAmount: bigint;
+    forwardPayload: Cell | null;
+};
+
+export function storeNftTransferMessage(message: NftTransferMessage): (builder: Builder) => void {
+    return (builder) => {
+        builder.storeUint(Number(OpCode.NftTransfer), 32);
+        builder.storeUint(message.queryId, 64);
+        builder.storeAddress(message.newOwner);
+        builder.storeAddress(message.responseDestination);
+        builder.storeMaybeRef(message.customPayload);
+        builder.storeCoins(message.forwardAmount);
+        builder.storeMaybeRef(message.forwardPayload);
+    };
+}
 
 export class WalletNftClass implements WalletNftInterface {
     async getNfts(this: Wallet, params: NFTsRequest): Promise<NFTsResponse> {
@@ -64,8 +86,8 @@ export class WalletNftClass implements WalletNftInterface {
             .endCell();
         const message: TransactionRequestMessage = {
             address: nftTransferMessage.nftAddress,
-            amount: nftTransferMessage.transferAmount.toString(),
-            payload: nftPayload.toBoc().toString('base64'),
+            amount: nftTransferMessage.transferAmount?.toString() ?? '100000000', // Default 0.1 TON
+            payload: nftPayload.toBoc().toString('base64') as Base64String,
             stateInit: undefined,
             extraCurrency: undefined,
             mode: {
@@ -111,7 +133,7 @@ export class WalletNftClass implements WalletNftInterface {
         const message: TransactionRequestMessage = {
             address: params.nftAddress,
             amount: params.transferAmount.toString(),
-            payload: nftPayload.toBoc().toString('base64'),
+            payload: nftPayload.toBoc().toString('base64') as Base64String,
             stateInit: undefined,
             extraCurrency: undefined,
             mode: {

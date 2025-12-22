@@ -6,15 +6,16 @@
  *
  */
 
-import { storeJettonTransferMessage } from '@ton-community/assets-sdk';
+import type { Builder, Cell } from '@ton/core';
 import { Address, beginCell } from '@ton/core';
 
 import { validateTransactionMessage } from '../../../validation';
-import { isValidAddress } from '../../../utils/address';
+import { asAddressFriendly, isValidAddress } from '../../../utils/address';
 import { CallForSuccess } from '../../../utils/retry';
 import { ParseStack, SerializeStack } from '../../../utils/tvmStack';
 import type { Wallet, WalletJettonInterface } from '../../../api/interfaces';
 import type {
+    Base64String,
     JettonsRequest,
     JettonsResponse,
     JettonsTransferRequest,
@@ -24,6 +25,30 @@ import type {
     UserFriendlyAddress,
 } from '../../../api/models';
 import { SendModeFlag } from '../../../api/models';
+import { OpCode } from '../../../types/toncenter/parsers';
+
+export interface JettonTransferMessage {
+    queryId: bigint;
+    amount: bigint;
+    destination: Address;
+    responseDestination: Address | null;
+    customPayload: Cell | null;
+    forwardAmount: bigint;
+    forwardPayload: Cell | null;
+}
+
+export function storeJettonTransferMessage(src: JettonTransferMessage) {
+    return (builder: Builder) => {
+        builder.storeUint(Number(OpCode.JettonTransfer), 32);
+        builder.storeUint(src.queryId, 64);
+        builder.storeCoins(src.amount);
+        builder.storeAddress(src.destination);
+        builder.storeAddress(src.responseDestination);
+        builder.storeMaybeRef(src.customPayload);
+        builder.storeCoins(src.forwardAmount ?? 0);
+        builder.storeMaybeRef(src.forwardPayload);
+    };
+}
 
 export class WalletJettonClass implements WalletJettonInterface {
     async createTransferJettonTransaction(
@@ -70,7 +95,7 @@ export class WalletJettonClass implements WalletJettonInterface {
         const message: TransactionRequestMessage = {
             address: jettonWalletAddress,
             amount: '50000000', // 0.05 TON for gas fees
-            payload: jettonPayload.toBoc().toString('base64'),
+            payload: jettonPayload.toBoc().toString('base64') as Base64String,
             stateInit: undefined,
             extraCurrency: undefined,
             mode: {
@@ -131,7 +156,7 @@ export class WalletJettonClass implements WalletJettonInterface {
             if (!jettonWalletAddress) {
                 throw new Error('Failed to get jetton wallet address');
             }
-            return jettonWalletAddress.toString();
+            return asAddressFriendly(jettonWalletAddress.toString());
         } catch (error) {
             throw new Error(
                 `Failed to get jetton wallet address for ${jettonAddress}: ${

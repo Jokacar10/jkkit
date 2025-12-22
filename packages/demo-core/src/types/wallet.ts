@@ -7,11 +7,11 @@
  */
 
 import type {
-    EventConnectRequest,
-    EventTransactionRequest,
-    EventSignDataRequest,
+    ConnectionRequestEvent,
     JSBridgeTransportFunction,
     StorageAdapter as KitStorageAdapter,
+    SignDataRequestEvent,
+    TransactionRequestEvent,
 } from '@ton/walletkit';
 import type Transport from '@ledgerhq/hw-transport';
 
@@ -77,17 +77,17 @@ export interface QueueRequestBase {
 
 export interface QueuedRequestConnect {
     type: 'connect';
-    request: EventConnectRequest;
+    request: ConnectionRequestEvent;
 }
 
 export interface QueuedRequestTransaction {
     type: 'transaction';
-    request: EventTransactionRequest;
+    request: TransactionRequestEvent;
 }
 
 export interface QueuedRequestSignData {
     type: 'signData';
-    request: EventSignDataRequest;
+    request: SignDataRequestEvent;
 }
 
 export type QueuedRequestData = QueuedRequestConnect | QueuedRequestTransaction | QueuedRequestSignData;

@@ -10,21 +10,22 @@
 
 import type { CONNECT_EVENT_ERROR_CODES, SendTransactionRpcResponseError } from '@tonconnect/protocol';
 
-import type {
-    EventConnectRequest,
-    EventTransactionRequest,
-    EventSignDataRequest,
-    EventDisconnect,
-    EventRequestError,
-    EventSignDataResponse,
-    EventTransactionResponse,
-} from './events';
 import type { JettonsAPI } from './jettons';
 import type { ApiClient } from './toncenter/ApiClient';
 import type { Wallet, WalletAdapter } from '../api/interfaces';
 import type { Network } from '../api/models/core/Network';
 import type { WalletId } from '../utils/walletId';
-import type { TransactionRequest, UserFriendlyAddress } from '../api/models';
+import type {
+    TransactionRequest,
+    UserFriendlyAddress,
+    TransactionRequestEvent,
+    RequestErrorEvent,
+    DisconnectionEvent,
+    SignDataRequestEvent,
+    ConnectionRequestEvent,
+    TransactionApprovalResponse,
+    SignDataApprovalResponse,
+} from '../api/models';
 
 /**
  * Main TonWalletKit interface
@@ -83,52 +84,52 @@ export interface ITonWalletKit {
     // === Request Processing ===
 
     /** Approve a connect request */
-    approveConnectRequest(event: EventConnectRequest): Promise<void>;
+    approveConnectRequest(event: ConnectionRequestEvent): Promise<void>;
     /** Reject a connect request */
     rejectConnectRequest(
-        event: EventConnectRequest,
+        event: ConnectionRequestEvent,
         reason?: string,
         errorCode?: CONNECT_EVENT_ERROR_CODES,
     ): Promise<void>;
 
     /** Approve a transaction request */
-    approveTransactionRequest(event: EventTransactionRequest): Promise<EventTransactionResponse>;
+    approveTransactionRequest(event: TransactionRequestEvent): Promise<TransactionApprovalResponse>;
 
     /** Reject a transaction request */
     rejectTransactionRequest(
-        event: EventTransactionRequest,
+        event: TransactionRequestEvent,
         reason?: string | SendTransactionRpcResponseError['error'],
     ): Promise<void>;
 
     /** Approve a sign data request */
-    approveSignDataRequest(event: EventSignDataRequest): Promise<EventSignDataResponse>;
+    approveSignDataRequest(event: SignDataRequestEvent): Promise<SignDataApprovalResponse>;
 
     /** Reject a sign data request */
-    rejectSignDataRequest(event: EventSignDataRequest, reason?: string): Promise<void>;
+    rejectSignDataRequest(event: SignDataRequestEvent, reason?: string): Promise<void>;
 
     // === Event Handlers ===
 
     /** Register connect request handler */
-    onConnectRequest(cb: (event: EventConnectRequest) => void): void;
+    onConnectRequest(cb: (event: ConnectionRequestEvent) => void): void;
 
     /** Register transaction request handler */
-    onTransactionRequest(cb: (event: EventTransactionRequest) => void): void;
+    onTransactionRequest(cb: (event: TransactionRequestEvent) => void): void;
 
     /** Register sign data request handler */
-    onSignDataRequest(cb: (event: EventSignDataRequest) => void): void;
+    onSignDataRequest(cb: (event: SignDataRequestEvent) => void): void;
 
     /** Register disconnect handler */
-    onDisconnect(cb: (event: EventDisconnect) => void): void;
+    onDisconnect(cb: (event: DisconnectionEvent) => void): void;
 
     /** Register error handler */
-    onRequestError(cb: (event: EventRequestError) => void): void;
+    onRequestError(cb: (event: RequestErrorEvent) => void): void;
 
     /** Remove request handlers */
-    removeConnectRequestCallback(cb: (event: EventConnectRequest) => void): void;
-    removeTransactionRequestCallback(cb: (event: EventTransactionRequest) => void): void;
-    removeSignDataRequestCallback(cb: (event: EventSignDataRequest) => void): void;
-    removeDisconnectCallback(cb: (event: EventDisconnect) => void): void;
-    removeErrorCallback(cb: (event: EventRequestError) => void): void;
+    removeConnectRequestCallback(cb: (event: ConnectionRequestEvent) => void): void;
+    removeTransactionRequestCallback(cb: (event: TransactionRequestEvent) => void): void;
+    removeSignDataRequestCallback(cb: (event: SignDataRequestEvent) => void): void;
+    removeDisconnectCallback(cb: (event: DisconnectionEvent) => void): void;
+    removeErrorCallback(cb: (event: RequestErrorEvent) => void): void;
 
     // === Jettons API ===
 

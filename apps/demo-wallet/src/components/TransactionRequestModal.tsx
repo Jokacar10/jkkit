@@ -8,10 +8,11 @@
 
 import React, { memo, useEffect, useMemo, useState } from 'react';
 import { Network } from '@ton/walletkit';
-import type { EventTransactionRequest, JettonInfo, TransactionTraceMoneyFlowItem } from '@ton/walletkit';
+import type { JettonInfo, TransactionRequestEvent, TransactionTraceMoneyFlowItem } from '@ton/walletkit';
 import { Address } from '@ton/core';
-import { useWalletKit, useAuth, useWalletStore } from '@ton/demo-core';
+import { useWalletKit, useAuth, useWalletStore, useTransactionRequests } from '@ton/demo-core';
 import type { SavedWallet } from '@ton/demo-core';
+import { toast } from 'sonner';
 
 import { Button } from './Button';
 import { Card } from './Card';
@@ -25,23 +26,17 @@ import { formatUnits } from '../utils/units';
 const log = createComponentLogger('TransactionRequestModal');
 
 interface TransactionRequestModalProps {
-    request: EventTransactionRequest;
+    request: TransactionRequestEvent;
     savedWallets: SavedWallet[];
     isOpen: boolean;
-    onApprove: () => void;
-    onReject: (reason?: string) => void;
 }
 
-export const TransactionRequestModal: React.FC<TransactionRequestModalProps> = ({
-    request,
-    savedWallets,
-    isOpen,
-    onApprove,
-    onReject,
-}) => {
+export const TransactionRequestModal: React.FC<TransactionRequestModalProps> = ({ request, savedWallets, isOpen }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
+    const [isExpired, setIsExpired] = useState(false);
     const { holdToSign } = useAuth();
+    const { approveTransactionRequest, rejectTransactionRequest } = useTransactionRequests();
 
     // Find the wallet being used for this transaction
     const currentWallet = useMemo(() => {
@@ -49,11 +44,33 @@ export const TransactionRequestModal: React.FC<TransactionRequestModalProps> = (
         return savedWallets.find((wallet) => wallet.address === request.walletAddress) || null;
     }, [savedWallets, request.walletAddress]);
 
+    // Check every second if transaction has expired
+    useEffect(() => {
+        const checkExpiration = () => {
+            const validUntil = request.request?.validUntil;
+            if (validUntil) {
+                const now = Math.floor(Date.now() / 1000);
+                setIsExpired(validUntil < now);
+            } else {
+                setIsExpired(false);
+            }
+        };
+
+        // Check immediately
+        checkExpiration();
+
+        // Set up interval to check every second
+        const interval = setInterval(checkExpiration, 1000);
+
+        return () => clearInterval(interval);
+    }, [request.request?.validUntil]);
+
     // Reset success state when modal closes/opens
     useEffect(() => {
         if (!isOpen) {
             setShowSuccess(false);
             setIsLoading(false);
+            setIsExpired(false);
         }
     }, [isOpen]);
 
@@ -61,7 +78,7 @@ export const TransactionRequestModal: React.FC<TransactionRequestModalProps> = (
         setIsLoading(true);
         try {
             // First, perform the actual signing operation
-            await onApprove();
+            await approveTransactionRequest();
 
             // If successful, show success animation
             setIsLoading(false);
@@ -71,12 +88,15 @@ export const TransactionRequestModal: React.FC<TransactionRequestModalProps> = (
             // But we keep showing the success state for visual feedback
         } catch (error) {
             log.error('Failed to approve transaction:', error);
+            toast.error('Failed to approve transaction', {
+                description: (error as Error)?.message,
+            });
             setIsLoading(false);
         }
     };
 
     const handleReject = () => {
-        onReject('User rejected the transaction');
+        rejectTransactionRequest('User rejected the transaction');
     };
 
     if (!isOpen) return null;
@@ -164,65 +184,102 @@ export const TransactionRequestModal: React.FC<TransactionRequestModalProps> = (
                             </div>
                         )}
 
-                        {request.preview.result === 'success' && (
-                            <>
-                                {/* Money Flow Summary */}
-                                <div>
-                                    <div className="space-y-3">
-                                        {/* No transfers message */}
-                                        {request.preview.moneyFlow?.outputs === '0' &&
-                                        request.preview.moneyFlow.inputs === '0' &&
-                                        request.preview.moneyFlow.ourTransfers.length === 0 ? (
-                                            <div className="border rounded-lg p-3 bg-gray-50">
-                                                <p className="text-sm text-gray-600 text-center">
-                                                    This transaction doesn't involve any token transfers
-                                                </p>
-                                            </div>
-                                        ) : (
-                                            <JettonFlow transfers={request.preview.moneyFlow?.ourTransfers || []} />
-                                        )}
+                        {/* Expired Transaction Warning */}
+                        {isExpired ? (
+                            <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                                <div className="flex">
+                                    <div className="flex-shrink-0">
+                                        <svg
+                                            className="h-6 w-6 text-orange-500"
+                                            viewBox="0 0 20 20"
+                                            fill="currentColor"
+                                        >
+                                            <path
+                                                fillRule="evenodd"
+                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
+                                                clipRule="evenodd"
+                                            />
+                                        </svg>
+                                    </div>
+                                    <div className="ml-3">
+                                        <h3 className="text-sm font-medium text-orange-800">Transaction Expired</h3>
+                                        <p className="text-sm text-orange-700 mt-1">
+                                            This transaction request has expired and can no longer be signed. Please
+                                            reject it and request a new transaction from the dApp.
+                                        </p>
                                     </div>
                                 </div>
-                                {/* Parsed Actions from Emulation */}
-                                {/*{request.preview.result && (*/}
-                                {/*    <ActionPreviewList*/}
-                                {/*        emulationResult={request.preview.emulationResult}*/}
-                                {/*        walletAddress={request.walletAddress || currentWallet?.address}*/}
-                                {/*        className="mt-4"*/}
-                                {/*        title="Actions:"*/}
-                                {/*    />*/}
-                                {/*)}*/}
+                            </div>
+                        ) : (
+                            <>
+                                {request.preview.data.result === 'success' && (
+                                    <>
+                                        {/* Money Flow Summary */}
+                                        <div>
+                                            <div className="space-y-3">
+                                                {/* No transfers message */}
+                                                {request.preview.data.moneyFlow?.outputs === '0' &&
+                                                request.preview.data.moneyFlow.inputs === '0' &&
+                                                request.preview.data.moneyFlow.ourTransfers.length === 0 ? (
+                                                    <div className="border rounded-lg p-3 bg-gray-50">
+                                                        <p className="text-sm text-gray-600 text-center">
+                                                            This transaction doesn't involve any token transfers
+                                                        </p>
+                                                    </div>
+                                                ) : (
+                                                    <JettonFlow
+                                                        transfers={request.preview.data.moneyFlow?.ourTransfers || []}
+                                                    />
+                                                )}
+                                            </div>
+                                        </div>
+                                        {/* Parsed Actions from Emulation */}
+                                        {/*{request.preview.data.result && (*/}
+                                        {/*    <ActionPreviewList*/}
+                                        {/*        emulationResult={request.preview.data.trace}*/}
+                                        {/*        walletAddress={request.walletAddress || currentWallet?.address}*/}
+                                        {/*        className="mt-4"*/}
+                                        {/*        title="Actions:"*/}
+                                        {/*    />*/}
+                                        {/*)}*/}
+                                    </>
+                                )}
+
+                                {(request.preview.data.result === 'failure' || request.preview.data.error) && (
+                                    <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                                        <p className="text-sm text-red-800">
+                                            <strong>Error:</strong> {request.preview.data.error?.message}
+                                        </p>
+                                    </div>
+                                )}
+
+                                {/* Warning */}
+                                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                                    <div className="flex">
+                                        <div className="flex-shrink-0">
+                                            <svg
+                                                className="h-5 w-5 text-red-400"
+                                                viewBox="0 0 20 20"
+                                                fill="currentColor"
+                                            >
+                                                <path
+                                                    fillRule="evenodd"
+                                                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                                                    clipRule="evenodd"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <div className="ml-3">
+                                            <p className="text-sm text-red-800">
+                                                <strong>Warning:</strong> This transaction will be irreversible. Only
+                                                approve if you trust the requesting dApp and understand the transaction
+                                                details.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
                             </>
                         )}
-
-                        {(request.preview.result === 'failure' || request.preview.error) && (
-                            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                                <p className="text-sm text-red-800">
-                                    <strong>Error:</strong> {request.preview.error?.message}
-                                </p>
-                            </div>
-                        )}
-
-                        {/* Warning */}
-                        <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                            <div className="flex">
-                                <div className="flex-shrink-0">
-                                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                                        <path
-                                            fillRule="evenodd"
-                                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                                            clipRule="evenodd"
-                                        />
-                                    </svg>
-                                </div>
-                                <div className="ml-3">
-                                    <p className="text-sm text-red-800">
-                                        <strong>Warning:</strong> This transaction will be irreversible. Only approve if
-                                        you trust the requesting dApp and understand the transaction details.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
 
                         {/* Action Buttons */}
                         <div className="flex space-x-3">
@@ -230,29 +287,30 @@ export const TransactionRequestModal: React.FC<TransactionRequestModalProps> = (
                                 variant="secondary"
                                 onClick={handleReject}
                                 disabled={isLoading}
-                                className="flex-1"
+                                className={isExpired ? 'w-full' : 'flex-1'}
                                 data-testid="send-transaction-reject"
                             >
                                 Reject
                             </Button>
-                            {holdToSign ? (
-                                <HoldToSignButton
-                                    onComplete={handleApprove}
-                                    isLoading={isLoading}
-                                    disabled={isLoading}
-                                    holdDuration={3000}
-                                />
-                            ) : (
-                                <Button
-                                    onClick={handleApprove}
-                                    isLoading={isLoading}
-                                    disabled={isLoading}
-                                    className="flex-1"
-                                    data-testid="send-transaction-approve"
-                                >
-                                    Approve & Sign
-                                </Button>
-                            )}
+                            {!isExpired &&
+                                (holdToSign ? (
+                                    <HoldToSignButton
+                                        onComplete={handleApprove}
+                                        isLoading={isLoading}
+                                        disabled={isLoading}
+                                        holdDuration={3000}
+                                    />
+                                ) : (
+                                    <Button
+                                        onClick={handleApprove}
+                                        isLoading={isLoading}
+                                        disabled={isLoading}
+                                        className="flex-1"
+                                        data-testid="send-transaction-approve"
+                                    >
+                                        Approve & Sign
+                                    </Button>
+                                ))}
                         </div>
                     </div>
                 </Card>

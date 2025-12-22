@@ -121,7 +121,7 @@ describe('EventProcessor with Real EventStore', () => {
                 from: 'session-1',
                 params: [''],
                 walletId: createWalletId(Network.mainnet(), 'wallet-1'),
-                walletAddress: 'wallet-1',
+                walletAddress: undefined,
             });
 
             // Verify event was marked as completed in store
@@ -155,7 +155,7 @@ describe('EventProcessor with Real EventStore', () => {
                 from: 'session-1',
                 params: ['sample-data-to-sign'],
                 walletId: createWalletId(Network.mainnet(), 'wallet-1'),
-                walletAddress: 'wallet-1',
+                walletAddress: undefined,
             });
 
             const event = await eventStore.getEvent(storedEvent.id);
@@ -317,7 +317,7 @@ describe('EventProcessor with Real EventStore', () => {
                 method: 'connect',
                 from: 'session-new',
                 walletId: 'no-wallet',
-                walletAddress: 'no-wallet',
+                walletAddress: undefined,
             });
         });
 
@@ -487,14 +487,14 @@ describe('EventProcessor with Real EventStore', () => {
             expect(eventRouter.routeEvent).toHaveBeenCalledWith(
                 expect.objectContaining({
                     params: ['wallet-1'],
-                    walletAddress: 'wallet-1',
+                    walletAddress: undefined,
                 }),
             );
 
             expect(eventRouter.routeEvent).not.toHaveBeenCalledWith(
                 expect.objectContaining({
                     params: ['wallet-2'],
-                    walletAddress: 'wallet-2',
+                    walletAddress: undefined,
                 }),
             );
 
@@ -506,7 +506,7 @@ describe('EventProcessor with Real EventStore', () => {
             expect(eventRouter.routeEvent).toHaveBeenCalledWith(
                 expect.objectContaining({
                     params: ['wallet-2'],
-                    walletAddress: 'wallet-2',
+                    walletAddress: undefined,
                 }),
             );
         });
@@ -547,7 +547,7 @@ describe('EventProcessor with Real EventStore', () => {
                 method: 'connect',
                 from: 'session-new',
                 walletId: 'no-wallet',
-                walletAddress: 'no-wallet',
+                walletAddress: undefined,
             });
 
             expect(eventRouter.routeEvent).not.toHaveBeenCalledWith(

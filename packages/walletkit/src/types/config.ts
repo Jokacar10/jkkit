@@ -35,7 +35,7 @@ export interface NetworkConfig {
  * Example: { [CHAIN.MAINNET]: { apiClient: {...} }, [CHAIN.TESTNET]: { apiClient: {...} } }
  */
 export type NetworkAdapters = {
-    [K in string]?: NetworkConfig;
+    [key: string]: NetworkConfig | undefined;
 };
 
 /**

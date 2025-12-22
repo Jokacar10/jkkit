@@ -11,7 +11,7 @@
 import type { ConnectItem } from '@tonconnect/protocol';
 import { CONNECT_EVENT_ERROR_CODES } from '@tonconnect/protocol';
 
-import type { ConnectPreview, EventConnectRequest, TonWalletKitOptions } from '../types';
+import type { TonWalletKitOptions } from '../types';
 import type { RawBridgeEvent, EventHandler, RawBridgeEventConnect } from '../types/internal';
 import { globalLogger } from '../core/Logger';
 import { BasicHandler } from './BasicHandler';
@@ -20,18 +20,23 @@ import { getUnixtime } from '../utils/time';
 import { uuidv7 } from '../utils/uuid';
 import { getEventsSubsystem, getVersion } from '../utils/version';
 import { isValidHost } from '../utils/url';
+import type {
+    ConnectionRequestEvent,
+    ConnectionRequestEventPreview,
+    ConnectionRequestEventRequestedItem,
+} from '../api/models';
 
 const log = globalLogger.createChild('ConnectHandler');
 
 export class ConnectHandler
-    extends BasicHandler<EventConnectRequest>
-    implements EventHandler<EventConnectRequest, RawBridgeEventConnect>
+    extends BasicHandler<ConnectionRequestEvent>
+    implements EventHandler<ConnectionRequestEvent, RawBridgeEventConnect>
 {
     private analyticsApi?: AnalyticsApi;
     private walletKitConfig: TonWalletKitOptions;
 
     constructor(
-        notify: (event: EventConnectRequest) => void,
+        notify: (event: ConnectionRequestEvent) => void,
         walletKitConfig: TonWalletKitOptions,
         analyticsApi?: AnalyticsApi,
     ) {
@@ -44,7 +49,7 @@ export class ConnectHandler
         return event.method === 'connect';
     }
 
-    async handle(event: RawBridgeEventConnect): Promise<EventConnectRequest> {
+    async handle(event: RawBridgeEventConnect): Promise<ConnectionRequestEvent> {
         // Extract manifest information
         const manifestUrl = this.extractManifestUrl(event);
         let manifest = null;
@@ -63,18 +68,12 @@ export class ConnectHandler
 
         const preview = this.createPreview(event, manifestUrl, manifest, manifestFetchErrorCode);
 
-        const connectEvent: EventConnectRequest = {
+        const connectEvent: ConnectionRequestEvent = {
             ...event,
             id: event.id,
-
-            request: event.params?.items || [],
+            requestedItems: event.params.items ? this.toConnectionRequestEventRequestedItems(event.params.items) : [],
             preview,
-            dAppInfo: {
-                name: preview?.manifest?.name,
-                description: preview?.manifest?.description,
-                url: preview?.manifest?.url,
-                iconUrl: preview?.manifest?.iconUrl,
-            },
+            dAppInfo: preview.dAppInfo,
             isJsBridge: event.isJsBridge,
             tabId: event.tabId,
         };
@@ -87,7 +86,7 @@ export class ConnectHandler
                 client_environment: 'wallet',
                 subsystem: getEventsSubsystem(),
                 client_id: event.from,
-                manifest_json_url: manifestUrl || preview?.manifest?.url,
+                manifest_json_url: manifestUrl || preview?.dAppInfo?.manifestUrl,
                 is_ton_addr: event.params?.items?.some((item) => item.name === 'ton_addr') || false,
                 is_ton_proof: event.params?.items?.some((item) => item.name === 'ton_proof') || false,
                 client_timestamp: getUnixtime(),
@@ -102,6 +101,23 @@ export class ConnectHandler
         ]);
 
         return connectEvent;
+    }
+
+    private toConnectionRequestEventRequestedItems(items: ConnectItem[]): ConnectionRequestEventRequestedItem[] {
+        return items.map((item) => {
+            if (item.name === 'ton_addr') {
+                return { type: 'ton_addr' };
+            } else if (item.name === 'ton_proof') {
+                return {
+                    type: 'ton_proof',
+                    value: {
+                        payload: item.payload as string,
+                    },
+                };
+            } else {
+                return { type: 'unknown', value: item };
+            }
+        });
     }
 
     /**
@@ -139,7 +155,7 @@ export class ConnectHandler
         manifestFetchErrorCode?:
             | CONNECT_EVENT_ERROR_CODES.MANIFEST_NOT_FOUND_ERROR
             | CONNECT_EVENT_ERROR_CODES.MANIFEST_CONTENT_ERROR,
-    ): ConnectPreview {
+    ): ConnectionRequestEventPreview {
         const eventManifest = event.params?.manifest;
         const manifest = fetchedManifest || eventManifest;
 
@@ -194,10 +210,15 @@ export class ConnectHandler
         }
 
         return {
-            manifest: sanitizedManifest,
-            requestedItems: event.params?.items || [],
             permissions: permissions,
-            manifestFetchErrorCode: finalManifestFetchErrorCode ?? undefined,
+            dAppInfo: {
+                url: dAppUrl,
+                name: sanitizedManifest.name,
+                description: sanitizedManifest.description,
+                iconUrl: sanitizedManifest.iconUrl,
+                manifestUrl: manifestUrl,
+            },
+            manifestFetchErrorCode: manifestFetchErrorCode ?? undefined,
         };
     }
 

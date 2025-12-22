@@ -8,11 +8,11 @@
 
 import { SEND_TRANSACTION_ERROR_CODES, WalletKitError, ERROR_CODES } from '@ton/walletkit';
 import type {
-    EventConnectRequest,
-    EventTransactionRequest,
-    EventSignDataRequest,
-    EventDisconnect,
     Wallet,
+    TransactionRequestEvent,
+    ConnectionRequestEvent,
+    SignDataRequestEvent,
+    DisconnectionEvent,
 } from '@ton/walletkit';
 
 import { createComponentLogger } from '../../utils/logger';
@@ -59,7 +59,7 @@ export const createTonConnectSlice: TonConnectSliceCreator = (set: SetState, get
     },
 
     // Connect request actions
-    showConnectRequest: (request: EventConnectRequest) => {
+    showConnectRequest: (request: ConnectionRequestEvent) => {
         set((state) => {
             state.tonConnect.pendingConnectRequest = request;
             state.tonConnect.isConnectModalOpen = true;
@@ -78,7 +78,7 @@ export const createTonConnectSlice: TonConnectSliceCreator = (set: SetState, get
         }
 
         try {
-            const updatedRequest: EventConnectRequest = {
+            const updatedRequest: ConnectionRequestEvent = {
                 ...state.tonConnect.pendingConnectRequest,
                 walletAddress: selectedWallet.getAddress(),
                 walletId: selectedWallet.getWalletId(),
@@ -105,23 +105,28 @@ export const createTonConnectSlice: TonConnectSliceCreator = (set: SetState, get
             return;
         }
 
-        if (!state.walletCore.walletKit) {
-            throw new Error('WalletKit not initialized');
-        }
-
-        try {
-            await state.walletCore.walletKit.rejectConnectRequest(state.tonConnect.pendingConnectRequest, reason);
-
+        const closeModal = () => {
             set((state) => {
                 state.tonConnect.pendingConnectRequest = undefined;
                 state.tonConnect.isConnectModalOpen = false;
             });
 
             state.clearCurrentRequestFromQueue();
+        };
+
+        if (!state.walletCore.walletKit) {
+            log.error('WalletKit not initialized');
+            closeModal();
+            return;
+        }
+
+        try {
+            await state.walletCore.walletKit.rejectConnectRequest(state.tonConnect.pendingConnectRequest, reason);
         } catch (error) {
             log.error('Failed to reject connect request:', error);
-            throw error;
         }
+
+        closeModal();
     },
 
     closeConnectModal: () => {
@@ -132,7 +137,7 @@ export const createTonConnectSlice: TonConnectSliceCreator = (set: SetState, get
     },
 
     // Transaction request actions
-    showTransactionRequest: (request: EventTransactionRequest) => {
+    showTransactionRequest: (request: TransactionRequestEvent) => {
         set((state) => {
             state.tonConnect.pendingTransactionRequest = request;
             state.tonConnect.isTransactionModalOpen = true;
@@ -150,60 +155,15 @@ export const createTonConnectSlice: TonConnectSliceCreator = (set: SetState, get
             throw new Error('WalletKit not initialized');
         }
 
-        try {
-            try {
-                await state.walletCore.walletKit.approveTransactionRequest(state.tonConnect.pendingTransactionRequest);
-                setTimeout(() => {
-                    set((state) => {
-                        state.tonConnect.pendingTransactionRequest = undefined;
-                        state.tonConnect.isTransactionModalOpen = false;
-                    });
+        await state.walletCore.walletKit.approveTransactionRequest(state.tonConnect.pendingTransactionRequest);
+        setTimeout(() => {
+            set((state) => {
+                state.tonConnect.pendingTransactionRequest = undefined;
+                state.tonConnect.isTransactionModalOpen = false;
+            });
 
-                    state.clearCurrentRequestFromQueue();
-                }, 3000);
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            } catch (error: any) {
-                log.error('Failed to approve transaction request:', state.tonConnect.pendingTransactionRequest);
-                const errorMessage = error?.message?.toLowerCase() ?? '';
-                const isLedgerError = errorMessage.includes('ledger');
-                const isUserRejection = errorMessage.includes('rejected') || errorMessage.includes('denied');
-
-                if (isLedgerError && isUserRejection) {
-                    // User rejected transaction on Ledger device - close modal and reject
-                    log.warn('Transaction was rejected on Ledger device');
-                    try {
-                        await state.walletCore.walletKit!.rejectTransactionRequest(
-                            state.tonConnect.pendingTransactionRequest!,
-                            'User rejected transaction on Ledger device',
-                        );
-                    } catch (rejectError) {
-                        log.error('Failed to send rejection after Ledger reject:', rejectError);
-                    }
-                    set((state) => {
-                        state.tonConnect.pendingTransactionRequest = undefined;
-                        state.tonConnect.isTransactionModalOpen = false;
-                    });
-                    state.clearCurrentRequestFromQueue();
-                } else if (isLedgerError) {
-                    // Other Ledger errors (device not connected, app not open) - keep modal open for retry
-                    log.warn('Could not approve transaction request with Ledger, please unlock it and open TON App');
-                    throw error; // Re-throw to let modal reset loading state
-                } else {
-                    log.warn('Could not approve transaction request');
-                    setTimeout(() => {
-                        set((state) => {
-                            state.tonConnect.pendingTransactionRequest = undefined;
-                            state.tonConnect.isTransactionModalOpen = false;
-                        });
-
-                        state.clearCurrentRequestFromQueue();
-                    }, 3000);
-                }
-            }
-        } catch (error) {
-            log.error('Failed to approve transaction request:', error);
-            throw error;
-        }
+            state.clearCurrentRequestFromQueue();
+        }, 3000);
     },
 
     rejectTransactionRequest: async (reason?: string) => {
@@ -253,7 +213,7 @@ export const createTonConnectSlice: TonConnectSliceCreator = (set: SetState, get
     },
 
     // Sign data request actions
-    showSignDataRequest: (request: EventSignDataRequest) => {
+    showSignDataRequest: (request: SignDataRequestEvent) => {
         set((state) => {
             state.tonConnect.pendingSignDataRequest = request;
             state.tonConnect.isSignDataModalOpen = true;
@@ -282,36 +242,9 @@ export const createTonConnectSlice: TonConnectSliceCreator = (set: SetState, get
 
                 state.clearCurrentRequestFromQueue();
             }, 3000);
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (error: any) {
+        } catch (error) {
             log.error('Failed to approve sign data request:', error);
-            const errorMessage = error?.message?.toLowerCase() ?? '';
-            const isLedgerError = errorMessage.includes('ledger');
-            const isUserRejection = errorMessage.includes('rejected') || errorMessage.includes('denied');
-
-            if (isLedgerError && isUserRejection) {
-                // User rejected signing on Ledger device - close modal and reject
-                log.warn('Sign request was rejected on Ledger device');
-                try {
-                    await state.walletCore.walletKit!.rejectSignDataRequest(
-                        state.tonConnect.pendingSignDataRequest!,
-                        'User rejected sign request on Ledger device',
-                    );
-                } catch (rejectError) {
-                    log.error('Failed to send rejection after Ledger reject:', rejectError);
-                }
-                set((state) => {
-                    state.tonConnect.pendingSignDataRequest = undefined;
-                    state.tonConnect.isSignDataModalOpen = false;
-                });
-                state.clearCurrentRequestFromQueue();
-            } else if (isLedgerError) {
-                // Other Ledger errors - keep modal open for retry
-                log.warn('Could not sign data with Ledger, please unlock it and open TON App');
-                throw error;
-            } else {
-                throw error;
-            }
+            throw error;
         }
     },
 
@@ -349,13 +282,13 @@ export const createTonConnectSlice: TonConnectSliceCreator = (set: SetState, get
     },
 
     // Disconnect events
-    handleDisconnectEvent: (event: EventDisconnect) => {
+    handleDisconnectEvent: (event: DisconnectionEvent) => {
         log.info('Disconnect event received:', event);
 
         set((state) => {
             state.tonConnect.disconnectedSessions.push({
                 walletAddress: event.walletAddress,
-                reason: event.reason,
+                reason: event.preview.reason,
                 timestamp: Date.now(),
             } as DisconnectNotification);
         });
@@ -440,11 +373,11 @@ export const createTonConnectSlice: TonConnectSliceCreator = (set: SetState, get
         });
 
         if (nextRequest.type === 'connect') {
-            get().showConnectRequest(nextRequest.request as EventConnectRequest);
+            get().showConnectRequest(nextRequest.request);
         } else if (nextRequest.type === 'transaction') {
-            get().showTransactionRequest(nextRequest.request as EventTransactionRequest);
+            get().showTransactionRequest(nextRequest.request);
         } else if (nextRequest.type === 'signData') {
-            get().showSignDataRequest(nextRequest.request as EventSignDataRequest);
+            get().showSignDataRequest(nextRequest.request);
         }
     },
 
@@ -513,7 +446,7 @@ export const createTonConnectSlice: TonConnectSliceCreator = (set: SetState, get
             });
         });
 
-        walletKit.onTransactionRequest(async (event: EventTransactionRequest) => {
+        walletKit.onTransactionRequest(async (event: TransactionRequestEvent) => {
             const wallet = await walletKit.getWallet(event.walletId ?? '');
             if (!wallet) {
                 log.error('Wallet not found for transaction request', { walletId: event.walletId });

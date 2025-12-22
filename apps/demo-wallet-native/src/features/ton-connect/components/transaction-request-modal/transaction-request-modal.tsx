@@ -6,8 +6,8 @@
  *
  */
 
+import type { TransactionRequestEvent } from '@ton/walletkit';
 import { Ionicons } from '@expo/vector-icons';
-import type { EventTransactionRequest } from '@ton/walletkit';
 import { useState, useMemo, useEffect } from 'react';
 import type { FC } from 'react';
 import { View } from 'react-native';
@@ -28,7 +28,7 @@ import { WalletInfoBlock } from '@/features/wallets';
 import { getErrorMessage } from '@/core/utils/errors/get-error-message';
 
 interface TransactionRequestModalProps {
-    request: EventTransactionRequest;
+    request: TransactionRequestEvent;
     isOpen: boolean;
     onApprove: () => void;
     onReject: (reason?: string) => void;
@@ -119,13 +119,13 @@ export const TransactionRequestModal: FC<TransactionRequestModalProps> = ({ requ
                     </View>
                 )}
 
-                {request.preview.result === 'success' && currentWallet && walletKit && (
+                {request.preview.data.result === 'success' && currentWallet && walletKit && (
                     <View style={styles.moneyFlowSection}>
                         <SectionTitle>Money Flow</SectionTitle>
 
-                        {request.preview.moneyFlow?.outputs === '0' &&
-                        request.preview.moneyFlow.inputs === '0' &&
-                        request.preview.moneyFlow.ourTransfers.length === 0 ? (
+                        {request.preview.data.moneyFlow?.outputs === '0' &&
+                        request.preview.data.moneyFlow.inputs === '0' &&
+                        request.preview.data.moneyFlow.ourTransfers.length === 0 ? (
                             <View style={styles.noTransfers}>
                                 <AppText style={styles.noTransfersText} textType="body1">
                                     This transaction doesn't involve any token transfers
@@ -133,7 +133,7 @@ export const TransactionRequestModal: FC<TransactionRequestModalProps> = ({ requ
                             </View>
                         ) : (
                             <View style={styles.transfersList}>
-                                {request.preview.moneyFlow?.ourTransfers.map((transfer, index) => (
+                                {request.preview.data.moneyFlow?.ourTransfers.map((transfer, index) => (
                                     <JettonFlowItem
                                         key={index}
                                         jettonAddress={
@@ -151,8 +151,8 @@ export const TransactionRequestModal: FC<TransactionRequestModalProps> = ({ requ
                     </View>
                 )}
 
-                {(request.preview.result === 'failure' || request.preview.error) && (
-                    <WarningBox variant="error">Error: {getErrorMessage(request.preview)}</WarningBox>
+                {(request.preview.data.result === 'failure' || request.preview.data.error) && (
+                    <WarningBox variant="error">Error: {getErrorMessage(request.preview.data)}</WarningBox>
                 )}
 
                 {error && <WarningBox variant="error">{error}</WarningBox>}

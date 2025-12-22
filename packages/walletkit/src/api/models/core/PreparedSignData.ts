@@ -55,7 +55,16 @@ export interface SignDataPayload {
 }
 
 export interface UnpreparedSignData {
+    /**
+     * Payload containing the data to be signed
+     */
     payload: SignDataPayload;
+    /**
+     * Requesting domain for the signature
+     */
     domain: string;
+    /**
+     * Wallet address that will sign the data
+     */
     address: UserFriendlyAddress;
 }

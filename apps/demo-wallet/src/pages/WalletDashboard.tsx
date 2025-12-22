@@ -6,7 +6,7 @@
  *
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWallet, useWalletKit, useTonConnect, useTransactionRequests, useSignDataRequests } from '@ton/demo-core';
 
@@ -59,8 +59,7 @@ export const WalletDashboard: React.FC = () => {
         approveConnectRequest,
         rejectConnectRequest,
     } = useTonConnect();
-    const { pendingTransactionRequest, isTransactionModalOpen, approveTransactionRequest, rejectTransactionRequest } =
-        useTransactionRequests();
+    const { pendingTransactionRequest, isTransactionModalOpen } = useTransactionRequests();
     const { pendingSignDataRequest, isSignDataModalOpen, approveSignDataRequest, rejectSignDataRequest } =
         useSignDataRequests();
     const { error } = useTonWallet();
@@ -120,21 +119,6 @@ export const WalletDashboard: React.FC = () => {
         const tonAmount = parseFloat(amount || '0') / 1000000000; // Convert nanoTON to TON
         return tonAmount.toFixed(4);
     };
-
-    useEffect(() => {
-        // Auto-refresh balance on mount
-        if (!balance) {
-            updateBalance();
-        }
-    }, [balance, updateBalance]);
-
-    // auto refresh balance every 10 seconds
-    useEffect(() => {
-        const interval = setInterval(() => {
-            updateBalance();
-        }, 10000);
-        return () => clearInterval(interval);
-    }, [updateBalance]);
 
     const handleSwitchWallet = async (walletId: string) => {
         try {
@@ -270,6 +254,7 @@ export const WalletDashboard: React.FC = () => {
                             >
                                 Refresh
                             </Button>
+
                             <Button onClick={() => navigate('/send')} className="flex-1" data-testid="send-button">
                                 Send
                             </Button>
@@ -366,8 +351,6 @@ export const WalletDashboard: React.FC = () => {
                     request={pendingTransactionRequest}
                     savedWallets={savedWallets}
                     isOpen={isTransactionModalOpen}
-                    onApprove={approveTransactionRequest}
-                    onReject={rejectTransactionRequest}
                 />
             )}
 

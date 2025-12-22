@@ -8,104 +8,10 @@
 
 // Event type definitions for TON Connect protocol
 
-import type {
-    CONNECT_EVENT_ERROR_CODES,
-    ConnectEventSuccess,
-    ConnectItem,
-    ConnectRequest,
-    WalletResponseTemplateError,
-} from '@tonconnect/protocol';
+import type { ConnectEventSuccess } from '@tonconnect/protocol';
 
-import type {
-    BridgeEventBase,
-    EventApprovalBase,
-    RawBridgeEventSignData,
-    RawBridgeEventTransaction,
-    RawBridgeEvent,
-} from './internal';
-import type { Base64String } from './primitive';
-import type { SignDataPayload, TransactionEmulatedPreview, TransactionRequest, Hex } from '../api/models';
-
-// export type EventConnectRequest = ConnectRequest;
-
-export interface DAppInfo {
-    name?: string;
-    description?: string;
-    url?: string;
-    iconUrl?: string;
-}
-
-/**
- * Connect request event from dApp
- */
-export interface EventConnectRequest extends BridgeEventBase {
-    request: ConnectRequest['items'];
-
-    /** Preview information for UI display */
-    preview: ConnectPreview;
-
-    /** dApp information */
-    dAppInfo: DAppInfo;
-}
-
-/**
- * Transaction request event from dApp
- */
-export type EventTransactionRequest = RawBridgeEventTransaction & {
-    /** Raw transaction request data */
-    request: TransactionRequest;
-
-    /** Human-readable preview for UI display */
-    preview: TransactionEmulatedPreview;
-
-    /** dApp information */
-    dAppInfo: DAppInfo;
-};
-
-export interface EventTransactionResponse {
-    signedBoc: Base64String;
-}
-
-/**
- * Sign data request event from dApp
- */
-export interface EventSignDataRequest extends RawBridgeEventSignData {
-    /** Raw data to be signed */
-    request: SignDataPayload;
-
-    /** Human-readable preview for UI display */
-    preview: SignDataPreview;
-
-    /** dApp information */
-    dAppInfo: DAppInfo;
-}
-
-export interface EventSignDataResponse {
-    signature: Hex;
-}
-
-/**
- * Disconnect event
- */
-export interface EventDisconnect extends BridgeEventBase {
-    /** Optional disconnect reason */
-    reason?: string;
-
-    /** Wallet ID in format "network:address" (e.g., "-239:EQD...") */
-    walletId: string;
-    walletAddress?: string;
-
-    /** dApp information */
-    dAppInfo: DAppInfo;
-}
-
-export interface EventRequestError {
-    incomingEvent: RawBridgeEvent;
-    result: WalletResponseTemplateError;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface EventRestoreConnectionRequest extends BridgeEventBase {}
+import type { EventApprovalBase } from './internal';
+import type { Base64String, SignDataPayload } from '../api/models';
 
 export interface EventConnectApproval extends EventApprovalBase {
     result: ConnectApproval;
@@ -127,7 +33,7 @@ export interface EventTransactionApproval extends EventApprovalBase {
 }
 
 export interface TransactionApproval {
-    signedBoc: string;
+    signedBoc: Base64String;
 }
 
 export interface EventSignDataApproval extends EventApprovalBase {
@@ -141,44 +47,3 @@ export interface SignDataApproval {
     domain: string;
     payload: SignDataPayload;
 }
-
-export interface ConnectPermission {
-    name: string;
-    title: string;
-    description: string;
-}
-
-/**
- * Connect request preview information
- */
-export interface ConnectPreview {
-    manifestUrl?: string;
-    manifest?: {
-        name?: string;
-        description?: string;
-        url?: string;
-        iconUrl?: string;
-    };
-
-    requestedItems?: ConnectItem[];
-    permissions?: ConnectPermission[];
-    manifestFetchErrorCode?:
-        | CONNECT_EVENT_ERROR_CODES.MANIFEST_NOT_FOUND_ERROR
-        | CONNECT_EVENT_ERROR_CODES.MANIFEST_CONTENT_ERROR;
-}
-
-export type SignDataPreviewText = {
-    kind: 'text';
-    content: string;
-};
-export type SignDataPreviewBinary = {
-    kind: 'binary';
-    content: string;
-};
-export type SignDataPreviewCell = {
-    kind: 'cell';
-    content: string;
-    schema?: string;
-    parsed?: Record<string, unknown>;
-};
-export type SignDataPreview = SignDataPreviewText | SignDataPreviewBinary | SignDataPreviewCell;

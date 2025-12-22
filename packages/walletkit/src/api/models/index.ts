@@ -14,7 +14,8 @@ export type { ExtraCurrencies } from './core/ExtraCurrencies';
 export { Network } from './core/Network';
 export type { PreparedSignData, SignDataPayload, UnpreparedSignData } from './core/PreparedSignData';
 export type { UserFriendlyAddress, Hex, Base64String, LogicalTime, ResultError, Pagination } from './core/Primitives';
-export { Result, asHex } from './core/Primitives';
+export { Result } from './core/Primitives';
+export { asHex } from '../../utils/hex';
 export type { ProofMessage } from './core/ProofMessage';
 export { SendMode, SendModeFlag, SendModeBase, SendModeToValue, SendModeFromValue } from './core/SendMode';
 export type { SignData, SignDataText, SignDataBinary, SignDataCell } from './core/SignData';
@@ -28,14 +29,15 @@ export type { BridgeEvent } from './bridge/BridgeEvent';
 export type {
     ConnectionRequestEvent,
     ConnectionRequestEventPreview,
-    ConnectionRequestEventPreviewRequestedItem,
+    ConnectionRequestEventRequestedItem,
     ConnectionRequestEventPreviewPermission,
 } from './bridge/ConnectionRequestEvent';
 export type { DisconnectionEvent } from './bridge/DisconnectionEvent';
 export type { SignDataApprovalResponse } from './bridge/SignDataApprovalResponse';
-export type { SignDataRequestEvent, SignDataRequestEventPreview } from './bridge/SignDataRequestEvent';
+export type { SignDataRequestEvent, SignDataRequestEventPreview, SignDataPreview } from './bridge/SignDataRequestEvent';
 export type { TransactionApprovalResponse } from './bridge/TransactionApprovalResponse';
 export type { TransactionRequestEvent, TransactionRequestEventPreview } from './bridge/TransactionRequestEvent';
+export type { RequestErrorEvent } from './bridge/RequestErrorEvent';
 
 // Jetton models
 export type { Jetton } from './jettons/Jetton';
