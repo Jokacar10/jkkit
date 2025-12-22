@@ -26,6 +26,7 @@ import { AppText } from '@/core/components/app-text';
 import { WarningBox } from '@/core/components/warning-box';
 import { WalletInfoBlock } from '@/features/wallets';
 import { getErrorMessage } from '@/core/utils/errors/get-error-message';
+import { getLedgerErrorMessage } from '@/features/ledger';
 
 interface TransactionRequestModalProps {
     request: TransactionRequestEvent;
@@ -58,20 +59,6 @@ export const TransactionRequestModal: FC<TransactionRequestModalProps> = ({ requ
         }
     }, [isOpen]);
 
-    const getLedgerErrorMessage = (err: unknown): string => {
-        const message = getErrorMessage(err).toLowerCase();
-        if (message.includes('0x6d02') || message.includes('unknown_apdu')) {
-            return 'TON app is not open on your Ledger device. Please open it and try again.';
-        }
-        if (message.includes('0x6985') || message.includes('denied')) {
-            return 'Transaction was rejected on Ledger device.';
-        }
-        if (message.includes('no ledger device')) {
-            return 'Ledger device not connected. Please connect your device and try again.';
-        }
-        return getErrorMessage(err);
-    };
-
     const handleApprove = async () => {
         setIsLoading(true);
         setError(null);
@@ -83,7 +70,8 @@ export const TransactionRequestModal: FC<TransactionRequestModalProps> = ({ requ
         } catch (err) {
             // eslint-disable-next-line no-console
             console.error('Failed to approve transaction:', err);
-            setError(isLedgerWallet ? getLedgerErrorMessage(err) : getErrorMessage(err));
+            const errorMessage = isLedgerWallet ? getLedgerErrorMessage(err) : getErrorMessage(err);
+            setError(errorMessage);
             setIsLoading(false);
         }
     };
@@ -119,7 +107,7 @@ export const TransactionRequestModal: FC<TransactionRequestModalProps> = ({ requ
                     </View>
                 )}
 
-                {request.preview.data.result === 'success' && currentWallet && walletKit && (
+                {request.preview.data.result === 'success' && (
                     <View style={styles.moneyFlowSection}>
                         <SectionTitle>Money Flow</SectionTitle>
 

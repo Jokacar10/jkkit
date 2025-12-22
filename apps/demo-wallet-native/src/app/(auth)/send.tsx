@@ -26,25 +26,12 @@ import { getErrorMessage } from '@/core/utils/errors/get-error-message';
 import { TokenListSheet, TokenSelector } from '@/features/send';
 import { fromMinorUnit, toMinorUnit } from '@/core/utils/amount/minor-unit';
 import { useFormattedJetton } from '@/core/hooks/use-formatted-jetton';
+import { getLedgerErrorMessage } from '@/features/ledger';
 
 interface SelectedToken {
     type: 'TON' | 'JETTON';
     data?: Jetton;
 }
-
-const getLedgerErrorMessage = (err: unknown): string => {
-    const message = getErrorMessage(err).toLowerCase();
-    if (message.includes('0x6d02') || message.includes('unknown_apdu')) {
-        return 'TON app is not open on your Ledger device. Please open it and try again.';
-    }
-    if (message.includes('0x6985') || message.includes('denied')) {
-        return 'Transaction was rejected on Ledger device.';
-    }
-    if (message.includes('no ledger device')) {
-        return 'Ledger device not connected. Please connect your device and try again.';
-    }
-    return getErrorMessage(err, 'Failed to send transaction');
-};
 
 const SendScreen: FC = () => {
     const [showTokenSelector, setShowTokenSelector] = useState(false);

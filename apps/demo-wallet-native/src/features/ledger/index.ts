@@ -19,6 +19,7 @@ export type { LedgerDevice, ScanSubscription } from './utils/ledger-transport';
 export { scanLedgerDevices, connectToLedgerDevice, disconnectLedgerDevice } from './utils/ledger-transport';
 export { createBLELedgerTransportFactory } from './utils/create-ble-transport-factory';
 export type { LedgerDeviceStorage } from './utils/create-ble-transport-factory';
+export { getLedgerErrorMessage } from './utils/get-ledger-error-message';
 
 // Components
 export { DeviceList, DeviceListItem, ScanningIndicator, LedgerInstructions, LedgerSettings } from './components';

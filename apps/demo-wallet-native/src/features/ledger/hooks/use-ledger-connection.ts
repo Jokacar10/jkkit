@@ -166,8 +166,8 @@ export const useLedgerConnection = (options?: UseLedgerConnectionOptions): UseLe
             if (transport) {
                 await disconnectLedgerDevice(transport);
             }
-        } catch (err) {
-            console.error('Error disconnecting:', err);
+        } catch (_err) {
+            //
         }
 
         setTransport(null);
@@ -186,7 +186,7 @@ export const useLedgerConnection = (options?: UseLedgerConnectionOptions): UseLe
             }
 
             if (transport) {
-                transport.close().catch(console.error);
+                void transport.close();
             }
         };
     }, [transport]);

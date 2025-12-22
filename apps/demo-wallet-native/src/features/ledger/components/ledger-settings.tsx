@@ -7,7 +7,7 @@
  */
 
 import type { FC } from 'react';
-import { View, TextInput } from 'react-native';
+import { View } from 'react-native';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 
 import { AppText } from '@/core/components/app-text';
