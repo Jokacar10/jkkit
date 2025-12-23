@@ -2,12 +2,14 @@
 
 This document shows how to use the WalletV4R2LedgerAdapter with the `@ton/v4ledger-adapter` package.
 
+> **Note:** `@ton/v4ledger-adapter` isn’t published as a prebuilt package. It is provided for demonstration only — you’ll need to build it yourself before use.
+
 ## Installation
 
 First, install the required packages:
 
 ```bash
-npm install @ton/v4ledger-adapter @ledgerhq/hw-transport-webusb
+npm install @ledgerhq/hw-transport-webusb
 # or for other environments:
 # npm install @ledgerhq/hw-transport-webhid
 # npm install @ledgerhq/hw-transport-node-hid
