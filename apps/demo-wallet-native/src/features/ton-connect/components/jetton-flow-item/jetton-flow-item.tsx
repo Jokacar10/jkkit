@@ -11,7 +11,7 @@ import type { JettonInfo } from '@ton/walletkit';
 import { Address } from '@ton/core';
 import { useState, useEffect, memo } from 'react';
 import type { FC } from 'react';
-import { View, Image } from 'react-native';
+import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 import type { ITonWalletKit } from '@ton/walletkit';
 import type { SavedWallet } from '@ton/demo-core';
