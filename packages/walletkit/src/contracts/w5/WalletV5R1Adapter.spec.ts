@@ -133,7 +133,6 @@ describe('WalletV5R1Adapter', () => {
             {
                 messages: [
                     {
-                        originalAddress: addressV5r1.bounceableNot,
                         address: addressV5r1.bounceableNot,
                         amount: '1',
                     },

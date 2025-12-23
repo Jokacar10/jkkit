@@ -157,13 +157,13 @@ export class WalletV5R1Adapter implements WalletAdapter {
         const actions = packActionsList(
             input.messages.map((m) => {
                 let bounce = true;
-                const parsedAddress = Address.parseFriendly(m.originalAddress);
+                const parsedAddress = Address.parseFriendly(m.address);
                 if (parsedAddress.isBounceable === false) {
                     bounce = false;
                 }
 
                 const msg = internal({
-                    to: m.originalAddress,
+                    to: m.address,
                     value: BigInt(m.amount),
                     bounce: bounce,
                     extracurrency: m.extraCurrency

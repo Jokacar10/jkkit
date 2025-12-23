@@ -114,7 +114,6 @@ async function testLedgerWallet() {
 
         // Create a test transaction message
         const message: TransactionRequestMessage = {
-            originalAddress: ledgerWallet.getAddress(),
             address: ledgerWallet.getAddress(),
             amount: '1000000', // 0.001 TON in nanoTON
         };

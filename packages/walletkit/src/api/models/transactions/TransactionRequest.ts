@@ -47,14 +47,9 @@ export interface TransactionRequest {
  */
 export interface TransactionRequestMessage {
     /**
-     * Recipient wallet address
+     * Recipient wallet address in format received from caller (raw, user friendly)
      */
-    originalAddress: string;
-
-    /**
-     * Recipient wallet address in user-friendly format
-     */
-    address: UserFriendlyAddress;
+    address: string;
 
     /**
      * Amount to transfer in nanos

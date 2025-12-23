@@ -93,7 +93,6 @@ export class WalletJettonClass implements WalletJettonInterface {
 
         // Create transaction message
         const message: TransactionRequestMessage = {
-            originalAddress: jettonWalletAddress,
             address: jettonWalletAddress,
             amount: '50000000', // 0.05 TON for gas fees
             payload: jettonPayload.toBoc().toString('base64') as Base64String,

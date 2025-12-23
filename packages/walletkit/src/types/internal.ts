@@ -123,7 +123,7 @@ export interface ConnectExtraCurrency {
 }
 
 export interface ConnectTransactionParamMessage {
-    address: string;
+    address: string; // address as passed from client
     amount: string;
     payload?: string; // boc
     stateInit?: string; // boc
@@ -146,9 +146,11 @@ export interface ConnectTransactionParamContent {
 }
 
 export function toTransactionRequestMessage(msg: ConnectTransactionParamMessage): TransactionRequestMessage {
+    // Check that msg.address is valid address
+    asAddressFriendly(msg.address);
+
     return {
-        originalAddress: msg.address,
-        address: asAddressFriendly(msg.address),
+        address: msg.address,
         amount: msg.amount,
         payload: msg.payload ? (msg.payload as Base64String) : undefined,
         stateInit: msg.stateInit ? (msg.stateInit as Base64String) : undefined,
@@ -159,7 +161,7 @@ export function toTransactionRequestMessage(msg: ConnectTransactionParamMessage)
 
 export function toConnectTransactionParamMessage(message: TransactionRequestMessage): ConnectTransactionParamMessage {
     return {
-        address: message.originalAddress,
+        address: message.address,
         amount: message.amount,
         payload: message.payload,
         stateInit: message.stateInit,
