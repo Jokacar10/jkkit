@@ -51,7 +51,8 @@ import {
   TonWalletKit,      // Main SDK class
   Signer,            // Handles cryptographic signing
   WalletV5R1Adapter, // Latest wallet version (recommended)
-  CHAIN,             // Network constants (MAINNET/TESTNET)
+  Network,           // Network configuration (mainnet/testnet)
+  CHAIN,             // Chain constants (mainnet/testnet)
 } from '@ton/walletkit';
 
 const kit = new TonWalletKit({
@@ -88,8 +89,8 @@ const mnemonic = process.env.APP_MNEMONIC!.split(' ');
 const signer = await Signer.fromMnemonic(mnemonic, { type: 'ton' });
 
 const walletV5R1Adapter = await WalletV5R1Adapter.create(signer, {
-  client: kit.getApiClient(CHAIN.MAINNET),
-  network: CHAIN.MAINNET,
+  client: kit.getApiClient(Network.mainnet()),
+  network: Network.mainnet(),
 });
 
 const walletV5R1 = await kit.addWallet(walletV5R1Adapter);
