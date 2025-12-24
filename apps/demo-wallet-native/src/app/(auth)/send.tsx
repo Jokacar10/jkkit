@@ -6,7 +6,7 @@
  *
  */
 
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, AntDesign } from '@expo/vector-icons';
 import { Address } from '@ton/ton';
 import type { Jetton, TONTransferRequest } from '@ton/walletkit';
 import { router } from 'expo-router';
@@ -16,11 +16,12 @@ import { Alert, View } from 'react-native';
 import { StyleSheet, useUnistyles } from 'react-native-unistyles';
 import { useWallet, useWalletKit } from '@ton/demo-core';
 
+import { ActiveTouchAction } from '@/core/components/active-touch-action';
 import { AmountInput } from '@/core/components/amount-input';
 import { AppButton } from '@/core/components/app-button';
 import { AppInput } from '@/core/components/app-input';
-import { AppText } from '@/core/components/app-text';
 import { AppKeyboardAwareScrollView } from '@/core/components/keyboard-aware-scroll-view';
+import { QrScanner } from '@/core/components/qr-scanner';
 import { ScreenHeader } from '@/core/components/screen-header';
 import { getErrorMessage } from '@/core/utils/errors/get-error-message';
 import { TokenListSheet, TokenSelector } from '@/features/send';
@@ -39,12 +40,14 @@ const SendScreen: FC = () => {
     const [amount, setAmount] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [selectedToken, setSelectedToken] = useState<SelectedToken>({ type: 'TON' });
+    const [isScannerVisible, setIsScannerVisible] = useState(false);
 
     const { theme } = useUnistyles();
     const selectedJettonInfo = useFormattedJetton(selectedToken?.data);
 
     const walletKit = useWalletKit();
     const { balance, currentWallet } = useWallet();
+    const { theme } = useUnistyles();
 
     const isLedgerWallet = currentWallet?.walletType === 'ledger';
 
@@ -158,6 +161,20 @@ const SendScreen: FC = () => {
         setAmount('');
     };
 
+    const handleScannerOpen = () => {
+        setIsScannerVisible(true);
+    };
+
+    const handleScannerClose = () => {
+        setIsScannerVisible(false);
+    };
+
+    const handleScanRecipient = (data: string) => {
+        if (!data) return;
+        setRecipient(data.trim());
+        handleScannerClose();
+    };
+
     return (
         <AppKeyboardAwareScrollView contentContainerStyle={styles.containerContent} style={styles.container}>
             <ScreenHeader.Container>
@@ -179,20 +196,20 @@ const SendScreen: FC = () => {
                 />
             </AmountInput.Container>
 
-            <View>
-                <AppText style={styles.addressLabel} textType="caption1">
-                    Recipient Address
-                </AppText>
-
+            <View style={styles.addressInputContainer}>
                 <AppInput
                     autoCapitalize="none"
                     autoComplete="off"
                     autoCorrect={false}
                     onChangeText={setRecipient}
-                    placeholder="EQ..."
+                    placeholder="Recipient Address"
                     style={styles.addressInput}
                     value={recipient}
                 />
+
+                <ActiveTouchAction onPress={handleScannerOpen} style={styles.scanButton}>
+                    <AntDesign name="scan" size={18} color={theme.colors.accent.primary} />
+                </ActiveTouchAction>
             </View>
 
             {isLedgerWallet && isLoading && (
@@ -226,6 +243,13 @@ const SendScreen: FC = () => {
                 onSelectJetton={handleSelectJetton}
                 selectedToken={selectedToken}
             />
+
+            <QrScanner
+                hint="Scan recipient TON address"
+                isVisible={isScannerVisible}
+                onClose={handleScannerClose}
+                onScan={handleScanRecipient}
+            />
         </AppKeyboardAwareScrollView>
     );
 };
@@ -243,22 +267,29 @@ const styles = StyleSheet.create(({ sizes, colors }, runtime) => ({
         paddingTop: sizes.page.paddingTop,
         paddingBottom: runtime.insets.bottom + sizes.page.paddingBottom,
     },
-    addressInput: {
-        backgroundColor: colors.background.main,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.navigation.default,
-        paddingVertical: sizes.space.vertical,
+    addressInputContainer: {
+        flexDirection: 'row',
+        gap: sizes.space.horizontal / 2,
         marginBottom: sizes.space.vertical * 2,
+        backgroundColor: colors.background.block,
+        borderRadius: sizes.borderRadius.md,
+        paddingVertical: sizes.block.paddingVertical,
+        paddingHorizontal: sizes.block.paddingHorizontal,
+        borderColor: colors.navigation.default,
+    },
+    addressInput: {
+        flex: 1,
         color: colors.text.highlight,
     },
-    addressLabel: {
-        color: colors.text.secondary,
+    scanButton: {
+        paddingHorizontal: sizes.space.horizontal / 2,
+        paddingVertical: sizes.space.vertical / 2,
     },
     amountInput: {
         paddingVertical: sizes.space.vertical * 3,
         gap: sizes.space.vertical / 2,
         marginTop: sizes.space.vertical,
-        marginBottom: sizes.space.vertical * 2,
+        marginBottom: sizes.space.vertical,
     },
     ledgerPrompt: {
         flexDirection: 'row',
