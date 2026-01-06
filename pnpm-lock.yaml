@@ -53,6 +53,9 @@ importers:
 
   apps/demo-wallet:
     dependencies:
+      '@demo/core':
+        specifier: workspace:*
+        version: link:../../demo/core
       '@ledgerhq/hw-transport-webhid':
         specifier: ^6.30.9
         version: 6.30.9
@@ -68,9 +71,6 @@ importers:
       '@ton/crypto':
         specifier: ^3.3.0
         version: 3.3.0
-      '@ton/demo-core':
-        specifier: workspace:*
-        version: link:../../packages/demo-core
       '@ton/v4ledger-adapter':
         specifier: workspace:*
         version: link:../../packages/v4ledger-adapter
@@ -198,6 +198,9 @@ importers:
       '@craftzdog/react-native-buffer':
         specifier: 6.1.1
         version: 6.1.1(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      '@demo/core':
+        specifier: workspace:*
+        version: link:../../demo/core
       '@expo-google-fonts/inter':
         specifier: 0.4.2
         version: 0.4.2
@@ -225,9 +228,6 @@ importers:
       '@ton/crypto':
         specifier: ^3.3.0
         version: 3.3.0
-      '@ton/demo-core':
-        specifier: workspace:*
-        version: link:../../packages/demo-core
       '@ton/ton':
         specifier: 16.0.0
         version: 16.0.0(@ton/core@0.62.0(@ton/crypto@3.3.0))(@ton/crypto@3.3.0)
@@ -368,7 +368,7 @@ importers:
         specifier: 5.9.3
         version: 5.9.3
 
-  packages/demo-core:
+  demo/core:
     dependencies:
       '@ton/core':
         specifier: ^0.62.0
@@ -378,10 +378,10 @@ importers:
         version: 3.3.0
       '@ton/v4ledger-adapter':
         specifier: workspace:*
-        version: link:../v4ledger-adapter
+        version: link:../../packages/v4ledger-adapter
       '@ton/walletkit':
         specifier: workspace:*
-        version: link:../walletkit
+        version: link:../../packages/walletkit
       immer:
         specifier: ^10.2.0
         version: 10.2.0

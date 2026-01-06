@@ -7,8 +7,8 @@
  */
 
 import TransportWebHID from '@ledgerhq/hw-transport-webhid';
-import { WalletProvider } from '@ton/demo-core';
-import type { WalletKitConfig } from '@ton/demo-core';
+import { WalletProvider } from '@demo/core';
+import type { WalletKitConfig } from '@demo/core';
 
 import { AppRouter } from './components';
 
