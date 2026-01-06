@@ -317,7 +317,7 @@ export const createWalletManagementSlice =
                     state.walletManagement.events = [];
                 });
 
-                await get().loadEvents();
+                void get().loadEvents();
 
                 log.info(`Switched to wallet ${walletId} successfully`);
             } catch (error) {
