@@ -30,17 +30,6 @@ export function getTonConnectWalletManifest(): WalletInfo {
         aboutUrl: 'https://walletkit-demo-wallet.vercel.app',
         // Supported platforms
         platforms: ['macos', 'windows', 'linux'],
-        features: [
-            {
-                name: 'SendTransaction',
-                maxMessages: 4,
-                extraCurrencySupported: false,
-            },
-            {
-                name: 'SignData',
-                types: ['text', 'binary', 'cell'],
-            },
-        ],
     });
 }
 
@@ -63,5 +52,16 @@ export function getTonConnectDeviceInfo(): DeviceInfo {
         appName: 'WalletKitDemoWallet',
         appVersion: '1.0.0',
         maxProtocolVersion: 2,
+        features: [
+            {
+                name: 'SendTransaction',
+                maxMessages: 4,
+                extraCurrencySupported: false,
+            },
+            {
+                name: 'SignData',
+                types: ['text', 'binary', 'cell'],
+            },
+        ],
     });
 }

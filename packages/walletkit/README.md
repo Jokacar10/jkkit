@@ -130,7 +130,7 @@ kit.onConnectRequest(async (event: ConnectionRequestEvent) => {
             // Set wallet ID and address on the request before approving
             const wallets = kit.getWallets();
             console.log(`Available wallets: ${wallets.length}`);
-            const walletInfo = yourWalletSelectionLogic();
+            const walletInfo = await yourWalletSelectionLogic();
             if (!walletInfo) {
                 console.error('No wallet available. Wallets count:', wallets.length);
                 await kit.rejectConnectRequest(event, 'No wallet available');
