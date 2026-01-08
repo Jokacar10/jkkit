@@ -317,7 +317,9 @@ export const createWalletManagementSlice =
                     state.walletManagement.events = [];
                 });
 
-                void get().loadEvents();
+                void get()
+                    .loadEvents()
+                    .catch((err) => log.error('Error loading events after switching wallet:', err));
 
                 log.info(`Switched to wallet ${walletId} successfully`);
             } catch (error) {
