@@ -4,7 +4,7 @@
   "description": "Examples for @ton/walletkit",
   "scripts": {
     "quality": "pnpm test",
-    "test": "tsx src/requests.ts"
+    "test": "tsx src/index.ts"
   },
   "dependencies": {
     "@ton/walletkit": "workspace:*",
