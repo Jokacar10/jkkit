@@ -64,6 +64,10 @@ export interface BridgeClientConnectErrorEvent {
   version?: string;
   /** Duration of wallet list download in milliseconds. */
   wallet_list_download_duration?: number;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
 }
 
 /** The event is fired when the dApp or wallet initiates the SSE connection via GET /events?client_id=... method. */
@@ -116,6 +120,10 @@ export interface BridgeClientConnectStartedEvent {
   version?: string;
   /** Duration of wallet list download in milliseconds. */
   wallet_list_download_duration?: number;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
 }
 
 /** When wallet or dapp receives message from bridge (SSE stream). */
@@ -184,6 +192,10 @@ export interface BridgeClientMessageDecodeErrorEvent {
   wallet_id?: string;
   /** Duration of wallet list download in milliseconds. */
   wallet_list_download_duration?: number;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
 }
 
 /** When wallet or dapp receives message from bridge (SSE stream). */
@@ -252,6 +264,10 @@ export interface BridgeClientMessageReceivedEvent {
   wallet_id?: string;
   /** Duration of wallet list download in milliseconds. */
   wallet_list_download_duration?: number;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
 }
 
 export interface BridgeConnectEstablishedEvent {
@@ -305,6 +321,10 @@ export interface BridgeConnectEstablishedEvent {
   version?: string;
   /** Duration of wallet list download in milliseconds. */
   wallet_list_download_duration?: number;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
 }
 
 /** When the client subscribed to bridge events. */
@@ -349,6 +369,10 @@ export interface BridgeEventsClientSubscribedEvent {
   user_id?: string;
   /** The version of the sending subsystem. */
   version?: string;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
 }
 
 /** When the client unsubscribed from bridge events. */
@@ -393,6 +417,10 @@ export interface BridgeEventsClientUnsubscribedEvent {
   user_id?: string;
   /** The version of the sending subsystem. */
   version?: string;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
 }
 
 /** When the message, sent to the bridge, expires. */
@@ -453,6 +481,10 @@ export interface BridgeMessageExpiredEvent {
    * @example "ZXhhbXBsZQ=="
    */
   wallet_id?: string;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
 }
 
 /** When the bridge receives a message post to /message. */
@@ -507,6 +539,10 @@ export interface BridgeMessageReceivedEvent {
   user_id?: string;
   /** The version of the sending subsystem. */
   version?: string;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
 }
 
 /** When the bridge sends a message to the SSE client. */
@@ -567,6 +603,10 @@ export interface BridgeMessageSentEvent {
    * @example "ZXhhbXBsZQ=="
    */
   wallet_id?: string;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
 }
 
 /** When the message, sent to the bridge, expires. */
@@ -625,6 +665,10 @@ export interface BridgeMessageValidationFailedEvent {
    * @example "ZXhhbXBsZQ=="
    */
   wallet_id?: string;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
 }
 
 /** When dApp or wallet POSTs a request to /message. Subsystems dapp, dapp-sdk, wallet, wallet-sdk. */
@@ -693,6 +737,10 @@ export interface BridgeRequestSentEvent {
   wallet_id?: string;
   /** Duration of wallet list download in milliseconds. */
   wallet_list_download_duration?: number;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
 }
 
 /** When the client sends a verification request to bridge events. */
@@ -740,6 +788,10 @@ export interface BridgeVerifyEvent {
   verify_type?: "connect" | string;
   /** The version of the sending subsystem. */
   version?: string;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
 }
 
 /** When the client sends a verification request to bridge events. */
@@ -789,6 +841,10 @@ export interface BridgeVerifyValidationFailedEvent {
   verify_type?: "connect" | string;
   /** The version of the sending subsystem. */
   version?: string;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
 }
 
 /** Fired when a user successfully connected a wallet. */
@@ -1232,6 +1288,10 @@ export interface JSBridgeCallEvent {
   wallet_app_version?: string;
   /** Duration of wallet list download in milliseconds. */
   wallet_list_download_duration?: number;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
 }
 
 /** When the JS bridge returns a promise from the method call. */
@@ -1304,6 +1364,10 @@ export interface JSBridgeErrorEvent {
   wallet_app_version?: string;
   /** Duration of wallet list download in milliseconds. */
   wallet_list_download_duration?: number;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
 }
 
 /** When the JS bridge returns a promise from the method call. */
@@ -1372,6 +1436,10 @@ export interface JSBridgeResponseEvent {
   wallet_app_version?: string;
   /** Duration of wallet list download in milliseconds. */
   wallet_list_download_duration?: number;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
 }
 
 export interface Message {
@@ -2097,6 +2165,16 @@ export interface WalletConnectAcceptedEvent {
   version?: string;
   wallet_app_name?: string;
   wallet_app_version?: string;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
+  /**
+   * Unique wallet ID
+   * @format base64
+   * @example "ZXhhbXBsZQ=="
+   */
+  wallet_id: string;
 }
 
 /** When the user approves the connection in the wallet. */
@@ -2153,6 +2231,16 @@ export interface WalletConnectRejectedEvent {
   version?: string;
   wallet_app_name?: string;
   wallet_app_version?: string;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
+  /**
+   * Unique wallet ID
+   * @format base64
+   * @example "ZXhhbXBsZQ=="
+   */
+  wallet_id: string;
 }
 
 /** When the wallet receives a connection request from the dApp. */
@@ -2204,6 +2292,10 @@ export interface WalletConnectRequestReceivedEvent {
   version?: string;
   wallet_app_name?: string;
   wallet_app_version?: string;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
 }
 
 /** When the wallet displays UI asking the user to confirm the connection. */
@@ -2260,6 +2352,10 @@ export interface WalletConnectRequestUIDisplayedEvent {
   version?: string;
   wallet_app_name?: string;
   wallet_app_version?: string;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
 }
 
 /** When the wallet sends the connection approval/rejection to the dApp. */
@@ -2316,6 +2412,16 @@ export interface WalletConnectResponseSentEvent {
   version?: string;
   wallet_app_name?: string;
   wallet_app_version?: string;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
+  /**
+   * Unique wallet ID
+   * @format base64
+   * @example "ZXhhbXBsZQ=="
+   */
+  wallet_id: string;
 }
 
 /** When the user approves the data signing in the wallet. */
@@ -2373,6 +2479,10 @@ export interface WalletSignDataAcceptedEvent {
    * @example "ZXhhbXBsZQ=="
    */
   wallet_id?: string;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
 }
 
 /** When the wallet displays the sign-data confirmation UI. */
@@ -2435,6 +2545,10 @@ export interface WalletSignDataConfirmationUIDisplayedEvent {
    * @example "ZXhhbXBsZQ=="
    */
   wallet_id?: string;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
 }
 
 /** When the user rejects the data signing request in the wallet. */
@@ -2492,6 +2606,10 @@ export interface WalletSignDataDeclinedEvent {
    * @example "ZXhhbXBsZQ=="
    */
   wallet_id?: string;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
 }
 
 /** When the wallet receives a sign-data request from the dApp. */
@@ -2549,6 +2667,10 @@ export interface WalletSignDataRequestReceivedEvent {
    * @example "ZXhhbXBsZQ=="
    */
   wallet_id?: string;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
 }
 
 /** When the wallet sends the signed data to the dApp. */
@@ -2606,6 +2728,10 @@ export interface WalletSignDataSentEvent {
    * @example "ZXhhbXBsZQ=="
    */
   wallet_id?: string;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
 }
 
 /** When the user approves the transaction in the wallet. When the wallet receives a transaction request from the dApp. */
@@ -2663,6 +2789,10 @@ export interface WalletTransactionAcceptedEvent {
    * @example "ZXhhbXBsZQ=="
    */
   wallet_id?: string;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
 }
 
 /** When the wallet displays the transaction confirmation UI. */
@@ -2733,6 +2863,10 @@ export interface WalletTransactionConfirmationUIDisplayedEvent {
    * @example "ZXhhbXBsZQ=="
    */
   wallet_id?: string;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
 }
 
 /** When the user rejects the transaction in the wallet. */
@@ -2794,6 +2928,10 @@ export interface WalletTransactionDeclinedEvent {
    * @example "ZXhhbXBsZQ=="
    */
   wallet_id?: string;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
 }
 
 /** When the wallet receives a transaction request from the dApp. */
@@ -2851,6 +2989,10 @@ export interface WalletTransactionRequestReceivedEvent {
    * @example "ZXhhbXBsZQ=="
    */
   wallet_id?: string;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
 }
 
 /** When the wallet submits the signed transaction to the network. */
@@ -2914,6 +3056,10 @@ export interface WalletTransactionSentEvent {
   version?: string;
   wallet_app_name?: string;
   wallet_app_version?: string;
+  /** User locale */
+  locale?: string;
+  /** Browser name */
+  browser?: string;
 }
 
 export type QueryParamsType = Record<string | number, any>;

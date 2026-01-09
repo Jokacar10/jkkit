@@ -21,3 +21,29 @@ export type Analytics<TEvent extends AnalyticsEvent = AnalyticsEvent, TOptional 
         event: Omit<Optional<E, TOptional>, 'event_name'>,
     ) => void;
 };
+
+export interface AnalyticsAppInfo {
+    env?: 'bridge' | 'miniapp' | 'wallet' | 'web';
+    platform?: 'ios' | 'ipad' | 'android' | 'macos' | 'windows' | 'linux';
+    browser?: string;
+    appName?: string;
+    appVersion?: string;
+
+    /**
+     * Retrieves the user's current locale setting.
+     */
+    getLocale?(): string;
+
+    /**
+     * Retrieves current user id.
+     */
+    getCurrentUserId?(): string;
+}
+
+export type AnalyticsManagerOptions = {
+    appInfo?: AnalyticsAppInfo;
+    endpoint?: string;
+    enabled?: boolean;
+    batchTimeoutMs?: number;
+    maxBatchSize?: number;
+};

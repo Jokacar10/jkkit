@@ -6,7 +6,6 @@
  *
  */
 
-export * from './analytics';
-export * from './analytics-manager';
+export * from './AnalyticsManager';
+export * from './types';
 export * from './swagger/types';
-export { AnalyticsManager, type AnalyticsManagerOptions } from './analytics-manager';

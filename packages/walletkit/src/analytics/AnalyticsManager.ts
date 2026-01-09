@@ -8,24 +8,17 @@
 
 import { globalLogger } from '../core/Logger';
 import { Api } from './swagger';
-import type { Analytics } from './analytics';
+import type { Analytics, AnalyticsManagerOptions, AnalyticsAppInfo } from './types';
 import type { AnalyticsEvent } from './swagger';
 import { pascalToKebab } from './utils';
+import { getEventsSubsystem, getUnixtime, getVersion, uuidv7 } from '../utils';
 
 const log = globalLogger.createChild('AnalyticsManager');
-
-export type AnalyticsManagerOptions = {
-    batchTimeoutMs?: number;
-    maxBatchSize?: number;
-    analyticsUrl?: string;
-    enabled?: boolean;
-    version?: string;
-    subsystem?: 'dapp' | 'dapp-sdk' | 'bridge' | 'wallet' | 'wallet-sdk';
-};
 
 export class AnalyticsManager {
     private api: Api<unknown>;
     private readonly baseEvent: Partial<AnalyticsEvent>;
+    private readonly appInfo?: AnalyticsAppInfo;
 
     private events: AnalyticsEvent[] = [];
     private timeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -36,7 +29,6 @@ export class AnalyticsManager {
 
     private readonly batchTimeoutMs: number;
     private readonly maxBatchSize: number;
-    private readonly analyticsUrl: string;
     private enabled: boolean;
 
     private static readonly HTTP_STATUS = {
@@ -48,20 +40,25 @@ export class AnalyticsManager {
     private static readonly MAX_BACKOFF_ATTEMPTS = 5;
     private static readonly BACKOFF_MULTIPLIER = 2;
 
-    constructor(options: AnalyticsManagerOptions = {}) {
+    constructor(options: AnalyticsManagerOptions) {
         this.batchTimeoutMs = options.batchTimeoutMs ?? 5000;
         this.currentBatchTimeoutMs = this.batchTimeoutMs;
         this.maxBatchSize = options.maxBatchSize ?? 100;
-        this.analyticsUrl = options.analyticsUrl ?? 'https://analytics.ton.org/events';
         this.enabled = options.enabled ?? true;
+        this.appInfo = options.appInfo;
 
         this.api = new Api({
-            baseUrl: options.analyticsUrl ?? 'https://analytics.ton.org',
+            baseUrl: options.endpoint ?? 'https://analytics.ton.org',
         });
 
         this.baseEvent = {
-            subsystem: options.subsystem ?? 'wallet-sdk',
-            version: options.version,
+            version: getVersion(),
+            subsystem: getEventsSubsystem(),
+            client_environment: options.appInfo?.env ?? 'wallet',
+            platform: options.appInfo?.platform,
+            browser: options.appInfo?.browser,
+            wallet_app_name: options.appInfo?.appName,
+            wallet_app_version: options.appInfo?.appVersion,
         };
     }
 
@@ -100,13 +97,21 @@ export class AnalyticsManager {
             return;
         }
 
-        const enhancedEvent = {
+        const enhancedEvent: AnalyticsEvent = {
             ...this.baseEvent,
             ...event,
-            event_id: this.generateUUID(),
-            client_timestamp: Math.floor(Date.now() / 1000),
-            trace_id: event.trace_id ?? this.generateUUID(),
+            event_id: uuidv7(),
+            trace_id: event.trace_id ?? uuidv7(),
+            client_timestamp: getUnixtime(),
         };
+
+        if (this.appInfo?.getLocale) {
+            enhancedEvent.locale = this.appInfo.getLocale();
+        }
+
+        if (this.appInfo?.getCurrentUserId) {
+            enhancedEvent.user_id = this.appInfo.getCurrentUserId();
+        }
 
         log.debug('Analytics event emitted', { event: enhancedEvent });
 
@@ -239,14 +244,6 @@ export class AnalyticsManager {
 
     private handleTooManyRequests(status: number, statusText: string): void {
         throw new Error(`Analytics API error: ${status} ${statusText}`);
-    }
-
-    private generateUUID(): string {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-            const r = (Math.random() * 16) | 0;
-            const v = c === 'x' ? r : (r & 0x3) | 0x8;
-            return v.toString(16);
-        });
     }
 
     setEnabled(enabled: boolean): void {

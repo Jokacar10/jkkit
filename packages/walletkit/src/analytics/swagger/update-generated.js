@@ -17,7 +17,7 @@ const { generateApi } = require('swagger-typescript-api');
 /**
  * Script to download swagger spec and generate TypeScript types
  * 1. Downloads from: https://analytics.ton.org/swagger/doc.json
- * 2. Transforms event_name patterns
+ * 2. Transforms for better types
  * 3. Generates TypeScript types using swagger-typescript-api
  */
 
@@ -92,6 +92,13 @@ function transformEventName(content) {
     // Step 2: Parse and handle enum arrays with empty strings
     const parsedContent = JSON.parse(result);
 
+    // Required fields for all events
+    const requiredFields = [
+        'event_name',
+        // 'event_id',
+        // 'network_id'
+    ];
+
     if (parsedContent.definitions) {
         for (const [key, definition] of Object.entries(parsedContent.definitions)) {
             if (key.includes('Event') && definition.properties && definition.properties.event_name) {
@@ -112,12 +119,56 @@ function transformEventName(content) {
                     }
                 }
 
-                // Make event_name required
+                // Add optional locale field if it doesn't exist
+                if (!definition.properties.locale) {
+                    definition.properties.locale = {
+                        type: 'string',
+                        description: 'User locale',
+                    };
+                }
+
+                // Add optional browser field if it doesn't exist
+                if (!definition.properties.browser) {
+                    definition.properties.browser = {
+                        type: 'string',
+                        description: 'Browser name',
+                    };
+                }
+
+                // Make required fields required
                 if (!definition.required) {
                     definition.required = [];
                 }
-                if (!definition.required.includes('event_name')) {
-                    definition.required.push('event_name');
+
+                // Add all required fields that exist in properties
+                for (const field of requiredFields) {
+                    if (definition.properties[field] && !definition.required.includes(field)) {
+                        definition.required.push(field);
+                    }
+                }
+
+                // Add missing wallet_id field for specific wallet connect events
+                const eventName = definition.properties.event_name?.const || definition.properties.event_name?.example;
+                const walletConnectEvents = [
+                    'wallet-connect-accepted',
+                    'wallet-connect-rejected',
+                    'wallet-connect-response-sent',
+                ];
+
+                if (eventName && walletConnectEvents.includes(eventName)) {
+                    // Add wallet_id field if it doesn't exist
+                    if (!definition.properties.wallet_id) {
+                        definition.properties.wallet_id = {
+                            type: 'string',
+                            description: 'Unique wallet ID',
+                            format: 'base64',
+                            example: 'ZXhhbXBsZQ==',
+                        };
+                    }
+                    // Make it required
+                    if (!definition.required.includes('wallet_id')) {
+                        definition.required.push('wallet_id');
+                    }
                 }
             }
         }

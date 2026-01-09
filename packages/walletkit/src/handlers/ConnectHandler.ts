@@ -11,14 +11,10 @@
 import type { ConnectItem } from '@tonconnect/protocol';
 import { CONNECT_EVENT_ERROR_CODES } from '@tonconnect/protocol';
 
-import type { TonWalletKitOptions } from '../types';
 import type { RawBridgeEvent, EventHandler, RawBridgeEventConnect } from '../types/internal';
 import { globalLogger } from '../core/Logger';
 import { BasicHandler } from './BasicHandler';
 import type { AnalyticsManager, Analytics } from '../analytics';
-import { getUnixtime } from '../utils/time';
-import { uuidv7 } from '../utils/uuid';
-import { getEventsSubsystem, getVersion } from '../utils/version';
 import { isValidHost } from '../utils/url';
 import type {
     ConnectionRequestEvent,
@@ -33,16 +29,10 @@ export class ConnectHandler
     implements EventHandler<ConnectionRequestEvent, RawBridgeEventConnect>
 {
     private analytics?: Analytics;
-    private walletKitConfig: TonWalletKitOptions;
 
-    constructor(
-        notify: (event: ConnectionRequestEvent) => void,
-        walletKitConfig: TonWalletKitOptions,
-        analyticsManager?: AnalyticsManager,
-    ) {
+    constructor(notify: (event: ConnectionRequestEvent) => void, analyticsManager?: AnalyticsManager) {
         super(notify);
         this.analytics = analyticsManager?.scoped();
-        this.walletKitConfig = walletKitConfig;
     }
 
     canHandle(event: RawBridgeEvent): event is RawBridgeEventConnect {
@@ -80,21 +70,14 @@ export class ConnectHandler
 
         // Send wallet-connect-request-received event
         this.analytics?.emitWalletConnectRequestReceived({
-            trace_id: event.traceId ?? uuidv7(),
-            client_environment: 'wallet',
-            subsystem: getEventsSubsystem(),
+            trace_id: event.traceId,
             client_id: event.from,
             manifest_json_url: manifestUrl || preview?.dAppInfo?.manifestUrl,
             is_ton_addr: event.params?.items?.some((item) => item.name === 'ton_addr') || false,
             is_ton_proof: event.params?.items?.some((item) => item.name === 'ton_proof') || false,
-            client_timestamp: getUnixtime(),
-            event_id: uuidv7(),
-            version: getVersion(),
             proof_payload_size: event.params?.items?.some((item) => item.name === 'ton_proof')
                 ? event.params?.items?.find((item) => item.name === 'ton_proof')?.payload?.length
                 : 0,
-            wallet_app_name: this.walletKitConfig.deviceInfo?.appName,
-            wallet_app_version: this.walletKitConfig.deviceInfo?.appVersion,
         });
 
         return connectEvent;

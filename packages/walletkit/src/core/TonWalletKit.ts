@@ -102,7 +102,14 @@ export class TonWalletKit implements ITonWalletKit {
         this.config = options;
 
         if (options?.analytics?.enabled) {
-            this.analyticsManager = new AnalyticsManager(options?.analytics);
+            this.analyticsManager = new AnalyticsManager({
+                ...options?.analytics,
+                appInfo: {
+                    appName: options?.deviceInfo?.appName,
+                    appVersion: options?.deviceInfo?.appVersion,
+                    ...options?.analytics?.appInfo,
+                },
+            });
         }
 
         // Initialize NetworkManager for multi-network support
@@ -351,7 +358,7 @@ export class TonWalletKit implements ITonWalletKit {
 
         const removeSession = async (sessionId: string) => {
             // Get session to check if it's a JS bridge session
-            const session = await this.sessionManager.getSession(sessionId);
+            const session = this.sessionManager.getSession(sessionId);
 
             if (session) {
                 try {
