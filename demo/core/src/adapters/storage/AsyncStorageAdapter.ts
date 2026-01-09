@@ -14,7 +14,7 @@ import type { StorageAdapter } from './types';
  * @example
  * ```typescript
  * import AsyncStorage from '@react-native-async-storage/async-storage';
- * import { AsyncStorageAdapter } from '@ton/demo-core/adapters';
+ * import { AsyncStorageAdapter } from '@demo/core/adapters';
  *
  * const storage = new AsyncStorageAdapter(AsyncStorage);
  * ```

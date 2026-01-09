@@ -1,5 +1,5 @@
 {
-  "name": "@ton/demo-core",
+  "name": "@demo/core",
   "version": "0.1.0",
   "description": "Core logic for TON wallet demo applications (React + React Native)",
   "main": "dist/cjs/index.js",
