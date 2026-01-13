@@ -115,9 +115,17 @@ export function getDeviceInfoForWallet(
 
     // If wallet adapter has getSupportedFeatures(), use those features
     if (walletAdapter?.getSupportedFeatures) {
+        const adapterFeatures = walletAdapter.getSupportedFeatures();
+        const hasSendTransactionString = adapterFeatures.some((feature) => feature === 'SendTransaction');
+        const hasSendTransactionObject = adapterFeatures.some(
+            (feature) => typeof feature === 'object' && feature.name === 'SendTransaction',
+        );
+
+        const shouldAddString = !hasSendTransactionString && hasSendTransactionObject;
+
         return {
             ...baseDeviceInfo,
-            features: ['SendTransaction', ...walletAdapter.getSupportedFeatures()],
+            features: shouldAddString ? ['SendTransaction', ...adapterFeatures] : adapterFeatures,
         };
     }
 
