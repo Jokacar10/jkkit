@@ -56,10 +56,6 @@ export async function createWalletAdapter(params: CreateWalletAdapterParams): Pr
         createLedgerTransport,
     } = params;
 
-    while (!walletKit.isReady()) {
-        await new Promise((resolve) => setTimeout(resolve, 100));
-    }
-
     const chainNetwork = network === 'mainnet' ? Network.mainnet() : Network.testnet();
 
     switch (useWalletInterfaceType) {

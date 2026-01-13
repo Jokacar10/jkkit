@@ -67,6 +67,7 @@ export const createWalletCoreSlice =
         walletCore: {
             walletKit: null,
             isWalletKitInitialized: false,
+            initializationError: null,
         },
 
         initializeWalletKit: async (network: 'mainnet' | 'testnet' = 'testnet'): Promise<void> => {
@@ -87,8 +88,23 @@ export const createWalletCoreSlice =
             // Create new WalletKit instance
             const walletKit = createWalletKitInstance(walletKitConfig);
 
+            // Wait for WalletKit to be ready with 10 second timeout
+            const startTime = Date.now();
+            const timeout = 10000; // 10 seconds
+
             while (!walletKit?.isReady()) {
-                await new Promise((resolve) => setTimeout(resolve, 10));
+                if (Date.now() - startTime > timeout) {
+                    log.error('WalletKit initialization timeout after 10 seconds');
+
+                    set((state) => {
+                        state.walletCore.initializationError = 'Initialization timeout';
+                        state.walletCore.isWalletKitInitialized = false;
+                    });
+
+                    return;
+                }
+
+                await new Promise((resolve) => setTimeout(resolve, 100));
             }
 
             get().setupTonConnectListeners(walletKit);
@@ -96,6 +112,7 @@ export const createWalletCoreSlice =
             set((state) => {
                 state.walletCore.walletKit = walletKit;
                 state.walletCore.isWalletKitInitialized = true;
+                state.walletCore.initializationError = null;
             });
 
             // Load all saved wallets into the WalletKit instance

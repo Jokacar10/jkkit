@@ -47,6 +47,7 @@ export interface WalletCoreSlice {
     walletCore: {
         walletKit: ITonWalletKit | null;
         isWalletKitInitialized: boolean;
+        initializationError: string | null;
     };
 
     initializeWalletKit: (network?: 'mainnet' | 'testnet') => Promise<void>;
