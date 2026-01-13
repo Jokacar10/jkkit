@@ -45,7 +45,7 @@ export function getDeviceInfoWithDefaults(options?: Partial<DeviceInfo>): Device
         ...options,
     };
 
-    return deviceInfo;
+    return addLegacySendTransactionFeature(deviceInfo);
 }
 
 export function createDeviceInfo(options?: Partial<DeviceInfo>): DeviceInfo {
@@ -116,19 +116,29 @@ export function getDeviceInfoForWallet(
     // If wallet adapter has getSupportedFeatures(), use those features
     if (walletAdapter?.getSupportedFeatures) {
         const adapterFeatures = walletAdapter.getSupportedFeatures();
-        const hasSendTransactionString = adapterFeatures.some((feature) => feature === 'SendTransaction');
-        const hasSendTransactionObject = adapterFeatures.some(
-            (feature) => typeof feature === 'object' && feature.name === 'SendTransaction',
-        );
-
-        const shouldAddString = !hasSendTransactionString && hasSendTransactionObject;
-
-        return {
+        const deviceInfo = {
             ...baseDeviceInfo,
-            features: shouldAddString ? ['SendTransaction', ...adapterFeatures] : adapterFeatures,
+            features: adapterFeatures,
         };
+
+        return addLegacySendTransactionFeature(deviceInfo);
     }
 
     // Otherwise, use features from deviceInfo
     return baseDeviceInfo;
+}
+
+function addLegacySendTransactionFeature(options: DeviceInfo): DeviceInfo {
+    const features = options.features;
+    const hasSendTransactionString = features.some((feature) => feature === 'SendTransaction');
+    const hasSendTransactionObject = features.some(
+        (feature) => typeof feature === 'object' && feature.name === 'SendTransaction',
+    );
+
+    const shouldAddString = !hasSendTransactionString && hasSendTransactionObject;
+
+    return {
+        ...options,
+        features: shouldAddString ? ['SendTransaction', ...features] : features,
+    };
 }
