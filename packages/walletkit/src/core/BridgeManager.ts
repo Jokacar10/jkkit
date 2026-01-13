@@ -377,12 +377,12 @@ export class BridgeManager {
 
             // Send bridge-client-connect-started event
             if (this.analytics) {
-                for (const client of clients) {
-                    this.analytics?.emitBridgeClientConnectStarted({
-                        trace_id: connectTraceId,
-                        client_id: client.clientId,
-                    });
-                }
+                const client = clients[0];
+
+                this.analytics.emitBridgeClientConnectStarted({
+                    trace_id: connectTraceId,
+                    client_id: client?.clientId,
+                });
             }
 
             this.bridgeProvider = await BridgeProvider.open<WalletConsumer>({
@@ -410,12 +410,12 @@ export class BridgeManager {
 
             // Send bridge-client-connect-established event
             if (this.analytics) {
-                for (const client of clients) {
-                    this.analytics?.emitBridgeClientConnectEstablished({
-                        trace_id: connectTraceId,
-                        client_id: client.clientId,
-                    });
-                }
+                const client = clients[0];
+
+                this.analytics.emitBridgeClientConnectEstablished({
+                    trace_id: connectTraceId,
+                    client_id: client?.clientId,
+                });
             }
 
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
