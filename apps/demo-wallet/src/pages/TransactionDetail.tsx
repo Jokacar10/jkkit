@@ -82,10 +82,6 @@ export const TransactionDetail: React.FC = () => {
                     return;
                 }
 
-                while (!walletKit?.isReady()) {
-                    await new Promise((resolve) => setTimeout(resolve, 100));
-                }
-
                 // Use the walletKit's API client to get transaction by hash
                 const apiClient = walletKit.getApiClient(chainNetwork);
                 const base64Hash = Base64Normalize(hash);

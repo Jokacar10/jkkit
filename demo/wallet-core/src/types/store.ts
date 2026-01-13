@@ -46,7 +46,8 @@ export interface AuthSlice extends AuthState {
 export interface WalletCoreSlice {
     walletCore: {
         walletKit: ITonWalletKit | null;
-        walletKitInitializer: Promise<void> | null;
+        isWalletKitInitialized: boolean;
+        initializationError: string | null;
     };
 
     initializeWalletKit: (network?: 'mainnet' | 'testnet') => Promise<void>;

@@ -14,13 +14,14 @@ import { isExtension } from '../../utils/isExtension';
 import { getTonConnectDeviceInfo, getTonConnectWalletManifest } from '../../utils/walletManifest';
 import type { SetState, WalletCoreSliceCreator } from '../../types/store';
 import type { WalletKitConfig } from '../../types/wallet';
+import { getErrorMessage } from '../../utils/error';
 
 const log = createComponentLogger('WalletCoreSlice');
 
 /**
  * Creates a WalletKit instance with the specified network configuration
  */
-async function createWalletKitInstance(walletKitConfig?: WalletKitConfig): Promise<ITonWalletKit> {
+function createWalletKitInstance(walletKitConfig?: WalletKitConfig): ITonWalletKit {
     const walletKit = new TonWalletKit({
         deviceInfo: createDeviceInfo(getTonConnectDeviceInfo()),
         walletManifest: createWalletManifest(getTonConnectWalletManifest()),
@@ -66,10 +67,11 @@ export const createWalletCoreSlice =
     (set: SetState, get) => ({
         walletCore: {
             walletKit: null,
-            walletKitInitializer: null,
+            isWalletKitInitialized: false,
+            initializationError: null,
         },
 
-        initializeWalletKit: (network: 'mainnet' | 'testnet' = 'testnet'): Promise<void> => {
+        initializeWalletKit: async (network: 'mainnet' | 'testnet' = 'testnet'): Promise<void> => {
             const state = get();
 
             // Check if we need to reinitialize
@@ -84,42 +86,29 @@ export const createWalletCoreSlice =
                 }
             }
 
-            // Create initializer promise for other slices to await
-            let initResolve: () => void;
-            let initReject: (error: Error) => void;
-            const initializer = new Promise<void>((resolve, reject) => {
-                initResolve = resolve;
-                initReject = reject;
-            });
-
-            set((state) => {
-                state.walletCore.walletKitInitializer = initializer;
-            });
-
             // Create new WalletKit instance
-            const walletKitPromise = createWalletKitInstance(walletKitConfig);
+            const walletKit = createWalletKitInstance(walletKitConfig);
 
-            walletKitPromise
-                .then(async (walletKit) => {
-                    // Setup event listeners from tonConnectSlice
-                    get().setupTonConnectListeners(walletKit);
+            try {
+                await walletKit.ensureInitialized();
+                get().setupTonConnectListeners(walletKit);
 
-                    set((state) => {
-                        state.walletCore.walletKit = walletKit;
-                    });
-
-                    // Load all saved wallets into the WalletKit instance
-                    await get().loadSavedWalletsIntoKit(walletKit);
-
-                    return walletKit;
-                })
-                .then(() => {
-                    initResolve();
-                })
-                .catch((error) => {
-                    initReject(error);
+                set((state) => {
+                    state.walletCore.walletKit = walletKit;
+                    state.walletCore.isWalletKitInitialized = true;
+                    state.walletCore.initializationError = null;
                 });
 
-            return initializer;
+                // Load all saved wallets into the WalletKit instance
+                await get().loadSavedWalletsIntoKit(walletKit);
+            } catch (error) {
+                const errorMessage = getErrorMessage(error);
+                log.error('WalletKit initialization failed', { errorMessage });
+
+                set((state) => {
+                    state.walletCore.initializationError = errorMessage;
+                    state.walletCore.isWalletKitInitialized = false;
+                });
+            }
         },
     });
