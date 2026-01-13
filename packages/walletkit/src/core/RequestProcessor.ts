@@ -37,10 +37,7 @@ import { getDeviceInfoForWallet } from '../utils/getDefaultWalletConfig';
 import type { WalletManager } from './WalletManager';
 import type { EventConnectApproval, EventTransactionApproval } from '../types/events';
 import { WalletKitError, ERROR_CODES } from '../errors';
-import { uuidv7 } from '../utils/uuid';
-import { getUnixtime } from '../utils/time';
-import { getEventsSubsystem, getVersion } from '../utils/version';
-import { Base64Normalize, Base64ToHex, HexToBase64 } from '../utils/base64';
+import { Base64ToHex, HexToBase64 } from '../utils/base64';
 import type {
     TransactionRequest,
     SignDataPayload,
