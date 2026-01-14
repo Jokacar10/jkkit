@@ -6,8 +6,6 @@
  *
  */
 
-import type { NetworkManager } from '../core/NetworkManager';
-import type { EventEmitter } from '../core/EventEmitter';
 import type { TransactionRequest } from '../api/models';
 import type { SwapAPI, SwapQuoteParams, SwapQuote, SwapParams, SwapProviderInterface } from './types';
 import { SwapError, SwapErrorCode } from './errors';
@@ -25,10 +23,7 @@ export class SwapManager implements SwapAPI {
     private providers: Map<string, SwapProviderInterface> = new Map();
     private defaultProvider?: string;
 
-    constructor(
-        private networkManager: NetworkManager,
-        private eventEmitter: EventEmitter,
-    ) {
+    constructor() {
         log.info('SwapManager initialized');
     }
 
@@ -160,21 +155,5 @@ export class SwapManager implements SwapAPI {
      */
     hasProvider(name: string): boolean {
         return this.providers.has(name);
-    }
-
-    /**
-     * Get the NetworkManager instance
-     * Used by providers to access network clients
-     */
-    getNetworkManager(): NetworkManager {
-        return this.networkManager;
-    }
-
-    /**
-     * Get the EventEmitter instance
-     * Used by providers to emit events
-     */
-    getEventEmitter(): EventEmitter {
-        return this.eventEmitter;
     }
 }
