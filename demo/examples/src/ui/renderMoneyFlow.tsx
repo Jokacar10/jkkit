@@ -6,22 +6,24 @@
  *
  */
 
+// eslint-disable-next-line import/order
 import React from 'react';
 
 // SAMPLE_START: RENDER_MONEY_FLOW_1
-import type { MoneyFlowSelf } from '@ton/walletkit';
+import type { TransactionTraceMoneyFlowItem } from '@ton/walletkit';
+import { AssetType } from '@ton/walletkit';
 // SAMPLE_END: RENDER_MONEY_FLOW_1
 
 // SAMPLE_START: RENDER_MONEY_FLOW_2
-export function renderMoneyFlow(transfers: MoneyFlowSelf[]) {
+function renderMoneyFlow(transfers: TransactionTraceMoneyFlowItem[]) {
     if (transfers.length === 0) {
         return <div>This transaction doesn't involve any token transfers</div>;
     }
 
-    return transfers.map((transfer) => {
+    return transfers.map((transfer: TransactionTraceMoneyFlowItem) => {
         const amount = BigInt(transfer.amount);
         const isIncoming = amount >= 0n;
-        const jettonAddress = transfer.type === 'jetton' ? transfer.jetton : 'TON';
+        const jettonAddress = transfer.assetType === AssetType.ton ? 'TON' : (transfer.tokenAddress ?? '');
 
         return (
             <div key={jettonAddress}>
@@ -35,3 +37,7 @@ export function renderMoneyFlow(transfers: MoneyFlowSelf[]) {
     });
 }
 // SAMPLE_END: RENDER_MONEY_FLOW_2
+
+export function applyRenderMoneyFlow(transfers: TransactionTraceMoneyFlowItem[]) {
+    return renderMoneyFlow(transfers);
+}

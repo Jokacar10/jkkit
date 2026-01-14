@@ -220,7 +220,7 @@ The snippets below mirror how the demo wallet renders previews in its modals. Ad
 Render Connect preview:
 
 ```ts
-export function renderConnectPreview(req: EventConnectRequest) {
+function renderConnectPreview(req: ConnectionRequestEvent) {
     const name = req.preview.manifest?.name ?? req.dAppInfo?.name;
     const description = req.preview.manifest?.description;
     const iconUrl = req.preview.manifest?.iconUrl;
@@ -238,26 +238,27 @@ export function renderConnectPreview(req: EventConnectRequest) {
 Render Transaction preview (money flow overview):
 
 ```ts
-import type { MoneyFlowSelf } from '@ton/walletkit';
+import type { TransactionEmulatedPreview } from '@ton/walletkit';
+import { AssetType } from '@ton/walletkit';
 
-export function summarizeTransaction(preview: TransactionPreview) {
-    if (preview.result === 'error') {
-        return { kind: 'error', message: preview.emulationError.message } as const;
+function summarizeTransaction(preview: TransactionEmulatedPreview) {
+    if (preview.result === 'error' && preview.error) {
+        return { kind: 'error', message: preview.error.message } as const;
     }
 
     // MoneyFlow now provides ourTransfers - a simplified array of net asset changes
-    const transfers = preview.moneyFlow.ourTransfers; // Array of MoneyFlowSelf
+    const transfers = preview.moneyFlow ? preview.moneyFlow.ourTransfers : []; // Array of TransactionTraceMoneyFlow
 
     // Each transfer has:
-    // - type: 'ton' | 'jetton'
+    // - assetType: 'ton' | 'jetton' | 'nft'
     // - amount: string (positive for incoming, negative for outgoing)
-    // - jetton?: string (jetton master address, if type === 'jetton')
+    // - tokenAddress?: string (jetton master address, if type === 'jetton' or 'nft')
 
     return {
         kind: 'success' as const,
         transfers: transfers.map((transfer) => ({
-            type: transfer.type,
-            jettonAddress: transfer.type === 'jetton' ? transfer.jetton : 'TON',
+            assetType: transfer.assetType,
+            jettonAddress: transfer.assetType === AssetType.ton ? 'TON' : (transfer.tokenAddress ?? ''),
             amount: transfer.amount, // string, can be positive or negative
             isIncoming: BigInt(transfer.amount) >= 0n,
         })),
@@ -268,17 +269,18 @@ export function summarizeTransaction(preview: TransactionPreview) {
 Example UI rendering:
 
 ```tsx
-import type { MoneyFlowSelf } from '@ton/walletkit';
+import type { TransactionTraceMoneyFlowItem } from '@ton/walletkit';
+import { AssetType } from '@ton/walletkit';
 
-export function renderMoneyFlow(transfers: MoneyFlowSelf[]) {
+function renderMoneyFlow(transfers: TransactionTraceMoneyFlowItem[]) {
     if (transfers.length === 0) {
         return <div>This transaction doesn't involve any token transfers</div>;
     }
 
-    return transfers.map((transfer) => {
+    return transfers.map((transfer: TransactionTraceMoneyFlowItem) => {
         const amount = BigInt(transfer.amount);
         const isIncoming = amount >= 0n;
-        const jettonAddress = transfer.type === 'jetton' ? transfer.jetton : 'TON';
+        const jettonAddress = transfer.assetType === AssetType.ton ? 'TON' : (transfer.tokenAddress ?? '');
 
         return (
             <div key={jettonAddress}>
@@ -296,7 +298,7 @@ export function renderMoneyFlow(transfers: MoneyFlowSelf[]) {
 Render Sign-Data preview:
 
 ```ts
-export function renderSignDataPreview(preview: SignDataPreview) {
+function renderSignDataPreview(preview: SignDataPreview) {
     switch (preview.kind) {
         case 'text':
             return { type: 'text', content: preview.content };
@@ -316,8 +318,7 @@ export function renderSignDataPreview(preview: SignDataPreview) {
 **Tip:** For jetton names/symbols and images in transaction previews, you can enrich the UI using:
 
 ```ts
-// Example usage (this would be in your component/handler):
-const info = kit.jettons.getJettonInfo(jettonAddress);
+const info = kit.jettons.getJettonInfo(jettonAddress, CHAIN.MAINNET);
 // info?.name, info?.symbol, info?.image
 ```
 
@@ -328,42 +329,42 @@ You can create transactions from your wallet app (not from dApps) and feed them 
 ### Send TON
 
 ```ts
-// import type { TonTransferParams } from '@ton/walletkit';
-//
-// const from = kit.getWallet(getSelectedWalletAddress());
-// if (!from) throw new Error('No wallet');
-//
-// const tonTransfer: TonTransferParams = {
-//     toAddress: 'EQC...recipient...',
-//     amount: (1n * 10n ** 9n).toString(), // 1 TON in nanotons
-//     // Optional comment OR body (base64 BOC), not both
-//     comment: 'Thanks!',
-// };
-//
-// // 1) Build transaction content
-// const tx = await from.createTransferTonTransaction(tonTransfer);
-//
-// // 2) Route into the normal flow (triggers onTransactionRequest)
-// await kit.handleNewTransaction(from, tx);
+import type { TONTransferRequest } from '@ton/walletkit';
+
+const from = kit.getWallet(getSelectedWalletAddress());
+if (!from) throw new Error('No wallet');
+
+const tonTransfer: TONTransferRequest = {
+    recipientAddress: 'EQC...recipient...',
+    transferAmount: (1n * 10n ** 9n).toString(), // 1 TON in nanotons
+    // Optional comment OR body (base64 BOC), not both
+    comment: 'Thanks!',
+};
+
+// 1) Build transaction content
+const tx = await from.createTransferTonTransaction(tonTransfer);
+
+// 2) Route into the normal flow (triggers onTransactionRequest)
+await kit.handleNewTransaction(from, tx);
 ```
 
 ### Send Jettons (fungible tokens)
 
 ```ts
-// import type { JettonTransferParams } from '@ton/walletkit';
-//
-// const wallet = kit.getWallet(getSelectedWalletAddress());
-// if (!wallet) throw new Error('No wallet');
-//
-// const jettonTransfer: JettonTransferParams = {
-//     toAddress: 'EQC...recipient...',
-//     jettonAddress: 'EQD...jetton-master...',
-//     amount: '1000000000', // raw amount per token decimals
-//     comment: 'Payment',
-// };
-//
-// const tx = await wallet.createTransferJettonTransaction(jettonTransfer);
-// await kit.handleNewTransaction(wallet, tx);
+import type { JettonsTransferRequest } from '@ton/walletkit';
+
+const wallet = kit.getWallet(getSelectedWalletAddress());
+if (!wallet) throw new Error('No wallet');
+
+const jettonTransfer: JettonsTransferRequest = {
+    recipientAddress: 'EQC...recipient...',
+    jettonAddress: 'EQD...jetton-master...',
+    transferAmount: '1000000000', // raw amount per token decimals
+    comment: 'Payment',
+};
+
+const tx = await wallet.createTransferJettonTransaction(jettonTransfer);
+await kit.handleNewTransaction(wallet, tx);
 ```
 
 **Notes:**
@@ -373,27 +374,27 @@ You can create transactions from your wallet app (not from dApps) and feed them 
 ### Send NFTs
 
 ```ts
-// import type { NftTransferParamsHuman } from '@ton/walletkit';
-//
-// const wallet = kit.getWallet(getSelectedWalletAddress());
-// if (!wallet) throw new Error('No wallet');
-//
-// const nftTransfer: NftTransferParamsHuman = {
-//     nftAddress: 'EQD...nft-item...',
-//     toAddress: 'EQC...recipient...',
-//     transferAmount: 10000000n, // TON used to invoke NFT transfer (nanotons)
-//     comment: 'Gift',
-// };
-//
-// const tx = await wallet.createTransferNftTransaction(nftTransfer);
-// await kit.handleNewTransaction(wallet, tx);
+import type { NFTTransferRequest } from '@ton/walletkit';
+
+const wallet = kit.getWallet(getSelectedWalletAddress());
+if (!wallet) throw new Error('No wallet');
+
+const nftTransfer: NFTTransferRequest = {
+    nftAddress: 'EQD...nft-item...',
+    recipientAddress: 'EQC...recipient...',
+    transferAmount: '1', // TON used to invoke NFT transfer (nanotons)
+    comment: 'Gift',
+};
+
+const tx = await wallet.createTransferNftTransaction(nftTransfer);
+await kit.handleNewTransaction(wallet, tx);
 ```
 
 **Fetching NFTs:**
 
 ```ts
 const items = await wallet.getNfts({ pagination: { offset: 0, limit: 50 } });
-// items.nfts is an array of NftItem
+// items.items is an array of NftItem
 console.log(`✓ Fetched ${items?.nfts?.length ?? 0} NFTs`);
 ```
 

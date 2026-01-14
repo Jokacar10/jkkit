@@ -6,11 +6,10 @@
  *
  */
 
-import React from 'react';
 import type { SignDataPreview } from '@ton/walletkit';
 
 // SAMPLE_START: RENDER_SIGN_DATA_PREVIEW
-export function renderSignDataPreview(preview: SignDataPreview) {
+function renderSignDataPreview(preview: SignDataPreview) {
     switch (preview.kind) {
         case 'text':
             return { type: 'text', content: preview.content };
@@ -26,3 +25,7 @@ export function renderSignDataPreview(preview: SignDataPreview) {
     }
 }
 // SAMPLE_END: RENDER_SIGN_DATA_PREVIEW
+
+export function applyRenderSignDataPreview(preview: SignDataPreview) {
+    return renderSignDataPreview(preview);
+}

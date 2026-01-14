@@ -6,34 +6,37 @@
  *
  */
 
-import React from 'react';
-
 // SAMPLE_START: SUMMARIZE_TRANSACTION_1
-import type { MoneyFlowSelf } from '@ton/walletkit';
+import type { TransactionEmulatedPreview } from '@ton/walletkit';
+import { AssetType } from '@ton/walletkit';
 // SAMPLE_END: SUMMARIZE_TRANSACTION_1
 
 // SAMPLE_START: SUMMARIZE_TRANSACTION_2
-export function summarizeTransaction(preview: TransactionPreview) {
-    if (preview.result === 'error') {
-        return { kind: 'error', message: preview.emulationError.message } as const;
+function summarizeTransaction(preview: TransactionEmulatedPreview) {
+    if (preview.result === 'error' && preview.error) {
+        return { kind: 'error', message: preview.error.message } as const;
     }
 
     // MoneyFlow now provides ourTransfers - a simplified array of net asset changes
-    const transfers = preview.moneyFlow.ourTransfers; // Array of MoneyFlowSelf
+    const transfers = preview.moneyFlow ? preview.moneyFlow.ourTransfers : []; // Array of TransactionTraceMoneyFlow
 
     // Each transfer has:
-    // - type: 'ton' | 'jetton'
+    // - assetType: 'ton' | 'jetton' | 'nft'
     // - amount: string (positive for incoming, negative for outgoing)
-    // - jetton?: string (jetton master address, if type === 'jetton')
+    // - tokenAddress?: string (jetton master address, if type === 'jetton' or 'nft')
 
     return {
         kind: 'success' as const,
         transfers: transfers.map((transfer) => ({
-            type: transfer.type,
-            jettonAddress: transfer.type === 'jetton' ? transfer.jetton : 'TON',
+            assetType: transfer.assetType,
+            jettonAddress: transfer.assetType === AssetType.ton ? 'TON' : (transfer.tokenAddress ?? ''),
             amount: transfer.amount, // string, can be positive or negative
             isIncoming: BigInt(transfer.amount) >= 0n,
         })),
     };
 }
 // SAMPLE_END: SUMMARIZE_TRANSACTION_2
+
+export function applySummarizeTransaction(preview: TransactionEmulatedPreview) {
+    return summarizeTransaction(preview);
+}

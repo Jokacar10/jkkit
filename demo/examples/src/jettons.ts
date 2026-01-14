@@ -6,15 +6,23 @@
  *
  */
 
+import 'dotenv/config';
+
+import { CHAIN } from '@ton/walletkit';
+
 import { walletKitInitializeSample } from './lib/walletKitInitializeSample';
 
+/**
+ * pnpm tsx src/jettons.ts
+ */
 async function main() {
     const kit = await walletKitInitializeSample();
+    const jettonAddress = 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs';
     // SAMPLE_START: GET_JETTON_INFO
-    // Example usage (this would be in your component/handler):
-    const info = kit.jettons.getJettonInfo(jettonAddress);
+    const info = kit.jettons.getJettonInfo(jettonAddress, CHAIN.MAINNET);
     // info?.name, info?.symbol, info?.image
     // SAMPLE_END: GET_JETTON_INFO
+    console.log(info);
 }
 
 main().catch((error) => {

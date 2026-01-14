@@ -9,7 +9,7 @@
 import 'dotenv/config';
 import type { ConnectionRequestEvent, TransactionRequestEvent } from '@ton/walletkit';
 
-import { walletKitInitializeSample } from './lib/walletKitInitializeSample';
+import { walletKitInitializeSample, getSelectedWalletAddress } from './lib/walletKitInitializeSample';
 
 /**
  * npx tsx src/ui-state-wiring.ts
@@ -21,12 +21,6 @@ import { walletKitInitializeSample } from './lib/walletKitInitializeSample';
 async function main() {
     console.log('=== Minimal UI State Wiring Example ===');
     const kit = await walletKitInitializeSample();
-
-    // Helper function (placeholder for your own wallet selection logic)
-    function getSelectedWalletAddress() {
-        const wallets = kit.getWallets();
-        return wallets.length > 0 ? wallets[0].getAddress() : '';
-    }
 
     // SAMPLE_START: MINIMAL_UI_STATE_WIRING
     type AppState = {
@@ -77,9 +71,13 @@ async function main() {
     console.log('✓ UI state wiring example completed');
     console.log('State management functions are ready to use:');
     console.log('  - approveConnect()');
+    await approveConnect();
     console.log('  - rejectConnect()');
+    await rejectConnect();
     console.log('  - approveTx()');
+    await approveTx();
     console.log('  - rejectTx()');
+    await rejectTx();
 
     await kit.close();
 }

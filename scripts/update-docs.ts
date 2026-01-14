@@ -40,7 +40,7 @@ function isJSXCode(code: string): boolean {
     return jsxPattern.test(code);
 }
 
-async function formatSampleCode(sample: string, filePath?: string): Promise<string> {
+async function formatSampleCode(sample: string): Promise<string> {
     const trimmed = sample.trim();
     if (trimmed === '') {
         return '';

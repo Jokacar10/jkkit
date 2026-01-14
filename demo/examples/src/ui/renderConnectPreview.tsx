@@ -6,10 +6,10 @@
  *
  */
 
-import React from 'react';
+import type { ConnectionRequestEvent } from '@ton/walletkit';
 
 // SAMPLE_START: RENDER_CONNECT_PREVIEW
-export function renderConnectPreview(req: EventConnectRequest) {
+function renderConnectPreview(req: ConnectionRequestEvent) {
     const name = req.preview.manifest?.name ?? req.dAppInfo?.name;
     const description = req.preview.manifest?.description;
     const iconUrl = req.preview.manifest?.iconUrl;
@@ -23,3 +23,7 @@ export function renderConnectPreview(req: EventConnectRequest) {
     };
 }
 // SAMPLE_END: RENDER_CONNECT_PREVIEW
+
+export function applyRenderConnectPreview(req: ConnectionRequestEvent) {
+    return renderConnectPreview(req);
+}
