@@ -61,6 +61,13 @@ window.initWalletKit = async (configuration, storage, bridgeTransport) => {
 
     console.log('🔄 Initializing WalletKit Bridge');
 
+    try {
+        await walletKit.ensureInitialized();
+    } catch (error) {
+        console.error('Failed to initialize WalletKit:', error);
+        throw error;
+    }
+
     // WalletKit is already constructed with config, just set up the bridge
     console.log('✅ WalletKit instance ready');
 
