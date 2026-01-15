@@ -168,7 +168,9 @@ export class Initializer {
         eventRouter.setBridgeManager(bridgeManager);
         bridgeManager
             .start()
-            .then(() => {})
+            .then(() => {
+                log.info('Bridge manager started successfully');
+            })
             .catch((e) => {
                 log.error('Could not start bridge manager', { error: e?.toString?.() });
             });
