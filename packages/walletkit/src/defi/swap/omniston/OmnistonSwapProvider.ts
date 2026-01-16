@@ -10,7 +10,7 @@ import { SettlementMethod, Omniston, GaslessSettlement } from '@ston-fi/omniston
 import type { Quote, QuoteResponseEvent, QuoteRequest } from '@ston-fi/omniston-sdk';
 import { Address } from '@ton/core';
 
-import type { OmnistonQuoteMetadata } from './types';
+import type { OmnistonQuoteMetadata, OmnistonSwapProviderConfig, OmnistonProviderOptions } from './types';
 import { SwapProvider } from '../SwapProvider';
 import type { SwapQuoteParams, SwapQuote, SwapParams, SwapFee } from '../types';
 import { SwapError } from '../errors';
@@ -20,15 +20,6 @@ import type { TransactionRequest } from '../../../api/models';
 import { asBase64, getUnixtime } from '../../../utils';
 
 const log = globalLogger.createChild('OmnistonSwapProvider');
-
-export interface OmnistonSwapProviderConfig {
-    apiUrl?: string;
-    defaultSlippageBps?: number;
-    quoteTimeoutMs?: number;
-    referrerAddress?: string;
-    referrerFeeBps?: number;
-    flexibleReferrerFee?: boolean;
-}
 
 /**
  * Swap provider implementation for Omniston (STON.fi) protocol
@@ -58,7 +49,7 @@ export interface OmnistonSwapProviderConfig {
  * kit.swap.registerProvider('omniston', provider);
  * ```
  */
-export class OmnistonSwapProvider extends SwapProvider {
+export class OmnistonSwapProvider extends SwapProvider<OmnistonProviderOptions> {
     private readonly apiUrl: string;
     private readonly defaultSlippageBps: number;
     private readonly quoteTimeoutMs: number;
@@ -93,7 +84,7 @@ export class OmnistonSwapProvider extends SwapProvider {
         return this.omniston$;
     }
 
-    async getQuote(params: SwapQuoteParams): Promise<SwapQuote> {
+    async getQuote(params: SwapQuoteParams<OmnistonProviderOptions>): Promise<SwapQuote> {
         log.debug('Getting Omniston quote', {
             fromToken: params.fromToken,
             toToken: params.toToken,
@@ -106,21 +97,26 @@ export class OmnistonSwapProvider extends SwapProvider {
 
             const slippageBps = params.slippageBps ?? this.defaultSlippageBps;
 
+            // Use providerOptions if provided, otherwise fall back to config values
+            const referrerAddress = params.providerOptions?.referrerAddress ?? this.referrerAddress;
+            const referrerFeeBps = params.providerOptions?.referrerFeeBps ?? this.referrerFeeBps;
+            const flexibleReferrerFee = params.providerOptions?.flexibleReferrerFee ?? this.flexibleReferrerFee;
+
             const quoteRequest: QuoteRequest = {
                 settlementMethods: [SettlementMethod.SETTLEMENT_METHOD_SWAP],
                 bidAssetAddress: toOmnistonAddress(bidAssetAddress, params.network),
                 askAssetAddress: toOmnistonAddress(askAssetAddress, params.network),
                 amount: { bidUnits: params.amount },
-                referrerAddress: this.referrerAddress
-                    ? toOmnistonAddress(this.referrerAddress, params.network)
+                referrerAddress: referrerAddress
+                    ? toOmnistonAddress(Address.parse(referrerAddress).toString({ bounceable: true }), params.network)
                     : undefined,
-                referrerFeeBps: this.referrerFeeBps,
+                referrerFeeBps: referrerFeeBps,
                 settlementParams: {
                     gaslessSettlement: GaslessSettlement.GASLESS_SETTLEMENT_POSSIBLE,
                     maxPriceSlippageBps: slippageBps,
                     // TODO: get from device info
                     maxOutgoingMessages: 4,
-                    flexibleReferrerFee: this.flexibleReferrerFee,
+                    flexibleReferrerFee: flexibleReferrerFee,
                 },
             };
 

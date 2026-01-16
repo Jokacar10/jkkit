@@ -12,12 +12,13 @@ import type { Network, TransactionRequest, UserFriendlyAddress } from '../../api
 /**
  * Parameters for requesting a swap quote
  */
-export interface SwapQuoteParams {
+export interface SwapQuoteParams<TProviderOptions = unknown> {
     fromToken: UserFriendlyAddress | 'TON';
     toToken: UserFriendlyAddress | 'TON';
     amount: string;
     network: Network;
     slippageBps?: number;
+    providerOptions?: TProviderOptions;
 }
 
 /**
@@ -48,12 +49,13 @@ export interface SwapFee {
 /**
  * Parameters for building swap transaction
  */
-export interface SwapParams {
+export interface SwapParams<TProviderOptions = unknown> {
     quote: SwapQuote;
     userAddress: UserFriendlyAddress;
     destinationAddress?: UserFriendlyAddress;
     slippageBps?: number;
     deadline?: number;
+    providerOptions?: TProviderOptions;
 }
 
 /**
@@ -67,7 +69,7 @@ export interface SwapAPI extends DefiManagerAPI<SwapProviderInterface> {
 /**
  * Interface that all swap providers must implement
  */
-export interface SwapProviderInterface {
-    getQuote(params: SwapQuoteParams): Promise<SwapQuote>;
-    buildSwapTransaction(params: SwapParams): Promise<TransactionRequest>;
+export interface SwapProviderInterface<TQuoteOptions = unknown, TSwapOptions = unknown> {
+    getQuote(params: SwapQuoteParams<TQuoteOptions>): Promise<SwapQuote>;
+    buildSwapTransaction(params: SwapParams<TSwapOptions>): Promise<TransactionRequest>;
 }

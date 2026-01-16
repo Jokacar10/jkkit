@@ -8,6 +8,18 @@
 
 import type { Quote } from '@ston-fi/omniston-sdk';
 
+interface ReferrerOptions {
+    referrerAddress?: string;
+    referrerFeeBps?: number;
+    flexibleReferrerFee?: boolean;
+}
+
+export interface OmnistonSwapProviderConfig extends ReferrerOptions {
+    apiUrl?: string;
+    defaultSlippageBps?: number;
+    quoteTimeoutMs?: number;
+}
+
 export interface OmnistonQuoteMetadata {
     quoteId: string;
     resolverId: string;
@@ -16,3 +28,8 @@ export interface OmnistonQuoteMetadata {
     gasBudget?: string;
     estimatedGasConsumption?: string;
 }
+
+/**
+ * Provider-specific options for Omniston swap operations
+ */
+export type OmnistonProviderOptions = ReferrerOptions;

@@ -27,7 +27,10 @@ export class SwapManager extends DefiManager<SwapProviderInterface> implements S
      * @param provider - Optional provider name to use
      * @returns Promise resolving to swap quote
      */
-    async getQuote(params: SwapQuoteParams, provider?: string): Promise<SwapQuote> {
+    async getQuote<TProviderOptions = unknown>(
+        params: SwapQuoteParams<TProviderOptions>,
+        provider?: string,
+    ): Promise<SwapQuote> {
         log.debug('Getting swap quote', {
             fromToken: params.fromToken,
             toToken: params.toToken,
@@ -57,7 +60,10 @@ export class SwapManager extends DefiManager<SwapProviderInterface> implements S
      * @param provider - Optional provider name to use
      * @returns Promise resolving to transaction request
      */
-    async buildSwapTransaction(params: SwapParams, provider?: string): Promise<TransactionRequest> {
+    async buildSwapTransaction<TProviderOptions = unknown>(
+        params: SwapParams<TProviderOptions>,
+        provider?: string,
+    ): Promise<TransactionRequest> {
         log.debug('Building swap transaction', {
             userAddress: params.userAddress,
             provider: provider || this.defaultProvider,
