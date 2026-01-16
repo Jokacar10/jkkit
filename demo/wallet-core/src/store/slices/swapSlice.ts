@@ -6,7 +6,7 @@
  *
  */
 
-import type { SwapQuote, SwapQuoteParams } from '@ton/walletkit';
+import type { SwapQuoteParams } from '@ton/walletkit';
 
 import { createComponentLogger } from '../../utils/logger';
 import { formatTon, formatUnits } from '../../utils/units';
@@ -14,38 +14,13 @@ import type { SetState, SwapSliceCreator } from '../../types/store';
 
 const log = createComponentLogger('SwapSlice');
 
-export interface SwapState {
-    fromToken: string;
-    toToken: string;
-    fromAmount: string;
-    toAmount: string;
-    currentQuote: SwapQuote | null;
-    isLoadingQuote: boolean;
-    isSwapping: boolean;
-    error: string | null;
-    slippageBps: number;
-}
-
-export interface SwapSlice {
-    swap: SwapState;
-
-    setFromToken: (token: string) => void;
-    setToToken: (token: string) => void;
-    setFromAmount: (amount: string) => void;
-    setSlippageBps: (slippage: number) => void;
-    swapTokens: () => void;
-    getQuote: () => Promise<void>;
-    executeSwap: () => Promise<void>;
-    clearSwap: () => void;
-    validateSwapInputs: () => string | null;
-}
-
 export const createSwapSlice: SwapSliceCreator = (set: SetState, get) => ({
     swap: {
         fromToken: 'TON',
         toToken: '',
         fromAmount: '',
         toAmount: '',
+        destinationAddress: '',
         currentQuote: null,
         isLoadingQuote: false,
         isSwapping: false,
@@ -78,6 +53,12 @@ export const createSwapSlice: SwapSliceCreator = (set: SetState, get) => ({
                 state.swap.toAmount = '';
                 state.swap.error = null;
             }
+        });
+    },
+
+    setDestinationAddress: (address: string) => {
+        set((state) => {
+            state.swap.destinationAddress = address;
         });
     },
 
@@ -317,6 +298,7 @@ export const createSwapSlice: SwapSliceCreator = (set: SetState, get) => ({
                 {
                     quote: currentQuote,
                     userAddress: state.walletManagement.address,
+                    destinationAddress: state.swap.destinationAddress || undefined,
                 },
                 'omniston',
             );

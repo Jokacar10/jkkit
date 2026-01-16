@@ -202,22 +202,26 @@ export interface NftsSlice {
 }
 
 // Swap slice interface
+export interface SwapState {
+    fromToken: string;
+    toToken: string;
+    fromAmount: string;
+    toAmount: string;
+    destinationAddress: string;
+    currentQuote: SwapQuote | null;
+    isLoadingQuote: boolean;
+    isSwapping: boolean;
+    error: string | null;
+    slippageBps: number;
+}
+
 export interface SwapSlice {
-    swap: {
-        fromToken: string;
-        toToken: string;
-        fromAmount: string;
-        toAmount: string;
-        currentQuote: SwapQuote | null;
-        isLoadingQuote: boolean;
-        isSwapping: boolean;
-        error: string | null;
-        slippageBps: number;
-    };
+    swap: SwapState;
 
     setFromToken: (token: string) => void;
     setToToken: (token: string) => void;
     setFromAmount: (amount: string) => void;
+    setDestinationAddress: (address: string) => void;
     setSlippageBps: (slippage: number) => void;
     swapTokens: () => void;
     getQuote: () => Promise<void>;

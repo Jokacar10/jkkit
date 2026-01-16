@@ -36,6 +36,7 @@ export const SwapInterface: FC<SwapInterfaceProps> = ({ className }) => {
         toToken,
         fromAmount,
         toAmount,
+        destinationAddress,
         currentQuote,
         isLoadingQuote,
         isSwapping,
@@ -44,6 +45,7 @@ export const SwapInterface: FC<SwapInterfaceProps> = ({ className }) => {
         setFromToken,
         setToToken,
         setFromAmount,
+        setDestinationAddress,
         setSlippageBps,
         swapTokens,
         getQuote,
@@ -53,6 +55,7 @@ export const SwapInterface: FC<SwapInterfaceProps> = ({ className }) => {
     const navigate = useNavigate();
 
     const [showSlippageSettings, setShowSlippageSettings] = useState(false);
+    const [useCustomDestination, setUseCustomDestination] = useState(false);
 
     const getTokenSymbol = (tokenAddress: string): string => {
         if (tokenAddress === 'TON') return 'TON';
@@ -134,6 +137,39 @@ export const SwapInterface: FC<SwapInterfaceProps> = ({ className }) => {
                     token={toToken}
                     className="-mt-2"
                 />
+
+                {/* Destination Address */}
+                <div className="space-y-2">
+                    <label className="flex items-center space-x-2 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={useCustomDestination}
+                            onChange={(e) => {
+                                setUseCustomDestination(e.target.checked);
+                                if (!e.target.checked) {
+                                    setDestinationAddress('');
+                                }
+                            }}
+                            className="w-4 h-4 text-blue-600 border-gray-300 bg-white rounded focus:ring-blue-500"
+                        />
+                        <span className="text-sm text-gray-700">Use different recipient address</span>
+                    </label>
+
+                    {useCustomDestination && (
+                        <div className="space-y-1">
+                            <input
+                                type="text"
+                                value={destinationAddress}
+                                onChange={(e) => setDestinationAddress(e.target.value)}
+                                placeholder="Enter recipient address (EQ...)"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                            />
+                            <p className="text-xs text-gray-500">
+                                Swapped tokens will be sent to this address instead of your wallet
+                            </p>
+                        </div>
+                    )}
+                </div>
 
                 {currentQuote && (
                     <>

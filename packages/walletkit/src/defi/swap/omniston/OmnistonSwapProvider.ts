@@ -16,7 +16,7 @@ import type { SwapQuoteParams, SwapQuote, SwapParams, SwapFee } from '../types';
 import { SwapError } from '../errors';
 import { globalLogger } from '../../../core/Logger';
 import { tokenToAddress, addressToToken, toOmnistonAddress, isOmnistonQuoteMetadata } from './utils';
-import type { Base64String, TransactionRequest } from '../../../api/models';
+import type { TransactionRequest } from '../../../api/models';
 import { asBase64, getUnixtime } from '../../../utils';
 
 const log = globalLogger.createChild('OmnistonSwapProvider');
@@ -221,10 +221,16 @@ export class OmnistonSwapProvider extends SwapProvider {
             const userAddress = Address.parse(params.userAddress).toRawString();
             const omnistonUserAddress = toOmnistonAddress(userAddress, params.quote.network);
 
+            // Use destinationAddress if provided, otherwise use userAddress
+            const destinationAddressRaw = params.destinationAddress
+                ? Address.parse(params.destinationAddress).toRawString()
+                : userAddress;
+            const omnistonDestinationAddress = toOmnistonAddress(destinationAddressRaw, params.quote.network);
+
             const transactionRequest = {
                 quote: omnistonQuote,
                 sourceAddress: omnistonUserAddress,
-                destinationAddress: omnistonUserAddress,
+                destinationAddress: omnistonDestinationAddress,
                 gasExcessAddress: omnistonUserAddress,
                 refundAddress: omnistonUserAddress,
                 useRecommendedSlippage: true,

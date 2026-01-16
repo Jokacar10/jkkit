@@ -51,9 +51,9 @@ export interface SwapFee {
 export interface SwapParams {
     quote: SwapQuote;
     userAddress: UserFriendlyAddress;
+    destinationAddress?: UserFriendlyAddress;
     slippageBps?: number;
     deadline?: number;
-    referralAddress?: UserFriendlyAddress;
 }
 
 /**
