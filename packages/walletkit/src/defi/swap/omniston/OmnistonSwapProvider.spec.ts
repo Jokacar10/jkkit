@@ -6,24 +6,16 @@
  *
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { Address } from '@ton/core';
 
 import { OmnistonSwapProvider } from './OmnistonSwapProvider';
 import { Network } from '../../../api/models';
-import type { NetworkManager } from '../../../core/NetworkManager';
-import type { EventEmitter } from '../../../core/EventEmitter';
 import { isOmnistonQuoteMetadata } from './utils';
 
 // Skip integration tests
-describe('OmnistonSwapProvider.getQuote', () => {
-    let mockNetworkManager: NetworkManager = {} as NetworkManager;
-    let mockEventEmitter = {
-        emit: vi.fn(),
-        on: vi.fn(),
-        off: vi.fn(),
-    } as unknown as EventEmitter;
-    const provider = new OmnistonSwapProvider(mockNetworkManager, mockEventEmitter, {
+describe.skip('OmnistonSwapProvider.getQuote', () => {
+    const provider = new OmnistonSwapProvider({
         defaultSlippageBps: 100,
         quoteTimeoutMs: 30000,
     });
@@ -39,7 +31,6 @@ describe('OmnistonSwapProvider.getQuote', () => {
 
         expect(BigInt(quote.toAmount)).toBeGreaterThan(0);
         expect(isOmnistonQuoteMetadata(quote.metadata)).toBeTruthy();
-        expect(mockEventEmitter.emit).toHaveBeenCalledWith('swap:quote:received', expect.any(Object));
     }, 30000);
 
     it('should build tx for quote', async () => {

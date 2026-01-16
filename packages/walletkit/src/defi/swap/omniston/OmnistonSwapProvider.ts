@@ -63,7 +63,7 @@ export class OmnistonSwapProvider extends SwapProvider<OmnistonProviderOptions> 
         super();
         this.apiUrl = config?.apiUrl ?? 'wss://omni-ws.ston.fi';
         this.defaultSlippageBps = config?.defaultSlippageBps ?? 100; // 1% default
-        this.quoteTimeoutMs = config?.quoteTimeoutMs ?? 7000; // 10 seconds
+        this.quoteTimeoutMs = config?.quoteTimeoutMs ?? 10000; // 10 seconds
         this.referrerAddress = config?.referrerAddress
             ? Address.parse(config?.referrerAddress).toString({ bounceable: true })
             : undefined;
