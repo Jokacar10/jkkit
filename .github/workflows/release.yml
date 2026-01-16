@@ -7,6 +7,10 @@ on:
   # Allows manual workflow runs with branch selection in UI
   workflow_dispatch: {}
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -15,7 +19,7 @@ jobs:
     # container:
     #   image: node:22-slim
     #   options: --user root
-    
+
     steps:
       # - name: Install git
       #   run: |
@@ -65,7 +69,7 @@ jobs:
       - name: Pack packages
         run: |
           pnpm pack -r --pack-destination release-artifacts
-      
+
       - name: Prepare checksums for release
         run: |
           # Copy and rename Android bridge checksums
@@ -74,14 +78,14 @@ jobs:
           else
             echo "Warning: Android bridge checksums not found at packages/walletkit-android-bridge/dist/checksums.json"
           fi
-          
+
           # Copy and rename iOS bridge checksums
           if [ -f "packages/walletkit-ios-bridge/dist/checksums.json" ]; then
             cp packages/walletkit-ios-bridge/dist/checksums.json release-artifacts/walletkit-ios-bridge.checksums.json
           else
             echo "Warning: iOS bridge checksums not found"
           fi
-      
+
       - name: Create Release Draft
         uses: softprops/action-gh-release@v1
         with:
@@ -97,8 +101,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish NPM package
-        run: |
-          pnpm publish --filter="@ton/walletkit" --access=public --publish-branch=release
+      - name: Publish NPM package (OIDC)
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: "true"
+        run: |
+          NODE_AUTH_TOKEN="" pnpm publish \
+            --filter="@ton/walletkit" \
+            --access=public \
+            --publish-branch=release
