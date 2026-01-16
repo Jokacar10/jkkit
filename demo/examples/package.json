@@ -10,14 +10,14 @@
   "dependencies": {
     "@ton/walletkit": "workspace:*",
     "@types/node": "^24.10.1",
-    "@types/react": "^18.2.0",
+    "@types/react": "catalog:",
     "dotenv": "^17.2.3",
-    "react": "^18.2.0",
+    "react": "catalog:",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },
   "devDependencies": {
-    "@vitest/coverage-v8": "^4.0.8",
-    "vitest": "^4.0.8"
+    "@vitest/coverage-v8": "^4.0.17",
+    "vitest": "^4.0.17"
   }
 }
