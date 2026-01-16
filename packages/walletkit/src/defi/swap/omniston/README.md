@@ -28,6 +28,36 @@ interface OmnistonSwapProviderConfig {
     referrerFeeBps?: number;      // Referrer fee in bps
     flexibleReferrerFee?: boolean; // Default: false
 }
+
+interface SwapQuoteParams {
+    fromToken: string;
+    toToken: string;
+    amount: string;
+    network: Network;
+    slippageBps?: number;
+    maxOutgoingMessages?: number; // Max messages per tx (default: 1 if not specified)
+    providerOptions?: OmnistonProviderOptions;
+}
+```
+
+**Important:** The `maxOutgoingMessages` parameter should be extracted from the wallet's features using `getMaxOutgoingMessages()` utility. If not provided, it defaults to `1`, which may limit swap route optimization.
+
+### Usage Example
+
+```typescript
+import { getMaxOutgoingMessages } from '@ton/walletkit';
+
+// Extract maxOutgoingMessages from wallet features
+const features = wallet.getSupportedFeatures();
+const maxOutgoingMessages = getMaxOutgoingMessages(features);
+
+const quote = await kit.swap.getQuote({
+    fromToken: 'TON',
+    toToken: 'USDT',
+    amount: '1000000000',
+    network: Network.mainnet(),
+    maxOutgoingMessages, // Pass wallet's capability
+});
 ```
 
 ## Referral Fees

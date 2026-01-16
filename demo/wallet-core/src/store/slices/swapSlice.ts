@@ -7,6 +7,7 @@
  */
 
 import type { SwapQuoteParams } from '@ton/walletkit';
+import { getMaxOutgoingMessages } from '@ton/walletkit';
 
 import { createComponentLogger } from '../../utils/logger';
 import { formatTon, formatUnits } from '../../utils/units';
@@ -204,13 +205,21 @@ export const createSwapSlice: SwapSliceCreator = (set: SetState, get) => ({
 
             const decimals = fromToken === 'TON' ? 9 : 6;
             const amountInUnits = Math.floor(parseFloat(fromAmount) * Math.pow(10, decimals)).toString();
+            let maxOutgoingMessages = 1;
+
+            if (state.walletManagement.currentWallet?.getSupportedFeatures) {
+                maxOutgoingMessages = getMaxOutgoingMessages(
+                    state.walletManagement.currentWallet?.getSupportedFeatures(),
+                );
+            }
 
             const quoteParams: SwapQuoteParams = {
-                fromToken: fromToken,
-                toToken: toToken,
-                amount: amountInUnits,
+                fromToken,
+                toToken,
                 network,
                 slippageBps,
+                maxOutgoingMessages,
+                amount: amountInUnits,
             };
 
             const quote = await state.walletCore.walletKit.swap.getQuote(quoteParams, 'omniston');

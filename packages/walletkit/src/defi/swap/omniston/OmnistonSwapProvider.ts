@@ -114,8 +114,7 @@ export class OmnistonSwapProvider extends SwapProvider<OmnistonProviderOptions> 
                 settlementParams: {
                     gaslessSettlement: GaslessSettlement.GASLESS_SETTLEMENT_POSSIBLE,
                     maxPriceSlippageBps: slippageBps,
-                    // TODO: get from device info
-                    maxOutgoingMessages: 4,
+                    maxOutgoingMessages: params.maxOutgoingMessages ?? 1,
                     flexibleReferrerFee: flexibleReferrerFee,
                 },
             };

@@ -18,6 +18,7 @@ export interface SwapQuoteParams<TProviderOptions = unknown> {
     amount: string;
     network: Network;
     slippageBps?: number;
+    maxOutgoingMessages?: number;
     providerOptions?: TProviderOptions;
 }
 
