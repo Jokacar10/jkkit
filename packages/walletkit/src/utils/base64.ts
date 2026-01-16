@@ -7,7 +7,7 @@
  */
 
 import type { Hex } from '../api/models';
-import { asHex } from '../api/models';
+import { asHex } from './hex';
 import { WalletKitError, ERROR_CODES } from '../errors';
 
 /**
