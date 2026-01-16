@@ -17,3 +17,6 @@ export { CardPreview, CardGenerator, RarityBadge } from './card';
 
 // Wallet components
 export { WalletConnect, MintButton } from './wallet';
+
+// Asset components
+export { JettonsCard, NftsCard } from './assets';

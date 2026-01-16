@@ -9,3 +9,4 @@
 export { useAppKit } from './useAppKit';
 export { useCardGenerator } from './useCardGenerator';
 export { useMint } from './useMint';
+export { useWalletAssets } from './useWalletAssets';

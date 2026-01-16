@@ -376,10 +376,12 @@ export class TonConnectWalletWrapperImpl implements TonConnectWalletWrapper {
         }
     }
 
-    async getJettons(_params?: JettonsRequest): Promise<JettonsResponse> {
-        throw new Error(
-            'Jettons listing not yet implemented in TonConnect wrapper. Use a full TonWalletKit wallet for jetton operations.',
-        );
+    async getJettons(params?: JettonsRequest): Promise<JettonsResponse> {
+        return this.client.jettonsByOwnerAddress({
+            ownerAddress: this.getAddress(),
+            offset: params?.pagination.offset,
+            limit: params?.pagination.limit,
+        });
     }
 
     // ==========================================
@@ -398,15 +400,15 @@ export class TonConnectWalletWrapperImpl implements TonConnectWalletWrapper {
         );
     }
 
-    async getNfts(_params: NFTsRequest): Promise<NFTsResponse> {
-        throw new Error(
-            'NFT listing not yet implemented in TonConnect wrapper. Use a full TonWalletKit wallet for NFT operations.',
-        );
+    async getNfts(params: NFTsRequest): Promise<NFTsResponse> {
+        return this.client.nftItemsByOwner({
+            ownerAddress: this.getAddress(),
+            pagination: params.pagination,
+        });
     }
 
-    async getNft(_address: UserFriendlyAddress): Promise<NFT | null> {
-        throw new Error(
-            'NFT fetching not yet implemented in TonConnect wrapper. Use a full TonWalletKit wallet for NFT operations.',
-        );
+    async getNft(address: UserFriendlyAddress): Promise<NFT | null> {
+        const result = await this.client.nftItemsByAddress({ address });
+        return result.nfts.length > 0 ? result.nfts[0] : null;
     }
 }

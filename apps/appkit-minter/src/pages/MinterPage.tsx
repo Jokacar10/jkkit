@@ -8,11 +8,13 @@
 
 import type React from 'react';
 
-import { Layout, CardGenerator, WalletConnect } from '@/components';
-import { useAppKit } from '@/hooks';
+import { Layout, CardGenerator, WalletConnect, JettonsCard, NftsCard } from '@/components';
+import { useAppKit, useWalletAssets } from '@/hooks';
 
 export const MinterPage: React.FC = () => {
     const { isConnected } = useAppKit();
+    const { jettons, nfts, isLoadingJettons, isLoadingNfts, jettonsError, nftsError, loadJettons, loadNfts } =
+        useWalletAssets();
 
     return (
         <Layout title="NFT Minter">
@@ -22,6 +24,19 @@ export const MinterPage: React.FC = () => {
 
                 {/* Card Generator with integrated mint button */}
                 <CardGenerator />
+
+                {/* Connected wallet assets */}
+                {isConnected && (
+                    <div className="space-y-4">
+                        <JettonsCard
+                            jettons={jettons}
+                            isLoading={isLoadingJettons}
+                            error={jettonsError}
+                            onRefresh={loadJettons}
+                        />
+                        <NftsCard nfts={nfts} isLoading={isLoadingNfts} error={nftsError} onRefresh={loadNfts} />
+                    </div>
+                )}
             </div>
         </Layout>
     );
