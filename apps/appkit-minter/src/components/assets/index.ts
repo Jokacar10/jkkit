@@ -8,3 +8,5 @@
 
 export { JettonsCard } from './JettonsCard';
 export { NftsCard } from './NftsCard';
+export { JettonTransferModal } from './JettonTransferModal';
+export { NftTransferModal } from './NftTransferModal';

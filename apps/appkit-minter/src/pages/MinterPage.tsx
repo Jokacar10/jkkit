@@ -13,8 +13,19 @@ import { useAppKit, useWalletAssets } from '@/hooks';
 
 export const MinterPage: React.FC = () => {
     const { isConnected } = useAppKit();
-    const { jettons, nfts, isLoadingJettons, isLoadingNfts, jettonsError, nftsError, loadJettons, loadNfts } =
-        useWalletAssets();
+    const {
+        jettons,
+        nfts,
+        isLoadingJettons,
+        isLoadingNfts,
+        jettonsError,
+        nftsError,
+        loadJettons,
+        loadNfts,
+        transferJetton,
+        transferNft,
+        isTransferring,
+    } = useWalletAssets();
 
     return (
         <Layout title="NFT Minter">
@@ -33,8 +44,17 @@ export const MinterPage: React.FC = () => {
                             isLoading={isLoadingJettons}
                             error={jettonsError}
                             onRefresh={loadJettons}
+                            onTransfer={transferJetton}
+                            isTransferring={isTransferring}
                         />
-                        <NftsCard nfts={nfts} isLoading={isLoadingNfts} error={nftsError} onRefresh={loadNfts} />
+                        <NftsCard
+                            nfts={nfts}
+                            isLoading={isLoadingNfts}
+                            error={nftsError}
+                            onRefresh={loadNfts}
+                            onTransfer={transferNft}
+                            isTransferring={isTransferring}
+                        />
                     </div>
                 )}
             </div>

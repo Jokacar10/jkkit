@@ -8,6 +8,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { Jetton, NFT } from '@ton/walletkit';
+import { isValidAddress } from '@ton/walletkit';
 
 import { useAppKit } from './useAppKit';
 
@@ -20,6 +21,11 @@ interface WalletAssetsState {
     nftsError: string | null;
 }
 
+interface TransferState {
+    isTransferring: boolean;
+    transferError: string | null;
+}
+
 export function useWalletAssets() {
     const { isConnected, wallet, getAppKit, getTonConnect } = useAppKit();
 
@@ -30,6 +36,11 @@ export function useWalletAssets() {
         isLoadingNfts: false,
         jettonsError: null,
         nftsError: null,
+    });
+
+    const [transferState, setTransferState] = useState<TransferState>({
+        isTransferring: false,
+        transferError: null,
     });
 
     const wrappedWallet = useMemo(() => {
@@ -90,6 +101,81 @@ export function useWalletAssets() {
         await Promise.all([loadJettons(), loadNfts()]);
     }, [loadJettons, loadNfts]);
 
+    const transferJetton = useCallback(
+        async (jetton: Jetton, recipientAddress: string, amount: string, comment?: string) => {
+            if (!wrappedWallet) {
+                throw new Error('Wallet not connected');
+            }
+
+            if (!isValidAddress(recipientAddress)) {
+                throw new Error('Invalid recipient address');
+            }
+
+            const decimals = jetton.decimalsNumber ?? 9;
+            const amountNum = parseFloat(amount);
+            if (isNaN(amountNum) || amountNum <= 0) {
+                throw new Error('Invalid amount');
+            }
+
+            const transferAmount = Math.floor(amountNum * Math.pow(10, decimals)).toString();
+
+            setTransferState({ isTransferring: true, transferError: null });
+
+            try {
+                const transaction = await wrappedWallet.createTransferJettonTransaction({
+                    jettonAddress: jetton.address,
+                    recipientAddress,
+                    transferAmount,
+                    comment,
+                });
+
+                await wrappedWallet.sendTransaction(transaction);
+                setTransferState({ isTransferring: false, transferError: null });
+
+                // Refresh jettons after transfer
+                await loadJettons();
+            } catch (error) {
+                const errorMessage = error instanceof Error ? error.message : 'Failed to transfer jetton';
+                setTransferState({ isTransferring: false, transferError: errorMessage });
+                throw error;
+            }
+        },
+        [wrappedWallet, loadJettons],
+    );
+
+    const transferNft = useCallback(
+        async (nft: NFT, recipientAddress: string, comment?: string) => {
+            if (!wrappedWallet) {
+                throw new Error('Wallet not connected');
+            }
+
+            if (!isValidAddress(recipientAddress)) {
+                throw new Error('Invalid recipient address');
+            }
+
+            setTransferState({ isTransferring: true, transferError: null });
+
+            try {
+                const transaction = await wrappedWallet.createTransferNftTransaction({
+                    nftAddress: nft.address,
+                    recipientAddress,
+                    comment,
+                });
+
+                await wrappedWallet.sendTransaction(transaction);
+                setTransferState({ isTransferring: false, transferError: null });
+
+                // Refresh NFTs after transfer
+                await loadNfts();
+            } catch (error) {
+                const errorMessage = error instanceof Error ? error.message : 'Failed to transfer NFT';
+                setTransferState({ isTransferring: false, transferError: errorMessage });
+                throw error;
+            }
+        },
+        [wrappedWallet, loadNfts],
+    );
+
     // Auto-load assets when wallet connects
     useEffect(() => {
         if (wrappedWallet) {
@@ -110,8 +196,11 @@ export function useWalletAssets() {
 
     return {
         ...state,
+        ...transferState,
         loadJettons,
         loadNfts,
         refresh,
+        transferJetton,
+        transferNft,
     };
 }
