@@ -14,7 +14,6 @@ import type { WalletManager } from '../core/WalletManager';
 import type { Storage } from '../storage';
 import { globalLogger } from './Logger';
 import type { WalletId } from '../utils/walletId';
-import { createWalletId } from '../utils/walletId';
 import type { Wallet } from '../api/interfaces';
 import type { TONConnectSessionManager } from '../api/interfaces/TONConnectSessionManager';
 import type { DAppInfo, TONConnectSession } from '../api/models';
@@ -58,6 +57,9 @@ export class TONConnectStoredSessionManager implements TONConnectSessionManager 
         // Create walletId from wallet if provided
         const walletId = wallet.getWalletId();
 
+        const url = new URL(dAppInfo.url || '');
+        const domain = url.host;
+
         const session: TONConnectSession = {
             sessionId,
             walletId,
@@ -66,6 +68,7 @@ export class TONConnectStoredSessionManager implements TONConnectSessionManager 
             lastActivityAt: now.toISOString(),
             privateKey: randomKeyPair.secretKey,
             publicKey: randomKeyPair.publicKey,
+            domain: domain,
             dAppInfo: dAppInfo,
             isJsBridge,
         };
@@ -91,18 +94,8 @@ export class TONConnectStoredSessionManager implements TONConnectSessionManager 
             return undefined;
         }
         for (const session of this.sessions.values()) {
-            try {
-                if (session.dAppInfo.url === undefined) {
-                    continue;
-                }
-
-                let dAppHost = new URL(session.dAppInfo.url).host;
-
-                if (dAppHost === host) {
-                    return this.getSession(session.sessionId);
-                }
-            } catch {
-                continue;
+            if (session.domain === host) {
+                return this.getSession(session.sessionId);
             }
         }
         return undefined;

@@ -17,7 +17,7 @@ export interface TONConnectSession {
     lastActivityAt: string; // date
     privateKey: string;
     publicKey: string;
-
+    domain: string;
     dAppInfo: DAppInfo;
 
     // Bridge type indicator (needed to determine how to send disconnect events)
