@@ -7,7 +7,7 @@
  */
 
 import type { Hex, Base64String } from '../api/models';
-import { asHex } from '../api/models';
+import { asHex } from './hex';
 import { WalletKitError, ERROR_CODES } from '../errors';
 
 export function asBase64(data: string): Base64String {
