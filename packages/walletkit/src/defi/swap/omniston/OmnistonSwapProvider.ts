@@ -88,7 +88,8 @@ export class OmnistonSwapProvider extends SwapProvider<OmnistonProviderOptions> 
         log.debug('Getting Omniston quote', {
             fromToken: params.fromToken,
             toToken: params.toToken,
-            amount: params.amount,
+            amountFrom: params.amountFrom,
+            amountTo: params.amountTo,
         });
 
         try {
@@ -102,11 +103,14 @@ export class OmnistonSwapProvider extends SwapProvider<OmnistonProviderOptions> 
             const referrerFeeBps = params.providerOptions?.referrerFeeBps ?? this.referrerFeeBps;
             const flexibleReferrerFee = params.providerOptions?.flexibleReferrerFee ?? this.flexibleReferrerFee;
 
+            // Determine amount based on whether amountFrom or amountTo is specified
+            const amount = params.amountFrom ? { bidUnits: params.amountFrom } : { askUnits: params.amountTo };
+
             const quoteRequest: QuoteRequest = {
+                amount,
                 settlementMethods: [SettlementMethod.SETTLEMENT_METHOD_SWAP],
                 bidAssetAddress: toOmnistonAddress(bidAssetAddress, params.network),
                 askAssetAddress: toOmnistonAddress(askAssetAddress, params.network),
-                amount: { bidUnits: params.amount },
                 referrerAddress: referrerAddress
                     ? toOmnistonAddress(Address.parse(referrerAddress).toString({ bounceable: true }), params.network)
                     : undefined,

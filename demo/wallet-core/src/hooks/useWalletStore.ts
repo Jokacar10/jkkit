@@ -218,6 +218,7 @@ export const useSwap = () => {
             setFromToken: state.setFromToken,
             setToToken: state.setToToken,
             setFromAmount: state.setFromAmount,
+            setToAmount: state.setToAmount,
             setDestinationAddress: state.setDestinationAddress,
             setSlippageBps: state.setSlippageBps,
             swapTokens: state.swapTokens,

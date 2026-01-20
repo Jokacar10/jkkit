@@ -221,6 +221,7 @@ export interface SwapSlice {
     setFromToken: (token: string) => void;
     setToToken: (token: string) => void;
     setFromAmount: (amount: string) => void;
+    setToAmount: (amount: string) => void;
     setDestinationAddress: (address: string) => void;
     setSlippageBps: (slippage: number) => void;
     swapTokens: () => void;

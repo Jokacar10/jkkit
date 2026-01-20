@@ -45,6 +45,7 @@ export const SwapInterface: FC<SwapInterfaceProps> = ({ className }) => {
         setFromToken,
         setToToken,
         setFromAmount,
+        setToAmount,
         setDestinationAddress,
         setSlippageBps,
         swapTokens,
@@ -80,7 +81,9 @@ export const SwapInterface: FC<SwapInterfaceProps> = ({ className }) => {
 
     const getSwapButtonText = () => {
         if (!fromToken || !toToken) return 'Select tokens';
-        if (!fromAmount || parseFloat(fromAmount) <= 0) return 'Enter amount';
+        const hasFromAmount = fromAmount && parseFloat(fromAmount) > 0;
+        const hasToAmount = toAmount && parseFloat(toAmount) > 0;
+        if (!hasFromAmount && !hasToAmount) return 'Enter amount';
         if (isLoadingQuote) return 'Getting quote...';
         if (error) return 'Error';
         if (!currentQuote) return 'Get Quote';
@@ -130,9 +133,8 @@ export const SwapInterface: FC<SwapInterfaceProps> = ({ className }) => {
                 <TokenInput
                     amount={toAmount}
                     excludeToken={fromToken}
-                    isOutput
                     label="To"
-                    onAmountChange={() => {}}
+                    onAmountChange={setToAmount}
                     onTokenSelect={setToToken}
                     token={toToken}
                     className="-mt-2"

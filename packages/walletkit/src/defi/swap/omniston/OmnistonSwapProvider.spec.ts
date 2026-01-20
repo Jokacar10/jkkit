@@ -22,7 +22,7 @@ describe.skip('OmnistonSwapProvider.getQuote', () => {
     const usdtQuoteParams = {
         fromToken: 'TON',
         toToken: 'EQA2kCVNwVsil2EM2mB0SkXytxCqQjS4mttjDpnXmwG9T6bO', // USDT
-        amount: '1000000000', // 1 TON
+        amountFrom: '1000000000', // 1 TON
         network: Network.mainnet(),
     };
 

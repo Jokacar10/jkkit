@@ -31,10 +31,19 @@ export class SwapManager extends DefiManager<SwapProviderInterface> implements S
         params: SwapQuoteParams<TProviderOptions>,
         provider?: string,
     ): Promise<SwapQuote> {
+        if (params.amountFrom && params.amountTo) {
+            throw new SwapError('Cannot specify both amountFrom and amountTo', SwapError.INVALID_PARAMS);
+        }
+
+        if (!params.amountFrom && !params.amountTo) {
+            throw new SwapError('Must specify either amountFrom or amountTo', SwapError.INVALID_PARAMS);
+        }
+
         log.debug('Getting swap quote', {
             fromToken: params.fromToken,
             toToken: params.toToken,
-            amount: params.amount,
+            amountFrom: params.amountFrom,
+            amountTo: params.amountTo,
             provider: provider || this.defaultProvider,
         });
 

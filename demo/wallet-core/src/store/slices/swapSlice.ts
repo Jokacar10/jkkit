@@ -57,6 +57,18 @@ export const createSwapSlice: SwapSliceCreator = (set: SetState, get) => ({
         });
     },
 
+    setToAmount: (amount: string) => {
+        set((state) => {
+            // Allow empty string or valid number input
+            if (amount === '' || /^\d*\.?\d*$/.test(amount)) {
+                state.swap.toAmount = amount;
+                state.swap.currentQuote = null;
+                state.swap.fromAmount = '';
+                state.swap.error = null;
+            }
+        });
+    },
+
     setDestinationAddress: (address: string) => {
         set((state) => {
             state.swap.destinationAddress = address;
@@ -73,9 +85,13 @@ export const createSwapSlice: SwapSliceCreator = (set: SetState, get) => ({
         set((state) => {
             const tempToken = state.swap.fromToken;
 
+            if (state.swap.toAmount) {
+                state.swap.fromAmount = state.swap.toAmount;
+                state.swap.toAmount = '';
+            }
+
             state.swap.fromToken = state.swap.toToken;
             state.swap.toToken = tempToken;
-            state.swap.toAmount = '';
             state.swap.currentQuote = null;
             state.swap.error = null;
         });
@@ -83,7 +99,7 @@ export const createSwapSlice: SwapSliceCreator = (set: SetState, get) => ({
 
     validateSwapInputs: () => {
         const state = get();
-        const { fromToken, toToken, fromAmount } = state.swap;
+        const { fromToken, toToken, fromAmount, toAmount } = state.swap;
 
         // Check if tokens are selected
         if (!fromToken) {
@@ -99,13 +115,14 @@ export const createSwapSlice: SwapSliceCreator = (set: SetState, get) => ({
             return 'Cannot swap the same token';
         }
 
-        // Check if amount is entered
-        if (!fromAmount || fromAmount === '') {
+        // Check if at least one amount is entered
+        if ((!fromAmount || fromAmount === '') && (!toAmount || toAmount === '')) {
             return 'Please enter an amount';
         }
 
-        // Check if amount is valid number
-        const amount = parseFloat(fromAmount);
+        // Validate the amount that is entered
+        const amountToValidate = fromAmount || toAmount;
+        const amount = parseFloat(amountToValidate);
         if (isNaN(amount)) {
             return 'Please enter a valid number';
         }
@@ -113,6 +130,11 @@ export const createSwapSlice: SwapSliceCreator = (set: SetState, get) => ({
         // Check if amount is positive
         if (amount <= 0) {
             return 'Amount must be greater than 0';
+        }
+
+        // Only check balance if fromAmount is specified (not when using toAmount)
+        if (!fromAmount) {
+            return null;
         }
 
         // Check balance
@@ -165,7 +187,7 @@ export const createSwapSlice: SwapSliceCreator = (set: SetState, get) => ({
 
     getQuote: async () => {
         const state = get();
-        const { fromToken, toToken, fromAmount, slippageBps } = state.swap;
+        const { fromToken, toToken, fromAmount, toAmount, slippageBps } = state.swap;
 
         // Validate inputs
         const validationError = get().validateSwapInputs();
@@ -201,10 +223,8 @@ export const createSwapSlice: SwapSliceCreator = (set: SetState, get) => ({
         });
 
         try {
-            log.info('Getting swap quote', { fromToken, toToken, fromAmount });
+            log.info('Getting swap quote', { fromToken, toToken, fromAmount, toAmount });
 
-            const decimals = fromToken === 'TON' ? 9 : 6;
-            const amountInUnits = Math.floor(parseFloat(fromAmount) * Math.pow(10, decimals)).toString();
             let maxOutgoingMessages = 1;
 
             if (state.walletManagement.currentWallet?.getSupportedFeatures) {
@@ -213,26 +233,54 @@ export const createSwapSlice: SwapSliceCreator = (set: SetState, get) => ({
                 );
             }
 
-            const quoteParams: SwapQuoteParams = {
-                fromToken,
-                toToken,
-                network,
-                slippageBps,
-                maxOutgoingMessages,
-                amount: amountInUnits,
-            };
+            // Determine which amount to use and convert to units
+            let quoteParams: SwapQuoteParams;
+            if (fromAmount) {
+                const decimals = fromToken === 'TON' ? 9 : 6;
+                const amountInUnits = Math.floor(parseFloat(fromAmount) * Math.pow(10, decimals)).toString();
+                quoteParams = {
+                    fromToken,
+                    toToken,
+                    network,
+                    slippageBps,
+                    maxOutgoingMessages,
+                    amountFrom: amountInUnits,
+                };
+            } else {
+                const decimals = toToken === 'TON' ? 9 : 6;
+                const amountInUnits = Math.floor(parseFloat(toAmount) * Math.pow(10, decimals)).toString();
+                quoteParams = {
+                    fromToken,
+                    toToken,
+                    network,
+                    slippageBps,
+                    maxOutgoingMessages,
+                    amountTo: amountInUnits,
+                };
+            }
 
             const quote = await state.walletCore.walletKit.swap.getQuote(quoteParams, 'omniston');
 
-            const toDecimals = toToken === 'TON' ? 9 : 6;
-            const toAmountFormatted = (parseFloat(quote.toAmount) / Math.pow(10, toDecimals)).toFixed(6);
-
-            set((state) => {
-                state.swap.currentQuote = quote;
-                state.swap.toAmount = toAmountFormatted;
-                state.swap.isLoadingQuote = false;
-                state.swap.error = null;
-            });
+            // Update the opposite amount based on which one was specified
+            if (fromAmount) {
+                const toDecimals = toToken === 'TON' ? 9 : 6;
+                const toAmountFormatted = (parseFloat(quote.toAmount) / Math.pow(10, toDecimals)).toFixed(6);
+                set((state) => {
+                    state.swap.currentQuote = quote;
+                    state.swap.toAmount = toAmountFormatted;
+                    state.swap.isLoadingQuote = false;
+                    state.swap.error = null;
+                });
+            } else {
+                const fromDecimals = fromToken === 'TON' ? 9 : 6;
+                const fromAmountFormatted = (parseFloat(quote.fromAmount) / Math.pow(10, fromDecimals)).toFixed(6);
+                set((state) => {
+                    state.swap.currentQuote = quote;
+                    state.swap.fromAmount = fromAmountFormatted;
+                    state.swap.isLoadingQuote = false;
+                    state.swap.error = null;
+                });
+            }
 
             log.info('Successfully got swap quote', { quote });
         } catch (error) {

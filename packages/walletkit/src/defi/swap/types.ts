@@ -10,17 +10,42 @@ import type { DefiManagerAPI } from '../types';
 import type { Network, TransactionRequest, UserFriendlyAddress } from '../../api/models';
 
 /**
- * Parameters for requesting a swap quote
+ * Base parameters for requesting a swap quote
  */
-export interface SwapQuoteParams<TProviderOptions = unknown> {
+interface SwapQuoteParamsBase<TProviderOptions = unknown> {
     fromToken: UserFriendlyAddress | 'TON';
     toToken: UserFriendlyAddress | 'TON';
-    amount: string;
     network: Network;
     slippageBps?: number;
     maxOutgoingMessages?: number;
     providerOptions?: TProviderOptions;
 }
+
+/**
+ * Parameters for requesting a swap quote with specified input amount
+ */
+export interface SwapQuoteParamsWithAmountFrom<
+    TProviderOptions = unknown,
+> extends SwapQuoteParamsBase<TProviderOptions> {
+    amountFrom: string;
+    amountTo?: never;
+}
+
+/**
+ * Parameters for requesting a swap quote with specified output amount
+ */
+export interface SwapQuoteParamsWithAmountTo<TProviderOptions = unknown> extends SwapQuoteParamsBase<TProviderOptions> {
+    amountFrom?: never;
+    amountTo: string;
+}
+
+/**
+ * Parameters for requesting a swap quote
+ * Can specify either amountFrom (how much to swap) or amountTo (how much to receive)
+ */
+export type SwapQuoteParams<TProviderOptions = unknown> =
+    | SwapQuoteParamsWithAmountFrom<TProviderOptions>
+    | SwapQuoteParamsWithAmountTo<TProviderOptions>;
 
 /**
  * Swap quote response with pricing information
