@@ -35,7 +35,6 @@ export {
 } from './utils';
 
 // Re-export from @tonconnect/sdk
-export * from '@tonconnect/sdk';
 export type { Wallet } from '@tonconnect/sdk';
 export type {
     TonWalletKit,

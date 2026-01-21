@@ -16,7 +16,7 @@ export default defineConfig({
     dts: true,
     clean: true,
     outDir: 'dist',
-    external: ['react', 'react-dom', 'react-dom/client', 'react/jsx-runtime', '@ton/appkit-ui'],
+    external: ['react', 'react-dom', 'react-dom/client', 'react/jsx-runtime'],
     platform: 'browser',
     target: 'es2020',
     sourcemap: true,

@@ -6,5 +6,7 @@
  *
  */
 
-export * from './library';
-export * from '@ton/appkit-ui';
+export * from './components';
+export * from './hooks';
+
+export * from '@tonconnect/ui-react';

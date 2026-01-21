@@ -6,7 +6,7 @@
  *
  */
 
-import { TonConnectUIProvider } from '@ton/appkit-ui-react';
+import { AppKitProvider } from '@ton/appkit-ui-react';
 import { Toaster } from 'sonner';
 
 import { AppRouter } from '@/components';
@@ -18,10 +18,10 @@ const MANIFEST_URL = 'https://tonconnect-demo-dapp-with-react-ui.vercel.app/tonc
 
 function App() {
     return (
-        <TonConnectUIProvider manifestUrl={MANIFEST_URL}>
+        <AppKitProvider manifestUrl={MANIFEST_URL}>
             <AppRouter />
             <Toaster position="top-right" richColors />
-        </TonConnectUIProvider>
+        </AppKitProvider>
     );
 }
 

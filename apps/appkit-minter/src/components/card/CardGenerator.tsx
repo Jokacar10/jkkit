@@ -8,12 +8,13 @@
 
 import type React from 'react';
 import { Sparkles, Coins, AlertCircle } from 'lucide-react';
+import { useAppKitWallet } from '@ton/appkit-ui-react';
 
 import { CardPreview } from './CardPreview';
 
 import { Button } from '@/components/common';
 import { Card } from '@/components/common';
-import { useCardGenerator, useMint, useAppKit } from '@/hooks';
+import { useCardGenerator, useMint } from '@/hooks';
 
 interface CardGeneratorProps {
     className?: string;
@@ -22,7 +23,8 @@ interface CardGeneratorProps {
 export const CardGenerator: React.FC<CardGeneratorProps> = ({ className }) => {
     const { currentCard, isGenerating, generate } = useCardGenerator();
     const { mint, isMinting, mintError, canMint } = useMint();
-    const { isConnected } = useAppKit();
+    const wallet = useAppKitWallet();
+    const isConnected = !!wallet;
 
     return (
         <Card className={className}>

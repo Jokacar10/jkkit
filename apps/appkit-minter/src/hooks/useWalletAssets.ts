@@ -6,11 +6,10 @@
  *
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { Jetton, NFT } from '@ton/walletkit';
 import { isValidAddress } from '@ton/walletkit';
-
-import { useAppKit } from './useAppKit';
+import { useAppKitWallet } from '@ton/appkit-ui-react';
 
 interface WalletAssetsState {
     jettons: Jetton[];
@@ -27,7 +26,7 @@ interface TransferState {
 }
 
 export function useWalletAssets() {
-    const { isConnected, wallet, getAppKit, getTonConnect } = useAppKit();
+    const wallet = useAppKitWallet();
 
     const [state, setState] = useState<WalletAssetsState>({
         jettons: [],
@@ -43,21 +42,13 @@ export function useWalletAssets() {
         transferError: null,
     });
 
-    const wrappedWallet = useMemo(() => {
-        if (!isConnected || !wallet) return null;
-        const appKit = getAppKit();
-        const tonConnect = getTonConnect();
-        if (!appKit || !tonConnect) return null;
-        return appKit.wrapTonConnectWallet(wallet, tonConnect);
-    }, [isConnected, wallet, getAppKit, getTonConnect]);
-
     const loadJettons = useCallback(async () => {
-        if (!wrappedWallet) return;
+        if (!wallet) return;
 
         setState((prev) => ({ ...prev, isLoadingJettons: true, jettonsError: null }));
 
         try {
-            const response = await wrappedWallet.getJettons({
+            const response = await wallet.getJettons({
                 pagination: { offset: 0, limit: 50 },
             });
             setState((prev) => ({
@@ -72,15 +63,15 @@ export function useWalletAssets() {
                 jettonsError: error instanceof Error ? error.message : 'Failed to load jettons',
             }));
         }
-    }, [wrappedWallet]);
+    }, [wallet]);
 
     const loadNfts = useCallback(async () => {
-        if (!wrappedWallet) return;
+        if (!wallet) return;
 
         setState((prev) => ({ ...prev, isLoadingNfts: true, nftsError: null }));
 
         try {
-            const response = await wrappedWallet.getNfts({
+            const response = await wallet.getNfts({
                 pagination: { offset: 0, limit: 50 },
             });
             setState((prev) => ({
@@ -95,7 +86,7 @@ export function useWalletAssets() {
                 nftsError: error instanceof Error ? error.message : 'Failed to load NFTs',
             }));
         }
-    }, [wrappedWallet]);
+    }, [wallet]);
 
     const refresh = useCallback(async () => {
         await Promise.all([loadJettons(), loadNfts()]);
@@ -103,7 +94,7 @@ export function useWalletAssets() {
 
     const transferJetton = useCallback(
         async (jetton: Jetton, recipientAddress: string, amount: string, comment?: string) => {
-            if (!wrappedWallet) {
+            if (!wallet) {
                 throw new Error('Wallet not connected');
             }
 
@@ -122,14 +113,14 @@ export function useWalletAssets() {
             setTransferState({ isTransferring: true, transferError: null });
 
             try {
-                const transaction = await wrappedWallet.createTransferJettonTransaction({
+                const transaction = await wallet.createTransferJettonTransaction({
                     jettonAddress: jetton.address,
                     recipientAddress,
                     transferAmount,
                     comment,
                 });
 
-                await wrappedWallet.sendTransaction(transaction);
+                await wallet.sendTransaction(transaction);
                 setTransferState({ isTransferring: false, transferError: null });
 
                 // Refresh jettons after transfer
@@ -140,12 +131,12 @@ export function useWalletAssets() {
                 throw error;
             }
         },
-        [wrappedWallet, loadJettons],
+        [wallet, loadJettons],
     );
 
     const transferNft = useCallback(
         async (nft: NFT, recipientAddress: string, comment?: string) => {
-            if (!wrappedWallet) {
+            if (!wallet) {
                 throw new Error('Wallet not connected');
             }
 
@@ -156,13 +147,13 @@ export function useWalletAssets() {
             setTransferState({ isTransferring: true, transferError: null });
 
             try {
-                const transaction = await wrappedWallet.createTransferNftTransaction({
+                const transaction = await wallet.createTransferNftTransaction({
                     nftAddress: nft.address,
                     recipientAddress,
                     comment,
                 });
 
-                await wrappedWallet.sendTransaction(transaction);
+                await wallet.sendTransaction(transaction);
                 setTransferState({ isTransferring: false, transferError: null });
 
                 // Refresh NFTs after transfer
@@ -173,14 +164,14 @@ export function useWalletAssets() {
                 throw error;
             }
         },
-        [wrappedWallet, loadNfts],
+        [wallet, loadNfts],
     );
 
-    // Auto-load assets when wallet connects
+    // Autoload assets when wallet connects
     useEffect(() => {
-        if (wrappedWallet) {
-            loadJettons();
-            loadNfts();
+        if (wallet) {
+            void loadJettons();
+            void loadNfts();
         } else {
             // Clear assets when wallet disconnects
             setState({
@@ -192,7 +183,7 @@ export function useWalletAssets() {
                 nftsError: null,
             });
         }
-    }, [wrappedWallet, loadJettons, loadNfts]);
+    }, [wallet, loadJettons, loadNfts]);
 
     return {
         ...state,

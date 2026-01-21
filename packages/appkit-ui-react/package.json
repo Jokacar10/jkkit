@@ -11,35 +11,18 @@
     "type": "git",
     "url": "git+https://github.com/ton-connect/sdk.git"
   },
-  "homepage": "https://github.com/ton-connect/sdk/tree/main/packages/ui-react",
-  "bugs": {
-    "url": "https://github.com/ton-connect/sdk/issues"
-  },
-  "keywords": [
-    "TON",
-    "Wallet",
-    "ton-connect",
-    "tonconnect",
-    "Connect",
-    "Tonkeeper",
-    "sdk",
-    "UI",
-    "React"
-  ],
-  "author": "tonconnect",
-  "license": "Apache-2.0",
   "files": [
-    "lib"
+    "dist"
   ],
-  "main": "./lib/index.cjs",
-  "module": "./lib/index.mjs",
-  "types": "./lib/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./lib/index.d.ts",
-      "require": "./lib/index.cjs",
-      "import": "./lib/index.mjs",
-      "default": "./lib/index.cjs"
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.cjs"
     }
   },
   "devDependencies": {
@@ -52,13 +35,11 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
-    "@ton/appkit-ui": "workspace:*"
+    "@ton/appkit": "workspace:*",
+    "@tonconnect/ui-react": "2.4.0-beta.4"
   },
   "peerDependencies": {
     "react": ">=17.0.0",
     "react-dom": ">=17.0.0"
-  },
-  "typedoc": {
-    "entryPoint": "./src/library.ts"
   }
 }

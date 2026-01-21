@@ -8,32 +8,18 @@
 
 import { useCallback } from 'react';
 import { toNano } from '@ton/core';
-
-import { useAppKit } from './useAppKit';
+import { useAppKitWallet } from '@ton/appkit-ui-react';
 
 import { useMinterStore } from '@/store';
 
 export function useMint() {
     const { currentCard, isMinting, mintError, setMinting, setMintError, mintCard } = useMinterStore();
-    const { isConnected, address, getAppKit, getTonConnect } = useAppKit();
+    const wallet = useAppKitWallet();
+    const isConnected = !!wallet;
 
     const mint = useCallback(async () => {
-        if (!currentCard || !isConnected || !address) {
+        if (!currentCard || !wallet) {
             setMintError('Please connect your wallet first');
-            return;
-        }
-
-        const appKit = getAppKit();
-        const tonConnect = getTonConnect();
-
-        if (!appKit || !tonConnect) {
-            setMintError('AppKit not initialized');
-            return;
-        }
-
-        const wallet = tonConnect.wallet;
-        if (!wallet) {
-            setMintError('Wallet not connected');
             return;
         }
 
@@ -41,18 +27,15 @@ export function useMint() {
         setMintError(null);
 
         try {
-            // Wrap the wallet using AppKit
-            const wrappedWallet = appKit.wrapTonConnectWallet(wallet, tonConnect);
-
             // Create a simple transfer transaction as a "mint" action
             // In a real app, this would call an NFT minting contract
-            const transaction = await wrappedWallet.createTransferTonTransaction({
-                recipientAddress: address, // Send to self as demo
+            const transaction = await wallet.createTransferTonTransaction({
+                recipientAddress: wallet.getAddress(), // Send to self as demo
                 transferAmount: toNano('0.01').toString(), // Small amount for demo
                 comment: `Minting NFT: ${currentCard.name} (${currentCard.rarity})`,
             });
 
-            await wrappedWallet.sendTransaction(transaction);
+            await wallet.sendTransaction(transaction);
 
             // Send the transaction through AppKit
             // await appKit.handleNewTransaction(wrappedWallet, transaction);
@@ -64,7 +47,7 @@ export function useMint() {
         } finally {
             setMinting(false);
         }
-    }, [currentCard, isConnected, address, getAppKit, getTonConnect, setMinting, setMintError, mintCard]);
+    }, [currentCard, isConnected, setMinting, setMintError, mintCard]);
 
     return {
         mint,

@@ -7,12 +7,14 @@
  */
 
 import type React from 'react';
+import { useAppKitWallet } from '@ton/appkit-ui-react';
 
 import { Layout, CardGenerator, WalletConnect, JettonsCard, NftsCard } from '@/components';
-import { useAppKit, useWalletAssets } from '@/hooks';
+import { useWalletAssets } from '@/hooks';
 
 export const MinterPage: React.FC = () => {
-    const { isConnected } = useAppKit();
+    const wallet = useAppKitWallet();
+    const isConnected = !!wallet;
     const {
         jettons,
         nfts,
