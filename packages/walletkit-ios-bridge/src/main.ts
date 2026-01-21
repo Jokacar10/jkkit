@@ -39,7 +39,7 @@ window.initWalletKit = async (configuration, storage, bridgeTransport, apiClient
     if (configuration.networkConfigurations) {
         for (const netConfig of configuration.networkConfigurations) {
             networks[netConfig.network.chainId] = {
-                apiClient: netConfig.apiClient,
+                apiClient: netConfig.apiClientConfiguration,
             };
         }
     }
