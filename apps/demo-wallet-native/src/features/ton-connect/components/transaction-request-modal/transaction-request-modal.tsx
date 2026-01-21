@@ -148,7 +148,7 @@ export const TransactionRequestModal: FC<TransactionRequestModalProps> = ({ requ
 
                 {!isExpired && (
                     <>
-                        {request.preview.data.result === 'success' && currentWallet && walletKit && (
+                        {request.preview.data?.result === 'success' && currentWallet && walletKit && (
                             <View style={styles.moneyFlowSection}>
                                 <SectionTitle>Money Flow</SectionTitle>
 
@@ -180,7 +180,7 @@ export const TransactionRequestModal: FC<TransactionRequestModalProps> = ({ requ
                             </View>
                         )}
 
-                        {(request.preview.data.result === 'failure' || request.preview.data.error) && (
+                        {(request.preview.data?.result === 'failure' || request.preview.data?.error) && (
                             <WarningBox variant="error">Error: {getErrorMessage(request.preview.data)}</WarningBox>
                         )}
 

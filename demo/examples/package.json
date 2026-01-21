@@ -5,7 +5,8 @@
   "scripts": {
     "quality": "pnpm test --coverage",
     "test": "vitest run",
-    "build": "tsc --noEmit"
+    "build": "tsc --noEmit",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@ton/walletkit": "workspace:*",

@@ -14,6 +14,7 @@
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --max-warnings 0 --fix",
     "quality": "turbo quality",
+    "typecheck": "turbo typecheck",
     "e2e": "turbo e2e",
     "clean": "git clean -xdf node_modules",
     "clean:workspaces": "turbo run clean",
