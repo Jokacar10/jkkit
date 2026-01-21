@@ -27,6 +27,9 @@ jobs:
       - name: Set up dependencies
         run: pnpm i --frozen-lockfile
 
+      - name: Build all packages
+        run: pnpm build
+
       - name: Typecheck iOS Bridge
         run: pnpm --filter walletkit-ios-bridge typecheck:bridge
 

@@ -30,7 +30,8 @@
       "cache": false
     },
     "typecheck": {
-      "cache": false
+      "cache": false,
+      "dependsOn": ["build"]
     },
     "generate-openapi-spec": {
       "dependsOn": ["^generate-openapi-spec"]
