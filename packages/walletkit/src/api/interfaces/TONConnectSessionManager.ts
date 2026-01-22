@@ -18,6 +18,13 @@ import type { Wallet } from '.';
  */
 export interface TONConnectSessionManager {
     /**
+     * Initialize the session manager
+     * Needed for backward compatibility with existing codebase
+     * Used to ensure that sessions are reloaded fro mstorage to local cache in browser extension
+     * */
+    initialize(): Promise<void>;
+
+    /**
      * Create a new session
      * @param sessionId - Unique session identifier
      * @param dAppInfo - Information about the dApp (name, url, iconUrl, description)

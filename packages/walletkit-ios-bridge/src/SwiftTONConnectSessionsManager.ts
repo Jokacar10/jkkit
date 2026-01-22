@@ -19,6 +19,14 @@ export class SwiftTONConnectSessionsManager implements TONConnectSessionManager 
         this.swiftSessionsManager = swiftSessionsManager;
     }
 
+    async initialize(): Promise<void> {
+        /*
+        No initialization needed for Swift implementation.
+        This method needed to comply with the TONConnectSessionManager interface.
+        Such compliance is needed for backward compability with existing codebase.
+        */
+    }
+
     async createSession(
         sessionId: string,
         dAppInfo: DAppInfo,
