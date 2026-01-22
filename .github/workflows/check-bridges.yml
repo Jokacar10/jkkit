@@ -8,6 +8,7 @@ jobs:
   typecheck-bridges:
     name: Typecheck Bridge Packages
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Check out code
