@@ -51,6 +51,7 @@ export { JettonError, JettonErrorCode } from './jettons';
 export type {
     ToncenterEmulationResponse,
     ToncenterResponseJettonWallets,
+    ToncenterResponseJettonMasters,
     ToncenterJettonWallet,
     EmulationAddressMetadata,
     EmulationTokenInfo,
@@ -60,6 +61,20 @@ export type {
     ToncenterTraceItem,
     TraceMeta,
 } from './toncenter/emulation';
+
+export type { FullAccountState } from './toncenter/api';
+
+export type {
+    TransactionsByAddressRequest,
+    GetTransactionByHashRequest,
+    GetPendingTransactionsRequest,
+    GetTraceRequest,
+    GetPendingTraceRequest,
+    GetJettonsByOwnerRequest,
+    GetJettonsByAddressRequest,
+    GetEventsRequest,
+    GetEventsResponse,
+} from './toncenter/ApiClient';
 
 export type { NftItem } from './toncenter/NftItem';
 

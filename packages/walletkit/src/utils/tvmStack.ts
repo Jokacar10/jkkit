@@ -9,10 +9,7 @@
 import type { TupleItem } from '@ton/core';
 import { Cell } from '@ton/core';
 
-export type RawStackItem =
-    | { type: 'null' }
-    | { type: 'num' | 'cell' | 'slice' | 'builder'; value: string }
-    | { type: 'tuple' | 'list'; value: RawStackItem[] };
+import type { RawStackItem } from '../api/models/';
 
 function ParseStackItem(item: RawStackItem): TupleItem {
     switch (item.type) {

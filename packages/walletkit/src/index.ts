@@ -99,6 +99,7 @@ export { RESTORE_CONNECTION_TIMEOUT, DEFAULT_REQUEST_TIMEOUT } from './bridge/ut
 export { CreateTonProofMessageBytes } from './utils/tonProof';
 export type { AnalyticsAppInfo, AnalyticsManagerOptions } from './analytics';
 export { isValidAddress } from './utils/address';
+export type { ToncenterEmulationResult } from './utils/toncenterEmulation';
 
 // API Interfaces
 export type * from './api/interfaces';
