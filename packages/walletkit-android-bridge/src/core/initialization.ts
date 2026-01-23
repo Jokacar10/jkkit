@@ -17,7 +17,7 @@ import { log, warn } from '../utils/logger';
 import { walletKit, setWalletKit } from './state';
 import { ensureWalletKitLoaded, TonWalletKit } from './moduleLoader';
 import { getInternalBrowserResolverMap } from '../utils/internalBrowserResolvers';
-import { isNativeSessionManagerAvailable, AndroidSessionManagerAdapter } from '../adapters/AndroidSessionManagerAdapter';
+import { hasAndroidSessionManager, AndroidTONConnectSessionsManager } from '../adapters/AndroidTONConnectSessionsManager';
 
 export interface InitTonWalletKitDeps {
     emit: (type: WalletKitBridgeEvent['type'], data?: WalletKitBridgeEvent['data']) => void;
@@ -156,17 +156,19 @@ export async function initTonWalletKit(
     if (window.WalletKitNative) {
         log('[walletkitBridge] Using Android native storage adapter');
         kitOptions.storage = new deps.AndroidStorageAdapter();
-
-        // Check if native session manager is available (when host app provides custom session manager)
-        if (isNativeSessionManagerAvailable()) {
-            log('[walletkitBridge] Using Android native session manager adapter');
-            kitOptions.sessionManager = new AndroidSessionManagerAdapter();
-        }
     } else if (config?.allowMemoryStorage) {
         log('[walletkitBridge] Using memory storage (sessions will not persist)');
         kitOptions.storage = {
             allowMemory: true,
         };
+    }
+
+    // Set up custom session manager if native bridge provides session management
+    if (hasAndroidSessionManager()) {
+        log('[walletkitBridge] Using Android native session manager');
+        kitOptions.sessionManager = new AndroidTONConnectSessionsManager();
+    } else {
+        log('[walletkitBridge] Using default WalletKit session manager');
     }
 
     if (!TonWalletKit) {
