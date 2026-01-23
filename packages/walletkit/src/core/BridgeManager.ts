@@ -610,10 +610,10 @@ export class BridgeManager {
                     }
 
                     rawEvent.dAppInfo = {
-                        name: session.dAppInfo?.name,
-                        description: session.dAppInfo?.description,
-                        url: session.dAppInfo?.url,
-                        iconUrl: session.dAppInfo?.iconUrl,
+                        name: session.dAppName,
+                        description: session.dAppDescription,
+                        url: session.dAppUrl,
+                        iconUrl: session.dAppIconUrl,
                     };
                 }
             } else if (rawEvent.domain) {
@@ -631,10 +631,10 @@ export class BridgeManager {
 
                 if (session) {
                     rawEvent.dAppInfo = {
-                        name: session.dAppInfo?.name,
-                        description: session.dAppInfo?.description,
-                        url: session.dAppInfo?.url,
-                        iconUrl: session.dAppInfo?.iconUrl,
+                        name: session.dAppName,
+                        description: session.dAppDescription,
+                        url: session.dAppUrl,
+                        iconUrl: session.dAppIconUrl,
                     };
 
                     if (!rawEvent.from) {

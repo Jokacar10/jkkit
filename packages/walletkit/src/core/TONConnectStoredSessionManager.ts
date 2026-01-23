@@ -26,6 +26,8 @@ export class TONConnectStoredSessionManager implements TONConnectSessionManager 
     private walletManager: WalletManager;
     private storageKey = 'sessions';
 
+    private schemaVersion = 1;
+
     constructor(storage: Storage, walletManager: WalletManager) {
         this.storage = storage;
         this.walletManager = walletManager;
@@ -57,8 +59,14 @@ export class TONConnectStoredSessionManager implements TONConnectSessionManager 
         // Create walletId from wallet if provided
         const walletId = wallet.getWalletId();
 
-        const url = new URL(dAppInfo.url || '');
-        const domain = url.host;
+        let domain: string;
+
+        try {
+            const url: URL = new URL(dAppInfo.url || '');
+            domain = url.host;
+        } catch {
+            throw new Error('Unable to resolve domain from dApp URL for new sessions');
+        }
 
         const session: TONConnectSession = {
             sessionId,
@@ -69,8 +77,12 @@ export class TONConnectStoredSessionManager implements TONConnectSessionManager 
             privateKey: randomKeyPair.secretKey,
             publicKey: randomKeyPair.publicKey,
             domain: domain,
-            dAppInfo: dAppInfo,
+            dAppName: dAppInfo.name,
+            dAppDescription: dAppInfo.description,
+            dAppUrl: dAppInfo.url,
+            dAppIconUrl: dAppInfo.iconUrl,
             isJsBridge,
+            schemaVersion: this.schemaVersion,
         };
 
         this.sessions.set(sessionId, session);
