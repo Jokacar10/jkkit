@@ -7,13 +7,13 @@
  */
 
 import { vi } from 'vitest';
-import type { Wallet } from '@ton/walletkit';
+import type { WalletInterface } from '@ton/appkit';
 
 /**
  * MockWrappedWallet is a test double for Wallet.
  * It satisfies the Wallet interface while providing vi.fn() mocks for assertions.
  */
-export type MockWrappedWallet = Wallet;
+export type MockWrappedWallet = WalletInterface;
 
 // Mock wrapped wallet that implements the full Wallet interface
 export const createMockWrappedWallet = (): MockWrappedWallet => {
@@ -110,15 +110,23 @@ export const createMockWrappedWallet = (): MockWrappedWallet => {
 };
 
 // Mock AppKit
-export interface MockAppKit {
-    getConnectedWallets: ReturnType<typeof vi.fn>;
+export class AppKit {
+    public eventBus = {
+        on: vi.fn(),
+        off: vi.fn(),
+        emit: vi.fn(),
+    };
+
+    getConnectedWallets = vi.fn().mockReturnValue(Promise.resolve([createMockWrappedWallet()]));
+    registerProvider = vi.fn();
+    connectWallet = vi.fn();
+    disconnectWallet = vi.fn();
+
+    constructor(
+        public config: {
+            networks?: Record<string, unknown>;
+        } = {},
+    ) {}
 }
 
-export const CreateAppKit = vi.fn(
-    (): MockAppKit => ({
-        getConnectedWallets: vi.fn(() => Promise.resolve([createMockWrappedWallet()])),
-    }),
-);
-
-// Re-export for type usage
-export type AppKit = MockAppKit;
+export default { AppKit };

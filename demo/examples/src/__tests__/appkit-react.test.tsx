@@ -21,6 +21,7 @@ vi.mock('react', async () => {
         useCallback: vi.fn((fn) => fn),
         useRef: vi.fn(() => ({ current: null })),
         useMemo: vi.fn((fn) => fn()),
+        useState: vi.fn((initial) => [initial, vi.fn()]),
     };
 });
 
