@@ -24,6 +24,7 @@ import type {
     ConnectionRequestEvent,
     TransactionApprovalResponse,
     SignDataApprovalResponse,
+    TONConnectSession,
 } from '../api/models';
 
 /**
@@ -70,7 +71,7 @@ export interface ITonWalletKit {
     disconnect(sessionId?: string): Promise<void>;
 
     /** List all active sessions */
-    listSessions(): Promise<SessionInfo[]>;
+    listSessions(): Promise<TONConnectSession[]>;
 
     // === URL Processing ===
 
@@ -134,30 +135,4 @@ export interface ITonWalletKit {
 
     /** Jettons API access */
     jettons: JettonsAPI;
-}
-
-/**
- * Session information for API responses
- */
-export interface SessionInfo {
-    /** Unique session identifier */
-    sessionId: string;
-
-    /** Connected dApp name */
-    dAppName: string;
-
-    /** Connected dApp URL */
-    dAppUrl: string;
-
-    /** Connected dApp icon URL */
-    dAppIconUrl: string;
-
-    /** Wallet ID */
-    walletId: string;
-
-    /** Session creation time */
-    createdAt?: Date;
-
-    /** Last activity time */
-    lastActivity?: Date;
 }
