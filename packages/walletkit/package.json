@@ -44,8 +44,9 @@
     "quality": "pnpm test:coverage",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --max-warnings 0 --fix",
-    "clean": "git clean -xdf dist node_modules .turbo",
-    "generate-openapi-spec": "src/api/scripts/generate-openapi-spec.sh"
+    "clean": "git clean -xdf dist node_modules .turbo coverage",
+    "generate-openapi-spec": "src/api/scripts/generate-openapi-spec.sh",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [
     "ton",
