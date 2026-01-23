@@ -64,7 +64,7 @@ export const TokenSelector: FC<TokenSelectorProps> = ({
 
         return {
             symbol,
-            icon: '/ton.png',
+            icon: '/ton.svg',
         };
     }, [selectedToken]);
 
