@@ -129,4 +129,11 @@ export class AppKit {
     ) {}
 }
 
+// WALLET_EVENTS constant
+export const WALLET_EVENTS = {
+    CONNECTED: 'wallet:connected',
+    DISCONNECTED: 'wallet:disconnected',
+    CHANGED: 'wallet:changed',
+} as const;
+
 export default { AppKit };
