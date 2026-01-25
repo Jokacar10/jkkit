@@ -8,7 +8,7 @@
 
 import type { CONNECTOR_EVENTS, WALLETS_EVENTS, PLUGIN_EVENTS } from '../constants/events';
 import type { WalletConnectedPayload, WalletDisconnectedPayload, PluginRegisteredPayload } from './payload';
-import type { WalletInterface } from '../../../types/wallet';
+import type { WalletInterface } from '../../wallets/types/wallet';
 
 export interface AppKitEvents {
     // Connector events

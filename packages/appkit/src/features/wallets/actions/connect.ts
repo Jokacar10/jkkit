@@ -6,7 +6,7 @@
  *
  */
 
-import type { AppKit } from '../../../core/app-kit';
+import type { AppKit } from '../../../core';
 
 export type ConnectParameters = {
     connectorId: string;

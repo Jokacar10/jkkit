@@ -13,6 +13,8 @@
  * Provides Emitter implementation and predefined event types.
  */
 export { Emitter } from './services/emitter';
-export type { EventPayload, AppKitEvent, EventListener } from './types/event-bus';
 export { CONNECTOR_EVENTS, WALLETS_EVENTS, PLUGIN_EVENTS } from './constants/events';
+
+export type { EventPayload, AppKitEvent, EventListener } from './types/event-bus';
+export type { AppKitEvents } from './types/events-map';
 export type { WalletConnectedPayload, WalletDisconnectedPayload, PluginRegisteredPayload } from './types/payload';

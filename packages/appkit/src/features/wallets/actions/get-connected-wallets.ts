@@ -6,8 +6,8 @@
  *
  */
 
-import type { AppKit } from '../../../core/app-kit';
-import type { WalletInterface } from '../../../types/wallet';
+import type { AppKit } from '../../../core';
+import type { WalletInterface } from '../types/wallet';
 
 export type GetConnectedWalletsReturnType = readonly WalletInterface[];
 

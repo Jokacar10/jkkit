@@ -6,9 +6,9 @@
  *
  */
 
-import type { AppKit } from '../../../core/app-kit';
+import type { AppKit } from '../../../core';
 import { WALLETS_EVENTS } from '../../events';
-import type { WalletInterface } from '../../../types/wallet';
+import type { WalletInterface } from '../types/wallet';
 
 export type WatchConnectedWalletsParameters = {
     onChange: (wallets: WalletInterface[]) => void;

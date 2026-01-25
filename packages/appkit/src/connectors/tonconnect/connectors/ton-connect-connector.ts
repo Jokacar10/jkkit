@@ -14,7 +14,7 @@ import { TonConnectWalletAdapter } from '../adapters/ton-connect-wallet-adapter'
 import type { Emitter } from '../../../features/events';
 import { CONNECTOR_EVENTS } from '../../../features/events';
 import type { Connector } from '../../../types/connector';
-import type { WalletInterface } from '../../../types/wallet';
+import type { WalletInterface } from '../../../features/wallets';
 
 export interface TonConnectConnectorConfig {
     id?: string;

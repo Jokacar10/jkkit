@@ -6,5 +6,5 @@
  *
  */
 
-export { AppKit } from './app-kit';
-export type { AppKitConfig } from './types';
+export { AppKit } from './services/app-kit';
+export type { AppKitConfig } from './types/config';

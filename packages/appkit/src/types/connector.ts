@@ -9,7 +9,7 @@
 import type { NetworkManager } from '@ton/walletkit';
 
 import type { Emitter } from '../features/events';
-import type { WalletInterface } from './wallet';
+import type { WalletInterface } from '../features/wallets/types/wallet';
 import type { AppKitEvents } from '../features/events/types/events-map';
 
 /**

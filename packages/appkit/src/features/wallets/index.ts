@@ -13,3 +13,5 @@ export * from './actions/disconnect';
 export * from './actions/get-connected-wallets';
 
 export * from './watchers/watch-connected-wallets';
+
+export * from './types/wallet';

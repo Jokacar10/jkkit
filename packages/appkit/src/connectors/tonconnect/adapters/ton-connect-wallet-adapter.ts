@@ -56,7 +56,7 @@ import {
 } from '@ton/walletkit';
 
 import { getValidUntil } from '../utils/transaction';
-import type { WalletInterface } from '../../../types/wallet';
+import type { WalletInterface } from '../../../features/wallets';
 
 /**
  * Configuration for TonConnectWalletAdapter

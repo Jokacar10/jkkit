@@ -6,7 +6,7 @@
  *
  */
 
-import type { WalletInterface } from '../../../types/wallet';
+import type { WalletInterface } from '../types/wallet';
 
 /**
  * Manages connected wallets.
