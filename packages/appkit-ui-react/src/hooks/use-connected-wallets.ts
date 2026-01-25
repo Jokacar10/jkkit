@@ -7,7 +7,7 @@
  */
 
 import { useSyncExternalStore, useCallback } from 'react';
-import { WALLETS_EVENTS } from '@ton/appkit';
+import { getConnectedWallets, watchConnectedWallets } from '@ton/appkit';
 
 import { useAppKit } from './use-app-kit';
 
@@ -15,14 +15,14 @@ export const useConnectedWallets = () => {
     const appKit = useAppKit();
 
     const subscribe = useCallback(
-        (callback: () => void) => {
-            return appKit.emitter.on(WALLETS_EVENTS.UPDATED, callback);
+        (onChange: () => void) => {
+            return watchConnectedWallets(appKit, { onChange });
         },
         [appKit],
     );
 
     const getSnapshot = useCallback(() => {
-        return appKit.getConnectedWallets();
+        return getConnectedWallets(appKit);
     }, [appKit]);
 
     return useSyncExternalStore(subscribe, getSnapshot, () => []);

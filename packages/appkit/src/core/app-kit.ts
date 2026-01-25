@@ -12,19 +12,20 @@ import { Network, KitNetworkManager } from '@ton/walletkit';
 import type { AppKitConfig } from './types';
 import type { Connector } from '../types/connector';
 import { Emitter, CONNECTOR_EVENTS, WALLETS_EVENTS } from '../features/events';
+import type { AppKitEvents } from '../features/events/types/events-map';
 import type { WalletInterface } from '../types/wallet';
-import { WalletsManager } from '../features/wallets-manager';
+import { WalletsManager } from '../features/wallets';
 
 /**
  * Central hub for wallet management.
  * Stores emitter, providers, and manages wallet connections.
  */
 export class AppKit {
-    readonly emitter: Emitter;
-    readonly walletsManager: WalletsManager;
+    readonly emitter: Emitter<AppKitEvents>;
+    readonly connectors: Map<string, Connector> = new Map();
 
-    private networkManager: NetworkManager;
-    private connectors: Map<string, Connector> = new Map();
+    private readonly networkManager: NetworkManager;
+    private readonly walletsManager: WalletsManager;
 
     constructor(config: AppKitConfig) {
         // Use provided networks config or default to mainnet
@@ -35,7 +36,7 @@ export class AppKit {
         this.networkManager = new KitNetworkManager({ networks });
         this.walletsManager = new WalletsManager();
 
-        this.emitter = new Emitter();
+        this.emitter = new Emitter<AppKitEvents>();
         this.emitter.on(CONNECTOR_EVENTS.CONNECTED, this.updateWalletsFromConnectors.bind(this));
         this.emitter.on(CONNECTOR_EVENTS.DISCONNECTED, this.updateWalletsFromConnectors.bind(this));
     }
@@ -76,32 +77,6 @@ export class AppKit {
      */
     getConnectedWallets(): readonly WalletInterface[] {
         return this.walletsManager.wallets;
-    }
-
-    /**
-     * Connect wallet using specific connector
-     */
-    async connectWallet(connectorId: string): Promise<void> {
-        const connector = this.connectors.get(connectorId);
-
-        if (!connector) {
-            throw new Error(`Connector with id "${connectorId}" not found`);
-        }
-
-        await connector.connectWallet();
-    }
-
-    /**
-     * Disconnect wallet using specific connector
-     */
-    async disconnectWallet(connectorId: string): Promise<void> {
-        const connector = this.connectors.get(connectorId);
-
-        if (!connector) {
-            throw new Error(`Connector with id "${connectorId}" not found`);
-        }
-
-        await connector.disconnectWallet();
     }
 
     /**

@@ -6,7 +6,7 @@
  *
  */
 
-export type EventPayload = Record<string, unknown>;
+export type EventPayload = object;
 
 export interface AppKitEvent<T extends EventPayload = EventPayload> {
     type: string;

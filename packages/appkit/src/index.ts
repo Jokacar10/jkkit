@@ -31,6 +31,9 @@ export * from './core';
 // Events feature
 export * from './features/events';
 
+// Wallets feature
+export * from './features/wallets';
+
 export * from './types/wallet';
 export * from './types/connector';
 

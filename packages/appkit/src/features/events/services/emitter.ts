@@ -6,46 +6,49 @@
  *
  */
 
-import type { EventPayload, EventListener, AppKitEvent } from '../types/event-bus';
+import type { EventListener, AppKitEvent, EventPayload } from '../types/event-bus';
+import type { AppKitEvents } from '../types/events-map';
 
-/**
- * Centralized emitter for appkit plugin communication
- */
-export class Emitter {
-    private listeners = new Map<string, Set<EventListener>>();
+export class Emitter<Events extends { [K in keyof Events]: EventPayload } = AppKitEvents> {
+    private listeners = new Map<keyof Events, Set<unknown>>();
 
-    emit<T extends EventPayload>(type: string, payload: T, source: string): void {
-        const event: AppKitEvent<T> = {
-            type,
+    emit<K extends keyof Events>(type: K, payload: Events[K], source: string): void {
+        const event: AppKitEvent<Events[K]> = {
+            type: type as string,
             payload,
             source,
             timestamp: Date.now(),
         };
 
-        // Notify specific listeners
-        this.listeners.get(type)?.forEach((listener) => listener(event));
+        const listeners = this.listeners.get(type);
 
-        // Notify wildcard listeners
-        this.listeners.get('*')?.forEach((listener) => listener(event));
+        if (listeners) {
+            listeners.forEach((listener) => {
+                (listener as EventListener<Events[K]>)(event);
+            });
+        }
     }
 
-    on<T extends EventPayload>(type: string, listener: EventListener<T>): () => void {
+    on<K extends keyof Events>(type: K, listener: EventListener<Events[K]>): () => void {
         if (!this.listeners.has(type)) {
             this.listeners.set(type, new Set());
         }
-        this.listeners.get(type)!.add(listener as EventListener);
-        return () => this.off(type, listener as EventListener);
+
+        this.listeners.get(type)!.add(listener as unknown);
+
+        return () => this.off(type, listener);
     }
 
-    off(type: string, listener: EventListener): void {
-        this.listeners.get(type)?.delete(listener);
+    off<K extends keyof Events>(type: K, listener: EventListener<Events[K]>): void {
+        this.listeners.get(type)?.delete(listener as unknown);
     }
 
-    once<T extends EventPayload>(type: string, listener: EventListener<T>): () => void {
-        const wrapper: EventListener<T> = (event) => {
-            this.off(type, wrapper as EventListener);
+    once<K extends keyof Events>(type: K, listener: EventListener<Events[K]>): () => void {
+        const wrapper = (event: AppKitEvent<Events[K]>) => {
+            this.off(type, wrapper);
             listener(event);
         };
+
         return this.on(type, wrapper);
     }
 }

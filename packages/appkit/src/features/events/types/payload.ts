@@ -17,11 +17,6 @@ export interface WalletDisconnectedPayload {
     connectorId: string;
 }
 
-export interface WalletChangedPayload {
-    wallets: WalletInterface[];
-    connectorId: string;
-}
-
 export interface PluginRegisteredPayload {
     pluginId: string;
     pluginType: string;

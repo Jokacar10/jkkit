@@ -15,9 +15,4 @@
 export { Emitter } from './services/emitter';
 export type { EventPayload, AppKitEvent, EventListener } from './types/event-bus';
 export { CONNECTOR_EVENTS, WALLETS_EVENTS, PLUGIN_EVENTS } from './constants/events';
-export type {
-    WalletConnectedPayload,
-    WalletDisconnectedPayload,
-    WalletChangedPayload,
-    PluginRegisteredPayload,
-} from './types/payload';
+export type { WalletConnectedPayload, WalletDisconnectedPayload, PluginRegisteredPayload } from './types/payload';
