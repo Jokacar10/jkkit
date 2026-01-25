@@ -19,6 +19,7 @@ export const CONNECTOR_EVENTS = {
  */
 export const WALLETS_EVENTS = {
     UPDATED: 'wallets:updated',
+    SELECTION_CHANGED: 'wallets:selection-changed',
 } as const;
 
 /**

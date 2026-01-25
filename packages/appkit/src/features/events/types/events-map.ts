@@ -17,6 +17,7 @@ export interface AppKitEvents {
 
     // Wallets events
     [WALLETS_EVENTS.UPDATED]: { wallets: WalletInterface[] };
+    [WALLETS_EVENTS.SELECTION_CHANGED]: { walletId: string | null };
 
     // Plugin events
     [PLUGIN_EVENTS.REGISTERED]: PluginRegisteredPayload;

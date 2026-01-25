@@ -23,9 +23,9 @@ import { WalletsManager } from '../../features/wallets';
 export class AppKit {
     readonly emitter: Emitter<AppKitEvents>;
     readonly connectors: Map<string, Connector> = new Map();
+    readonly walletsManager: WalletsManager;
 
     private readonly networkManager: NetworkManager;
-    private readonly walletsManager: WalletsManager;
 
     constructor(config: AppKitConfig) {
         // Use provided networks config or default to mainnet
@@ -34,11 +34,12 @@ export class AppKit {
         };
 
         this.networkManager = new KitNetworkManager({ networks });
-        this.walletsManager = new WalletsManager();
 
         this.emitter = new Emitter<AppKitEvents>();
         this.emitter.on(CONNECTOR_EVENTS.CONNECTED, this.updateWalletsFromConnectors.bind(this));
         this.emitter.on(CONNECTOR_EVENTS.DISCONNECTED, this.updateWalletsFromConnectors.bind(this));
+
+        this.walletsManager = new WalletsManager(this.emitter);
     }
 
     /**

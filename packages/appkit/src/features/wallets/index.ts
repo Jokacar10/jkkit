@@ -10,8 +10,10 @@ export { WalletsManager } from './service/wallets-manager';
 
 export * from './actions/connect';
 export * from './actions/disconnect';
+export * from './actions/get-selected-wallet';
 export * from './actions/get-connected-wallets';
 
 export * from './watchers/watch-connected-wallets';
+export * from './watchers/watch-selected-wallet';
 
 export * from './types/wallet';
