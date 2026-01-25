@@ -89,13 +89,7 @@ export class AndroidTONConnectSessionsManager implements TONConnectSessionManage
                 description: dAppInfo.description,
             });
 
-            const resultJson = this.bridge.sessionCreate(
-                sessionId,
-                dAppInfoJson,
-                walletId,
-                walletAddress,
-                isJsBridge,
-            );
+            const resultJson = this.bridge.sessionCreate(sessionId, dAppInfoJson, walletId, walletAddress, isJsBridge);
 
             const session = JSON.parse(resultJson) as TONConnectSession;
             log('[AndroidSessionManager] Session created:', session.sessionId);

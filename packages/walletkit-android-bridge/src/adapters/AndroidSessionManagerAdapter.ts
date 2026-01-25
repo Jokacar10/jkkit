@@ -39,7 +39,7 @@ type AndroidWindow = Window & {
  */
 export function isNativeSessionManagerAvailable(): boolean {
     const androidWindow = window as AndroidWindow;
-    return !!(androidWindow.WalletKitNative?.sessionCreate);
+    return !!androidWindow.WalletKitNative?.sessionCreate;
 }
 
 /**

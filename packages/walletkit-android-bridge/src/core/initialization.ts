@@ -17,7 +17,10 @@ import { log, warn } from '../utils/logger';
 import { walletKit, setWalletKit } from './state';
 import { ensureWalletKitLoaded, TonWalletKit } from './moduleLoader';
 import { getInternalBrowserResolverMap } from '../utils/internalBrowserResolvers';
-import { hasAndroidSessionManager, AndroidTONConnectSessionsManager } from '../adapters/AndroidTONConnectSessionsManager';
+import {
+    hasAndroidSessionManager,
+    AndroidTONConnectSessionsManager,
+} from '../adapters/AndroidTONConnectSessionsManager';
 
 export interface InitTonWalletKitDeps {
     emit: (type: WalletKitBridgeEvent['type'], data?: WalletKitBridgeEvent['data']) => void;
