@@ -13,6 +13,7 @@ import type { AppKitConfig } from '../types/config';
 import type { Connector } from '../../../types/connector';
 import { Emitter, CONNECTOR_EVENTS, WALLETS_EVENTS } from '../../events';
 import type { AppKitEvents } from '../../events';
+import { QueryClient } from '../../query';
 import type { WalletInterface } from '../../../features/wallets';
 import { WalletsManager } from '../../../features/wallets';
 
@@ -22,10 +23,11 @@ import { WalletsManager } from '../../../features/wallets';
  */
 export class AppKit {
     readonly emitter: Emitter<AppKitEvents>;
+    readonly queryClient: QueryClient;
     readonly connectors: Map<string, Connector> = new Map();
     readonly walletsManager: WalletsManager;
 
-    private readonly networkManager: NetworkManager;
+    readonly networkManager: NetworkManager;
 
     constructor(config: AppKitConfig) {
         // Use provided networks config or default to mainnet
@@ -39,6 +41,7 @@ export class AppKit {
         this.emitter.on(CONNECTOR_EVENTS.CONNECTED, this.updateWalletsFromConnectors.bind(this));
         this.emitter.on(CONNECTOR_EVENTS.DISCONNECTED, this.updateWalletsFromConnectors.bind(this));
 
+        this.queryClient = new QueryClient();
         this.walletsManager = new WalletsManager(this.emitter);
     }
 
