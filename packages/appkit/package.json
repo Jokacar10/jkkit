@@ -40,17 +40,29 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ton-community/assets-sdk": "^0.0.5",
-    "@ton/core": "^0.61.0",
-    "@ton/walletkit": "workspace:*",
+    "@ton/walletkit": "workspace:*"
+  },
+  "peerDependencies": {
+    "@ton/core": "^0.62.0 || ^0.63.0",
     "@tonconnect/protocol": "catalog:",
     "@tonconnect/sdk": "catalog:"
+  },
+  "peerDependenciesMeta": {
+    "@tonconnect/protocol": {
+      "optional": true
+    },
+    "@tonconnect/sdk": {
+      "optional": true
+    }
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.15.0",
   "devDependencies": {
+    "@ton/core": "catalog:",
+    "@tonconnect/protocol": "catalog:",
+    "@tonconnect/sdk": "catalog:",
     "tsup": "^8.5.0",
     "tsx": "^4.20.5",
     "typescript": "~5.8.3"

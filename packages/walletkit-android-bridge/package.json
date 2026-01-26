@@ -24,10 +24,10 @@
     "buffer": "^6.0.3"
   },
   "peerDependencies": {
-    "@ton/core": "^0.62.0"
+    "@ton/core": "catalog:"
   },
   "devDependencies": {
-    "@ton/core": "^0.62.1",
+    "@ton/core": "catalog:",
     "typescript": "^5.9.3",
     "vite": "^7.3.1"
   }

@@ -8,13 +8,14 @@
 
 import path from 'path';
 
+import { analyzer } from 'vite-bundle-analyzer';
 import { defineConfig } from 'vite';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 
 // https://vite.dev/config/
 export default defineConfig({
-    plugins: [react(), tailwindcss()],
+    plugins: [react(), tailwindcss(), process.env.ANALYZE === 'true' && analyzer()],
     server: {
         port: 5174,
         allowedHosts: ['localhost', '127.0.0.1', 'local.dev'],
