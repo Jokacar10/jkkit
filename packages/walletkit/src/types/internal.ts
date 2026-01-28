@@ -17,13 +17,11 @@ import type {
 import { WalletResponseError as _WalletResponseError } from '@tonconnect/protocol';
 
 import type { JSBridgeTransportFunction } from './jsBridge';
-import type { WalletId } from '../utils/walletId';
 import type {
     ExtraCurrencies,
     TransactionRequest,
     TransactionRequestMessage,
     BridgeEvent,
-    UserFriendlyAddress,
     Base64String,
 } from '../api/models';
 import { SendModeFromValue } from '../utils/sendMode';
