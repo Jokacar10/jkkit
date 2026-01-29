@@ -41,13 +41,8 @@ export async function approveConnectRequest(args: ApproveConnectRequestArgs) {
         // Set walletId on the event (wallet lookup not needed - wallet is managed by Kotlin)
         event.walletId = args.walletId;
 
-        // Wrap event in ConnectionRequest object as expected by TonWalletKit
-        const request = {
-            event,
-            response: args.response,
-        };
-
-        const result = await kit.approveConnectRequest(request);
+        // Pass event and response as separate parameters (new API)
+        const result = await kit.approveConnectRequest(event, args.response);
 
         return result;
     });
@@ -63,7 +58,7 @@ export async function rejectConnectRequest(args: RejectConnectRequestArgs) {
             throw new Error('Event is required for connect request rejection');
         }
 
-        const result = await kit.rejectConnectRequest({ event }, args.reason, args.errorCode);
+        const result = await kit.rejectConnectRequest(event, args.reason, args.errorCode);
 
         return result ?? { success: true };
     });
@@ -84,13 +79,8 @@ export async function approveTransactionRequest(args: ApproveTransactionRequestA
             event.walletId = args.walletId;
         }
 
-        // Wrap event in SendTransactionRequest object as expected by TonWalletKit
-        const request = {
-            event,
-            response: args.response,
-        };
-
-        const result = await kit.approveTransactionRequest(request);
+        // Pass event and response as separate parameters (new API)
+        const result = await kit.approveTransactionRequest(event, args.response);
 
         return result;
     });
@@ -112,7 +102,7 @@ export async function rejectTransactionRequest(args: RejectTransactionRequestArg
                 ? { code: args.errorCode, message: args.reason || 'Transaction rejected' }
                 : args.reason;
 
-        const result = await kit.rejectTransactionRequest({ event }, reason);
+        const result = await kit.rejectTransactionRequest(event, reason);
 
         return result ?? { success: true };
     });
@@ -137,14 +127,9 @@ export async function approveSignDataRequest(args: ApproveSignDataRequestArgs) {
             event.walletId = args.walletId;
         }
 
-        // Wrap event in SignDataRequest object as expected by TonWalletKit
-        const request = {
-            event,
-            response: args.response,
-        };
-
-        log('approveSignDataRequest calling kit.approveSignDataRequest with:', request);
-        const result = await kit.approveSignDataRequest(request);
+        // Pass event and response as separate parameters (new API)
+        log('approveSignDataRequest calling kit.approveSignDataRequest with event:', event, 'response:', args.response);
+        const result = await kit.approveSignDataRequest(event, args.response);
         log('approveSignDataRequest result:', result);
 
         return result;
@@ -167,7 +152,7 @@ export async function rejectSignDataRequest(args: RejectSignDataRequestArgs) {
                 ? { code: args.errorCode, message: args.reason || 'Sign data rejected' }
                 : args.reason;
 
-        const result = await kit.rejectSignDataRequest({ event }, reason);
+        const result = await kit.rejectSignDataRequest(event, reason);
 
         return result ?? { success: true };
     });

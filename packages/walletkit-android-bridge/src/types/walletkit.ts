@@ -93,11 +93,11 @@ export interface WalletKitInstance {
     removeDisconnectCallback(): void;
     onRequestError(callback: (event: unknown) => void): void;
     removeErrorCallback(): void;
-    // Request approval methods
-    approveConnectRequest(event: unknown): Promise<unknown>;
+    // Request approval methods - event and response are separate parameters
+    approveConnectRequest(event: unknown, response?: unknown): Promise<unknown>;
     rejectConnectRequest(event: unknown, reason?: string, errorCode?: number): Promise<unknown>;
-    approveTransactionRequest(event: unknown): Promise<unknown>;
+    approveTransactionRequest(event: unknown, response?: unknown): Promise<unknown>;
     rejectTransactionRequest(event: unknown, reason?: string | { code: number; message: string }): Promise<unknown>;
-    approveSignDataRequest(event: unknown): Promise<unknown>;
+    approveSignDataRequest(event: unknown, response?: unknown): Promise<unknown>;
     rejectSignDataRequest(event: unknown, reason?: string | { code: number; message: string }): Promise<unknown>;
 }

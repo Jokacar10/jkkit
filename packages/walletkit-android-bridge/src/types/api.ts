@@ -106,7 +106,15 @@ export interface ApproveConnectRequestArgs {
     event: TonConnectRequestEvent;
     walletId: string;
     response?: {
-        proof?: string;
+        proof: {
+            signature: string;
+            timestamp: number;
+            domain: {
+                lengthBytes: number;
+                value: string;
+            };
+            payload: string;
+        };
     };
 }
 
@@ -120,7 +128,7 @@ export interface ApproveTransactionRequestArgs {
     event: TonConnectRequestEvent;
     walletId?: string;
     response?: {
-        signedBoc?: string;
+        signedBoc: string;
     };
 }
 
@@ -134,9 +142,9 @@ export interface ApproveSignDataRequestArgs {
     event: TonConnectRequestEvent;
     walletId?: string;
     response?: {
-        signature?: string;
-        timestamp?: number;
-        domain?: string;
+        signature: string;
+        timestamp: number;
+        domain: string;
     };
 }
 
