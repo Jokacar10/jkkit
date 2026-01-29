@@ -97,10 +97,7 @@ export class RequestProcessor {
     /**
      * Process connect request approval
      */
-    async approveConnectRequest(
-        event: ConnectionRequestEvent,
-        response: ConnectionApprovalResponse | undefined,
-    ): Promise<void> {
+    async approveConnectRequest(event: ConnectionRequestEvent, response?: ConnectionApprovalResponse): Promise<void> {
         try {
             // If event is ConnectionRequestEvent, we need to create approval ourself
             const walletId = event.walletId;
@@ -258,7 +255,7 @@ export class RequestProcessor {
      */
     async approveTransactionRequest(
         event: SendTransactionRequestEvent,
-        response: SendTransactionApprovalResponse | undefined,
+        response?: SendTransactionApprovalResponse,
     ): Promise<SendTransactionApprovalResponse> {
         try {
             if (response) {
@@ -368,7 +365,7 @@ export class RequestProcessor {
      */
     async approveSignDataRequest(
         event: SignDataRequestEvent,
-        response: SignDataApprovalResponse | undefined,
+        response?: SignDataApprovalResponse,
     ): Promise<SignDataApprovalResponse> {
         try {
             if (response) {

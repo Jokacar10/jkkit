@@ -24,6 +24,7 @@ import type {
     SignDataApprovalResponse,
     SendTransactionApprovalResponse,
     ConnectionRequestEvent,
+    ConnectionApprovalResponse,
     SendTransactionRequestEvent,
     SignDataRequestEvent,
 } from '@ton/walletkit';
@@ -41,7 +42,6 @@ import type {
     SwiftWalletKitConfiguration,
     SwiftWalletSigner,
 } from './types';
-import type { ConnectionApprovalResponse } from '../../walletkit/dist/cjs';
 
 declare global {
     interface Window {
