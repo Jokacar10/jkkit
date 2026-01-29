@@ -4,31 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-catalogs:
-  default:
-    '@types/react':
-      specifier: 19.2.8
-      version: 19.2.8
-    '@types/react-dom':
-      specifier: 19.2.3
-      version: 19.2.3
-    react:
-      specifier: 19.2.3
-      version: 19.2.3
-    react-dom:
-      specifier: 19.2.3
-      version: 19.2.3
-  react-native:
-    '@types/react':
-      specifier: 19.1.17
-      version: 19.1.17
-    react:
-      specifier: 19.1.0
-      version: 19.1.0
-    react-native:
-      specifier: 0.81.5
-      version: 0.81.5
-
 importers:
 
   .:
@@ -513,9 +488,6 @@ importers:
       '@ton/crypto':
         specifier: ^3.3.0
         version: 3.3.0
-      '@truecarry/tlb-abi':
-        specifier: ^0.2.0
-        version: 0.2.0(@ton/core@0.62.1(@ton/crypto@3.3.0))
       '@types/chrome':
         specifier: ^0.1.33
         version: 0.1.33
@@ -2758,11 +2730,6 @@ packages:
   '@tonconnect/sdk@3.3.1':
     resolution: {integrity: sha512-lhXJu95VvbD36u5mMPg2sg+w4GQwkrYnHeJ8rVveu2N7UPwt0jvrEqKlvf7Ss1gh5RDtzs35SS3GbJlaIOAJNA==}
 
-  '@truecarry/tlb-abi@0.2.0':
-    resolution: {integrity: sha512-GKcaS1OdPiy6MH7+l3Y2teFoDIYNcdPNat+PLEQk+1jajB4b8lUy5KBv/nVpxDzCuWUQo+em1lq5Gok9auUZuA==}
-    peerDependencies:
-      '@ton/core': ^0.56.3
-
   '@truecarry/vite-plugin-web-extension@4.5.1':
     resolution: {integrity: sha512-WSramCYE+wVFH/zQdBhaBP5gSd9pldyjOu+jvkaTEFXwzCDbNQJ+34ke4/XDsaohpcQTe+lbVXbUT+Jt4Ni9Jw==}
     engines: {node: '>=16'}
@@ -3883,15 +3850,6 @@ packages:
 
   debug@4.3.7:
     resolution: {integrity: sha512-Er2nc/H7RrMXZBFCEim6TCmMk02Z8vLC2Rbi1KEBggpo0fS6l0S1nnapwmIi3yW/+GOJap1Krg4w0Hg80oCqgQ==}
-    engines: {node: '>=6.0'}
-    peerDependencies:
-      supports-color: '*'
-    peerDependenciesMeta:
-      supports-color:
-        optional: true
-
-  debug@4.4.1:
-    resolution: {integrity: sha512-KcKCqiftBJcZr++7ykoDIEwSa3XWowTfNPo92BYxjXiyYEVrUQh2aLyhxBCwww+heortUFxEJYcRzosstTEBYQ==}
     engines: {node: '>=6.0'}
     peerDependencies:
       supports-color: '*'
@@ -10829,13 +10787,6 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@truecarry/tlb-abi@0.2.0(@ton/core@0.62.1(@ton/crypto@3.3.0))':
-    dependencies:
-      '@ton/core': 0.62.1(@ton/crypto@3.3.0)
-      debug: 4.4.1
-    transitivePeerDependencies:
-      - supports-color
-
   '@truecarry/vite-plugin-web-extension@4.5.1(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)':
     dependencies:
       ajv: 8.17.1
@@ -12134,10 +12085,6 @@ snapshots:
       ms: 2.1.3
 
   debug@4.3.7:
-    dependencies:
-      ms: 2.1.3
-
-  debug@4.4.1:
     dependencies:
       ms: 2.1.3
 
