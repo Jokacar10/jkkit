@@ -7,6 +7,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { getConnectedWallets } from '@ton/appkit';
 
 import type { MockWrappedWallet } from '../__mocks__/@ton/appkit';
 
@@ -26,11 +27,9 @@ describe('appkit examples', () => {
     describe('initialize', () => {
         it('should create AppKit and get connected wallets', async () => {
             const { appKit } = await import('../appkit/initialize');
-
             expect(appKit).toBeDefined();
-            expect(appKit.getConnectedWallets).toBeDefined();
 
-            const wallets = await appKit.getConnectedWallets();
+            const wallets = getConnectedWallets(appKit);
             expect(wallets).toBeDefined();
             expect(Array.isArray(wallets)).toBe(true);
         });

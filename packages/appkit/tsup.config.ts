@@ -14,7 +14,7 @@ export default defineConfig({
     entry: ['src/**/*.ts', '!src/**/*.test.ts', '!src/**/__tests__/**'],
     format: ['esm', 'cjs'],
     bundle: false,
-    dts: true,
+    dts: false,
     clean: true,
     outDir: 'dist',
     platform: 'browser',

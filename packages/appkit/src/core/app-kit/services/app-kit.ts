@@ -23,7 +23,7 @@ import { WalletsManager } from '../../wallets-manager';
  */
 export class AppKit {
     readonly emitter: AppKitEmitter;
-    readonly connectors: Map<string, Connector> = new Map();
+    readonly connectors: Connector[] = [];
     readonly walletsManager: WalletsManager;
 
     readonly networkManager: NetworkManager;
@@ -49,39 +49,17 @@ export class AppKit {
     /**
      * Add a wallet connector
      */
-    addConnector(connector: Connector): () => void {
+    addConnector(connector: Connector): void {
         const id = connector.id;
+        const oldConnector = this.connectors.find((c) => c.id === id);
 
-        if (this.connectors.has(id)) {
-            const oldConnector = this.connectors.get(id);
-            oldConnector?.destroy();
+        if (oldConnector) {
+            oldConnector.destroy();
+            this.connectors.splice(this.connectors.indexOf(oldConnector), 1);
         }
 
-        this.connectors.set(id, connector);
+        this.connectors.push(connector);
         connector.initialize(this.emitter, this.networkManager);
-
-        return () => this.removeConnector(id);
-    }
-
-    /**
-     * Remove a wallet connector
-     */
-    removeConnector(connectorId: string): void {
-        const connector = this.connectors.get(connectorId);
-
-        if (!connector) {
-            throw new Error(`Connector with id "${connectorId}" not found`);
-        }
-
-        connector.destroy();
-        this.connectors.delete(connectorId);
-    }
-
-    /**
-     * Get wallets from wallets manager
-     */
-    getConnectedWallets(): readonly WalletInterface[] {
-        return this.walletsManager.wallets;
     }
 
     /**

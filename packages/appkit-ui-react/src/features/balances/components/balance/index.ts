@@ -6,4 +6,4 @@
  *
  */
 
-export {};
+export { Balance } from './balance';

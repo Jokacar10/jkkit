@@ -16,6 +16,7 @@ export {
 // Wallets
 export { connect, type ConnectParameters, type ConnectReturnType } from './wallets/connect';
 export { disconnect, type DisconnectReturnType, type DisconnectParameters } from './wallets/disconnect';
+export { getConnectors, type GetConnectorsReturnType } from './wallets/get-connectors';
 export { getConnectedWallets, type GetConnectedWalletsReturnType } from './wallets/get-connected-wallets';
 export { getSelectedWallet, type GetSelectedWalletReturnType } from './wallets/get-selected-wallet';
 export {
@@ -23,3 +24,18 @@ export {
     type SetSelectedWalletIdParameters,
     type SetSelectedWalletIdReturnType,
 } from './wallets/set-selected-wallet-id';
+export {
+    watchSelectedWallet,
+    type WatchSelectedWalletParameters,
+    type WatchSelectedWalletReturnType,
+} from './wallets/watch-selected-wallet';
+export {
+    watchConnectedWallets,
+    type WatchConnectedWalletsParameters,
+    type WatchConnectedWalletsReturnType,
+} from './wallets/watch-connected-wallets';
+export {
+    watchConnectors,
+    type WatchConnectorsParameters,
+    type WatchConnectorsReturnType,
+} from './wallets/watch-connectors';

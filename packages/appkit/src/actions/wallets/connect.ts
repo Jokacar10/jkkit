@@ -19,7 +19,7 @@ export type ConnectReturnType = void;
  */
 export async function connect(appKit: AppKit, parameters: ConnectParameters): Promise<ConnectReturnType> {
     const { connectorId } = parameters;
-    const connector = appKit.connectors.get(connectorId);
+    const connector = appKit.connectors.find((c) => c.id === connectorId);
 
     if (!connector) {
         throw new Error(`Connector with id "${connectorId}" not found`);

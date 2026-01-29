@@ -8,7 +8,7 @@
 
 import type { NetworkManager } from '@ton/walletkit';
 import { Network } from '@ton/walletkit';
-import type { ITonConnect } from '@tonconnect/sdk';
+import type { TonConnectUI } from '@tonconnect/ui';
 
 import { TonConnectWalletAdapter } from '../adapters/ton-connect-wallet-adapter';
 import { CONNECTOR_EVENTS } from '../../../core/app-kit';
@@ -18,14 +18,14 @@ import type { AppKitEmitter } from '../../../core/app-kit';
 
 export interface TonConnectConnectorConfig {
     id?: string;
-    tonConnect: ITonConnect;
+    tonConnect: TonConnectUI;
 }
 
 export class TonConnectConnector implements Connector {
     readonly id: string;
-    readonly type = 'tonconnect/sdk';
+    readonly type = 'tonconnect';
 
-    private tonConnect: ITonConnect;
+    private tonConnect: TonConnectUI;
     private networkManager: NetworkManager | null = null;
     private emitter: AppKitEmitter | null = null;
     private unsubscribeTonConnect: (() => void) | null = null;
@@ -51,7 +51,7 @@ export class TonConnectConnector implements Connector {
         });
 
         // Restore existing connection
-        await this.tonConnect.restoreConnection();
+        await this.tonConnect.connector.restoreConnection();
     }
 
     destroy(): void {
@@ -62,14 +62,11 @@ export class TonConnectConnector implements Connector {
     }
 
     async connectWallet(): Promise<void> {
-        // Connection flow is handled by UI (modal with QR code, etc.)
-        // This method can be extended for programmatic connection
+        await this.tonConnect.openModal();
     }
 
     async disconnectWallet(): Promise<void> {
-        if (this.tonConnect.connected) {
-            await this.tonConnect.disconnect();
-        }
+        await this.tonConnect.disconnect();
     }
 
     getConnectedWallets(): WalletInterface[] {
@@ -83,7 +80,7 @@ export class TonConnectConnector implements Connector {
 
             const walletAdapter = new TonConnectWalletAdapter({
                 tonConnectWallet: wallet,
-                tonConnect: this.tonConnect,
+                tonConnect: this.tonConnect.connector,
                 client,
             });
 

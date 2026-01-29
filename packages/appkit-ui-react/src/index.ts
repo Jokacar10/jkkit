@@ -6,8 +6,8 @@
  *
  */
 
-export { AppKitProvider } from './components/app-kit-provider';
+export { AppKitProvider } from './providers/app-kit-provider';
 export { useAppKit } from './hooks/use-app-kit';
-export { useConnectedWallets } from './hooks/use-connected-wallets';
-export { useSelectedWallet } from './hooks/use-selected-wallet';
-export { useBalance } from './hooks/use-balance';
+
+export * from './features/balances';
+export * from './features/wallets';

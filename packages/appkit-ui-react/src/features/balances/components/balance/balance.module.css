@@ -1,0 +1,7 @@
+.balance {
+  background-color: gainsboro;
+  border-radius: 9999px;
+  font-size: 13px;
+  padding: 10px 15px;
+  display: inline-block;
+}

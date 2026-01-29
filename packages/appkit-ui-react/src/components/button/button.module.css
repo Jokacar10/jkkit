@@ -1,0 +1,26 @@
+.button {
+  appearance: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 10px 20px;
+  font-family: inherit;
+  line-height: normal;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 12px;
+
+  background-color: var(--ta-color-connect-button-background); 
+  color: var(--ta-color-connect-button-foreground);
+  transition: background-color 0.2s ease;
+}
+
+.button:hover {
+  opacity: 0.8;
+}
+
+.button:active {
+  transform: scale(0.98);
+}

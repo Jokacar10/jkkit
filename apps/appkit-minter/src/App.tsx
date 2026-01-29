@@ -17,6 +17,7 @@ import { appKit } from './services/app-kit';
 import { AppRouter } from '@/components';
 
 import './App.css';
+import '@ton/appkit-ui-react/styles.css';
 
 // TonConnect manifest URL - in production, host your own manifest
 const MANIFEST_URL = 'https://tonconnect-demo-dapp-with-react-ui.vercel.app/tonconnect-manifest.json';
@@ -30,7 +31,7 @@ function AppKitBridge({ children }: { children: React.ReactNode }) {
 
         const unregister = appKit.addConnector(
             new TonConnectConnector({
-                tonConnect: tonConnectUI.connector,
+                tonConnect: tonConnectUI,
             }),
         );
 

@@ -19,7 +19,7 @@ export type DisconnectReturnType = void;
  */
 export async function disconnect(appKit: AppKit, parameters: DisconnectParameters): Promise<DisconnectReturnType> {
     const { connectorId } = parameters;
-    const connector = appKit.connectors.get(connectorId);
+    const connector = appKit.connectors.find((c) => c.id === connectorId);
 
     if (!connector) {
         throw new Error(`Connector with id "${connectorId}" not found`);

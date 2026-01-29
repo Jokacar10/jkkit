@@ -7,23 +7,22 @@
  */
 
 import { useSyncExternalStore, useCallback } from 'react';
-import { getConnectedWallets } from '@ton/appkit';
-import { watchConnectedWallets } from '@ton/appkit/watchers';
+import { getConnectors, watchConnectors } from '@ton/appkit';
 
-import { useAppKit } from './use-app-kit';
+import { useAppKit } from '../../../hooks/use-app-kit';
 
-export const useConnectedWallets = () => {
+export const useConnectors = () => {
     const appKit = useAppKit();
 
     const subscribe = useCallback(
         (onChange: () => void) => {
-            return watchConnectedWallets(appKit, { onChange });
+            return watchConnectors(appKit, { onChange });
         },
         [appKit],
     );
 
     const getSnapshot = useCallback(() => {
-        return getConnectedWallets(appKit);
+        return getConnectors(appKit);
     }, [appKit]);
 
     return useSyncExternalStore(subscribe, getSnapshot, () => []);

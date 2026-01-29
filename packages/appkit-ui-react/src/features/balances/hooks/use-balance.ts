@@ -6,11 +6,11 @@
  *
  */
 
-import type { GetBalanceOptions } from '@ton/appkit';
-import { getBalanceQueryParams } from '@ton/appkit/watchers';
+import type { GetBalanceOptions } from '@ton/appkit/queries';
+import { getBalanceQueryOptions } from '@ton/appkit/queries';
 import { useQuery } from '@tanstack/react-query';
 
-import { useAppKit } from './use-app-kit';
+import { useAppKit } from '../../../hooks/use-app-kit';
 
 /**
  * Hook to get balance
@@ -19,7 +19,7 @@ export function useBalance(params: GetBalanceOptions, queryOptions?: Record<stri
     const appKit = useAppKit();
 
     return useQuery({
-        ...getBalanceQueryParams(appKit, params),
+        ...getBalanceQueryOptions(appKit, params),
         ...queryOptions,
     });
 }

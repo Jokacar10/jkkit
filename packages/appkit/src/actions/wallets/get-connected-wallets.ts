@@ -15,5 +15,5 @@ export type GetConnectedWalletsReturnType = readonly WalletInterface[];
  * Get connected wallets
  */
 export function getConnectedWallets(appKit: AppKit): GetConnectedWalletsReturnType {
-    return appKit.getConnectedWallets();
+    return appKit.walletsManager.wallets;
 }

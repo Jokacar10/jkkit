@@ -11,16 +11,17 @@ import { defineConfig } from 'tsup';
 import * as packageJson from './package.json';
 
 export default defineConfig({
-    entry: ['src/index.ts'],
+    entry: ['src/**/*.{ts,tsx,js,jsx,mjs,css}'],
     format: ['esm', 'cjs'],
-    dts: true,
+    bundle: false,
+    dts: false,
     clean: true,
     outDir: 'dist',
     external: ['react', 'react-dom', 'react-dom/client', 'react/jsx-runtime'],
     platform: 'browser',
     target: 'es2020',
     sourcemap: true,
-    minify: true,
+    minify: false,
     treeshake: {
         preset: 'smallest',
     },
@@ -30,6 +31,7 @@ export default defineConfig({
     },
     define: {
         'process.env': '{}',
-        TON_CONNECT_UI_REACT_VERSION: JSON.stringify(packageJson.version),
+        TON_APPKIT_UI_REACT_VERSION: JSON.stringify(packageJson.version),
     },
+    onSuccess: 'tsc --emitDeclarationOnly',
 });

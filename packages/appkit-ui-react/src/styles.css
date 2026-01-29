@@ -1,0 +1,46 @@
+:root {
+  /* Colors */
+  --ta-color-primary: #007aff;
+  --ta-color-text: #000000;
+  --ta-color-text-secondary: #8e8e93;
+  --ta-color-background: #ffffff;
+  --ta-color-background-secondary: #f2f2f7;
+
+  /* Border Radius */
+  --ta-border-radius-s: 4px;
+  --ta-border-radius-m: 8px;
+  --ta-border-radius-l: 12px;
+  --ta-border-radius-xl: 16px;
+  --ta-border-radius-full: 9999px;
+
+  /* Border Width */
+  --ta-border-width-s: 1px;
+  --ta-border-width-m: 2px;
+}
+
+[data-theme='dark'] {
+  --ta-color-primary: #0a84ff;
+  --ta-color-text: #ffffff;
+  --ta-color-text-secondary: #8e8e93;
+  --ta-color-background: #000000;
+  --ta-color-background-secondary: #1c1c1e;
+
+  /* Token mappings */
+  --ta-color-connect-button-background: #0098EA;
+  --ta-color-connect-button-foreground: #FFFFFF;
+  --ta-color-accent: #0098EA;
+  --ta-color-telegram-button: #0098EA;
+  --ta-color-text-primary: #0F0F0F;
+  --ta-color-text-secondary: #6A7785;
+}
+
+:root {
+  /* ... existing vars ... */
+  /* Token mappings available in root as well or default theme */
+  --ta-color-connect-button-background: #0098EA;
+  --ta-color-connect-button-foreground: #FFFFFF;
+  --ta-color-accent: #0098EA;
+  --ta-color-telegram-button: #0098EA;
+  --ta-color-text-primary: #0F0F0F;
+  --ta-color-text-secondary: #6A7785;
+}
