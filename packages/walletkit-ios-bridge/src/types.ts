@@ -15,16 +15,18 @@ import type {
     WalletAdapter,
     Wallet,
     TransactionRequest,
-    SignDataRequestEvent,
-    TransactionRequestEvent,
-    ConnectionRequestEvent,
     BridgeEventMessageInfo,
     InjectedToExtensionBridgeRequestPayload,
     JettonsAPI,
     TONConnectSession,
-    TransactionApprovalResponse,
     SignDataApprovalResponse,
+    SendTransactionApprovalResponse,
+    ConnectionApprovalResponse,
+    SendTransactionRequestEvent,
+    SignDataRequestEvent,
 } from '@ton/walletkit';
+
+import type { ConnectionRequestEvent } from '../../walletkit/dist/cjs';
 
 export interface SwiftApiClient extends ApiClient {
     getNetwork: () => Network;
@@ -96,17 +98,22 @@ export interface SwiftWalletKit {
 
     handleTonConnectUrl(url: string): Promise<void>;
 
-    approveConnectRequest(request: ConnectionRequestEvent): Promise<void>;
+    approveConnectRequest(event: ConnectionRequestEvent, response?: ConnectionApprovalResponse): Promise<void>;
 
-    rejectConnectRequest(request: ConnectionRequestEvent, reason?: string): Promise<void>;
+    rejectConnectRequest(event: ConnectionRequestEvent, reason?: string): Promise<void>;
 
-    approveTransactionRequest(request: TransactionRequestEvent): Promise<TransactionApprovalResponse>;
+    approveTransactionRequest(
+        event: SendTransactionRequestEvent,
+        response?: SendTransactionApprovalResponse,
+    ): Promise<SendTransactionApprovalResponse>;
+    rejectTransactionRequest(event: SendTransactionRequestEvent, reason?: string): Promise<void>;
 
-    rejectTransactionRequest(request: TransactionRequestEvent, reason?: string): Promise<void>;
+    approveSignDataRequest(
+        event: SignDataRequestEvent,
+        response?: SignDataApprovalResponse,
+    ): Promise<SignDataApprovalResponse>;
 
-    approveSignDataRequest(request: SignDataRequestEvent): Promise<SignDataApprovalResponse>;
-
-    rejectSignDataRequest(request: SignDataRequestEvent, reason?: string): Promise<void>;
+    rejectSignDataRequest(event: SignDataRequestEvent, reason?: string): Promise<void>;
 
     disconnect(sessionId: string): Promise<void>;
 
