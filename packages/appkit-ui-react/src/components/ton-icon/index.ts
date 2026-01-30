@@ -6,4 +6,4 @@
  *
  */
 
-export { TonIcon } from './ton-icon';
+export { TonIcon, TonIconCircle } from './ton-icon';

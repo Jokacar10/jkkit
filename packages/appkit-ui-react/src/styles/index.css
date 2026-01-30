@@ -36,6 +36,7 @@
   --ta-body-line-height: 20px;
   --ta-body-font-weight: 400;
   --ta-body-medium-font-weight: 500;
+  --ta-body-bold-font-weight: 700;
 
   --ta-body-small-font-size: 12px;
   --ta-body-small-line-height: 16px;
@@ -51,17 +52,19 @@
   --ta-caption2-font-weight: 400;
 
   /* Colors */
-  --ta-color-primary: #007aff;
+  --ta-color-primary: #0098EB;
+  --ta-color-primary-foreground: #ffffff;
   --ta-color-text: #000000;
   --ta-color-text-secondary: #8e8e93;
   --ta-color-background: #ffffff;
   --ta-color-background-secondary: #f2f2f7;
-  --ta-color-connect-button-background: #0098EA;
-  --ta-color-connect-button-foreground: #FFFFFF;
-  --ta-color-accent: #0098EA;
-  --ta-color-telegram-button: #0098EA;
-  --ta-color-text-primary: #0F0F0F;
-  --ta-color-text-secondary: #6A7785;
+  --ta-color-block: #ffffff;
+  --ta-color-block-foreground: #000000;
+
+  /* Static Colors */
+  --ta-color-white: #ffffff;
+  --ta-color-black: #000000;
+  --ta-color-ton: #0098EB;
 
   /* Border Radius */
   --ta-border-radius-s: 4px;
@@ -76,17 +79,12 @@
 }
 
 [data-ta-theme='dark'] {
-  --ta-color-primary: #0a84ff;
+  --ta-color-primary: #0098EB;
+  --ta-color-primary-foreground: #ffffff;
   --ta-color-text: #ffffff;
   --ta-color-text-secondary: #8e8e93;
   --ta-color-background: #000000;
   --ta-color-background-secondary: #1c1c1e;
-
-  /* Token mappings */
-  --ta-color-connect-button-background: #0098EA;
-  --ta-color-connect-button-foreground: #FFFFFF;
-  --ta-color-accent: #0098EA;
-  --ta-color-telegram-button: #0098EA;
-  --ta-color-text-primary: #0F0F0F;
-  --ta-color-text-secondary: #6A7785;
+  --ta-color-block: #121214;
+  --ta-color-block-foreground: #ffffff;
 }

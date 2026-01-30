@@ -13,8 +13,8 @@
   justify-content: center;
   gap: 8px;
 
-  background-color: var(--ta-color-connect-button-background); 
-  color: var(--ta-color-connect-button-foreground);
+  background-color: var(--ta-color-primary); 
+  color: var(--ta-color-primary-foreground);
   transition: transform 0.125s ease-in-out, background-color 0.2s ease;
   will-change: transform;
 }

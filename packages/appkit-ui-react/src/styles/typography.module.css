@@ -62,6 +62,13 @@
   font-weight: var(--ta-body-medium-font-weight);
 }
 
+.bodyBold {
+  font-family: var(--ta-font-family);
+  font-size: var(--ta-body-font-size);
+  line-height: var(--ta-body-line-height);
+  font-weight: var(--ta-body-bold-font-weight);
+}
+
 .bodySmall {
   font-family: var(--ta-font-family);
   font-size: var(--ta-body-small-font-size);

@@ -6,4 +6,4 @@
  *
  */
 
-export { Balance } from './balance';
+export * from './ton-balance-badge';

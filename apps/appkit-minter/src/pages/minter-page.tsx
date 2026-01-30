@@ -7,7 +7,7 @@
  */
 
 import type React from 'react';
-import { useSelectedWallet } from '@ton/appkit-ui-react';
+import { useSelectedWallet, TonBalanceBadge } from '@ton/appkit-ui-react';
 
 import { Layout, CardGenerator, WalletConnect, JettonsCard, NftsCard } from '@/components';
 import { useWalletAssets } from '@/hooks';
@@ -32,6 +32,8 @@ export const MinterPage: React.FC = () => {
     return (
         <Layout title="NFT Minter">
             <div className="space-y-4">
+                <TonBalanceBadge />
+
                 {/* Wallet Connection - shown when not connected */}
                 {!isConnected && <WalletConnect />}
 

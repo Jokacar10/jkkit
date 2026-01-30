@@ -12,6 +12,8 @@ export { useAppKitTheme } from './hooks/use-app-kit-theme';
 export { I18nProvider } from './providers/i18n-provider';
 export { useI18n } from './hooks/use-i18n';
 
+export * from './components/block';
+export * from './components/button';
 export * from './components/ton-icon';
 
 export * from './features/balances';
