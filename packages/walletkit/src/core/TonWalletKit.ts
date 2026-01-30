@@ -143,6 +143,10 @@ export class TonWalletKit implements ITonWalletKit {
 
             const walletAddress = wallet.getAddress();
 
+            // Get wallet state init and public key for the response
+            const walletStateInit = await wallet.getStateInit();
+            const publicKey = wallet.getPublicKey().replace('0x', '');
+
             // Get device info with wallet-specific features if available
             const deviceInfo = getDeviceInfoForWallet(wallet, this.config.deviceInfo);
 
@@ -158,8 +162,8 @@ export class TonWalletKit implements ITonWalletKit {
                             address: Address.parse(walletAddress).toRawString(),
                             // TODO: Support multiple networks
                             network: wallet.getNetwork().chainId === CHAIN.MAINNET ? CHAIN.MAINNET : CHAIN.TESTNET,
-                            walletStateInit: '',
-                            publicKey: '',
+                            walletStateInit,
+                            publicKey,
                         },
                     ],
                 },
