@@ -17,7 +17,7 @@ export const validateNumericString = (num: string, maxDecimals?: number): boolea
     // if the decimals is zero the dot is not needed
     if (maxDecimals === 0 && num.includes('.')) return false;
 
-    if (num === '.') return false;
+    if (num === '.' || num === ',') return false;
 
     if (maxDecimals !== undefined && match?.[1]) return isValid && match?.[1].length <= maxDecimals;
 

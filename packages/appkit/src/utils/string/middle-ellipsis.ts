@@ -7,5 +7,9 @@
  */
 
 export const middleEllipsis = (value: string, left = 5, right = 5) => {
+    if (value.length <= left + right) {
+        return value;
+    }
+
     return `${value.slice(0, left)}...${value.slice(-right)}`;
 };
