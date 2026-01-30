@@ -62,6 +62,7 @@ import type { WalletInterface } from '../../../types/wallet';
  * Configuration for TonConnectWalletAdapter
  */
 export interface TonConnectWalletAdapterConfig {
+    connectorId: string;
     tonConnectWallet: TonConnectWallet;
     tonConnect: ITonConnect;
     client: ApiClient;
@@ -74,11 +75,13 @@ export class TonConnectWalletAdapter implements WalletInterface {
     public readonly tonConnectWallet: TonConnectWallet;
     public readonly tonConnect: ITonConnect;
     public readonly client: ApiClient;
+    public readonly connectorId: string;
 
     constructor(config: TonConnectWalletAdapterConfig) {
         this.tonConnectWallet = config.tonConnectWallet;
         this.tonConnect = config.tonConnect;
         this.client = config.client;
+        this.connectorId = config.connectorId;
     }
 
     // ==========================================

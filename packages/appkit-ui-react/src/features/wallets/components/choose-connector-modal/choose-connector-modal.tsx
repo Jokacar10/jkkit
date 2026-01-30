@@ -10,6 +10,7 @@ import type { FC } from 'react';
 
 import { Modal } from '../../../../components/modal';
 import { ConnectorsList } from '../connectors-list';
+import { useI18n } from '../../../../hooks/use-i18n';
 
 export interface ChooseConnectorModalProps {
     isOpen: boolean;
@@ -17,8 +18,10 @@ export interface ChooseConnectorModalProps {
 }
 
 export const ChooseConnectorModal: FC<ChooseConnectorModalProps> = ({ isOpen, onClose }) => {
+    const { t } = useI18n();
+
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Connect Wallet">
+        <Modal isOpen={isOpen} onClose={onClose} title={t('Connect Wallet')}>
             <ConnectorsList onConnectorSelect={onClose} />
         </Modal>
     );

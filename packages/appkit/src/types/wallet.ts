@@ -6,4 +6,8 @@
  *
  */
 
-export type { Wallet as WalletInterface } from '@ton/walletkit';
+import type { Wallet } from '@ton/walletkit';
+
+export interface WalletInterface extends Wallet {
+    connectorId: string;
+}

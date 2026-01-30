@@ -51,7 +51,7 @@
   },
   "scripts": {
     "build": "tsup --onSuccess \"tsc --emitDeclarationOnly\"",
-    "dev": "pnpm run build --watch",
+    "dev": "pnpm run build --watch --no-clean",
     "quality": "pnpm test",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"

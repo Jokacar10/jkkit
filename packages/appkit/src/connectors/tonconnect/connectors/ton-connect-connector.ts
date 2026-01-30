@@ -12,18 +12,20 @@ import type { TonConnectUI } from '@tonconnect/ui';
 
 import { TonConnectWalletAdapter } from '../adapters/ton-connect-wallet-adapter';
 import { CONNECTOR_EVENTS } from '../../../core/app-kit';
-import type { Connector } from '../../../types/connector';
+import type { Connector, ConnectorMetadata } from '../../../types/connector';
 import type { WalletInterface } from '../../../types/wallet';
 import type { AppKitEmitter } from '../../../core/app-kit';
 
 export interface TonConnectConnectorConfig {
-    id?: string;
     tonConnect: TonConnectUI;
+    id?: string;
+    metadata?: ConnectorMetadata;
 }
 
 export class TonConnectConnector implements Connector {
     readonly id: string;
     readonly type = 'tonconnect';
+    readonly metadata: ConnectorMetadata;
 
     private tonConnect: TonConnectUI;
     private networkManager: NetworkManager | null = null;
@@ -33,6 +35,11 @@ export class TonConnectConnector implements Connector {
     constructor(config: TonConnectConnectorConfig) {
         this.id = config.id ?? 'tonconnect-default';
         this.tonConnect = config.tonConnect;
+        this.metadata = {
+            name: 'TonConnect',
+            iconUrl: 'https://avatars.githubusercontent.com/u/113980577',
+            ...config.metadata,
+        };
     }
 
     async initialize(emitter: AppKitEmitter, networkManager: NetworkManager): Promise<void> {
@@ -79,6 +86,7 @@ export class TonConnectConnector implements Connector {
             const client = this.networkManager.getClient(Network.custom(wallet.account.chain));
 
             const walletAdapter = new TonConnectWalletAdapter({
+                connectorId: this.id,
                 tonConnectWallet: wallet,
                 tonConnect: this.tonConnect.connector,
                 client,

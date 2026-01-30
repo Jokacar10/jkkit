@@ -9,6 +9,8 @@
 export { AppKitProvider } from './providers/app-kit-provider';
 export { useAppKit } from './hooks/use-app-kit';
 export { useAppKitTheme } from './hooks/use-app-kit-theme';
+export { I18nProvider } from './providers/i18n-provider';
+export { useI18n } from './hooks/use-i18n';
 
 export * from './components/ton-icon';
 

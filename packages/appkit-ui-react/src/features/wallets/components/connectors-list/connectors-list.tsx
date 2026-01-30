@@ -13,6 +13,7 @@ import { useConnectors } from '../../hooks/use-connectors';
 import { useConnect } from '../../hooks/use-connect';
 import { ConnectorItem } from '../connector-item';
 import styles from './connectors-list.module.css';
+import { useI18n } from '../../../../hooks/use-i18n';
 
 export interface ConnectorsListProps {
     className?: string;
@@ -22,6 +23,7 @@ export interface ConnectorsListProps {
 export const ConnectorsList: FC<ConnectorsListProps> = ({ className, onConnectorSelect }) => {
     const connectors = useConnectors();
     const { connect } = useConnect();
+    const { t } = useI18n();
 
     const handleConnect = (connectorId: string) => {
         connect({ connectorId });
@@ -29,16 +31,16 @@ export const ConnectorsList: FC<ConnectorsListProps> = ({ className, onConnector
     };
 
     if (connectors.length === 0) {
-        return <div className={styles.emptyState}>No wallets found</div>;
+        return <div className={styles.emptyState}>{t('No wallets found')}</div>;
     }
 
     return (
         <div className={clsx(styles.list, className)}>
-            {connectors.map((connector: any) => (
+            {connectors.map((connector) => (
                 <ConnectorItem
                     key={connector.id}
-                    name={connector.name}
-                    iconUrl={connector.imageUrl}
+                    name={connector.metadata.name}
+                    iconUrl={connector.metadata.iconUrl}
                     onClick={() => handleConnect(connector.id)}
                 />
             ))}

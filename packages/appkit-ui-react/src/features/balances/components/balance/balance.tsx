@@ -7,10 +7,11 @@
  */
 
 import type { GetBalanceOptions } from '@ton/appkit';
-import { fromNano } from '@ton/core';
+import { formatUnits } from '@ton/appkit';
 
 import { useBalance } from '../../hooks/use-balance';
 import styles from './balance.module.css';
+import { useI18n } from '../../../../hooks/use-i18n';
 
 export interface BalanceProps extends GetBalanceOptions {
     className?: string;
@@ -18,14 +19,15 @@ export interface BalanceProps extends GetBalanceOptions {
 
 export function Balance({ className, ...props }: BalanceProps) {
     const { data: balance, isLoading, error } = useBalance(props);
+    const { t } = useI18n();
 
     if (isLoading) {
-        return <div className={`${styles.balance} ${className || ''}`}>Loading...</div>;
+        return <div className={`${styles.balance} ${className || ''}`}>{t('Loading...')}</div>;
     }
 
     if (error) {
-        return <div className={`${styles.balance} ${className || ''}`}>Error loading balance</div>;
+        return <div className={`${styles.balance} ${className || ''}`}>{t('Error loading balance')}</div>;
     }
 
-    return <div className={`${styles.balance} ${className || ''}`}>{balance ? fromNano(balance) : '0'} TON</div>;
+    return <div className={`${styles.balance} ${className || ''}`}>{balance ? formatUnits(balance, 9) : '0'} TON</div>;
 }
