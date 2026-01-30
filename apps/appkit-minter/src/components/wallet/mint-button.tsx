@@ -26,8 +26,8 @@ export const MintButton: React.FC<MintButtonProps> = ({ className }) => {
         return (
             <Card className={className}>
                 <div className="flex items-center gap-3 py-2">
-                    <Wallet className="w-8 h-8 text-gray-400 flex-shrink-0" />
-                    <p className="text-gray-600 text-sm">Connect your wallet to mint NFTs</p>
+                    <Wallet className="w-8 h-8 text-muted-foreground flex-shrink-0" />
+                    <p className="text-muted-foreground text-sm">Connect your wallet to mint NFTs</p>
                 </div>
             </Card>
         );
@@ -37,9 +37,9 @@ export const MintButton: React.FC<MintButtonProps> = ({ className }) => {
         <Card className={className}>
             <div className="space-y-3">
                 {mintError && (
-                    <div className="flex items-center gap-2 p-2 bg-red-50 border border-red-200 rounded-lg">
-                        <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
-                        <p className="text-xs text-red-700">{mintError}</p>
+                    <div className="flex items-center gap-2 p-2 bg-destructive/10 border border-destructive/20 rounded-lg">
+                        <AlertCircle className="w-4 h-4 text-destructive flex-shrink-0" />
+                        <p className="text-xs text-destructive">{mintError}</p>
                     </div>
                 )}
 
@@ -48,7 +48,7 @@ export const MintButton: React.FC<MintButtonProps> = ({ className }) => {
                     {isMinting ? 'Minting...' : canMint ? 'Mint NFT' : 'Generate a card first'}
                 </Button>
 
-                <p className="text-xs text-gray-500 text-center">Fee: ~0.01 TON</p>
+                <p className="text-xs text-muted-foreground text-center">Fee: ~0.01 TON</p>
             </div>
         </Card>
     );

@@ -6,4 +6,4 @@
  *
  */
 
-export { MinterPage } from './MinterPage';
+export { MinterPage } from './minter-page';

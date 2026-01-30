@@ -9,7 +9,7 @@
 import React, { useState } from 'react';
 import type { NFT } from '@ton/walletkit';
 
-import { NftTransferModal } from './NftTransferModal';
+import { NftTransferModal } from './nft-transfer-modal';
 
 import { Card, Button } from '@/components/common';
 

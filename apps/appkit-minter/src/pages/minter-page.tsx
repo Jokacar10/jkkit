@@ -7,7 +7,7 @@
  */
 
 import type React from 'react';
-import { useBalance, useSelectedWallet, Balance, ConnectButton } from '@ton/appkit-ui-react';
+import { useSelectedWallet } from '@ton/appkit-ui-react';
 
 import { Layout, CardGenerator, WalletConnect, JettonsCard, NftsCard } from '@/components';
 import { useWalletAssets } from '@/hooks';
@@ -28,22 +28,12 @@ export const MinterPage: React.FC = () => {
         transferNft,
         isTransferring,
     } = useWalletAssets();
-    const { error } = useBalance(
-        { address: wallet?.getAddress() || '', network: wallet?.getNetwork() },
-        { refreshInterval: 6000, enabled: isConnected },
-    );
-
-    console.log('balance', error);
 
     return (
         <Layout title="NFT Minter">
             <div className="space-y-4">
                 {/* Wallet Connection - shown when not connected */}
                 {!isConnected && <WalletConnect />}
-
-                {wallet && <Balance address={wallet.getAddress()} network={wallet.getNetwork()} />}
-
-                <ConnectButton />
 
                 {/* Card Generator with integrated mint button */}
                 <CardGenerator />

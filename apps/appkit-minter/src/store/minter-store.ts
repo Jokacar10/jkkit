@@ -10,7 +10,7 @@ import { create } from 'zustand';
 
 import type { CardData } from '@/types';
 import { generateId } from '@/lib/utils';
-import { getRandomRarity, getRandomName, getRandomDescription, getCardImageUrl } from '@/lib/cardData';
+import { getRandomRarity, getRandomName, getRandomDescription, getCardImageUrl } from '@/lib/card-data';
 
 interface MinterState {
     currentCard: CardData | null;

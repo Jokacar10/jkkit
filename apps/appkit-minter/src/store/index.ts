@@ -6,4 +6,4 @@
  *
  */
 
-export { useMinterStore } from './minterStore';
+export { useMinterStore } from './minter-store';

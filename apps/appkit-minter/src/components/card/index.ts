@@ -6,6 +6,6 @@
  *
  */
 
-export { CardPreview } from './CardPreview';
-export { CardGenerator } from './CardGenerator';
-export { RarityBadge } from './RarityBadge';
+export { CardPreview } from './card-preview';
+export { CardGenerator } from './card-generator';
+export { RarityBadge } from './rarity-badge';

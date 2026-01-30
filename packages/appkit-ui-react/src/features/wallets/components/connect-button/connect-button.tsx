@@ -15,6 +15,7 @@ import { useSelectedWallet } from '../../hooks/use-selected-wallet';
 import { useConnectors } from '../../hooks/use-connectors';
 import { useConnect } from '../../hooks/use-connect';
 import { useDisconnect } from '../../hooks/use-disconnect';
+import { TonIcon } from '../../../../components/ton-icon';
 
 type ConnectButtonProps = Omit<ComponentProps<'button'>, 'onClick' | 'children'>;
 
@@ -47,6 +48,7 @@ export const ConnectButton: FC<ConnectButtonProps> = ({ className, ...props }) =
 
     return (
         <Button className={clsx(styles.connectButton, className)} onClick={onClick} {...props}>
+            <TonIcon />
             {selectedWallet ? selectedWallet.getAddress() : 'Connect'}
         </Button>
     );

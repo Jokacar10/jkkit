@@ -49,7 +49,26 @@ export class AppKit {
     /**
      * Add a wallet connector
      */
-    addConnector(connector: Connector): void {
+    addConnector(connector: Connector): () => void {
+        const id = connector.id;
+        const oldConnector = this.connectors.find((c) => c.id === id);
+
+        if (oldConnector) {
+            this.removeConnector(oldConnector);
+        }
+
+        this.connectors.push(connector);
+        connector.initialize(this.emitter, this.networkManager);
+
+        return () => {
+            this.removeConnector(connector);
+        };
+    }
+
+    /**
+     * Remove a wallet connector
+     */
+    removeConnector(connector: Connector): void {
         const id = connector.id;
         const oldConnector = this.connectors.find((c) => c.id === id);
 
@@ -57,9 +76,6 @@ export class AppKit {
             oldConnector.destroy();
             this.connectors.splice(this.connectors.indexOf(oldConnector), 1);
         }
-
-        this.connectors.push(connector);
-        connector.initialize(this.emitter, this.networkManager);
     }
 
     /**

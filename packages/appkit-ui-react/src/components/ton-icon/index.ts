@@ -6,5 +6,4 @@
  *
  */
 
-export { WalletConnect } from './wallet-connect';
-export { MintButton } from './mint-button';
+export { TonIcon } from './ton-icon';

@@ -9,5 +9,7 @@
 export { AppKitProvider } from './providers/app-kit-provider';
 export { useAppKit } from './hooks/use-app-kit';
 
+export * from './components/ton-icon';
+
 export * from './features/balances';
 export * from './features/wallets';

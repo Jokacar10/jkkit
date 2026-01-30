@@ -10,7 +10,7 @@
 export { Button, Card } from './common';
 
 // Layout components
-export { Layout, AppRouter } from './layout';
+export { Layout, AppRouter, ThemeProvider } from './layout';
 
 // Card components
 export { CardPreview, CardGenerator, RarityBadge } from './card';

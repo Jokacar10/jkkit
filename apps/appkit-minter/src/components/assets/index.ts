@@ -6,7 +6,7 @@
  *
  */
 
-export { JettonsCard } from './JettonsCard';
-export { NftsCard } from './NftsCard';
-export { JettonTransferModal } from './JettonTransferModal';
-export { NftTransferModal } from './NftTransferModal';
+export { JettonsCard } from './jettons-card';
+export { NftsCard } from './nfts-card';
+export { JettonTransferModal } from './jetton-transfer-modal';
+export { NftTransferModal } from './nft-transfer-modal';

@@ -6,5 +6,6 @@
  *
  */
 
-export { Layout } from './Layout';
-export { AppRouter } from './AppRouter';
+export { Layout } from './layout';
+export { AppRouter } from './app-router';
+export { ThemeProvider } from './theme-provider';

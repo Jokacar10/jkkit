@@ -135,4 +135,9 @@ export const CONNECTOR_EVENTS = {
     DISCONNECTED: 'connector:disconnected',
 } as const;
 
-export default { AppKit };
+// Standalone getConnectedWallets function
+export const getConnectedWallets = vi.fn((_appKit: AppKit) => {
+    return [createMockWrappedWallet()];
+});
+
+export default { AppKit, getConnectedWallets };

@@ -21,10 +21,13 @@ export const RarityBadge: React.FC<RarityBadgeProps> = ({ rarity, className }) =
     const config = RARITY_CONFIGS[rarity];
 
     const badgeStyles: Record<Rarity, string> = {
-        [RarityValues.Common]: 'bg-gray-100 text-gray-700 border-gray-300',
-        [RarityValues.Rare]: 'bg-blue-100 text-blue-700 border-blue-300',
-        [RarityValues.Epic]: 'bg-purple-100 text-purple-700 border-purple-300',
-        [RarityValues.Legendary]: 'bg-amber-100 text-amber-700 border-amber-300',
+        [RarityValues.Common]: 'bg-muted text-muted-foreground border-border',
+        [RarityValues.Rare]:
+            'bg-blue-100 text-blue-700 border-blue-300 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700',
+        [RarityValues.Epic]:
+            'bg-purple-100 text-purple-700 border-purple-300 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700',
+        [RarityValues.Legendary]:
+            'bg-amber-100 text-amber-700 border-amber-300 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700',
     };
 
     return (

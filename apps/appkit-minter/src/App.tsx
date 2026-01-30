@@ -14,9 +14,9 @@ import { Toaster } from 'sonner';
 
 import { appKit } from './services/app-kit';
 
-import { AppRouter } from '@/components';
+import { AppRouter, ThemeProvider } from '@/components';
 
-import './App.css';
+import './app.css';
 import '@ton/appkit-ui-react/styles.css';
 
 // TonConnect manifest URL - in production, host your own manifest
@@ -43,12 +43,14 @@ function AppKitBridge({ children }: { children: React.ReactNode }) {
 
 function App() {
     return (
-        <TonConnectUIProvider manifestUrl={MANIFEST_URL}>
-            <AppKitBridge>
-                <AppRouter />
-                <Toaster position="top-right" richColors />
-            </AppKitBridge>
-        </TonConnectUIProvider>
+        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+            <TonConnectUIProvider manifestUrl={MANIFEST_URL}>
+                <AppKitBridge>
+                    <AppRouter />
+                    <Toaster position="top-right" richColors />
+                </AppKitBridge>
+            </TonConnectUIProvider>
+        </ThemeProvider>
     );
 }
 

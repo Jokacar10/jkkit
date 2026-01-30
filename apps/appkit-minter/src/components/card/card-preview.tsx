@@ -8,7 +8,7 @@
 
 import type React from 'react';
 
-import { RarityBadge } from './RarityBadge';
+import { RarityBadge } from './rarity-badge';
 
 import { cn } from '@/lib/utils';
 import { RarityValues, RARITY_CONFIGS } from '@/types';
@@ -55,13 +55,13 @@ export const CardPreview: React.FC<CardPreviewProps> = ({ card, className }) => 
             {/* Card content */}
             <div className="relative p-4">
                 {/* Card image */}
-                <div className="relative aspect-[3/4] rounded-xl overflow-hidden mb-4 bg-white/50 backdrop-blur-sm border border-white/20">
+                <div className="relative aspect-[3/4] rounded-xl overflow-hidden mb-4 bg-background/50 backdrop-blur-sm border border-border/20">
                     {card.imageUrl ? (
                         <img src={card.imageUrl} alt={card.name} className="w-full h-full object-cover" />
                     ) : (
                         <div className="w-full h-full flex items-center justify-center">
                             <svg
-                                className="w-16 h-16 text-gray-300"
+                                className="w-16 h-16 text-muted-foreground/30"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -85,14 +85,16 @@ export const CardPreview: React.FC<CardPreviewProps> = ({ card, className }) => 
                 {/* Card info */}
                 <div className="h-14">
                     <h3
-                        className="text-lg font-bold text-gray-900 text-center truncate"
+                        className="text-lg font-bold text-black text-center truncate"
                         style={{ textShadow: isLegendary ? '0 0 10px rgba(245, 158, 11, 0.3)' : 'none' }}
                     >
                         {card.name}
                     </h3>
 
                     {card.description && (
-                        <p className="text-xs text-gray-600 text-center italic line-clamp-2">{card.description}</p>
+                        <p className="text-xs text-muted-foreground text-center italic line-clamp-2">
+                            {card.description}
+                        </p>
                     )}
                 </div>
             </div>
