@@ -76,7 +76,9 @@ export const sendJettonSchema = z.object({
     amount: z
         .string()
         .min(1)
-        .describe('Amount of tokens to send in human-readable format (e.g., "100" for 100 tokens, "0.5" for 0.5 tokens)'),
+        .describe(
+            'Amount of tokens to send in human-readable format (e.g., "100" for 100 tokens, "0.5" for 0.5 tokens)',
+        ),
     comment: z.string().optional().describe('Optional comment/memo for the transaction'),
 });
 
@@ -143,9 +145,7 @@ export function createTransferTools(walletService: WalletService) {
 
                 try {
                     const jettons = await walletService.getJettons(args.wallet);
-                    const jetton = jettons.find(
-                        (j) => j.address.toLowerCase() === args.jettonAddress.toLowerCase(),
-                    );
+                    const jetton = jettons.find((j) => j.address.toLowerCase() === args.jettonAddress.toLowerCase());
                     if (jetton) {
                         decimals = jetton.decimals;
                         symbol = jetton.symbol;

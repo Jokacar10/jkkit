@@ -19,7 +19,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 
 import { WalletService } from './services/WalletService.js';
-import { createWalletTools, createBalanceTools, createTransferTools } from './tools/index.js';
+import { createWalletTools, createBalanceTools, createTransferTools, createSwapTools } from './tools/index.js';
 
 const SERVER_NAME = 'ton-mcp';
 const SERVER_VERSION = '0.1.0';
@@ -33,10 +33,9 @@ function log(message: string) {
 async function main() {
     log(`Starting ${SERVER_NAME} v${SERVER_VERSION}...`);
 
-    // Initialize wallet service (use NETWORK env var, defaults to mainnet)
-    const network = (process.env.NETWORK === 'testnet' ? 'testnet' : 'mainnet') as 'mainnet' | 'testnet';
-    const walletService = new WalletService(network);
-    log(`Wallet service initialized (${network})`);
+    // Initialize wallet service (supports both mainnet and testnet)
+    const walletService = new WalletService();
+    log('Wallet service initialized (supports mainnet and testnet)');
 
     // Create MCP server
     const server = new McpServer({
@@ -49,6 +48,7 @@ async function main() {
     const walletTools = createWalletTools(walletService);
     const balanceTools = createBalanceTools(walletService);
     const transferTools = createTransferTools(walletService);
+    const swapTools = createSwapTools(walletService);
     log('Tools created');
 
     // Register wallet management tools
@@ -135,8 +135,27 @@ async function main() {
         transferTools.send_jetton.handler,
     );
 
+    // Register swap tools
+    server.registerTool(
+        'get_swap_quote',
+        {
+            description: swapTools.get_swap_quote.description,
+            inputSchema: swapTools.get_swap_quote.inputSchema.shape,
+        },
+        swapTools.get_swap_quote.handler,
+    );
+
+    server.registerTool(
+        'execute_swap',
+        {
+            description: swapTools.execute_swap.description,
+            inputSchema: swapTools.execute_swap.inputSchema.shape,
+        },
+        swapTools.execute_swap.handler,
+    );
+
     log(
-        'Registered 9 tools: create_wallet, import_wallet, list_wallets, remove_wallet, get_balance, get_jetton_balance, get_jettons, send_ton, send_jetton',
+        'Registered 11 tools: create_wallet, import_wallet, list_wallets, remove_wallet, get_balance, get_jetton_balance, get_jettons, send_ton, send_jetton, get_swap_quote, execute_swap',
     );
 
     // Create stdio transport

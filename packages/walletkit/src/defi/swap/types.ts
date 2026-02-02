@@ -24,9 +24,8 @@ interface SwapQuoteParamsBase<TProviderOptions = unknown> {
 /**
  * Parameters for requesting a swap quote with specified input amount
  */
-export interface SwapQuoteParamsWithAmountFrom<
-    TProviderOptions = unknown,
-> extends SwapQuoteParamsBase<TProviderOptions> {
+export interface SwapQuoteParamsWithAmountFrom<TProviderOptions = unknown>
+    extends SwapQuoteParamsBase<TProviderOptions> {
     amountFrom: string;
     amountTo?: never;
 }

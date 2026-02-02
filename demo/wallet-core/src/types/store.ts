@@ -234,12 +234,12 @@ export interface SwapSlice {
 // Combined app state
 export interface AppState
     extends AuthSlice,
-    WalletCoreSlice,
-    WalletManagementSlice,
-    TonConnectSlice,
-    JettonsSlice,
-    NftsSlice,
-    SwapSlice {
+        WalletCoreSlice,
+        WalletManagementSlice,
+        TonConnectSlice,
+        JettonsSlice,
+        NftsSlice,
+        SwapSlice {
     isHydrated: boolean;
 }
 

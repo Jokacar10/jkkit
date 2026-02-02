@@ -20,6 +20,10 @@ export const createWalletSchema = z.object({
         .enum(['v5r1', 'v4r2'])
         .default('v5r1')
         .describe('Wallet version (v5r1 recommended, v4r2 for legacy compatibility)'),
+    network: z
+        .enum(['mainnet', 'testnet'])
+        .default('mainnet')
+        .describe('Network to create the wallet on (mainnet or testnet)'),
 });
 
 export const importWalletSchema = z.object({
@@ -29,6 +33,10 @@ export const importWalletSchema = z.object({
         .enum(['v5r1', 'v4r2'])
         .default('v5r1')
         .describe('Wallet version (v5r1 recommended, v4r2 for legacy compatibility)'),
+    network: z
+        .enum(['mainnet', 'testnet'])
+        .default('mainnet')
+        .describe('Network to import the wallet on (mainnet or testnet)'),
 });
 
 export const removeWalletSchema = z.object({
@@ -42,7 +50,7 @@ export function createWalletTools(walletService: WalletService) {
                 'Create a new TON wallet with a generated mnemonic. Returns the wallet address and mnemonic (save it securely!).',
             inputSchema: createWalletSchema,
             handler: async (args: z.infer<typeof createWalletSchema>) => {
-                const result = await walletService.createWallet(args.name, args.version);
+                const result = await walletService.createWallet(args.name, args.version, args.network);
                 return {
                     content: [
                         {
@@ -88,7 +96,7 @@ export function createWalletTools(walletService: WalletService) {
                     };
                 }
 
-                const result = await walletService.importWallet(args.name, mnemonicWords, args.version);
+                const result = await walletService.importWallet(args.name, mnemonicWords, args.version, args.network);
                 return {
                     content: [
                         {

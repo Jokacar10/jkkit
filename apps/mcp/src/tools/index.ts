@@ -13,3 +13,4 @@
 export { createWalletTools } from './wallet.js';
 export { createBalanceTools } from './balance.js';
 export { createTransferTools } from './transfer.js';
+export { createSwapTools } from './swap.js';

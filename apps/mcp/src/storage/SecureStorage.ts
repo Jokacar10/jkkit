@@ -102,19 +102,27 @@ export class SecureStorage {
     }
 
     /**
+     * Get wallet ID (network:address format, matching @ton/walletkit pattern)
+     */
+    getWalletId(wallet: WalletData): string {
+        return `${wallet.network}:${wallet.address}`;
+    }
+
+    /**
      * Add a new wallet
      */
     async addWallet(wallet: WalletData): Promise<void> {
         const data = await this.loadData();
+        const walletId = this.getWalletId(wallet);
 
         // Check for duplicate name
         if (data.wallets.some((w) => w.name === wallet.name)) {
             throw new Error(`Wallet with name "${wallet.name}" already exists`);
         }
 
-        // Check for duplicate address
-        if (data.wallets.some((w) => w.address === wallet.address)) {
-            throw new Error(`Wallet with address "${wallet.address}" already exists`);
+        // Check for duplicate walletId (same address on same network)
+        if (data.wallets.some((w) => this.getWalletId(w) === walletId)) {
+            throw new Error(`Wallet with address "${wallet.address}" already exists on ${wallet.network}`);
         }
 
         data.wallets.push(wallet);

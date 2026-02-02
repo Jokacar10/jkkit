@@ -20,7 +20,8 @@ import {
     Network,
     createWalletId,
 } from '@ton/walletkit';
-import type { Wallet } from '@ton/walletkit';
+import type { Wallet, SwapQuote, SwapQuoteParams, SwapParams } from '@ton/walletkit';
+import { OmnistonSwapProvider } from '@ton/walletkit/swap/omniston';
 
 import { SecureStorage } from '../storage/SecureStorage.js';
 import type { WalletData } from '../storage/SecureStorage.js';
@@ -59,34 +60,62 @@ export interface TransferResult {
     message: string;
 }
 
+export interface SwapQuoteResult {
+    quote: SwapQuote;
+    fromToken: string;
+    toToken: string;
+    fromAmount: string;
+    toAmount: string;
+    minReceived: string;
+    provider: string;
+    expiresAt?: number;
+}
+
+export interface SwapResult {
+    success: boolean;
+    message: string;
+}
+
 /**
  * WalletService manages TON wallets using TonWalletKit
+ * Supports both mainnet and testnet simultaneously
  */
 export class WalletService {
     private storage: SecureStorage;
     private kit: TonWalletKit | null = null;
-    private network: Network;
-    private networkName: 'mainnet' | 'testnet';
     private loadedWallets: Map<string, Wallet> = new Map();
 
-    constructor(network: 'mainnet' | 'testnet' = 'mainnet') {
+    constructor() {
         this.storage = new SecureStorage();
-        this.networkName = network;
-        this.network = network === 'mainnet' ? Network.mainnet() : Network.testnet();
     }
 
     /**
-     * Initialize the TonWalletKit instance
+     * Get Network instance from network name
+     */
+    private getNetwork(networkName: 'mainnet' | 'testnet'): Network {
+        return networkName === 'mainnet' ? Network.mainnet() : Network.testnet();
+    }
+
+    /**
+     * Initialize the TonWalletKit instance (supports both networks)
      */
     private async getKit(): Promise<TonWalletKit> {
         if (!this.kit) {
             this.kit = new TonWalletKit({
                 networks: {
-                    [this.network.chainId]: {},
+                    [Network.mainnet().chainId]: {},
+                    [Network.testnet().chainId]: {},
                 },
                 storage: new MemoryStorageAdapter(),
             });
             await this.kit.waitForReady();
+
+            // Register Omniston swap provider
+            const omnistonProvider = new OmnistonSwapProvider({
+                defaultSlippageBps: 100, // 1%
+            });
+            this.kit.swap.registerProvider('omniston', omnistonProvider);
+            this.kit.swap.setDefaultProvider('omniston');
         }
         return this.kit;
     }
@@ -94,8 +123,13 @@ export class WalletService {
     /**
      * Create a new wallet with generated mnemonic
      */
-    async createWallet(name: string, version: 'v5r1' | 'v4r2' = 'v5r1'): Promise<CreateWalletResult> {
+    async createWallet(
+        name: string,
+        version: 'v5r1' | 'v4r2' = 'v5r1',
+        networkName: 'mainnet' | 'testnet' = 'mainnet',
+    ): Promise<CreateWalletResult> {
         const kit = await this.getKit();
+        const network = this.getNetwork(networkName);
 
         // Generate new mnemonic
         const mnemonic = await CreateTonMnemonic();
@@ -107,12 +141,12 @@ export class WalletService {
         const walletAdapter =
             version === 'v5r1'
                 ? await WalletV5R1Adapter.create(signer, {
-                      client: kit.getApiClient(this.network),
-                      network: this.network,
+                      client: kit.getApiClient(network),
+                      network,
                   })
                 : await WalletV4R2Adapter.create(signer, {
-                      client: kit.getApiClient(this.network),
-                      network: this.network,
+                      client: kit.getApiClient(network),
+                      network,
                   });
 
         const address = walletAdapter.getAddress();
@@ -122,17 +156,17 @@ export class WalletService {
             name,
             address,
             mnemonic,
-            network: this.networkName,
+            network: networkName,
             version,
             createdAt: new Date().toISOString(),
         };
 
         await this.storage.addWallet(walletData);
 
-        // Add to kit and cache
+        // Add to kit and cache using walletId
         const wallet = await kit.addWallet(walletAdapter);
         if (wallet) {
-            this.loadedWallets.set(address, wallet);
+            this.loadedWallets.set(wallet.getWalletId(), wallet);
         }
 
         return {
@@ -150,8 +184,10 @@ export class WalletService {
         name: string,
         mnemonic: string[],
         version: 'v5r1' | 'v4r2' = 'v5r1',
+        networkName: 'mainnet' | 'testnet' = 'mainnet',
     ): Promise<ImportWalletResult> {
         const kit = await this.getKit();
+        const network = this.getNetwork(networkName);
 
         // Create signer from mnemonic
         const signer = await Signer.fromMnemonic(mnemonic, { type: 'ton' });
@@ -160,12 +196,12 @@ export class WalletService {
         const walletAdapter =
             version === 'v5r1'
                 ? await WalletV5R1Adapter.create(signer, {
-                      client: kit.getApiClient(this.network),
-                      network: this.network,
+                      client: kit.getApiClient(network),
+                      network,
                   })
                 : await WalletV4R2Adapter.create(signer, {
-                      client: kit.getApiClient(this.network),
-                      network: this.network,
+                      client: kit.getApiClient(network),
+                      network,
                   });
 
         const address = walletAdapter.getAddress();
@@ -175,17 +211,17 @@ export class WalletService {
             name,
             address,
             mnemonic,
-            network: this.networkName,
+            network: networkName,
             version,
             createdAt: new Date().toISOString(),
         };
 
         await this.storage.addWallet(walletData);
 
-        // Add to kit and cache
+        // Add to kit and cache using walletId
         const wallet = await kit.addWallet(walletAdapter);
         if (wallet) {
-            this.loadedWallets.set(address, wallet);
+            this.loadedWallets.set(wallet.getWalletId(), wallet);
         }
 
         return {
@@ -218,12 +254,14 @@ export class WalletService {
             return false;
         }
 
+        const network = this.getNetwork(walletData.network);
+        const walletId = createWalletId(network, walletData.address);
+
         // Remove from cache
-        this.loadedWallets.delete(walletData.address);
+        this.loadedWallets.delete(walletId);
 
         // Remove from kit if loaded
         if (this.kit) {
-            const walletId = createWalletId(this.network, walletData.address);
             const kitWallet = this.kit.getWallet(walletId);
             if (kitWallet) {
                 await this.kit.removeWallet(walletId);
@@ -242,9 +280,12 @@ export class WalletService {
             throw new Error(`Wallet "${name}" not found`);
         }
 
+        const network = this.getNetwork(walletData.network);
+        const walletId = createWalletId(network, walletData.address);
+
         // Check cache first
-        if (this.loadedWallets.has(walletData.address)) {
-            return this.loadedWallets.get(walletData.address)!;
+        if (this.loadedWallets.has(walletId)) {
+            return this.loadedWallets.get(walletId)!;
         }
 
         // Load wallet into kit
@@ -254,27 +295,26 @@ export class WalletService {
         const walletAdapter =
             walletData.version === 'v5r1'
                 ? await WalletV5R1Adapter.create(signer, {
-                      client: kit.getApiClient(this.network),
-                      network: this.network,
+                      client: kit.getApiClient(network),
+                      network,
                   })
                 : await WalletV4R2Adapter.create(signer, {
-                      client: kit.getApiClient(this.network),
-                      network: this.network,
+                      client: kit.getApiClient(network),
+                      network,
                   });
 
         const wallet = await kit.addWallet(walletAdapter);
         if (!wallet) {
             // Wallet already exists in kit
-            const walletId = createWalletId(this.network, walletData.address);
             const existingWallet = kit.getWallet(walletId);
             if (existingWallet) {
-                this.loadedWallets.set(walletData.address, existingWallet);
+                this.loadedWallets.set(walletId, existingWallet);
                 return existingWallet;
             }
             throw new Error(`Failed to load wallet "${name}"`);
         }
 
-        this.loadedWallets.set(walletData.address, wallet);
+        this.loadedWallets.set(walletId, wallet);
         return wallet;
     }
 
@@ -370,6 +410,83 @@ export class WalletService {
             return {
                 success: true,
                 message: `Successfully sent ${amount} jettons to ${toAddress}`,
+            };
+        } catch (error) {
+            return {
+                success: false,
+                message: error instanceof Error ? error.message : 'Unknown error',
+            };
+        }
+    }
+
+    /**
+     * Get a swap quote
+     */
+    async getSwapQuote(
+        walletName: string,
+        fromToken: string,
+        toToken: string,
+        amount: string,
+        slippageBps?: number,
+    ): Promise<SwapQuoteResult> {
+        // Verify wallet exists and get its network
+        const walletData = await this.storage.getWallet(walletName);
+        if (!walletData) {
+            throw new Error(`Wallet "${walletName}" not found`);
+        }
+
+        const network = this.getNetwork(walletData.network);
+        const kit = await this.getKit();
+
+        const params: SwapQuoteParams = {
+            fromToken: fromToken === 'TON' ? 'TON' : fromToken,
+            toToken: toToken === 'TON' ? 'TON' : toToken,
+            amountFrom: amount,
+            network,
+            slippageBps,
+        };
+
+        const quote = await kit.swap.getQuote(params);
+
+        return {
+            quote,
+            fromToken: typeof quote.fromToken === 'string' ? quote.fromToken : quote.fromToken,
+            toToken: typeof quote.toToken === 'string' ? quote.toToken : quote.toToken,
+            fromAmount: quote.fromAmount,
+            toAmount: quote.toAmount,
+            minReceived: quote.minReceived,
+            provider: quote.provider,
+            expiresAt: quote.expiresAt,
+        };
+    }
+
+    /**
+     * Execute a swap using a quote
+     */
+    async executeSwap(walletName: string, quote: SwapQuote): Promise<SwapResult> {
+        try {
+            const [wallet, kit, walletData] = await Promise.all([
+                this.getWalletByName(walletName),
+                this.getKit(),
+                this.storage.getWallet(walletName),
+            ]);
+
+            if (!walletData) {
+                throw new Error(`Wallet "${walletName}" not found`);
+            }
+
+            const params: SwapParams = {
+                quote,
+                userAddress: walletData.address,
+            };
+
+            const tx = await kit.swap.buildSwapTransaction(params);
+
+            await wallet.sendTransaction(tx);
+
+            return {
+                success: true,
+                message: `Successfully swapped ${quote.fromAmount} ${quote.fromToken} for ${quote.toAmount} ${quote.toToken}`,
             };
         } catch (error) {
             return {

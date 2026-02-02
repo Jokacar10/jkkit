@@ -28,10 +28,9 @@ import type { SwapQuoteParams, SwapQuote, SwapParams, SwapProviderInterface } fr
  * }
  * ```
  */
-export abstract class SwapProvider<
-    TQuoteOptions = undefined,
-    TSwapOptions = undefined,
-> implements SwapProviderInterface<TQuoteOptions, TSwapOptions> {
+export abstract class SwapProvider<TQuoteOptions = undefined, TSwapOptions = undefined>
+    implements SwapProviderInterface<TQuoteOptions, TSwapOptions>
+{
     /**
      * Get a quote for swapping tokens
      * @param params - Quote parameters including tokens, amount, and network
