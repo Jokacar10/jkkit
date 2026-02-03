@@ -10,7 +10,8 @@
 export { makeSnakeCell } from './snake-cell';
 
 // NFT content encoding
-export { encodeOffChainContent } from './nft-content';
+export { encodeOffChainContent, encodeOnChainContent } from './nft-content';
+export type { NftMetadata } from './nft-content';
 
 // NFT Single contract
 export { NftSingleCodeCell, buildSingleNftDataCell, buildSingleNftStateInit } from './nft-single';

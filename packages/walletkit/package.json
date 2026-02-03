@@ -81,7 +81,7 @@
     "@stryker-mutator/core": "^9.4.0",
     "@ton-community/tlb-runtime": "1.0.0-alpha.3",
     "@ton/core": "catalog:",
-    "@ton/crypto": "^3.3.0",
+    "@ton/crypto": "catalog:",
     "@types/chrome": "^0.1.33",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.10.1",

@@ -12,7 +12,7 @@ import { useSelectedWallet } from '@ton/appkit-ui-react';
 import type { Base64String, TransactionRequest } from '@ton/walletkit';
 
 import { useMinterStore } from '@/store';
-import { buildSingleNftStateInit } from '@/contracts';
+import { buildSingleNftStateInit, encodeOnChainContent } from '@/contracts';
 
 /**
  * Hook to create NFT mint transaction request
@@ -28,21 +28,18 @@ export function useMintTransaction() {
 
         const walletAddress = Address.parse(wallet.getAddress());
 
-        // Build NFT metadata as data URI (in production, use IPFS)
-        const metadata = {
+        // Build on-chain NFT metadata content cell
+        const contentCell = encodeOnChainContent({
             name: currentCard.name,
             description: currentCard.description,
             image: currentCard.imageUrl,
-            attributes: [{ trait_type: 'Rarity', value: currentCard.rarity }],
-        };
-        const metadataJson = JSON.stringify(metadata);
-        const contentUrl = `data:application/json;base64,${Buffer.from(metadataJson).toString('base64')}`;
+        });
 
         // Build NFT StateInit
         const { stateInit, address: nftAddress } = buildSingleNftStateInit({
             ownerAddress: walletAddress,
             editorAddress: walletAddress,
-            content: contentUrl,
+            contentCell,
             royaltyParams: {
                 royaltyFactor: 0,
                 royaltyBase: 1000,

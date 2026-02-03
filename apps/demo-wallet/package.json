@@ -29,7 +29,7 @@
     "@ledgerhq/hw-transport-webusb": "^6.29.16",
     "@tailwindcss/vite": "^4.1.18",
     "@ton/core": "catalog:",
-    "@ton/crypto": "^3.3.0",
+    "@ton/crypto": "catalog:",
     "@ton/walletkit": "workspace:*",
     "@truecarry/vite-plugin-web-extension": "^4.5.1",
     "@truecarry/webext-bridge": "^6.0.2",

@@ -15,6 +15,9 @@ catalogs:
     '@ton/core':
       specifier: ^0.63.0
       version: 0.63.0
+    '@ton/crypto':
+      specifier: 3.3.0
+      version: 3.3.0
     '@tonconnect/protocol':
       specifier: 2.3.0
       version: 2.3.0
@@ -93,6 +96,9 @@ importers:
       '@ton/core':
         specifier: 'catalog:'
         version: 0.63.0(@ton/crypto@3.3.0)
+      '@ton/crypto':
+        specifier: 'catalog:'
+        version: 3.3.0
       '@ton/walletkit':
         specifier: workspace:*
         version: link:../../packages/walletkit
@@ -197,7 +203,7 @@ importers:
         specifier: 'catalog:'
         version: 0.63.0(@ton/crypto@3.3.0)
       '@ton/crypto':
-        specifier: ^3.3.0
+        specifier: 'catalog:'
         version: 3.3.0
       '@ton/walletkit':
         specifier: workspace:*
@@ -354,7 +360,7 @@ importers:
         specifier: 'catalog:'
         version: 0.63.0(@ton/crypto@3.3.0)
       '@ton/crypto':
-        specifier: ^3.3.0
+        specifier: 'catalog:'
         version: 3.3.0
       '@ton/ton':
         specifier: 16.1.0
@@ -579,7 +585,7 @@ importers:
         specifier: 'catalog:'
         version: 0.63.0(@ton/crypto@3.3.0)
       '@ton/crypto':
-        specifier: ^3.3.0
+        specifier: 'catalog:'
         version: 3.3.0
       '@ton/walletkit':
         specifier: workspace:*
@@ -715,7 +721,7 @@ importers:
         specifier: 'catalog:'
         version: 0.63.0(@ton/crypto@3.3.0)
       '@ton/crypto':
-        specifier: ^3.3.0
+        specifier: 'catalog:'
         version: 3.3.0
       '@types/chrome':
         specifier: ^0.1.33
@@ -822,7 +828,7 @@ importers:
         version: 14.2.0
     devDependencies:
       '@ton/crypto':
-        specifier: ^3.3.0
+        specifier: 'catalog:'
         version: 3.3.0
       '@ton/crypto-primitives':
         specifier: ^2.1.0
