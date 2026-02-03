@@ -7,24 +7,13 @@
  */
 
 import type React from 'react';
-import { useSelectedWallet, useSelectedWalletJettons } from '@ton/appkit-ui-react';
+import { useSelectedWallet } from '@ton/appkit-ui-react';
 
 import { Layout, CardGenerator, WalletConnect, JettonsCard, NftsCard } from '@/components';
-import { useWalletAssets } from '@/hooks';
 
 export const MinterPage: React.FC = () => {
     const [wallet] = useSelectedWallet();
     const isConnected = !!wallet;
-    const { nfts, isLoadingNfts, nftsError, loadNfts, transferNft, isTransferring } = useWalletAssets();
-
-    const {
-        data: jettonsResponse,
-        isLoading: isLoadingJettons,
-        isError: isErrorJettons,
-        refetch: loadJettons,
-    } = useSelectedWalletJettons({ refetchInterval: 10000 });
-
-    const jettons = jettonsResponse?.jettons ?? [];
 
     return (
         <Layout title="NFT Minter">
@@ -38,21 +27,8 @@ export const MinterPage: React.FC = () => {
                 {/* Connected wallet assets */}
                 {isConnected && (
                     <div className="space-y-4">
-                        <JettonsCard
-                            jettons={jettons}
-                            isLoading={isLoadingJettons}
-                            isError={isErrorJettons}
-                            onRefresh={loadJettons}
-                        />
-
-                        <NftsCard
-                            nfts={nfts}
-                            isLoading={isLoadingNfts}
-                            error={nftsError}
-                            onRefresh={loadNfts}
-                            onTransfer={transferNft}
-                            isTransferring={isTransferring}
-                        />
+                        <JettonsCard />
+                        <NftsCard />
                     </div>
                 )}
             </div>

@@ -6,36 +6,30 @@
  *
  */
 
-import React, { useState } from 'react';
+import { useMemo, useState } from 'react';
+import type { FC, ComponentProps } from 'react';
 import type { NFT } from '@ton/walletkit';
-import { NftItem } from '@ton/appkit-ui-react';
+import { NftItem, useSelectedWalletNFTs } from '@ton/appkit-ui-react';
 
 import { NftTransferModal } from './nft-transfer-modal';
 
 import { Card, Button } from '@/components/common';
 
-interface NftsCardProps {
-    nfts: NFT[];
-    isLoading: boolean;
-    error: string | null;
-    onRefresh: () => void;
-    onTransfer?: (nft: NFT, recipientAddress: string, comment?: string) => Promise<void>;
-    isTransferring?: boolean;
-}
-
-export const NftsCard: React.FC<NftsCardProps> = ({
-    nfts,
-    isLoading,
-    error,
-    onRefresh,
-    onTransfer,
-    isTransferring = false,
-}) => {
+export const NftsCard: FC<ComponentProps<'div'>> = (props) => {
     const [selectedNft, setSelectedNft] = useState<NFT | null>(null);
 
-    if (error) {
+    const {
+        data: nftsResponse,
+        isLoading: isLoading,
+        isError: isError,
+        refetch: onRefresh,
+    } = useSelectedWalletNFTs({ refetchInterval: 10000 });
+
+    const nfts = useMemo(() => nftsResponse?.nfts ?? [], [nftsResponse?.nfts]);
+
+    if (isError) {
         return (
-            <Card title="NFTs">
+            <Card title="NFTs" {...props}>
                 <div className="text-center py-4">
                     <div className="text-destructive mb-2">
                         <svg className="w-8 h-8 mx-auto" fill="currentColor" viewBox="0 0 20 20">
@@ -46,8 +40,10 @@ export const NftsCard: React.FC<NftsCardProps> = ({
                             />
                         </svg>
                     </div>
+
                     <p className="text-sm text-destructive mb-3">Failed to load NFTs</p>
-                    <Button size="sm" variant="secondary" onClick={onRefresh}>
+
+                    <Button size="sm" variant="secondary" onClick={() => onRefresh()}>
                         Try Again
                     </Button>
                 </div>
@@ -57,7 +53,7 @@ export const NftsCard: React.FC<NftsCardProps> = ({
 
     return (
         <>
-            <Card title="NFTs">
+            <Card title="NFTs" {...props}>
                 {isLoading ? (
                     <div className="flex items-center justify-center py-8">
                         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
@@ -85,7 +81,7 @@ export const NftsCard: React.FC<NftsCardProps> = ({
                             <p className="text-sm font-semibold text-foreground">
                                 {nfts.length} {nfts.length === 1 ? 'NFT' : 'NFTs'}
                             </p>
-                            <Button size="sm" variant="secondary" onClick={onRefresh}>
+                            <Button size="sm" variant="primary" onClick={() => onRefresh()}>
                                 Refresh
                             </Button>
                         </div>
@@ -97,7 +93,7 @@ export const NftsCard: React.FC<NftsCardProps> = ({
                                     key={nft.address}
                                     nft={nft}
                                     className="!bg-muted"
-                                    onClick={() => onTransfer && setSelectedNft(nft)}
+                                    onClick={() => setSelectedNft(nft)}
                                 />
                             ))}
                         </div>
@@ -112,14 +108,8 @@ export const NftsCard: React.FC<NftsCardProps> = ({
             </Card>
 
             {/* NFT Transfer Modal */}
-            {selectedNft && onTransfer && (
-                <NftTransferModal
-                    nft={selectedNft}
-                    isOpen={!!selectedNft}
-                    onClose={() => setSelectedNft(null)}
-                    onTransfer={onTransfer}
-                    isTransferring={isTransferring}
-                />
+            {selectedNft && (
+                <NftTransferModal nft={selectedNft} isOpen={!!selectedNft} onClose={() => setSelectedNft(null)} />
             )}
         </>
     );

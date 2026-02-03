@@ -6,8 +6,11 @@
  *
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { NFT } from '@ton/walletkit';
+import { getFormattedNftInfo, getErrorMessage } from '@ton/appkit';
+import { useSelectedWallet, Transaction } from '@ton/appkit-ui-react';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/common';
 
@@ -15,69 +18,28 @@ interface NftTransferModalProps {
     nft: NFT;
     isOpen: boolean;
     onClose: () => void;
-    onTransfer: (nft: NFT, recipientAddress: string, comment?: string) => Promise<void>;
-    isTransferring: boolean;
 }
 
-const formatAddress = (address: string): string => {
-    return `${address.slice(0, 4)}...${address.slice(-4)}`;
-};
-
-const getNftImage = (nft: NFT): string | null => {
-    if (!nft.info?.image) return null;
-
-    const { url, data, mediumUrl, smallUrl, largeUrl } = nft.info.image;
-
-    if (url) return url;
-    if (mediumUrl) return mediumUrl;
-    if (largeUrl) return largeUrl;
-    if (smallUrl) return smallUrl;
-
-    if (data) {
-        try {
-            return atob(data);
-        } catch {
-            return null;
-        }
-    }
-
-    return null;
-};
-
-const getNftName = (nft: NFT): string => {
-    if (nft.info?.name) return nft.info.name;
-    if (nft.index) return `NFT #${nft.index}`;
-    return formatAddress(nft.address);
-};
-
-const getCollectionName = (nft: NFT): string => {
-    return nft.collection?.name || 'Unknown Collection';
-};
-
-const getNftDescription = (nft: NFT): string | null => {
-    return nft.info?.description || null;
-};
-
-export const NftTransferModal: React.FC<NftTransferModalProps> = ({
-    nft,
-    isOpen,
-    onClose,
-    onTransfer,
-    isTransferring,
-}) => {
+export const NftTransferModal: React.FC<NftTransferModalProps> = ({ nft, isOpen, onClose }) => {
     const [recipientAddress, setRecipientAddress] = useState('');
     const [comment, setComment] = useState('');
     const [transferError, setTransferError] = useState<string | null>(null);
 
-    const handleTransfer = async () => {
-        setTransferError(null);
-        try {
-            await onTransfer(nft, recipientAddress, comment || undefined);
-            handleClose();
-        } catch (err) {
-            setTransferError(err instanceof Error ? err.message : 'Transfer failed');
-        }
-    };
+    const [wallet] = useSelectedWallet();
+
+    const nftInfo = useMemo(() => getFormattedNftInfo(nft), [nft]);
+
+    const createTransferTransaction = useCallback(async () => {
+        if (!wallet) return null;
+
+        const transaction = await wallet.createTransferNftTransaction({
+            nftAddress: nft.address,
+            recipientAddress,
+            comment,
+        });
+
+        return transaction;
+    }, [wallet, nft.address, recipientAddress, comment]);
 
     const handleClose = () => {
         setRecipientAddress('');
@@ -109,12 +71,8 @@ export const NftTransferModal: React.FC<NftTransferModalProps> = ({
                     {/* NFT Preview */}
                     <div className="mb-4">
                         <div className="w-full h-48 bg-muted rounded-lg flex items-center justify-center overflow-hidden mb-3">
-                            {getNftImage(nft) ? (
-                                <img
-                                    src={getNftImage(nft)!}
-                                    alt={getNftName(nft)}
-                                    className="w-full h-full object-cover"
-                                />
+                            {nftInfo.image ? (
+                                <img src={nftInfo.image} alt={nftInfo.name} className="w-full h-full object-cover" />
                             ) : (
                                 <svg
                                     className="w-16 h-16 text-muted-foreground"
@@ -131,10 +89,10 @@ export const NftTransferModal: React.FC<NftTransferModalProps> = ({
                                 </svg>
                             )}
                         </div>
-                        <h4 className="font-medium text-card-foreground">{getNftName(nft)}</h4>
-                        <p className="text-sm text-muted-foreground">{getCollectionName(nft)}</p>
-                        {getNftDescription(nft) && (
-                            <p className="text-xs text-muted-foreground/70 mt-1">{getNftDescription(nft)}</p>
+                        <h4 className="font-medium text-card-foreground">{nftInfo.name}</h4>
+                        <p className="text-sm text-muted-foreground">{nftInfo.collectionName}</p>
+                        {nftInfo.description && (
+                            <p className="text-xs text-muted-foreground/70 mt-1">{nftInfo.description}</p>
                         )}
                     </div>
 
@@ -172,15 +130,25 @@ export const NftTransferModal: React.FC<NftTransferModalProps> = ({
                         )}
                     </div>
 
-                    <div className="flex space-x-3 mt-6">
-                        <Button
-                            className="flex-1"
-                            onClick={handleTransfer}
-                            disabled={!recipientAddress || isTransferring}
-                            isLoading={isTransferring}
+                    <div className="flex mt-6 gap-3">
+                        <Transaction
+                            getTransactionRequest={createTransferTransaction}
+                            onSuccess={() => {
+                                handleClose();
+                                toast.success('NFT transferred successfully');
+                            }}
+                            onError={(error) => {
+                                setTransferError(getErrorMessage(error));
+                            }}
+                            disabled={!recipientAddress}
                         >
-                            Transfer
-                        </Button>
+                            {({ isLoading, onSubmit, disabled, text }) => (
+                                <Button isLoading={isLoading} onClick={onSubmit} disabled={disabled} className="flex-1">
+                                    {text}
+                                </Button>
+                            )}
+                        </Transaction>
+
                         <Button variant="secondary" onClick={handleClose} className="flex-1">
                             Cancel
                         </Button>

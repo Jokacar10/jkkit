@@ -41,16 +41,22 @@ export const getCollectionName = (nft: NFT): string => {
     return nft.collection?.name || 'Unknown Collection';
 };
 
+export const getNftDescription = (nft: NFT): string | null => {
+    return nft.info?.description || null;
+};
+
 export const getFormattedNftInfo = (nft: NFT) => {
     const nftName = getNftName(nft);
     const nftImage = getNftImage(nft);
     const collectionName = getCollectionName(nft);
+    const nftDescription = getNftDescription(nft);
 
     return {
         address: nft.address,
         collectionName,
         name: nftName,
         image: nftImage,
+        description: nftDescription,
         isOnSale: nft.isOnSale,
     };
 };
