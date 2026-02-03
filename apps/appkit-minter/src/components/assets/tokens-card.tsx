@@ -10,27 +10,43 @@ import { useMemo, useState } from 'react';
 import type { FC, ComponentProps } from 'react';
 import type { Jetton } from '@ton/walletkit';
 import { getFormattedJettonInfo } from '@ton/appkit';
-import { CurrencyItem, useSelectedWalletJettons } from '@ton/appkit-ui-react';
+import { CurrencyItem, useSelectedWalletJettons, useSelectedWalletBalance } from '@ton/appkit-ui-react';
 
-import { JettonTransferModal } from './jetton-transfer-modal';
+import { TokenTransferModal } from './token-transfer-modal';
 
 import { Card, Button } from '@/components/common';
 
-export const JettonsCard: FC<ComponentProps<'div'>> = (props) => {
-    const [selectedJetton, setSelectedJetton] = useState<Jetton | null>(null);
+interface SelectedToken {
+    type: 'TON' | 'JETTON';
+    jetton?: Jetton;
+}
+
+export const TokensCard: FC<ComponentProps<'div'>> = (props) => {
+    const [selectedToken, setSelectedToken] = useState<SelectedToken | null>(null);
+
+    const {
+        data: balance,
+        isLoading: isBalanceLoading,
+        isError: isBalanceError,
+    } = useSelectedWalletBalance({ refetchInterval: 10000 });
 
     const {
         data: jettonsResponse,
-        isLoading: isLoading,
-        isError: isError,
+        isLoading: isJettonsLoading,
+        isError: isJettonsError,
         refetch: onRefresh,
     } = useSelectedWalletJettons({ refetchInterval: 10000 });
 
     const jettons = useMemo(() => jettonsResponse?.jettons ?? [], [jettonsResponse?.jettons]);
 
+    const isLoading = isBalanceLoading || isJettonsLoading;
+    const isError = isBalanceError || isJettonsError;
+
+    const totalTokens = jettons.length + 1; // +1 for TON
+
     if (isError) {
         return (
-            <Card title="Jettons" {...props}>
+            <Card title="Balances" {...props}>
                 <div className="text-center py-4">
                     <div className="text-destructive mb-2">
                         <svg className="w-8 h-8 mx-auto" fill="currentColor" viewBox="0 0 20 20">
@@ -42,7 +58,7 @@ export const JettonsCard: FC<ComponentProps<'div'>> = (props) => {
                         </svg>
                     </div>
 
-                    <p className="text-sm text-destructive mb-3">Failed to load jettons</p>
+                    <p className="text-sm text-destructive mb-3">Failed to load balances</p>
 
                     <Button size="sm" variant="secondary" onClick={() => onRefresh()}>
                         Try Again
@@ -54,41 +70,38 @@ export const JettonsCard: FC<ComponentProps<'div'>> = (props) => {
 
     return (
         <>
-            <Card title="Jettons" {...props}>
+            <Card title="Balances" {...props}>
                 {isLoading ? (
                     <div className="flex items-center justify-center py-8">
                         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                        <span className="ml-3 text-sm text-muted-foreground">Loading jettons...</span>
-                    </div>
-                ) : jettons.length === 0 ? (
-                    <div className="text-center py-6">
-                        <div className="text-muted-foreground mb-2">
-                            <svg className="w-10 h-10 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
-                                />
-                            </svg>
-                        </div>
-                        <p className="text-sm text-muted-foreground">No jettons yet</p>
-                        <p className="text-xs text-muted-foreground/70 mt-1">Your token balances will appear here</p>
+                        <span className="ml-3 text-sm text-muted-foreground">Loading balances...</span>
                     </div>
                 ) : (
                     <div className="space-y-3">
                         {/* Summary */}
                         <div className="flex items-center justify-between p-3 bg-muted rounded-lg border border-border">
                             <p className="text-sm font-semibold text-foreground">
-                                {jettons.length} {jettons.length === 1 ? 'Token' : 'Tokens'}
+                                {totalTokens} {totalTokens === 1 ? 'Asset' : 'Assets'}
                             </p>
                             <Button size="sm" variant="primary" onClick={() => onRefresh()}>
                                 Refresh
                             </Button>
                         </div>
 
-                        {/* Jetton List */}
+                        {/* Token List */}
                         <div className="space-y-2">
+                            <CurrencyItem
+                                className="!bg-muted"
+                                ticker="TON"
+                                name="Toncoin"
+                                balance={balance || '0'}
+                                decimals={9}
+                                onClick={() => setSelectedToken({ type: 'TON' })}
+                                icon="./ton.png"
+                                isVerified
+                            />
+
+                            {/* Jettons */}
                             {jettons.map((jetton) => {
                                 const info = getFormattedJettonInfo(jetton);
 
@@ -106,7 +119,7 @@ export const JettonsCard: FC<ComponentProps<'div'>> = (props) => {
                                         decimals={jetton.decimalsNumber}
                                         icon={info.image}
                                         isVerified={jetton.isVerified}
-                                        onClick={() => setSelectedJetton(jetton)}
+                                        onClick={() => setSelectedToken({ type: 'JETTON', jetton })}
                                     />
                                 );
                             })}
@@ -115,12 +128,14 @@ export const JettonsCard: FC<ComponentProps<'div'>> = (props) => {
                 )}
             </Card>
 
-            {/* Jetton Transfer Modal */}
-            {selectedJetton && (
-                <JettonTransferModal
-                    jetton={selectedJetton}
-                    isOpen={!!selectedJetton}
-                    onClose={() => setSelectedJetton(null)}
+            {/* Token Transfer Modal */}
+            {selectedToken && (
+                <TokenTransferModal
+                    tokenType={selectedToken.type}
+                    jetton={selectedToken.jetton}
+                    tonBalance={balance || '0'}
+                    isOpen={!!selectedToken}
+                    onClose={() => setSelectedToken(null)}
                 />
             )}
         </>

@@ -9,7 +9,7 @@
 import type React from 'react';
 import { useSelectedWallet } from '@ton/appkit-ui-react';
 
-import { Layout, CardGenerator, WalletConnect, JettonsCard, NftsCard } from '@/components';
+import { Layout, CardGenerator, WalletConnect, TokensCard, NftsCard } from '@/components';
 
 export const MinterPage: React.FC = () => {
     const [wallet] = useSelectedWallet();
@@ -27,7 +27,7 @@ export const MinterPage: React.FC = () => {
                 {/* Connected wallet assets */}
                 {isConnected && (
                     <div className="space-y-4">
-                        <JettonsCard />
+                        <TokensCard />
                         <NftsCard />
                     </div>
                 )}

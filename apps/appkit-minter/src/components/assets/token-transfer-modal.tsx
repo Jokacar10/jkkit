@@ -14,13 +14,21 @@ import { toast } from 'sonner';
 
 import { Button } from '@/components/common';
 
-interface JettonTransferModalProps {
-    jetton: Jetton;
+interface TokenTransferModalProps {
+    tokenType: 'TON' | 'JETTON';
+    jetton?: Jetton;
+    tonBalance: string;
     isOpen: boolean;
     onClose: () => void;
 }
 
-export const JettonTransferModal: React.FC<JettonTransferModalProps> = ({ jetton, isOpen, onClose }) => {
+export const TokenTransferModal: React.FC<TokenTransferModalProps> = ({
+    tokenType,
+    jetton,
+    tonBalance,
+    isOpen,
+    onClose,
+}) => {
     const [recipientAddress, setRecipientAddress] = useState('');
     const [amount, setAmount] = useState('');
     const [comment, setComment] = useState('');
@@ -28,33 +36,70 @@ export const JettonTransferModal: React.FC<JettonTransferModalProps> = ({ jetton
 
     const [wallet] = useSelectedWallet();
 
-    const jettonInfo = useMemo(() => getFormattedJettonInfo(jetton), [jetton]);
+    const tokenInfo = useMemo(() => {
+        if (tokenType === 'TON') {
+            return {
+                name: 'Toncoin',
+                symbol: 'TON',
+                decimals: 9,
+                balance: formatUnits(tonBalance, 9),
+                image: './ton.png',
+                address: null,
+            };
+        }
+
+        if (!jetton) {
+            throw new Error('Jetton not found');
+        }
+
+        const jettonInfo = getFormattedJettonInfo(jetton);
+
+        return {
+            name: jettonInfo.name,
+            symbol: jettonInfo.symbol,
+            decimals: jettonInfo.decimals,
+            balance: jettonInfo.balance,
+            image: jettonInfo.image,
+            address: jettonInfo.address,
+        };
+    }, [tokenType, tonBalance, jetton]);
 
     const createTransferTransaction = useCallback(async () => {
         if (!wallet) return null;
 
-        const decimals = jettonInfo.decimals;
         const amountNum = parseFloat(amount);
-
-        if (!decimals) {
-            throw new Error('Jetton decimals not found');
-        }
 
         if (isNaN(amountNum) || amountNum <= 0) {
             throw new Error('Invalid amount');
         }
 
-        const transferAmount = parseUnits(amount, decimals).toString();
+        if (!tokenInfo.decimals) {
+            throw new Error('Invalid token decimals');
+        }
 
-        const transaction = await wallet.createTransferJettonTransaction({
-            jettonAddress: jettonInfo.address,
-            recipientAddress,
-            transferAmount,
-            comment,
-        });
+        const transferAmount = parseUnits(amount, tokenInfo.decimals).toString();
 
-        return transaction;
-    }, [wallet, jettonInfo, recipientAddress, amount, comment]);
+        if (tokenType === 'TON') {
+            const transaction = await wallet.createTransferTonTransaction({
+                recipientAddress,
+                transferAmount,
+                comment,
+            });
+            return transaction;
+        } else {
+            if (!tokenInfo.address) {
+                throw new Error('Jetton address not found');
+            }
+
+            const transaction = await wallet.createTransferJettonTransaction({
+                jettonAddress: tokenInfo.address,
+                recipientAddress,
+                transferAmount,
+                comment,
+            });
+            return transaction;
+        }
+    }, [wallet, tokenType, tokenInfo, recipientAddress, amount, comment]);
 
     const handleClose = () => {
         setRecipientAddress('');
@@ -73,26 +118,26 @@ export const JettonTransferModal: React.FC<JettonTransferModalProps> = ({ jetton
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center space-x-3">
                             <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center overflow-hidden">
-                                {jettonInfo.image ? (
+                                {tokenInfo.image ? (
                                     <img
-                                        src={jettonInfo.image}
-                                        alt={jettonInfo.name}
+                                        src={tokenInfo.image}
+                                        alt={tokenInfo.name}
                                         className="w-full h-full object-cover"
                                     />
+                                ) : tokenType === 'TON' ? (
+                                    <svg className="w-6 h-6 text-primary" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                                    </svg>
                                 ) : (
                                     <span className="text-sm font-bold text-muted-foreground">
-                                        {jettonInfo.symbol?.slice(0, 2)}
+                                        {tokenInfo.symbol?.slice(0, 2)}
                                     </span>
                                 )}
                             </div>
                             <div>
-                                <h3 className="text-lg font-medium text-card-foreground">Transfer {jettonInfo.name}</h3>
+                                <h3 className="text-lg font-medium text-card-foreground">Transfer {tokenInfo.name}</h3>
                                 <p className="text-sm text-muted-foreground">
-                                    Balance:{' '}
-                                    {jettonInfo.decimals
-                                        ? formatUnits(jettonInfo.balance, jettonInfo.decimals)
-                                        : jettonInfo.balance}{' '}
-                                    {jettonInfo.symbol}
+                                    Balance: {tokenInfo.balance} {tokenInfo.symbol}
                                 </p>
                             </div>
                         </div>
@@ -160,7 +205,7 @@ export const JettonTransferModal: React.FC<JettonTransferModalProps> = ({ jetton
                             getTransactionRequest={createTransferTransaction}
                             onSuccess={() => {
                                 handleClose();
-                                toast.success('Transfer successful');
+                                toast.success(`${tokenInfo.symbol} transferred successfully`);
                             }}
                             onError={(error) => {
                                 setTransferError(getErrorMessage(error));
