@@ -15,10 +15,10 @@ export interface Config {
     telegramBotToken: string;
     /** Wallet encryption key (32-byte hex) */
     walletEncryptionKey: string;
-    /** Ollama server URL */
-    ollamaBaseUrl: string;
-    /** Ollama model name */
-    ollamaModel: string;
+    /** Anthropic API key */
+    anthropicApiKey: string;
+    /** Anthropic model name */
+    anthropicModel: string;
     /** TON network (mainnet or testnet) */
     tonNetwork: 'mainnet' | 'testnet';
     /** SQLite database path */
@@ -48,6 +48,11 @@ export function loadConfig(): Config {
         throw new Error('WALLET_ENCRYPTION_KEY must be a 64-character hex string (32 bytes)');
     }
 
+    const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
+    if (!anthropicApiKey) {
+        throw new Error('ANTHROPIC_API_KEY environment variable is required');
+    }
+
     const tonNetwork = (process.env.TON_NETWORK ?? 'testnet') as 'mainnet' | 'testnet';
     if (tonNetwork !== 'mainnet' && tonNetwork !== 'testnet') {
         throw new Error('TON_NETWORK must be "mainnet" or "testnet"');
@@ -56,8 +61,8 @@ export function loadConfig(): Config {
     return {
         telegramBotToken,
         walletEncryptionKey,
-        ollamaBaseUrl: process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434',
-        ollamaModel: process.env.OLLAMA_MODEL ?? 'glm-4.7-flash:q4_K_M',
+        anthropicApiKey,
+        anthropicModel: process.env.ANTHROPIC_MODEL ?? 'claude-opus-4-5-20250514',
         tonNetwork,
         databasePath: process.env.DATABASE_PATH ?? `./data/bot-${tonNetwork}.db`,
         toncenterApiKeyMainnet: process.env.TONCENTER_API_KEY_MAINNET,

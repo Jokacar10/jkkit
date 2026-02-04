@@ -7,16 +7,16 @@
  */
 
 /**
- * LLMService - Ollama-based LLM integration with tool calling
+ * LLMService - Anthropic Claude-based LLM integration with tool calling
  *
  * Features:
- * - Natural language processing via Ollama
+ * - Natural language processing via Anthropic Claude
  * - Native tool calling support
  * - Tool execution loop with result handling
  */
 
-import { Ollama } from 'ollama';
-import type { Message, Tool, ToolCall } from 'ollama';
+import Anthropic from '@anthropic-ai/sdk';
+import type { MessageParam, Tool, ToolResultBlockParam, ToolUseBlock } from '@anthropic-ai/sdk/resources/messages';
 
 /**
  * Tool definition for the LLM
@@ -36,7 +36,7 @@ export interface ToolDefinition {
  * Configuration for LLMService
  */
 export interface LLMServiceConfig {
-    baseUrl: string;
+    apiKey: string;
     model: string;
 }
 
@@ -63,14 +63,14 @@ const MAX_HISTORY_AGE_MS = 30 * 60 * 1000;
  * LLMService handles natural language processing with tool calling
  */
 export class LLMService {
-    private readonly ollama: Ollama;
+    private readonly anthropic: Anthropic;
     private readonly model: string;
     private tools: ToolDefinition[] = [];
     private toolHandlers: Map<string, (args: Record<string, unknown>) => Promise<unknown>> = new Map();
     private conversationHistory: Map<string, ConversationEntry[]> = new Map();
 
     constructor(config: LLMServiceConfig) {
-        this.ollama = new Ollama({ host: config.baseUrl });
+        this.anthropic = new Anthropic({ apiKey: config.apiKey });
         this.model = config.model;
     }
 
@@ -119,34 +119,27 @@ export class LLMService {
     }
 
     /**
-     * Get Ollama-formatted tool definitions
+     * Get Anthropic-formatted tool definitions
      */
-    private getOllamaTools(): Tool[] {
+    private getAnthropicTools(): Tool[] {
         return this.tools.map((tool) => ({
-            type: 'function' as const,
-            function: {
-                name: tool.name,
-                description: tool.description,
-                parameters: tool.parameters,
-            },
+            name: tool.name,
+            description: tool.description,
+            input_schema: tool.parameters,
         }));
     }
 
     /**
      * Execute a tool call and return the result
      */
-    private async executeTool(toolCall: ToolCall): Promise<string> {
-        const handler = this.toolHandlers.get(toolCall.function.name);
+    private async executeTool(toolUse: ToolUseBlock): Promise<string> {
+        const handler = this.toolHandlers.get(toolUse.name);
         if (!handler) {
-            return JSON.stringify({ error: `Unknown tool: ${toolCall.function.name}` });
+            return JSON.stringify({ error: `Unknown tool: ${toolUse.name}` });
         }
 
         try {
-            const args =
-                typeof toolCall.function.arguments === 'string'
-                    ? JSON.parse(toolCall.function.arguments)
-                    : toolCall.function.arguments;
-
+            const args = toolUse.input as Record<string, unknown>;
             const result = await handler(args);
             return JSON.stringify(result);
         } catch (error) {
@@ -161,12 +154,7 @@ export class LLMService {
      * Returns the final response after all tool calls are resolved
      */
     async chat(userId: string, userMessage: string, systemPrompt?: string): Promise<string> {
-        const messages: Message[] = [];
-
-        // Add system prompt if provided
-        if (systemPrompt) {
-            messages.push({ role: 'system', content: systemPrompt });
-        }
+        const messages: MessageParam[] = [];
 
         // Add conversation history
         const history = this.getHistory(userId);
@@ -187,32 +175,40 @@ export class LLMService {
         while (iterations < maxIterations) {
             iterations++;
 
-            const response = await this.ollama.chat({
+            const response = await this.anthropic.messages.create({
                 model: this.model,
+                max_tokens: 4096,
+                system: systemPrompt,
                 messages,
-                tools: this.getOllamaTools(),
+                tools: this.getAnthropicTools(),
             });
 
-            // Check if the model wants to call tools
-            if (response.message.tool_calls && response.message.tool_calls.length > 0) {
-                // Add assistant message with tool calls
-                messages.push(response.message);
+            // Check for tool use blocks
+            const toolUseBlocks = response.content.filter((block): block is ToolUseBlock => block.type === 'tool_use');
 
-                // Execute each tool call and add results
-                for (const toolCall of response.message.tool_calls) {
-                    const result = await this.executeTool(toolCall);
-                    messages.push({
-                        role: 'tool',
+            if (toolUseBlocks.length > 0) {
+                // Add assistant response with tool use
+                messages.push({ role: 'assistant', content: response.content });
+
+                // Execute tools and add results
+                const toolResults: ToolResultBlockParam[] = [];
+                for (const toolUse of toolUseBlocks) {
+                    const result = await this.executeTool(toolUse);
+                    toolResults.push({
+                        type: 'tool_result',
+                        tool_use_id: toolUse.id,
                         content: result,
                     });
                 }
+                messages.push({ role: 'user', content: toolResults });
 
                 // Continue the loop to let the model process tool results
                 continue;
             }
 
             // No more tool calls, return the final response
-            const responseContent = response.message.content ?? '';
+            const textBlock = response.content.find((block) => block.type === 'text');
+            const responseContent = textBlock?.type === 'text' ? textBlock.text : '';
 
             // Add assistant response to history
             this.addToHistory(userId, 'assistant', responseContent);

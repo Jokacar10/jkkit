@@ -9,7 +9,7 @@
 /**
  * TON MCP Telegram Bot - Entry point
  *
- * A Telegram bot that uses natural language processing via Ollama
+ * A Telegram bot that uses natural language processing via Anthropic Claude
  * to interact with TON wallets through the @ton/mcp package.
  */
 
@@ -37,7 +37,7 @@ async function main(): Promise<void> {
     // Load configuration
     const config = loadConfig();
     log(`Network: ${config.tonNetwork}`);
-    log(`Ollama model: ${config.ollamaModel}`);
+    log(`Anthropic model: ${config.anthropicModel}`);
     log(`Database: ${config.databasePath}`);
 
     // Initialize database
@@ -76,8 +76,8 @@ async function main(): Promise<void> {
 
     // Create LLM service
     const llmService = new LLMService({
-        baseUrl: config.ollamaBaseUrl,
-        model: config.ollamaModel,
+        apiKey: config.anthropicApiKey,
+        model: config.anthropicModel,
     });
     log('LLM service initialized');
 
