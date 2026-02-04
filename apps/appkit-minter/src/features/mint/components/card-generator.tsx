@@ -15,8 +15,9 @@ import { toast } from 'sonner';
 
 import { CardPreview } from './card-preview';
 import { useCardGenerator } from '../hooks/use-card-generator';
-import { useMintTransaction } from '../hooks/use-mint';
-import { useMinterStore } from '../store/minter-store';
+import { useNftMintTransaction } from '../hooks/use-nft-mint-transaction';
+import { mintCard } from '../store/actions/mint-card';
+import { setMintError } from '../store/actions/set-mint-error';
 
 import { Button, Card } from '@/core/components';
 
@@ -26,10 +27,9 @@ interface CardGeneratorProps {
 
 export const CardGenerator: React.FC<CardGeneratorProps> = ({ className }) => {
     const { currentCard, isGenerating, generate } = useCardGenerator();
-    const { createMintTransaction, canMint } = useMintTransaction();
-    const { mintCard } = useMinterStore();
+    const { createMintTransaction, canMint } = useNftMintTransaction();
     const [wallet] = useSelectedWallet();
-    const [mintError, setMintError] = useState<string | null>(null);
+    const [mintErrorLocal, setMintErrorLocal] = useState<string | null>(null);
     const isConnected = !!wallet;
 
     return (
@@ -77,10 +77,10 @@ export const CardGenerator: React.FC<CardGeneratorProps> = ({ className }) => {
                 </div>
 
                 {/* Mint error */}
-                {mintError && (
+                {mintErrorLocal && (
                     <div className="flex items-center gap-2 p-2 bg-destructive/10 border border-destructive/20 rounded-lg">
                         <AlertCircle className="w-4 h-4 text-destructive flex-shrink-0" />
-                        <p className="text-xs text-destructive">{mintError}</p>
+                        <p className="text-xs text-destructive">{mintErrorLocal}</p>
                     </div>
                 )}
 
@@ -96,11 +96,14 @@ export const CardGenerator: React.FC<CardGeneratorProps> = ({ className }) => {
                             getTransactionRequest={createMintTransaction}
                             onSuccess={() => {
                                 mintCard();
+                                setMintErrorLocal(null);
                                 setMintError(null);
                                 toast.success('NFT minted successfully!');
                             }}
                             onError={(error) => {
-                                setMintError(getErrorMessage(error));
+                                const msg = getErrorMessage(error);
+                                setMintErrorLocal(msg);
+                                setMintError(msg);
                             }}
                             disabled={!canMint}
                         >

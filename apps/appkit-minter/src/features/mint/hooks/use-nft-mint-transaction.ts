@@ -17,8 +17,8 @@ import { buildSingleNftStateInit, encodeOnChainContent } from '../contracts';
 /**
  * Hook to create NFT mint transaction request
  */
-export function useMintTransaction() {
-    const { currentCard } = useMinterStore();
+export function useNftMintTransaction() {
+    const currentCard = useMinterStore((state) => state.currentCard);
     const [wallet] = useSelectedWallet();
 
     const createMintTransaction = useCallback(async (): Promise<TransactionRequest | null> => {

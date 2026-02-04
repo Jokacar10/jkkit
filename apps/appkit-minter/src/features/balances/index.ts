@@ -6,5 +6,6 @@
  *
  */
 
+// Components
 export { TokensCard } from './components/tokens-card';
 export { TokenTransferModal } from './components/token-transfer-modal';

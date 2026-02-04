@@ -13,7 +13,7 @@ export { RarityBadge } from './components/rarity-badge';
 
 // Hooks
 export { useCardGenerator } from './hooks/use-card-generator';
-export { useMintTransaction } from './hooks/use-mint';
+export { useNftMintTransaction } from './hooks/use-nft-mint-transaction';
 
 // Store
 export { useMinterStore } from './store/minter-store';

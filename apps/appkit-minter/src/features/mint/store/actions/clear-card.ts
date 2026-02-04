@@ -6,6 +6,8 @@
  *
  */
 
-// Components
-export { NftsCard } from './components/nfts-card';
-export { NftTransferModal } from './components/nft-transfer-modal';
+import { useMinterStore } from '../minter-store';
+
+export const clearCard = (): void => {
+    useMinterStore.setState({ currentCard: null, mintError: null });
+};
