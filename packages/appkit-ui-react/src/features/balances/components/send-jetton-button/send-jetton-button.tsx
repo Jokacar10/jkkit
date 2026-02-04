@@ -8,15 +8,18 @@
 
 import { useMemo } from 'react';
 import type { FC } from 'react';
-import type { Jetton } from '@ton/walletkit';
-import { formatUnits, getFormattedJettonInfo } from '@ton/appkit';
+import { formatUnits } from '@ton/appkit';
 
 import { SendButton } from '../send-button';
 import type { SendButtonProps } from '../send-button';
 import { useI18n } from '../../../../hooks/use-i18n';
 
 export type SendJettonButtonProps = Omit<SendButtonProps, 'tokenType' | 'jettonAddress'> & {
-    jetton: Jetton;
+    jetton: {
+        address: string;
+        symbol: string;
+        decimals: number;
+    };
 };
 
 export const SendJettonButton: FC<SendJettonButtonProps> = ({
@@ -29,16 +32,14 @@ export const SendJettonButton: FC<SendJettonButtonProps> = ({
     const { t } = useI18n();
 
     const text = useMemo(() => {
-        const jettonInfo = getFormattedJettonInfo(jetton);
-
-        if (amount && jettonInfo.decimals) {
+        if (amount && jetton.decimals) {
             return t('balances.sendJettonWithAmount', {
-                amount: formatUnits(amount, jettonInfo.decimals),
-                symbol: jettonInfo.symbol,
+                amount: formatUnits(amount, jetton.decimals),
+                symbol: jetton.symbol,
             });
         }
 
-        return t('balances.sendJetton', { symbol: jettonInfo.symbol });
+        return t('balances.sendJetton', { symbol: jetton.symbol });
     }, [t, amount, jetton]);
 
     return (
