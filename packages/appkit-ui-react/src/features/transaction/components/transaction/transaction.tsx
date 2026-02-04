@@ -55,14 +55,13 @@ const TransactionContent: FC<TransactionContentProps> = ({ text, children, ...pr
         if (isLoading) {
             return t('transaction.processing');
         }
-        if (error) {
-            return t('transaction.tryAgain');
-        }
+
         if (receipt) {
             return t('transaction.success');
         }
+
         return text ?? t('transaction.sendTransaction');
-    }, [isLoading, receipt, error, text, t]);
+    }, [isLoading, receipt, text, t]);
 
     if (children) {
         return (

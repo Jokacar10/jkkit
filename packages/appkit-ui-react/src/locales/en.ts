@@ -20,7 +20,6 @@ export default {
         sendTransaction: 'Send Transaction',
         processing: 'Processing...',
         success: 'Success',
-        tryAgain: 'Try Again',
     },
 
     // Balances
