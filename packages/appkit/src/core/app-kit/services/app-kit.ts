@@ -7,7 +7,7 @@
  */
 
 import type { NetworkManager } from '@ton/walletkit';
-import { Network, KitNetworkManager } from '@ton/walletkit';
+import { Network } from '@ton/walletkit';
 
 import type { AppKitConfig } from '../types/config';
 import type { Connector } from '../../../types/connector';
@@ -16,6 +16,7 @@ import { CONNECTOR_EVENTS, WALLETS_EVENTS } from '../constants/events';
 import type { AppKitEmitter, AppKitEvents } from '../types/events';
 import type { WalletInterface } from '../../../types/wallet';
 import { WalletsManager } from '../../wallets-manager';
+import { AppKitNetworkManager } from './app-kit-network-manager';
 
 /**
  * Central hub for wallet management.
@@ -32,17 +33,16 @@ export class AppKit {
     constructor(config: AppKitConfig) {
         this.config = config;
 
+        this.emitter = new Emitter<AppKitEvents>();
+        this.emitter.on(CONNECTOR_EVENTS.CONNECTED, this.updateWalletsFromConnectors.bind(this));
+        this.emitter.on(CONNECTOR_EVENTS.DISCONNECTED, this.updateWalletsFromConnectors.bind(this));
+
         // Use provided networks config or default to mainnet
         const networks = config.networks ?? {
             [Network.mainnet().chainId]: {},
         };
 
-        this.networkManager = new KitNetworkManager({ networks });
-
-        this.emitter = new Emitter<AppKitEvents>();
-        this.emitter.on(CONNECTOR_EVENTS.CONNECTED, this.updateWalletsFromConnectors.bind(this));
-        this.emitter.on(CONNECTOR_EVENTS.DISCONNECTED, this.updateWalletsFromConnectors.bind(this));
-
+        this.networkManager = new AppKitNetworkManager({ networks }, this.emitter);
         this.walletsManager = new WalletsManager(this.emitter);
     }
 

@@ -7,7 +7,7 @@
  */
 
 import type { Emitter } from '../../emitter';
-import type { CONNECTOR_EVENTS, WALLETS_EVENTS, PLUGIN_EVENTS } from '../constants/events';
+import type { CONNECTOR_EVENTS, WALLETS_EVENTS, PLUGIN_EVENTS, NETWORKS_EVENTS } from '../constants/events';
 import type { WalletInterface } from '../../../types/wallet';
 
 export interface WalletConnectedPayload {
@@ -32,6 +32,9 @@ export interface AppKitEvents {
     // Wallets events
     [WALLETS_EVENTS.UPDATED]: { wallets: WalletInterface[] };
     [WALLETS_EVENTS.SELECTION_CHANGED]: { walletId: string | null };
+
+    // Networks events
+    [NETWORKS_EVENTS.UPDATED]: Record<string, never>;
 
     // Plugin events
     [PLUGIN_EVENTS.REGISTERED]: PluginRegisteredPayload;

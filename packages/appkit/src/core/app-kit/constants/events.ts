@@ -23,6 +23,13 @@ export const WALLETS_EVENTS = {
 } as const;
 
 /**
+ * Networks events
+ */
+export const NETWORKS_EVENTS = {
+    UPDATED: 'networks:updated',
+} as const;
+
+/**
  * Plugin events
  */
 export const PLUGIN_EVENTS = {

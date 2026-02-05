@@ -52,3 +52,11 @@ export {
     type WatchConnectorsParameters,
     type WatchConnectorsReturnType,
 } from './wallets/watch-connectors';
+
+// Network
+export { getNetworks, type GetNetworksReturnType } from './network/get-networks';
+export {
+    getSelectedWalletNetwork,
+    type GetSelectedWalletNetworkReturnType,
+} from './network/get-selected-wallet-network';
+export { watchNetworks, type WatchNetworksParameters, type WatchNetworksReturnType } from './network/watch-networks';
