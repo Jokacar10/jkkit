@@ -88,8 +88,8 @@ export class OmnistonSwapProvider extends SwapProvider<OmnistonProviderOptions> 
         log.debug('Getting Omniston quote', {
             fromToken: params.fromToken,
             toToken: params.toToken,
-            amountFrom: params.amountFrom,
-            amountTo: params.amountTo,
+            amount: params.amount,
+            isReverseSwap: params.isReverseSwap,
         });
 
         try {
@@ -104,7 +104,7 @@ export class OmnistonSwapProvider extends SwapProvider<OmnistonProviderOptions> 
             const flexibleReferrerFee = params.providerOptions?.flexibleReferrerFee ?? this.flexibleReferrerFee;
 
             // Determine amount based on whether amountFrom or amountTo is specified
-            const amount = params.amountFrom ? { bidUnits: params.amountFrom } : { askUnits: params.amountTo };
+            const amount = params.isReverseSwap ? { askUnits: params.amount } : { bidUnits: params.amount };
 
             const quoteRequest: QuoteRequest = {
                 amount,

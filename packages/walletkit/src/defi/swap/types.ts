@@ -7,55 +7,36 @@
  */
 
 import type { DefiManagerAPI } from '../types';
-import type { Network, TransactionRequest, UserFriendlyAddress } from '../../api/models';
+import type { Network, TransactionRequest, UserFriendlyAddress, TokenAmount } from '../../api/models';
 
 /**
  * Base parameters for requesting a swap quote
  */
-interface SwapQuoteParamsBase<TProviderOptions = unknown> {
-    fromToken: UserFriendlyAddress | 'TON';
-    toToken: UserFriendlyAddress | 'TON';
+export interface SwapQuoteParams<TProviderOptions = unknown> {
+    amount: TokenAmount;
+    fromToken: SwapToken;
+    toToken: SwapToken;
     network: Network;
     slippageBps?: number;
     maxOutgoingMessages?: number;
     providerOptions?: TProviderOptions;
+    isReverseSwap?: boolean;
 }
 
 /**
- * Parameters for requesting a swap quote with specified input amount
+ * Token type for swap
  */
-export interface SwapQuoteParamsWithAmountFrom<
-    TProviderOptions = unknown,
-> extends SwapQuoteParamsBase<TProviderOptions> {
-    amountFrom: string;
-    amountTo?: never;
-}
-
-/**
- * Parameters for requesting a swap quote with specified output amount
- */
-export interface SwapQuoteParamsWithAmountTo<TProviderOptions = unknown> extends SwapQuoteParamsBase<TProviderOptions> {
-    amountFrom?: never;
-    amountTo: string;
-}
-
-/**
- * Parameters for requesting a swap quote
- * Can specify either amountFrom (how much to swap) or amountTo (how much to receive)
- */
-export type SwapQuoteParams<TProviderOptions = unknown> =
-    | SwapQuoteParamsWithAmountFrom<TProviderOptions>
-    | SwapQuoteParamsWithAmountTo<TProviderOptions>;
+export type SwapToken = { type: 'jetton'; address: UserFriendlyAddress } | { type: 'ton' };
 
 /**
  * Swap quote response with pricing information
  */
 export interface SwapQuote {
-    fromToken: UserFriendlyAddress | 'TON';
-    toToken: UserFriendlyAddress | 'TON';
-    fromAmount: string;
-    toAmount: string;
-    minReceived: string;
+    fromToken: SwapToken;
+    toToken: SwapToken;
+    fromAmount: TokenAmount;
+    toAmount: TokenAmount;
+    minReceived: TokenAmount;
     network: Network;
     priceImpact?: number;
     fee?: SwapFee[];
@@ -68,8 +49,8 @@ export interface SwapQuote {
  * Fee information for swap
  */
 export interface SwapFee {
-    amount: string;
-    token: UserFriendlyAddress | 'TON';
+    amount: TokenAmount;
+    token: SwapToken;
 }
 
 /**
