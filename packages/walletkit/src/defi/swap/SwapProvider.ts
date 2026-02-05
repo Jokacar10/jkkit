@@ -32,6 +32,8 @@ export abstract class SwapProvider<
     TQuoteOptions = undefined,
     TSwapOptions = undefined,
 > implements SwapProviderInterface<TQuoteOptions, TSwapOptions> {
+    abstract readonly providerId: string;
+
     /**
      * Get a quote for swapping tokens
      * @param params - Quote parameters including tokens, amount, and network

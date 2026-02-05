@@ -21,8 +21,8 @@ import { Card } from '../Card';
 import { cn } from '@/lib/utils';
 
 function getPriceImpactColor(priceImpact: number): string {
-    if (priceImpact > 5) return 'text-destructive';
-    if (priceImpact > 2) return 'text-yellow-600';
+    if (priceImpact > 500) return 'text-destructive';
+    if (priceImpact > 200) return 'text-yellow-600';
     return 'text-green-600';
 }
 
@@ -208,7 +208,7 @@ export const SwapInterface: FC<SwapInterfaceProps> = ({ className }) => {
                         <div className="space-y-2 text-sm">
                             <div className="flex justify-between">
                                 <span className="text-muted-foreground">Provider</span>
-                                <span className="font-medium capitalize">{currentQuote.provider}</span>
+                                <span className="font-medium capitalize">{currentQuote.providerId}</span>
                             </div>
 
                             <div className="flex justify-between">
@@ -222,7 +222,7 @@ export const SwapInterface: FC<SwapInterfaceProps> = ({ className }) => {
                                 <div className="flex justify-between">
                                     <span className="text-gray-500">Price Impact</span>
                                     <span className={cn(getPriceImpactColor(currentQuote.priceImpact))}>
-                                        {currentQuote.priceImpact.toFixed(2)}%
+                                        {(currentQuote.priceImpact / 100).toFixed(2)}%
                                     </span>
                                 </div>
                             )}

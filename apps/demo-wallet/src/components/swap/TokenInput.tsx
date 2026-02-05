@@ -44,7 +44,7 @@ export const TokenInput: FC<Props> = ({
             return formatTon(balance || '0');
         }
 
-        const jetton = userJettons.find((j) => j.address === token.address);
+        const jetton = userJettons.find((j) => j.address === token.value);
         if (jetton && jetton.balance && jetton.decimalsNumber) {
             const decimals = jetton.decimalsNumber;
             return formatUnits(jetton.balance, decimals);
@@ -63,7 +63,7 @@ export const TokenInput: FC<Props> = ({
                 onAmountChange(maxAmount.toString());
             }
         } else {
-            const jetton = userJettons.find((j) => j.address === token.address);
+            const jetton = userJettons.find((j) => j.address === token.value);
             if (jetton && jetton.balance) {
                 const decimals = jetton.decimalsNumber || 9;
                 const balanceInUnits = formatUnits(jetton.balance, decimals);

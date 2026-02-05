@@ -22,8 +22,8 @@ describe.skip('OmnistonSwapProvider.getQuote', () => {
     });
     const usdtQuoteParams = {
         fromToken: { type: 'ton' } as SwapToken,
-        toToken: { type: 'jetton', address: 'EQA2kCVNwVsil2EM2mB0SkXytxCqQjS4mttjDpnXmwG9T6bO' } as SwapToken, // USDT
-        amountFrom: '1000000000', // 1 TON
+        toToken: { type: 'jetton', value: 'EQA2kCVNwVsil2EM2mB0SkXytxCqQjS4mttjDpnXmwG9T6bO' } as SwapToken, // USDT
+        amount: '1000000000', // 1 TON
         network: Network.mainnet(),
     };
 

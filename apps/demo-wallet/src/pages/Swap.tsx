@@ -22,7 +22,7 @@ export const Swap: FC = () => {
 
     useEffect(() => {
         setFromToken({ type: 'ton' });
-        setToToken({ type: 'jetton', address: USDT_ADDRESS });
+        setToToken({ type: 'jetton', value: USDT_ADDRESS });
 
         return () => clearSwap();
     }, []);

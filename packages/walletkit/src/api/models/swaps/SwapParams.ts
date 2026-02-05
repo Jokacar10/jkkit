@@ -13,8 +13,19 @@ import type { SwapQuote } from './SwapQuote';
  * Parameters for building swap transaction
  */
 export interface SwapParams<TProviderOptions = unknown> {
+    /**
+     * The swap quote based on which the transaction is built
+     */
     quote: SwapQuote;
+
+    /**
+     * Address of the user performing the swap
+     */
     userAddress: UserFriendlyAddress;
+
+    /**
+     * Address to receive the swapped tokens (defaults to userAddress)
+     */
     destinationAddress?: UserFriendlyAddress;
 
     /**
@@ -28,5 +39,9 @@ export interface SwapParams<TProviderOptions = unknown> {
      * @format int
      */
     deadline?: number;
+
+    /**
+     * Provider-specific options
+     */
     providerOptions?: TProviderOptions;
 }

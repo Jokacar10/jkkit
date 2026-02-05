@@ -56,11 +56,13 @@ export class OmnistonSwapProvider extends SwapProvider<OmnistonProviderOptions> 
     private readonly referrerAddress?: string;
     private readonly referrerFeeBps?: number;
     private readonly flexibleReferrerFee: boolean;
-
     private omniston$?: Omniston;
+
+    readonly providerId: string;
 
     constructor(config?: OmnistonSwapProviderConfig) {
         super();
+        this.providerId = config?.providerId ?? 'omniston';
         this.apiUrl = config?.apiUrl ?? 'wss://omni-ws.ston.fi';
         this.defaultSlippageBps = config?.defaultSlippageBps ?? 100; // 1% default
         this.quoteTimeoutMs = config?.quoteTimeoutMs ?? 10000; // 10 seconds
@@ -302,7 +304,7 @@ export class OmnistonSwapProvider extends SwapProvider<OmnistonProviderOptions> 
 
         return {
             metadata,
-            provider: 'omniston',
+            providerId: this.providerId,
             fromToken: params.fromToken,
             toToken: params.toToken,
             fromAmount: quote.bidUnits,

@@ -6,13 +6,38 @@
  *
  */
 
+import type { DefiProvider } from './DefiProvider';
+
 /**
  * Swap API interface exposed by SwapManager
  */
-export interface DefiManagerAPI<T> {
-    registerProvider(name: string, provider: T): void;
-    setDefaultProvider(name: string): void;
-    getProvider(name?: string): T;
+export interface DefiManagerAPI<T extends DefiProvider> {
+    /**
+     * Register a new provider
+     * @param provider Provider instance (must have providerId)
+     */
+    registerProvider(provider: T): void;
+
+    /**
+     * Set the default provider
+     * @param providerId Provider identifier
+     */
+    setDefaultProvider(providerId: string): void;
+
+    /**
+     * Get a registered provider
+     * @param providerId Provider identifier (optional, returns default if not specified)
+     */
+    getProvider(providerId?: string): T;
+
+    /**
+     * Get list of all registered provider ids
+     */
     getRegisteredProviders(): string[];
-    hasProvider(name: string): boolean;
+
+    /**
+     * Check if a provider is registered
+     * @param providerId Provider identifier
+     */
+    hasProvider(providerId: string): boolean;
 }

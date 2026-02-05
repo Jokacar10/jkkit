@@ -37,7 +37,7 @@ export class SwapManager extends DefiManager<SwapProviderInterface> implements S
             toToken: params.toToken,
             amount: params.amount,
             isReverseSwap: params.isReverseSwap,
-            provider: provider || this.defaultProvider,
+            provider: provider || this.defaultProviderId,
         });
 
         try {
@@ -68,7 +68,7 @@ export class SwapManager extends DefiManager<SwapProviderInterface> implements S
     ): Promise<TransactionRequest> {
         log.debug('Building swap transaction', {
             userAddress: params.userAddress,
-            provider: provider || this.defaultProvider,
+            provider: provider || this.defaultProviderId,
         });
 
         try {

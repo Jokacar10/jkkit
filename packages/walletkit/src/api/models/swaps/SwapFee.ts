@@ -13,6 +13,13 @@ import type { SwapToken } from './SwapToken';
  * Fee information for swap
  */
 export interface SwapFee {
+    /**
+     * Amount of the fee
+     */
     amount: TokenAmount;
+
+    /**
+     * Token in which the fee is paid
+     */
     token: SwapToken;
 }

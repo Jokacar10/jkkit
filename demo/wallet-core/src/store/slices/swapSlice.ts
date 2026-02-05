@@ -18,7 +18,7 @@ const log = createComponentLogger('SwapSlice');
 export const createSwapSlice: SwapSliceCreator = (set: SetState, get) => ({
     swap: {
         fromToken: { type: 'ton' },
-        toToken: { type: 'jetton', address: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs' },
+        toToken: { type: 'jetton', value: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs' },
         amount: '',
         destinationAddress: '',
         currentQuote: null,
@@ -138,7 +138,7 @@ export const createSwapSlice: SwapSliceCreator = (set: SetState, get) => ({
             }
         } else {
             // Check jetton balance
-            const jetton = state.jettons.userJettons.find((j) => j.address === fromToken.address);
+            const jetton = state.jettons.userJettons.find((j) => j.address === fromToken.value);
 
             if (!jetton || !jetton.balance) {
                 return 'Insufficient balance';
@@ -349,7 +349,7 @@ export const createSwapSlice: SwapSliceCreator = (set: SetState, get) => ({
     clearSwap: () => {
         set((state) => {
             state.swap.fromToken = { type: 'ton' };
-            state.swap.toToken = { type: 'jetton', address: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs' };
+            state.swap.toToken = { type: 'jetton', value: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs' };
             state.swap.amount = '';
             state.swap.currentQuote = null;
             state.swap.isLoadingQuote = false;

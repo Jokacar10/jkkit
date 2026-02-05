@@ -14,9 +14,24 @@ import type { SwapToken } from './SwapToken';
  * Base parameters for requesting a swap quote
  */
 export interface SwapQuoteParams<TProviderOptions = unknown> {
+    /**
+     * Amount of tokens to swap (incoming or outgoing depending on isReverseSwap)
+     */
     amount: TokenAmount;
+
+    /**
+     * Token to swap from
+     */
     fromToken: SwapToken;
+
+    /**
+     * Token to swap to
+     */
     toToken: SwapToken;
+
+    /**
+     * Network on which the swap will be executed
+     */
     network: Network;
 
     /**
@@ -30,6 +45,14 @@ export interface SwapQuoteParams<TProviderOptions = unknown> {
      * @format int
      */
     maxOutgoingMessages?: number;
+
+    /**
+     * Provider-specific options
+     */
     providerOptions?: TProviderOptions;
+
+    /**
+     * If true, amount is the amount to receive (buy). If false, amount is the amount to spend (sell).
+     */
     isReverseSwap?: boolean;
 }
