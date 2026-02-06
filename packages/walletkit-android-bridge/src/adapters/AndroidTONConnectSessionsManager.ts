@@ -119,19 +119,24 @@ export class AndroidTONConnectSessionsManager implements TONConnectSessionManage
         }
     }
 
-    async removeSession(sessionId: string): Promise<void> {
+    async removeSession(sessionId: string): Promise<TONConnectSession | undefined> {
         try {
-            this.bridge.sessionRemove(sessionId);
+            const resultJson = this.bridge.sessionRemove(sessionId);
+            if (!resultJson) {
+                return undefined;
+            }
+            return JSON.parse(resultJson) as TONConnectSession;
         } catch (err) {
             error('[AndroidSessionManager] Failed to remove session:', err);
             throw err;
         }
     }
 
-    async removeSessions(parameters?: { walletId?: WalletId; domain?: string; isJsBridge?: boolean }): Promise<void> {
+    async removeSessions(parameters?: { walletId?: WalletId; domain?: string; isJsBridge?: boolean }): Promise<TONConnectSession[]> {
         try {
             const filterJson = JSON.stringify(parameters ?? {});
-            this.bridge.sessionRemoveFiltered(filterJson);
+            const resultJson = this.bridge.sessionRemoveFiltered(filterJson);
+            return JSON.parse(resultJson) as TONConnectSession[];
         } catch (err) {
             error('[AndroidSessionManager] Failed to remove sessions:', err);
             throw err;
