@@ -132,7 +132,11 @@ export class AndroidTONConnectSessionsManager implements TONConnectSessionManage
         }
     }
 
-    async removeSessions(parameters?: { walletId?: WalletId; domain?: string; isJsBridge?: boolean }): Promise<TONConnectSession[]> {
+    async removeSessions(parameters?: {
+        walletId?: WalletId;
+        domain?: string;
+        isJsBridge?: boolean;
+    }): Promise<TONConnectSession[]> {
         try {
             const filterJson = JSON.stringify(parameters ?? {});
             const resultJson = this.bridge.sessionRemoveFiltered(filterJson);
