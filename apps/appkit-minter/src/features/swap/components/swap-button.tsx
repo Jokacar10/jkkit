@@ -25,6 +25,7 @@ export const SwapButton: FC = () => {
         fromToken: { type: 'ton' },
         toToken: { type: 'jetton', value: USDT_ADDRESS },
         network,
+        slippageBps: 100,
     });
 
     const { mutateAsync: buildSwapTransaction } = useBuildSwapTransaction();
