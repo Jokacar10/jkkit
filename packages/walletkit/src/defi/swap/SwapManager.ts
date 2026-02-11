@@ -7,7 +7,8 @@
  */
 
 import type { TransactionRequest } from '../../api/models';
-import type { SwapAPI, SwapQuoteParams, SwapQuote, SwapParams, SwapProviderInterface } from './types';
+import type { SwapAPI, SwapProviderInterface } from '../../api/interfaces';
+import type { SwapQuoteParams, SwapQuote, SwapParams } from '../../api/models';
 import { SwapError } from './errors';
 import { globalLogger } from '../../core/Logger';
 import { DefiManager } from '../DefiManager';
@@ -31,20 +32,12 @@ export class SwapManager extends DefiManager<SwapProviderInterface> implements S
         params: SwapQuoteParams<TProviderOptions>,
         provider?: string,
     ): Promise<SwapQuote> {
-        if (params.amountFrom && params.amountTo) {
-            throw new SwapError('Cannot specify both amountFrom and amountTo', SwapError.INVALID_PARAMS);
-        }
-
-        if (!params.amountFrom && !params.amountTo) {
-            throw new SwapError('Must specify either amountFrom or amountTo', SwapError.INVALID_PARAMS);
-        }
-
         log.debug('Getting swap quote', {
             fromToken: params.fromToken,
             toToken: params.toToken,
-            amountFrom: params.amountFrom,
-            amountTo: params.amountTo,
-            provider: provider || this.defaultProvider,
+            amount: params.amount,
+            isReverseSwap: params.isReverseSwap,
+            provider: provider || this.defaultProviderId,
         });
 
         try {
@@ -75,7 +68,7 @@ export class SwapManager extends DefiManager<SwapProviderInterface> implements S
     ): Promise<TransactionRequest> {
         log.debug('Building swap transaction', {
             userAddress: params.userAddress,
-            provider: provider || this.defaultProvider,
+            provider: provider || this.defaultProviderId,
         });
 
         try {
