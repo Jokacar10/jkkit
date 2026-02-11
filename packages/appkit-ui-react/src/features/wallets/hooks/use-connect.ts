@@ -30,17 +30,8 @@ export type UseConnectReturnType<context = unknown> = UseMutationReturnType<
 
 export const useConnect = <context = unknown>(
     parameters: UseConnectParameters<context> = {},
-): UseConnectReturnType<context> & {
-    connect: UseConnectReturnType<context>['mutate'];
-    connectAsync: UseConnectReturnType<context>['mutateAsync'];
-} => {
+): UseConnectReturnType<context> => {
     const appKit = useAppKit();
 
-    const mutation = useMutation(connectMutationOptions(appKit, parameters));
-
-    return {
-        ...mutation,
-        connect: mutation.mutate,
-        connectAsync: mutation.mutateAsync,
-    };
+    return useMutation(connectMutationOptions(appKit, parameters));
 };

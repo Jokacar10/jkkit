@@ -28,7 +28,6 @@ export const useJettonsByAddress = <selectData = GetJettonsByAddressData>(
     parameters: UseJettonsByAddressParameters<selectData> = {},
 ): UseJettonsByAddressReturnType<selectData> => {
     const appKit = useAppKit();
-    const options = getJettonsByAddressQueryOptions(appKit, parameters);
 
-    return useQuery(options);
+    return useQuery(getJettonsByAddressQueryOptions(appKit, parameters));
 };

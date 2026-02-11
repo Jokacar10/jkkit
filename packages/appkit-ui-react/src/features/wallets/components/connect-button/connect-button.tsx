@@ -27,8 +27,8 @@ export const ConnectButton: FC<ConnectButtonProps> = ({ className, ...props }) =
 
     const [wallet] = useSelectedWallet();
     const connectors = useConnectors();
-    const { connect } = useConnect();
-    const { disconnect } = useDisconnect();
+    const { mutate: connect } = useConnect();
+    const { mutate: disconnect } = useDisconnect();
 
     const { t } = useI18n();
 

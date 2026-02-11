@@ -28,7 +28,6 @@ export const useBalanceByAddress = <selectData = GetBalanceByAddressData>(
     parameters: UseBalanceByAddressParameters<selectData> = {},
 ): UseBalanceByAddressReturnType<selectData> => {
     const appKit = useAppKit();
-    const options = getBalanceByAddressQueryOptions(appKit, parameters);
 
-    return useQuery(options);
+    return useQuery(getBalanceByAddressQueryOptions(appKit, parameters));
 };

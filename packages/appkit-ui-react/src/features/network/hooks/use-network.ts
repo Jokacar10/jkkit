@@ -6,10 +6,10 @@
  *
  */
 
-import { getSelectedWallet } from '@ton/appkit';
 import type { Network } from '@ton/walletkit';
+import { useMemo } from 'react';
 
-import { useAppKit } from '../../../hooks/use-app-kit';
+import { useSelectedWallet } from '../../wallets';
 
 export type UseNetworkReturnType = Network | undefined;
 
@@ -17,7 +17,7 @@ export type UseNetworkReturnType = Network | undefined;
  * Hook to get network of the selected wallet
  */
 export const useNetwork = (): UseNetworkReturnType => {
-    const appKit = useAppKit();
-    const wallet = getSelectedWallet(appKit);
-    return wallet?.getNetwork();
+    const [wallet] = useSelectedWallet();
+
+    return useMemo(() => wallet?.getNetwork(), [wallet]);
 };

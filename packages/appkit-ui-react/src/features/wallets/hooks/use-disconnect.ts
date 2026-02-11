@@ -32,17 +32,8 @@ export type UseDisconnectReturnType<context = unknown> = UseMutationReturnType<
 
 export const useDisconnect = <context = unknown>(
     parameters: UseDisconnectParameters<context> = {},
-): UseDisconnectReturnType<context> & {
-    disconnect: UseDisconnectReturnType<context>['mutate'];
-    disconnectAsync: UseDisconnectReturnType<context>['mutateAsync'];
-} => {
+): UseDisconnectReturnType<context> => {
     const appKit = useAppKit();
 
-    const mutation = useMutation(disconnectMutationOptions(appKit, parameters));
-
-    return {
-        ...mutation,
-        disconnect: mutation.mutate,
-        disconnectAsync: mutation.mutateAsync,
-    };
+    return useMutation(disconnectMutationOptions(appKit, parameters));
 };

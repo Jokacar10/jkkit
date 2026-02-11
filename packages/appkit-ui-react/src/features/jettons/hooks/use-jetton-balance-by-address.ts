@@ -32,7 +32,6 @@ export const useJettonBalanceByAddress = <selectData = GetJettonBalanceByAddress
     parameters: UseJettonBalanceByAddressParameters<selectData> = {},
 ): UseJettonBalanceByAddressReturnType<selectData> => {
     const appKit = useAppKit();
-    const options = getJettonBalanceByAddressQueryOptions(appKit, parameters);
 
-    return useQuery(options);
+    return useQuery(getJettonBalanceByAddressQueryOptions(appKit, parameters));
 };

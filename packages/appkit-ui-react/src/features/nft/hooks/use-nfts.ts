@@ -23,5 +23,6 @@ export const useNfts = <selectData = GetNFTsData>(
     parameters: UseNFTsParameters<selectData> = {},
 ): UseNFTsReturnType<selectData> => {
     const address = useAddress();
+
     return useNFTsByAddress({ ...parameters, address });
 };
