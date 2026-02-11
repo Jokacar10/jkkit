@@ -6,14 +6,8 @@
  *
  */
 
-import path from 'path';
-import { fileURLToPath } from 'url';
-
 import type { StorybookConfig } from '@storybook/react-vite';
-import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 const config: StorybookConfig = {
     stories: ['../src/**/*.stories.@(ts|tsx)'],
@@ -30,17 +24,11 @@ const config: StorybookConfig = {
     viteFinal: async (viteConfig) => {
         return {
             ...viteConfig,
+            plugins: [...(viteConfig.plugins ?? []), nodePolyfills()],
             resolve: {
                 ...viteConfig.resolve,
                 alias: {
                     ...viteConfig.resolve?.alias,
-                    // '@ton/appkit': path.resolve(__dirname, '../../appkit/src/index.ts'),
-                    // '@ton/appkit/queries': path.resolve(__dirname, '../../appkit/src/queries/index.ts'),
-                    // '@ton/appkit/tonconnect': path.resolve(
-                    //     __dirname,
-                    //     '../../appkit/src/connectors/tonconnect/index.ts',
-                    // ),
-                    // '@ton/walletkit': path.resolve(__dirname, '../../walletkit/src/index.ts'),
                 },
             },
             css: {
@@ -61,12 +49,7 @@ const config: StorybookConfig = {
                 ],
                 esbuildOptions: {
                     ...viteConfig.optimizeDeps?.esbuildOptions,
-                    plugins: [
-                        ...(viteConfig.optimizeDeps?.esbuildOptions?.plugins || []),
-                        NodeGlobalsPolyfillPlugin({
-                            buffer: true,
-                        }),
-                    ],
+                    plugins: [...(viteConfig.optimizeDeps?.esbuildOptions?.plugins || [])],
                 },
             },
         };
