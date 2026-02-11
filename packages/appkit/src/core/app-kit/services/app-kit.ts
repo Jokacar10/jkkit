@@ -46,6 +46,12 @@ export class AppKit {
         this.networkManager = new AppKitNetworkManager({ networks }, this.emitter);
         this.walletsManager = new WalletsManager(this.emitter);
         this.swapManager = new SwapManager();
+
+        if (config.connectors) {
+            config.connectors.forEach((connector) => {
+                this.addConnector(connector);
+            });
+        }
     }
 
     /**

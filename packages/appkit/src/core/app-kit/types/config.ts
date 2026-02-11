@@ -8,6 +8,8 @@
 
 import type { NetworkAdapters } from '@ton/walletkit';
 
+import type { Connector } from '../../../types/connector';
+
 /**
  * Configuration for AppKit
  */
@@ -20,4 +22,5 @@ export interface AppKitConfig {
      * Values contain apiClient configuration (url and optional API key)
      */
     networks?: NetworkAdapters;
+    connectors?: Connector[];
 }

@@ -6,11 +6,8 @@
  *
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { AppKitProvider } from '@ton/appkit-ui-react';
-import { useTonConnectUI } from '@tonconnect/ui-react';
-import { TonConnectConnector } from '@ton/appkit/tonconnect';
-import { addConnector } from '@ton/appkit';
 
 import { appKit } from '../services/app-kit';
 
@@ -19,16 +16,5 @@ interface AppKitBridgeProps {
 }
 
 export const AppKitBridge: React.FC<AppKitBridgeProps> = ({ children }) => {
-    const [tonConnectUI] = useTonConnectUI();
-
-    // Register TonConnect provider
-    useEffect(() => {
-        if (!tonConnectUI) return;
-
-        const unregister = addConnector(appKit, new TonConnectConnector({ tonConnect: tonConnectUI }));
-
-        return unregister;
-    }, [tonConnectUI]);
-
     return <AppKitProvider appKit={appKit}>{children}</AppKitProvider>;
 };

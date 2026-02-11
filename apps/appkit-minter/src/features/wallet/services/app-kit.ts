@@ -9,6 +9,7 @@
 import { AppKit, Network } from '@ton/appkit';
 import { OmnistonSwapProvider } from '@ton/walletkit/swap/omniston';
 import { registerSwapProvider } from '@ton/appkit';
+import { TonConnectConnector } from '@ton/appkit/tonconnect';
 
 import { ENV_TON_API_KEY_MAINNET, ENV_TON_API_KEY_TESTNET } from '@/core/configs/env';
 
@@ -27,6 +28,13 @@ export const appKit = new AppKit({
             },
         },
     },
+    connectors: [
+        new TonConnectConnector({
+            tonConnectOptions: {
+                manifestUrl: 'https://tonconnect-demo-dapp-with-react-ui.vercel.app/tonconnect-manifest.json',
+            },
+        }),
+    ],
 });
 
 registerSwapProvider(appKit, new OmnistonSwapProvider());

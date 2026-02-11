@@ -6,7 +6,8 @@
  *
  */
 
-import type { TonConnectUI } from '@tonconnect/ui';
+import type { TonConnectUiCreateOptions } from '@tonconnect/ui';
+import { TonConnectUI } from '@tonconnect/ui';
 
 import { TonConnectWalletAdapter } from '../adapters/ton-connect-wallet-adapter';
 import { CONNECTOR_EVENTS } from '../../../core/app-kit';
@@ -15,7 +16,7 @@ import type { WalletInterface } from '../../../types/wallet';
 import type { AppKitEmitter } from '../../../core/app-kit';
 
 export interface TonConnectConnectorConfig {
-    tonConnect: TonConnectUI;
+    tonConnectOptions: TonConnectUiCreateOptions;
     id?: string;
     metadata?: ConnectorMetadata;
 }
@@ -31,7 +32,7 @@ export class TonConnectConnector implements Connector {
 
     constructor(config: TonConnectConnectorConfig) {
         this.id = config.id ?? 'tonconnect-default';
-        this.tonConnect = config.tonConnect;
+        this.tonConnect = new TonConnectUI(config.tonConnectOptions);
         this.metadata = {
             name: 'TonConnect',
             iconUrl: 'https://avatars.githubusercontent.com/u/113980577',
