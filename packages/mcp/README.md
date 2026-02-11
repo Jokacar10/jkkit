@@ -7,14 +7,20 @@ A Model Context Protocol (MCP) server for TON blockchain wallet operations. Buil
 - **Wallet Management**: Create, import, list, and remove TON wallets
 - **Balance Queries**: Check TON and Jetton balances
 - **Transfers**: Send TON and Jettons to any address
-- **Secure Storage**: Wallets stored locally with encryption-ready design
+- **Swaps**: Get quotes and execute token swaps
+- **Dual Transport**: Stdio (default) and HTTP server modes
 
-## Installation
+## Quick Start
 
 ```bash
-# In the monorepo
-pnpm install
-pnpm --filter @ton/mcp build
+# Run as stdio MCP server
+npx @ton/mcp
+
+# Run as HTTP server (port 3000)
+npx @ton/mcp --http
+
+# Run as HTTP server on custom port
+npx @ton/mcp --http 8080
 ```
 
 ## Usage with MCP Clients
@@ -27,12 +33,27 @@ Add to your MCP configuration:
 {
   "mcpServers": {
     "ton": {
-      "command": "node",
-      "args": ["/path/to/kit/apps/mcp/dist/index.js"]
+      "command": "npx",
+      "args": ["@ton/mcp"]
     }
   }
 }
 ```
+
+### HTTP mode
+
+Start the server and point your MCP client to the endpoint:
+
+```bash
+npx @ton/mcp --http 3000
+# MCP endpoint: http://localhost:3000/mcp
+```
+
+## Environment Variables
+
+| Variable  | Default   | Description                  |
+|-----------|-----------|------------------------------|
+| `NETWORK` | `mainnet` | TON network (`mainnet` / `testnet`) |
 
 ## Available Tools
 
@@ -108,34 +129,47 @@ Send Jettons to an address.
 - `amount` (required): Amount in raw units (apply decimals yourself)
 - `comment` (optional): Transaction comment/memo
 
-## Storage
+### Swaps
 
-Wallet data is stored in `~/.ton-mcp/wallets.json`.
+#### `get_swap_quote`
+Get a quote for a token swap.
 
-**Current Implementation:** Plaintext JSON storage
-
-**Security Note:** Mnemonics are currently stored in plaintext. The storage interface is designed to easily support encrypted storage in the future. Do not use this for production wallets with significant funds until encryption is implemented.
+#### `execute_swap`
+Execute a token swap.
 
 ## Development
 
 ```bash
+# Run from source (stdio)
+pnpm --filter @ton/mcp dev:cli
+
+# Run from source (HTTP)
+pnpm --filter @ton/mcp dev:cli:http
+
 # Build
-pnpm build
+pnpm --filter @ton/mcp build
 
-# Watch mode
-pnpm dev
-
-# Run directly
-pnpm start
+# Run built version
+node packages/mcp/dist/cli.js
+node packages/mcp/dist/cli.js --http 8080
 ```
 
-## Network
+## Library Usage
 
-The server uses TON Mainnet by default. This can be configured in the WalletService constructor.
+The package also exports a programmatic API for building custom MCP servers:
+
+```typescript
+import { createTonWalletMCP, InMemoryStorageAdapter, LocalSignerAdapter, StaticUserContextProvider } from '@ton/mcp';
+
+const server = createTonWalletMCP({
+  storage: new InMemoryStorageAdapter(),
+  signer: new LocalSignerAdapter(),
+  userContext: new StaticUserContextProvider('my-user'),
+  network: 'mainnet',
+  requireConfirmation: false,
+});
+```
 
 ## License
 
 MIT
-
-
-
