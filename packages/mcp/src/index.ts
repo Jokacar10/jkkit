@@ -10,10 +10,9 @@
  * TON MCP Server - Model Context Protocol server for TON blockchain wallet operations
  *
  * This module provides:
- * - Factory function for creating multi-user MCP servers with pluggable adapters
- * - Standalone MCP server for single-user CLI use
+ * - Factory function for creating single-user MCP servers with pluggable adapters
  * - Adapter interfaces for custom storage and signing implementations
- * - Example adapters for testing and development
+ * - Built-in adapters for common use cases
  */
 
 // ===========================================
@@ -32,16 +31,13 @@ export type {
     WalletInfo,
     CreateWalletParams,
     ImportWalletParams,
-    IUserContextProvider,
-    RequestContext,
     IContactResolver,
     Contact,
     TonMcpConfig,
-    LimitsConfig,
 } from './types/index.js';
 
 // ===========================================
-// Example Adapters
+// Adapters
 // ===========================================
 
 export {
@@ -49,33 +45,9 @@ export {
     LocalSignerAdapter,
     SqliteStorageAdapter,
     SqliteSignerAdapter,
-    TelegramUserContextProvider,
-    StaticUserContextProvider,
 } from './adapters/index.js';
 
-export type {
-    TelegramUserContextConfig,
-    SqliteDatabase,
-    SqliteStorageConfig,
-    SqliteSignerConfig,
-} from './adapters/index.js';
-
-// ===========================================
-// Core Utilities (for advanced use)
-// ===========================================
-
-export { UserScopedStorage } from './core/UserScopedStorage.js';
-export { UserScopedSigner } from './core/UserScopedSigner.js';
-export { LimitsManager } from './core/LimitsManager.js';
-export type { LimitCheckResult } from './core/LimitsManager.js';
-export { PendingTransactionManager } from './core/PendingTransactionManager.js';
-export type {
-    PendingTransaction,
-    PendingTransactionType,
-    PendingTonTransfer,
-    PendingJettonTransfer,
-    PendingSwap,
-} from './core/PendingTransactionManager.js';
+export type { SqliteDatabase, SqliteStorageConfig, SqliteSignerConfig } from './adapters/index.js';
 
 // ===========================================
 // Services
@@ -92,7 +64,5 @@ export type {
     TransferResult,
     SwapQuoteResult,
     SwapResult,
+    PendingTransaction,
 } from './services/McpWalletService.js';
-
-// Legacy WalletService for standalone use
-export { WalletService } from './services/WalletService.js';

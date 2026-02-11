@@ -12,27 +12,14 @@
 
 import type { IStorageAdapter } from './storage.js';
 import type { ISignerAdapter } from './signer.js';
-import type { IUserContextProvider } from './user-context.js';
 import type { IContactResolver } from './contacts.js';
-
-/**
- * Safety limits configuration
- */
-export interface LimitsConfig {
-    /** Maximum TON amount per single transaction */
-    maxTransactionTon?: number;
-    /** Maximum TON amount per day per user */
-    dailyLimitTon?: number;
-    /** Maximum number of wallets per user */
-    maxWalletsPerUser?: number;
-}
 
 /**
  * Configuration for createTonWalletMCP factory
  */
 export interface TonMcpConfig {
     /**
-     * Storage adapter for wallet metadata, contacts, pending transactions.
+     * Storage adapter for wallet metadata and pending transactions.
      * Required.
      */
     storage: IStorageAdapter;
@@ -42,12 +29,6 @@ export interface TonMcpConfig {
      * Required.
      */
     signer: ISignerAdapter;
-
-    /**
-     * User context provider for extracting authenticated user ID.
-     * Required.
-     */
-    userContext: IUserContextProvider;
 
     /**
      * Optional contact resolver for name-to-address resolution.
@@ -61,14 +42,16 @@ export interface TonMcpConfig {
     network?: 'mainnet' | 'testnet';
 
     /**
-     * Safety limits for transactions and wallets.
-     */
-    limits?: LimitsConfig;
-
-    /**
      * If true, transactions require explicit confirmation via confirm_transaction tool.
-     * Recommended for Telegram bots and other user-facing applications.
      * @default false
      */
     requireConfirmation?: boolean;
+
+    /**
+     * Network-specific configuration (API keys).
+     */
+    networks?: {
+        mainnet?: { apiKey?: string };
+        testnet?: { apiKey?: string };
+    };
 }

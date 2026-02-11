@@ -28,7 +28,6 @@ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/
 import { createTonWalletMCP } from './factory.js';
 import { InMemoryStorageAdapter } from './adapters/InMemoryStorageAdapter.js';
 import { LocalSignerAdapter } from './adapters/LocalSignerAdapter.js';
-import { StaticUserContextProvider } from './adapters/TelegramUserContextProvider.js';
 
 const SERVER_NAME = 'ton-mcp';
 
@@ -61,12 +60,10 @@ function parseArgs() {
 function createAdaptersAndServer() {
     const storage = new InMemoryStorageAdapter();
     const signer = new LocalSignerAdapter();
-    const userContext = new StaticUserContextProvider('cli-user');
 
     const server = createTonWalletMCP({
         storage,
         signer,
-        userContext,
         network: NETWORK,
         requireConfirmation: false,
     });

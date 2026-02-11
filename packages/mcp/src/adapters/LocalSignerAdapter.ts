@@ -324,7 +324,7 @@ export class LocalSignerAdapter implements ISignerAdapter {
 
     /**
      * Get TonWalletKit instance for direct wallet operations
-     * Used by WalletService for balance/transfer operations
+     * Used by McpWalletService for balance/transfer operations
      */
     async getKitInstance(): Promise<TonWalletKit> {
         return this.getKit();
@@ -332,7 +332,7 @@ export class LocalSignerAdapter implements ISignerAdapter {
 
     /**
      * Get a loaded wallet by ID for direct operations
-     * Used by WalletService for balance/transfer operations
+     * Used by McpWalletService for balance/transfer operations
      */
     async getLoadedWallet(walletId: string): Promise<Wallet> {
         return this.getWalletForSigning(walletId);

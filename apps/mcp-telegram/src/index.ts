@@ -13,13 +13,14 @@
  * to interact with TON wallets through the @ton/mcp package.
  */
 
-import { McpWalletService, SqliteStorageAdapter, SqliteSignerAdapter } from '@ton/mcp';
+import { SqliteStorageAdapter, SqliteSignerAdapter } from '@ton/mcp';
 
 import { loadConfig } from './config.js';
 import { initializeDatabase } from './db/schema.js';
 import { ProfileService } from './services/ProfileService.js';
 import { LLMService } from './services/LLMService.js';
 import { createBot, initializeBotInfo } from './bot.js';
+import { UserServiceFactory } from './core/UserServiceFactory.js';
 
 // Log helper
 function log(message: string): void {
@@ -57,18 +58,20 @@ async function main(): Promise<void> {
         tableName: 'wallets',
     });
 
-    // Create wallet service with TonCenter API keys
-    const walletService = new McpWalletService({
-        storage: storageAdapter,
+    // Create user service factory
+    const userServiceFactory = new UserServiceFactory({
         signer: signerAdapter,
-        defaultNetwork: config.tonNetwork,
-        requireConfirmation: false,
-        networks: {
-            mainnet: config.toncenterApiKeyMainnet ? { apiKey: config.toncenterApiKeyMainnet } : undefined,
-            testnet: config.toncenterApiKeyTestnet ? { apiKey: config.toncenterApiKeyTestnet } : undefined,
+        storage: storageAdapter,
+        serviceConfig: {
+            defaultNetwork: config.tonNetwork,
+            requireConfirmation: false,
+            networks: {
+                mainnet: config.toncenterApiKeyMainnet ? { apiKey: config.toncenterApiKeyMainnet } : undefined,
+                testnet: config.toncenterApiKeyTestnet ? { apiKey: config.toncenterApiKeyTestnet } : undefined,
+            },
         },
     });
-    log('Wallet service initialized');
+    log('User service factory initialized');
 
     // Create profile service
     const profileService = new ProfileService(db);
@@ -84,9 +87,7 @@ async function main(): Promise<void> {
     // Create Telegram bot
     const bot = createBot({
         token: config.telegramBotToken,
-        walletService,
-        storageAdapter,
-        signerAdapter,
+        userServiceFactory,
         llmService,
         profileService,
         defaultNetwork: config.tonNetwork,
@@ -101,7 +102,7 @@ async function main(): Promise<void> {
     const shutdown = async (): Promise<void> => {
         log('Shutting down...');
         bot.stop();
-        await walletService.close();
+        await userServiceFactory.closeAll();
         await signerAdapter.close();
         db.close();
         log('Shutdown complete');

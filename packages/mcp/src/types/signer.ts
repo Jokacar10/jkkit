@@ -36,7 +36,7 @@ export interface WalletInfo {
  * Parameters for creating a new wallet
  */
 export interface CreateWalletParams {
-    /** Unique wallet ID (should be user-scoped externally) */
+    /** Unique wallet ID */
     walletId: string;
     /** Wallet contract version */
     version: 'v5r1' | 'v4r2';
@@ -48,7 +48,7 @@ export interface CreateWalletParams {
  * Parameters for importing a wallet from mnemonic
  */
 export interface ImportWalletParams {
-    /** Unique wallet ID (should be user-scoped externally) */
+    /** Unique wallet ID */
     walletId: string;
     /** 24-word mnemonic phrase (stored securely, never returned) */
     mnemonic: string[];
@@ -64,7 +64,6 @@ export interface ImportWalletParams {
  * Implementations should:
  * - Store keys encrypted (e.g., AES-256-GCM with master key derived via PBKDF2/Argon2)
  * - Never expose private keys or seed phrases through any method
- * - Support user isolation if operating in multi-tenant mode
  */
 export interface ISignerAdapter {
     /**
@@ -95,7 +94,6 @@ export interface ISignerAdapter {
 
     /**
      * List all wallet IDs managed by this adapter.
-     * For user isolation, the wrapper should filter by user prefix.
      *
      * @returns Array of wallet IDs
      */

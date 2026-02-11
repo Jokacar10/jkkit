@@ -16,11 +16,8 @@ export type { IStorageAdapter } from './storage.js';
 // Signer adapter
 export type { ISignerAdapter, WalletInfo, CreateWalletParams, ImportWalletParams } from './signer.js';
 
-// User context provider
-export type { IUserContextProvider, RequestContext } from './user-context.js';
-
 // Contact resolver
 export type { IContactResolver, Contact } from './contacts.js';
 
 // Config
-export type { TonMcpConfig, LimitsConfig } from './config.js';
+export type { TonMcpConfig } from './config.js';

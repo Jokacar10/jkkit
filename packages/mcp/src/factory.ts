@@ -13,7 +13,6 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 import type { TonMcpConfig } from './types/config.js';
-import type { RequestContext } from './types/user-context.js';
 import { McpWalletService } from './services/McpWalletService.js';
 import {
     createMcpWalletTools,
@@ -27,17 +26,9 @@ const SERVER_NAME = 'ton-mcp';
 const SERVER_VERSION = '0.1.0';
 
 /**
- * Tool handler context with authenticated user
- */
-export interface ToolContext {
-    userId: string;
-    requestContext: RequestContext;
-}
-
-/**
  * Create a configured TON Wallet MCP server
  *
- * @param config - Configuration with adapters and limits
+ * @param config - Configuration with adapters
  * @returns Configured McpServer instance
  *
  * @example
@@ -47,15 +38,6 @@ export interface ToolContext {
  * const server = createTonWalletMCP({
  *   storage: new InMemoryStorageAdapter(),
  *   signer: new LocalSignerAdapter(),
- *   userContext: {
- *     getUserId: async (ctx) => ctx.headers?.['x-user-id'] ?? null,
- *   },
- *   limits: {
- *     maxTransactionTon: 100,
- *     dailyLimitTon: 1000,
- *     maxWalletsPerUser: 10,
- *   },
- *   requireConfirmation: true,
  * });
  * ```
  */
@@ -66,8 +48,8 @@ export function createTonWalletMCP(config: TonMcpConfig): McpServer {
         signer: config.signer,
         contacts: config.contacts,
         defaultNetwork: config.network,
-        limits: config.limits,
         requireConfirmation: config.requireConfirmation,
+        networks: config.networks,
     });
 
     // Create MCP server
@@ -76,39 +58,12 @@ export function createTonWalletMCP(config: TonMcpConfig): McpServer {
         version: SERVER_VERSION,
     });
 
-    // Helper to authenticate and get user context
-    const authenticateUser = async (requestContext: RequestContext): Promise<string> => {
-        const userId = await config.userContext.getUserId(requestContext);
-        if (!userId) {
-            throw new Error('User authentication required');
-        }
-        return userId;
-    };
-
-    // Create authenticated tool handler wrapper
-    const createAuthenticatedHandler = <TArgs, TResult>(
-        handler: (args: TArgs, userId: string, walletService: McpWalletService) => Promise<TResult>,
-    ) => {
-        return async (args: TArgs, extra: unknown) => {
-            // Extract request context from extra
-            // In MCP, the request context is typically passed via headers or meta
-            const extraObj = extra as { meta?: Record<string, unknown>; headers?: Record<string, string> } | undefined;
-            const requestContext: RequestContext = {
-                headers: extraObj?.headers,
-                metadata: extraObj?.meta,
-            };
-
-            const userId = await authenticateUser(requestContext);
-            return handler(args, userId, walletService);
-        };
-    };
-
     // Get all tools
-    const walletTools = createMcpWalletTools(walletService, createAuthenticatedHandler);
-    const balanceTools = createMcpBalanceTools(walletService, createAuthenticatedHandler);
-    const transferTools = createMcpTransferTools(walletService, createAuthenticatedHandler);
-    const swapTools = createMcpSwapTools(walletService, createAuthenticatedHandler);
-    const pendingTools = createMcpPendingTools(walletService, createAuthenticatedHandler);
+    const walletTools = createMcpWalletTools(walletService);
+    const balanceTools = createMcpBalanceTools(walletService);
+    const transferTools = createMcpTransferTools(walletService);
+    const swapTools = createMcpSwapTools(walletService);
+    const pendingTools = createMcpPendingTools(walletService);
 
     // Helper to register tools with type assertion (Zod version mismatch workaround)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

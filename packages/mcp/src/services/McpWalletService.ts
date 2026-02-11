@@ -7,15 +7,16 @@
  */
 
 /**
- * McpWalletService - Multi-user wallet service with adapter support
+ * McpWalletService - Single-user wallet service for MCP server
  *
- * This service wraps wallet operations with:
- * - User isolation via UserScopedSigner and UserScopedStorage
- * - Transaction limits via LimitsManager
- * - Confirmation flow via PendingTransactionManager
+ * This service wraps wallet operations using pluggable adapters:
+ * - ISignerAdapter for key management and signing
+ * - IStorageAdapter for metadata and pending transactions
+ * - Optional confirmation flow for transactions
  *
- * Unlike the standalone WalletService, this service is designed for
- * multi-user environments like Telegram bots.
+ * Designed for single-user MCP deployments (e.g., Claude Desktop).
+ * For multi-user scenarios (e.g., Telegram bots), build your own
+ * user-scoping layer on top.
  */
 
 import {
@@ -30,20 +31,9 @@ import {
 import type { Wallet, SwapQuote, SwapQuoteParams, SwapParams, ApiClientConfig } from '@ton/walletkit';
 import { OmnistonSwapProvider } from '@ton/walletkit/swap/omniston';
 
-import type { LimitsConfig } from '../types/config.js';
 import type { IStorageAdapter } from '../types/storage.js';
 import type { ISignerAdapter } from '../types/signer.js';
 import type { IContactResolver } from '../types/contacts.js';
-import { UserScopedStorage } from '../core/UserScopedStorage.js';
-import { UserScopedSigner } from '../core/UserScopedSigner.js';
-import { LimitsManager } from '../core/LimitsManager.js';
-import { PendingTransactionManager } from '../core/PendingTransactionManager.js';
-import type {
-    PendingTransaction,
-    PendingTonTransfer,
-    PendingJettonTransfer,
-    PendingSwap,
-} from '../core/PendingTransactionManager.js';
 
 /**
  * Wallet info returned to tools (no sensitive data)
@@ -159,6 +149,57 @@ export interface NetworkConfig {
 }
 
 /**
+ * Pending transaction types
+ */
+type PendingTransactionType = 'send_ton' | 'send_jetton' | 'swap';
+
+/**
+ * Pending transaction data
+ */
+export interface PendingTransaction {
+    id: string;
+    type: PendingTransactionType;
+    walletName: string;
+    createdAt: string;
+    expiresAt: string;
+    description: string;
+    data: PendingTonTransfer | PendingJettonTransfer | PendingSwap;
+}
+
+interface PendingTonTransfer {
+    type: 'send_ton';
+    toAddress: string;
+    amountNano: string;
+    amountTon: string;
+    comment?: string;
+}
+
+interface PendingJettonTransfer {
+    type: 'send_jetton';
+    toAddress: string;
+    jettonAddress: string;
+    amountRaw: string;
+    amountHuman: string;
+    symbol?: string;
+    decimals: number;
+    comment?: string;
+}
+
+interface PendingSwap {
+    type: 'swap';
+    fromToken: string;
+    toToken: string;
+    fromAmount: string;
+    toAmount: string;
+    minReceived: string;
+    provider: string;
+    quoteJson: string;
+}
+
+/** Default pending transaction TTL in seconds (5 minutes) */
+const PENDING_TTL_SECONDS = 300;
+
+/**
  * Configuration for McpWalletService
  */
 export interface McpWalletServiceConfig {
@@ -166,7 +207,6 @@ export interface McpWalletServiceConfig {
     signer: ISignerAdapter;
     contacts?: IContactResolver;
     defaultNetwork?: 'mainnet' | 'testnet';
-    limits?: LimitsConfig;
     requireConfirmation?: boolean;
     /** Network-specific configuration */
     networks?: {
@@ -176,19 +216,19 @@ export interface McpWalletServiceConfig {
 }
 
 /**
- * McpWalletService manages wallet operations for multi-user MCP deployments.
+ * McpWalletService manages wallet operations for single-user MCP deployments.
  */
 export class McpWalletService {
     private readonly config: McpWalletServiceConfig;
-    private readonly limitsManager: LimitsManager;
-    private readonly pendingManager: PendingTransactionManager;
+    private readonly signer: ISignerAdapter;
+    private readonly storage: IStorageAdapter;
     private kit: TonWalletKit | null = null;
     private loadedWallets: Map<string, Wallet> = new Map();
 
     constructor(config: McpWalletServiceConfig) {
         this.config = config;
-        this.limitsManager = new LimitsManager(config.limits);
-        this.pendingManager = new PendingTransactionManager();
+        this.signer = config.signer;
+        this.storage = config.storage;
     }
 
     /**
@@ -235,34 +275,6 @@ export class McpWalletService {
     }
 
     /**
-     * Create user-scoped storage wrapper
-     */
-    createUserStorage(userId: string): UserScopedStorage {
-        return new UserScopedStorage(this.config.storage, userId);
-    }
-
-    /**
-     * Create user-scoped signer wrapper
-     */
-    createUserSigner(userId: string): UserScopedSigner {
-        return new UserScopedSigner(this.config.signer, userId);
-    }
-
-    /**
-     * Get limits manager
-     */
-    getLimitsManager(): LimitsManager {
-        return this.limitsManager;
-    }
-
-    /**
-     * Get pending transaction manager
-     */
-    getPendingManager(): PendingTransactionManager {
-        return this.pendingManager;
-    }
-
-    /**
      * Check if confirmation is required
      */
     requiresConfirmation(): boolean {
@@ -270,113 +282,99 @@ export class McpWalletService {
     }
 
     /**
-     * Create a new wallet for a user
+     * Create a new wallet
      */
     async createWallet(
-        userSigner: UserScopedSigner,
-        userStorage: UserScopedStorage,
         name: string,
         version: 'v5r1' | 'v4r2' = 'v5r1',
         networkName: 'mainnet' | 'testnet' = this.config.defaultNetwork ?? 'mainnet',
     ): Promise<CreateWalletResult> {
-        // Check wallet count limit
-        const existingWallets = await userSigner.listWallets();
-        const limitCheck = await this.limitsManager.checkWalletCountLimit(existingWallets.length);
-        if (!limitCheck.allowed) {
-            throw new Error(limitCheck.reason);
-        }
-
-        // Create wallet via signer
-        const walletInfo = await userSigner.createWallet({
-            name,
+        const walletInfo = await this.signer.createWallet({
+            walletId: name,
             version,
             network: networkName,
         });
 
-        // Store metadata in user storage
+        // Store metadata
         const metadata: McpWalletInfo = {
-            name: walletInfo.name,
+            name,
             address: walletInfo.address,
             network: walletInfo.network,
             version: walletInfo.version,
             createdAt: walletInfo.createdAt,
         };
-        await userStorage.set(`wallet:${name}`, metadata);
+        await this.storage.set(`wallet:${name}`, metadata);
 
-        // Return result WITHOUT mnemonic
         return {
-            name: walletInfo.name,
+            name,
             address: walletInfo.address,
             network: walletInfo.network,
         };
     }
 
     /**
-     * Import a wallet for a user
+     * Import a wallet from mnemonic
      */
     async importWallet(
-        userSigner: UserScopedSigner,
-        userStorage: UserScopedStorage,
         name: string,
         mnemonic: string[],
         version: 'v5r1' | 'v4r2' = 'v5r1',
         networkName: 'mainnet' | 'testnet' = this.config.defaultNetwork ?? 'mainnet',
     ): Promise<ImportWalletResult> {
-        // Check wallet count limit
-        const existingWallets = await userSigner.listWallets();
-        const limitCheck = await this.limitsManager.checkWalletCountLimit(existingWallets.length);
-        if (!limitCheck.allowed) {
-            throw new Error(limitCheck.reason);
-        }
-
-        // Import wallet via signer (mnemonic stored securely, never returned)
-        const walletInfo = await userSigner.importWallet({
-            name,
+        const walletInfo = await this.signer.importWallet({
+            walletId: name,
             mnemonic,
             version,
             network: networkName,
         });
 
-        // Store metadata in user storage
+        // Store metadata
         const metadata: McpWalletInfo = {
-            name: walletInfo.name,
+            name,
             address: walletInfo.address,
             network: walletInfo.network,
             version: walletInfo.version,
             createdAt: walletInfo.createdAt,
         };
-        await userStorage.set(`wallet:${name}`, metadata);
+        await this.storage.set(`wallet:${name}`, metadata);
 
         return {
-            name: walletInfo.name,
+            name,
             address: walletInfo.address,
             network: walletInfo.network,
         };
     }
 
     /**
-     * List all wallets for a user
+     * List all wallets
      */
-    async listWallets(userSigner: UserScopedSigner): Promise<McpWalletInfo[]> {
-        const wallets = await userSigner.listWallets();
-        return wallets.map((w) => ({
-            name: w.name,
-            address: w.address,
-            network: w.network,
-            version: w.version,
-            createdAt: w.createdAt,
-        }));
+    async listWallets(): Promise<McpWalletInfo[]> {
+        const walletIds = await this.signer.listWalletIds();
+        const wallets: McpWalletInfo[] = [];
+
+        for (const walletId of walletIds) {
+            const wallet = await this.signer.getWallet(walletId);
+            if (wallet) {
+                wallets.push({
+                    name: walletId,
+                    address: wallet.address,
+                    network: wallet.network,
+                    version: wallet.version,
+                    createdAt: wallet.createdAt,
+                });
+            }
+        }
+
+        return wallets;
     }
 
     /**
-     * Remove a wallet for a user
+     * Remove a wallet
      */
-    async removeWallet(userSigner: UserScopedSigner, userStorage: UserScopedStorage, name: string): Promise<boolean> {
-        // Delete from signer
-        const deleted = await userSigner.deleteWallet(name);
+    async removeWallet(name: string): Promise<boolean> {
+        const deleted = await this.signer.deleteWallet(name);
         if (deleted) {
-            // Delete metadata
-            await userStorage.delete(`wallet:${name}`);
+            await this.storage.delete(`wallet:${name}`);
         }
         return deleted;
     }
@@ -384,8 +382,8 @@ export class McpWalletService {
     /**
      * Get or load a wallet for balance/transfer operations
      */
-    private async getWalletForOperations(userSigner: UserScopedSigner, name: string): Promise<Wallet> {
-        const walletInfo = await userSigner.getWallet(name);
+    private async getWalletForOperations(name: string): Promise<Wallet> {
+        const walletInfo = await this.signer.getWallet(name);
         if (!walletInfo) {
             throw new Error('Wallet not found');
         }
@@ -398,10 +396,8 @@ export class McpWalletService {
             return this.loadedWallets.get(walletId)!;
         }
 
-        // We need to load the wallet into TonWalletKit
-        // This requires access to the mnemonic, which is stored in the signer
-        // The LocalSignerAdapter has a method to get the loaded wallet
-        const signer = userSigner.getUnderlyingSigner() as {
+        // Try to get loaded wallet from signer
+        const signer = this.signer as {
             getLoadedWallet?(walletId: string): Promise<Wallet>;
             getStoredWallet?(walletId: string):
                 | {
@@ -411,19 +407,15 @@ export class McpWalletService {
                 | undefined;
         };
 
-        // Try to get loaded wallet from signer
         if (typeof signer.getLoadedWallet === 'function') {
-            const scopedId = `${userSigner.getUserId()}:${name}`;
-            const wallet = await signer.getLoadedWallet(scopedId);
+            const wallet = await signer.getLoadedWallet(name);
             this.loadedWallets.set(walletId, wallet);
             return wallet;
         }
 
-        // Fallback: need to reconstruct the wallet
-        // This requires the mnemonic from the signer
+        // Fallback: reconstruct the wallet from stored mnemonic
         if (typeof signer.getStoredWallet === 'function') {
-            const scopedId = `${userSigner.getUserId()}:${name}`;
-            const storedWallet = signer.getStoredWallet(scopedId);
+            const storedWallet = signer.getStoredWallet(name);
             if (storedWallet) {
                 const kit = await this.getKit();
                 const signerInstance = await Signer.fromMnemonic(storedWallet.mnemonic, { type: 'ton' });
@@ -458,24 +450,24 @@ export class McpWalletService {
     /**
      * Get TON balance
      */
-    async getBalance(userSigner: UserScopedSigner, walletName: string): Promise<string> {
-        const wallet = await this.getWalletForOperations(userSigner, walletName);
+    async getBalance(walletName: string): Promise<string> {
+        const wallet = await this.getWalletForOperations(walletName);
         return wallet.getBalance();
     }
 
     /**
      * Get Jetton balance
      */
-    async getJettonBalance(userSigner: UserScopedSigner, walletName: string, jettonAddress: string): Promise<string> {
-        const wallet = await this.getWalletForOperations(userSigner, walletName);
+    async getJettonBalance(walletName: string, jettonAddress: string): Promise<string> {
+        const wallet = await this.getWalletForOperations(walletName);
         return wallet.getJettonBalance(jettonAddress);
     }
 
     /**
      * Get all Jettons
      */
-    async getJettons(userSigner: UserScopedSigner, walletName: string): Promise<JettonInfoResult[]> {
-        const wallet = await this.getWalletForOperations(userSigner, walletName);
+    async getJettons(walletName: string): Promise<JettonInfoResult[]> {
+        const wallet = await this.getWalletForOperations(walletName);
         const jettonsResponse = await wallet.getJettons({ pagination: { limit: 100, offset: 0 } });
 
         return jettonsResponse.jettons.map((j) => ({
@@ -488,17 +480,10 @@ export class McpWalletService {
     }
 
     /**
-     * Get transaction history for a wallet
+     * Get transaction history using events API
      */
-    /**
-     * Get transaction history using events API (like demo wallet)
-     */
-    async getTransactions(
-        userSigner: UserScopedSigner,
-        walletName: string,
-        limit: number = 20,
-    ): Promise<TransactionInfo[]> {
-        const wallet = await this.getWalletForOperations(userSigner, walletName);
+    async getTransactions(walletName: string, limit: number = 20): Promise<TransactionInfo[]> {
+        const wallet = await this.getWalletForOperations(walletName);
         const address = wallet.getAddress();
         const client = wallet.getClient();
 
@@ -590,23 +575,15 @@ export class McpWalletService {
      * Send TON (with optional confirmation flow)
      */
     async sendTon(
-        userSigner: UserScopedSigner,
-        userStorage: UserScopedStorage,
         walletName: string,
         toAddress: string,
         amountNano: string,
         amountTon: string,
         comment?: string,
     ): Promise<TransferResult> {
-        // Check limits
-        const limitCheck = await this.limitsManager.checkTransactionLimit(userStorage, parseFloat(amountTon));
-        if (!limitCheck.allowed) {
-            return { success: false, message: limitCheck.reason! };
-        }
-
         // If confirmation required, create pending transaction
         if (this.requiresConfirmation()) {
-            const pending = await this.pendingManager.createPending(userStorage, {
+            const pending = await this.createPending({
                 type: 'send_ton',
                 walletName,
                 description: `Send ${amountTon} TON to ${toAddress}${comment ? ` (${comment})` : ''}`,
@@ -627,22 +604,20 @@ export class McpWalletService {
         }
 
         // Execute immediately
-        return this.executeTonTransfer(userSigner, userStorage, walletName, toAddress, amountNano, comment);
+        return this.executeTonTransfer(walletName, toAddress, amountNano, comment);
     }
 
     /**
      * Execute TON transfer (internal)
      */
-    async executeTonTransfer(
-        userSigner: UserScopedSigner,
-        userStorage: UserScopedStorage,
+    private async executeTonTransfer(
         walletName: string,
         toAddress: string,
         amountNano: string,
         comment?: string,
     ): Promise<TransferResult> {
         try {
-            const wallet = await this.getWalletForOperations(userSigner, walletName);
+            const wallet = await this.getWalletForOperations(walletName);
 
             const tx = await wallet.createTransferTonTransaction({
                 recipientAddress: toAddress,
@@ -651,10 +626,6 @@ export class McpWalletService {
             });
 
             await wallet.sendTransaction(tx);
-
-            // Record for daily limit
-            const amountTon = Number(BigInt(amountNano)) / 1e9;
-            await this.limitsManager.recordTransaction(userStorage, amountTon);
 
             return {
                 success: true,
@@ -672,8 +643,6 @@ export class McpWalletService {
      * Send Jetton (with optional confirmation flow)
      */
     async sendJetton(
-        userSigner: UserScopedSigner,
-        userStorage: UserScopedStorage,
         walletName: string,
         toAddress: string,
         jettonAddress: string,
@@ -685,7 +654,7 @@ export class McpWalletService {
     ): Promise<TransferResult> {
         // If confirmation required, create pending transaction
         if (this.requiresConfirmation()) {
-            const pending = await this.pendingManager.createPending(userStorage, {
+            const pending = await this.createPending({
                 type: 'send_jetton',
                 walletName,
                 description: `Send ${amountHuman} ${symbol ?? 'tokens'} to ${toAddress}${comment ? ` (${comment})` : ''}`,
@@ -709,14 +678,13 @@ export class McpWalletService {
         }
 
         // Execute immediately
-        return this.executeJettonTransfer(userSigner, walletName, toAddress, jettonAddress, amountRaw, comment);
+        return this.executeJettonTransfer(walletName, toAddress, jettonAddress, amountRaw, comment);
     }
 
     /**
      * Execute Jetton transfer (internal)
      */
-    async executeJettonTransfer(
-        userSigner: UserScopedSigner,
+    private async executeJettonTransfer(
         walletName: string,
         toAddress: string,
         jettonAddress: string,
@@ -724,7 +692,7 @@ export class McpWalletService {
         comment?: string,
     ): Promise<TransferResult> {
         try {
-            const wallet = await this.getWalletForOperations(userSigner, walletName);
+            const wallet = await this.getWalletForOperations(walletName);
 
             const tx = await wallet.createTransferJettonTransaction({
                 recipientAddress: toAddress,
@@ -751,14 +719,13 @@ export class McpWalletService {
      * Get swap quote
      */
     async getSwapQuote(
-        userSigner: UserScopedSigner,
         walletName: string,
         fromToken: string,
         toToken: string,
         amount: string,
         slippageBps?: number,
     ): Promise<SwapQuoteResult> {
-        const walletInfo = await userSigner.getWallet(walletName);
+        const walletInfo = await this.signer.getWallet(walletName);
         if (!walletInfo) {
             throw new Error('Wallet not found');
         }
@@ -791,15 +758,10 @@ export class McpWalletService {
     /**
      * Execute swap (with optional confirmation flow)
      */
-    async executeSwap(
-        userSigner: UserScopedSigner,
-        userStorage: UserScopedStorage,
-        walletName: string,
-        quote: SwapQuote,
-    ): Promise<SwapResult> {
+    async executeSwap(walletName: string, quote: SwapQuote): Promise<SwapResult> {
         // If confirmation required, create pending transaction
         if (this.requiresConfirmation()) {
-            const pending = await this.pendingManager.createPending(userStorage, {
+            const pending = await this.createPending({
                 type: 'swap',
                 walletName,
                 description: `Swap ${quote.fromAmount} ${quote.fromToken} for ${quote.toAmount} ${quote.toToken}`,
@@ -823,23 +785,20 @@ export class McpWalletService {
         }
 
         // Execute immediately
-        return this.executeSwapInternal(userSigner, walletName, quote);
+        return this.executeSwapInternal(walletName, quote);
     }
 
     /**
      * Execute swap (internal)
      */
-    async executeSwapInternal(userSigner: UserScopedSigner, walletName: string, quote: SwapQuote): Promise<SwapResult> {
+    private async executeSwapInternal(walletName: string, quote: SwapQuote): Promise<SwapResult> {
         try {
-            const [wallet, kit, walletInfo] = await Promise.all([
-                this.getWalletForOperations(userSigner, walletName),
-                this.getKit(),
-                userSigner.getWallet(walletName),
-            ]);
-
+            const walletInfo = await this.signer.getWallet(walletName);
             if (!walletInfo) {
                 throw new Error('Wallet not found');
             }
+
+            const [wallet, kit] = await Promise.all([this.getWalletForOperations(walletName), this.getKit()]);
 
             const params: SwapParams = {
                 quote,
@@ -864,12 +823,8 @@ export class McpWalletService {
     /**
      * Confirm a pending transaction
      */
-    async confirmTransaction(
-        userSigner: UserScopedSigner,
-        userStorage: UserScopedStorage,
-        transactionId: string,
-    ): Promise<TransferResult | SwapResult> {
-        const pending = await this.pendingManager.confirmPending(userStorage, transactionId);
+    async confirmTransaction(transactionId: string): Promise<TransferResult | SwapResult> {
+        const pending = await this.confirmPending(transactionId);
         if (!pending) {
             return { success: false, message: 'Transaction not found or expired' };
         }
@@ -877,19 +832,11 @@ export class McpWalletService {
         switch (pending.data.type) {
             case 'send_ton': {
                 const data = pending.data as PendingTonTransfer;
-                return this.executeTonTransfer(
-                    userSigner,
-                    userStorage,
-                    pending.walletName,
-                    data.toAddress,
-                    data.amountNano,
-                    data.comment,
-                );
+                return this.executeTonTransfer(pending.walletName, data.toAddress, data.amountNano, data.comment);
             }
             case 'send_jetton': {
                 const data = pending.data as PendingJettonTransfer;
                 return this.executeJettonTransfer(
-                    userSigner,
                     pending.walletName,
                     data.toAddress,
                     data.jettonAddress,
@@ -900,7 +847,7 @@ export class McpWalletService {
             case 'swap': {
                 const data = pending.data as PendingSwap;
                 const quote = JSON.parse(data.quoteJson) as SwapQuote;
-                return this.executeSwapInternal(userSigner, pending.walletName, quote);
+                return this.executeSwapInternal(pending.walletName, quote);
             }
             default:
                 return { success: false, message: 'Unknown transaction type' };
@@ -910,25 +857,40 @@ export class McpWalletService {
     /**
      * Cancel a pending transaction
      */
-    async cancelTransaction(userStorage: UserScopedStorage, transactionId: string): Promise<boolean> {
-        return this.pendingManager.cancelPending(userStorage, transactionId);
+    async cancelTransaction(transactionId: string): Promise<boolean> {
+        const pending = await this.getPending(transactionId);
+        if (!pending) {
+            return false;
+        }
+        return this.storage.delete(`pending:${transactionId}`);
     }
 
     /**
      * List pending transactions
      */
-    async listPendingTransactions(userStorage: UserScopedStorage): Promise<PendingTransaction[]> {
-        return this.pendingManager.listPending(userStorage);
+    async listPendingTransactions(): Promise<PendingTransaction[]> {
+        const keys = await this.storage.list('pending:');
+        const now = new Date();
+        const transactions: PendingTransaction[] = [];
+
+        for (const key of keys) {
+            const pending = await this.storage.get<PendingTransaction>(key);
+            if (pending && new Date(pending.expiresAt) >= now) {
+                transactions.push(pending);
+            }
+        }
+
+        return transactions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
 
     /**
      * Resolve contact name to address
      */
-    async resolveContact(userId: string, name: string): Promise<string | null> {
+    async resolveContact(name: string): Promise<string | null> {
         if (!this.config.contacts) {
             return null;
         }
-        return this.config.contacts.resolve(userId, name);
+        return this.config.contacts.resolve('default', name);
     }
 
     /**
@@ -940,5 +902,54 @@ export class McpWalletService {
             this.kit = null;
         }
         this.loadedWallets.clear();
+    }
+
+    // ============================================
+    // Pending transaction helpers (internal)
+    // ============================================
+
+    private async createPending(params: {
+        type: PendingTransactionType;
+        walletName: string;
+        description: string;
+        data: PendingTonTransfer | PendingJettonTransfer | PendingSwap;
+    }): Promise<PendingTransaction> {
+        const id = `tx_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+        const now = new Date();
+        const expiresAt = new Date(now.getTime() + PENDING_TTL_SECONDS * 1000);
+
+        const pending: PendingTransaction = {
+            id,
+            type: params.type,
+            walletName: params.walletName,
+            createdAt: now.toISOString(),
+            expiresAt: expiresAt.toISOString(),
+            description: params.description,
+            data: params.data,
+        };
+
+        await this.storage.set(`pending:${id}`, pending, PENDING_TTL_SECONDS);
+        return pending;
+    }
+
+    private async getPending(transactionId: string): Promise<PendingTransaction | null> {
+        const pending = await this.storage.get<PendingTransaction>(`pending:${transactionId}`);
+        if (!pending) {
+            return null;
+        }
+        if (new Date(pending.expiresAt) < new Date()) {
+            await this.storage.delete(`pending:${transactionId}`);
+            return null;
+        }
+        return pending;
+    }
+
+    private async confirmPending(transactionId: string): Promise<PendingTransaction | null> {
+        const pending = await this.getPending(transactionId);
+        if (!pending) {
+            return null;
+        }
+        await this.storage.delete(`pending:${transactionId}`);
+        return pending;
     }
 }

@@ -7,7 +7,7 @@
  */
 
 /**
- * Example adapter exports
+ * Adapter exports
  */
 
 // Storage adapters
@@ -19,7 +19,3 @@ export type { SqliteDatabase, SqliteStorageConfig } from './SqliteStorageAdapter
 export { LocalSignerAdapter } from './LocalSignerAdapter.js';
 export { SqliteSignerAdapter } from './SqliteSignerAdapter.js';
 export type { SqliteSignerConfig } from './SqliteSignerAdapter.js';
-
-// User context providers
-export { TelegramUserContextProvider, StaticUserContextProvider } from './TelegramUserContextProvider.js';
-export type { TelegramUserContextConfig } from './TelegramUserContextProvider.js';

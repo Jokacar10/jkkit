@@ -415,7 +415,7 @@ export class SqliteSignerAdapter implements ISignerAdapter {
 
     /**
      * Get TonWalletKit instance for direct wallet operations
-     * Used by WalletService for balance/transfer operations
+     * Used by McpWalletService for balance/transfer operations
      */
     async getKitInstance(): Promise<TonWalletKit> {
         return this.getKit();
@@ -423,7 +423,7 @@ export class SqliteSignerAdapter implements ISignerAdapter {
 
     /**
      * Get a loaded wallet by ID for direct operations
-     * Used by WalletService for balance/transfer operations
+     * Used by McpWalletService for balance/transfer operations
      */
     async getLoadedWallet(walletId: string): Promise<Wallet> {
         return this.getWalletForSigning(walletId);
@@ -431,7 +431,7 @@ export class SqliteSignerAdapter implements ISignerAdapter {
 
     /**
      * Get stored wallet data (internal use only)
-     * Returns mnemonic for internal operations (like McpWalletService)
+     * Returns mnemonic for internal operations (used by McpWalletService)
      */
     getStoredWallet(walletId: string): { mnemonic: string[]; version: 'v5r1' | 'v4r2' } | undefined {
         const row = this.db

@@ -17,9 +17,8 @@
 
 import type { Context } from 'grammy';
 import { Bot } from 'grammy';
-import type { McpWalletService, SqliteStorageAdapter, SqliteSignerAdapter } from '@ton/mcp';
-import { UserScopedStorage, UserScopedSigner } from '@ton/mcp';
 
+import type { UserServiceFactory } from './core/UserServiceFactory.js';
 import type { LLMService } from './services/LLMService.js';
 import type { ProfileService } from './services/ProfileService.js';
 import { createToolDefinitions } from './tools/definitions.js';
@@ -146,9 +145,7 @@ Helpful, direct, competent. Like a friend who's good with crypto — not a custo
  */
 export interface BotConfig {
     token: string;
-    walletService: McpWalletService;
-    storageAdapter: SqliteStorageAdapter;
-    signerAdapter: SqliteSignerAdapter;
+    userServiceFactory: UserServiceFactory;
     llmService: LLMService;
     profileService: ProfileService;
     defaultNetwork: 'mainnet' | 'testnet';
@@ -224,22 +221,14 @@ async function handleStart(ctx: Context, config: BotConfig): Promise<void> {
     }
 
     try {
-        // Check if user has a wallet
-        const userSigner = new UserScopedSigner(config.signerAdapter, `tg:${userId}`);
-        const wallets = await config.walletService.listWallets(userSigner);
+        const service = config.userServiceFactory.getService(`tg:${userId}`);
+        const wallets = await service.listWallets();
 
         let walletAddress: string;
 
         if (wallets.length === 0) {
             // Create a wallet for the user
-            const userStorage = new UserScopedStorage(config.storageAdapter, `tg:${userId}`);
-            const result = await config.walletService.createWallet(
-                userSigner,
-                userStorage,
-                DEFAULT_WALLET_NAME,
-                'v5r1',
-                config.defaultNetwork,
-            );
+            const result = await service.createWallet(DEFAULT_WALLET_NAME, 'v5r1', config.defaultNetwork);
             walletAddress = result.address;
 
             // Create/update profile
@@ -304,20 +293,12 @@ async function handleMessage(ctx: Context, config: BotConfig): Promise<void> {
     }
 
     try {
-        // Ensure user has a wallet
-        const userSigner = new UserScopedSigner(config.signerAdapter, `tg:${userId}`);
-        const userStorage = new UserScopedStorage(config.storageAdapter, `tg:${userId}`);
-        const wallets = await config.walletService.listWallets(userSigner);
+        const service = config.userServiceFactory.getService(`tg:${userId}`);
+        const wallets = await service.listWallets();
 
         if (wallets.length === 0) {
             // Auto-create wallet for new users
-            const result = await config.walletService.createWallet(
-                userSigner,
-                userStorage,
-                DEFAULT_WALLET_NAME,
-                'v5r1',
-                config.defaultNetwork,
-            );
+            const result = await service.createWallet(DEFAULT_WALLET_NAME, 'v5r1', config.defaultNetwork);
 
             // Create profile
             config.profileService.createOrUpdateProfile(userId, result.address, username, firstName);
@@ -331,9 +312,7 @@ async function handleMessage(ctx: Context, config: BotConfig): Promise<void> {
 
         // Create tool context for this user
         const toolContext = {
-            walletService: config.walletService,
-            userSigner,
-            userStorage,
+            walletService: service,
             profileService: config.profileService,
             walletName: DEFAULT_WALLET_NAME,
         };
