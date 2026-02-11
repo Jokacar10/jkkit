@@ -6,14 +6,13 @@
  *
  */
 
-import type { TokenAmount } from '@ton/walletkit';
-
 import type { AppKit } from '../../core/app-kit';
 import { getBalanceByAddress } from '../../actions/balances/get-balance-by-address';
 import type { GetBalanceByAddressOptions } from '../../actions/balances/get-balance-by-address';
 import type { QueryOptions, QueryParameter } from '../../types/query';
 import type { Compute, ExactPartial } from '../../types/utils';
 import { filterQueryOptions } from '../../utils';
+import type { GetBalanceByAddressReturnType } from '../../actions/balances/get-balance-by-address';
 
 export type GetBalanceErrorType = Error;
 
@@ -41,7 +40,7 @@ export const getBalanceByAddressQueryOptions = <selectData = GetBalanceByAddress
     };
 };
 
-export type GetBalanceQueryFnData = Compute<TokenAmount | null>;
+export type GetBalanceQueryFnData = Compute<Awaited<GetBalanceByAddressReturnType>>;
 
 export const getBalanceByAddressQueryKey = (
     options: Compute<ExactPartial<GetBalanceByAddressOptions>> = {},

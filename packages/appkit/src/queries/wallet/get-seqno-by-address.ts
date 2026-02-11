@@ -12,6 +12,7 @@ import type { GetSeqnoOptions } from '../../actions/wallet/get-seqno';
 import type { QueryOptions, QueryParameter } from '../../types/query';
 import type { Compute, ExactPartial } from '../../types/utils';
 import { filterQueryOptions } from '../../utils';
+import type { GetSeqnoReturnType } from '../../actions/wallet/get-seqno';
 
 export type GetSeqnoErrorType = Error;
 
@@ -38,7 +39,7 @@ export const getSeqnoByAddressQueryOptions = <selectData = GetSeqnoByAddressData
     };
 };
 
-export type GetSeqnoQueryFnData = Compute<number | null>;
+export type GetSeqnoQueryFnData = Compute<Awaited<GetSeqnoReturnType>>;
 
 export const getSeqnoByAddressQueryKey = (
     options: Compute<ExactPartial<GetSeqnoOptions>> = {},

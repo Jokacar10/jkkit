@@ -6,14 +6,13 @@
  *
  */
 
-import type { JettonsResponse } from '@ton/walletkit';
-
 import type { AppKit } from '../../core/app-kit';
 import { getJettonsByAddress } from '../../actions/balances/get-jettons-by-address';
 import type { GetJettonsByAddressOptions } from '../../actions/balances/get-jettons-by-address';
 import type { QueryOptions, QueryParameter } from '../../types/query';
 import type { Compute, ExactPartial } from '../../types/utils';
 import { filterQueryOptions } from '../../utils';
+import type { GetJettonsByAddressReturnType } from '../../actions/balances/get-jettons-by-address';
 
 export type GetJettonsErrorType = Error;
 
@@ -42,7 +41,7 @@ export const getJettonsByAddressQueryOptions = <selectData = GetJettonsByAddress
     };
 };
 
-export type GetJettonsQueryFnData = Compute<JettonsResponse>;
+export type GetJettonsQueryFnData = Compute<Awaited<GetJettonsByAddressReturnType>>;
 
 export const getJettonsByAddressQueryKey = (
     options: Compute<ExactPartial<GetJettonsByAddressOptions>> = {},

@@ -6,14 +6,13 @@
  *
  */
 
-import type { NFTsResponse } from '@ton/walletkit';
-
 import type { AppKit } from '../../core/app-kit';
 import { getNftsByAddress } from '../../actions/nft/get-nfts-by-address';
 import type { GetNftsByAddressOptions } from '../../actions/nft/get-nfts-by-address';
 import type { QueryOptions, QueryParameter } from '../../types/query';
 import type { Compute, ExactPartial } from '../../types/utils';
 import { filterQueryOptions } from '../../utils';
+import type { GetNftsByAddressReturnType } from '../../actions/nft/get-nfts-by-address';
 
 export type GetNFTsErrorType = Error;
 
@@ -42,7 +41,7 @@ export const getNFTsByAddressQueryOptions = <selectData = GetNFTsByAddressData>(
     };
 };
 
-export type GetNFTsQueryFnData = Compute<NFTsResponse>;
+export type GetNFTsQueryFnData = Compute<Awaited<GetNftsByAddressReturnType>>;
 
 export const getNFTsByAddressQueryKey = (
     options: Compute<ExactPartial<GetNftsByAddressOptions>> = {},
