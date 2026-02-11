@@ -10,6 +10,7 @@ import React, { useEffect } from 'react';
 import { AppKitProvider } from '@ton/appkit-ui-react';
 import { useTonConnectUI } from '@tonconnect/ui-react';
 import { TonConnectConnector } from '@ton/appkit/tonconnect';
+import { addConnector } from '@ton/appkit';
 
 import { appKit } from '../services/app-kit';
 
@@ -24,11 +25,7 @@ export const AppKitBridge: React.FC<AppKitBridgeProps> = ({ children }) => {
     useEffect(() => {
         if (!tonConnectUI) return;
 
-        const unregister = appKit.addConnector(
-            new TonConnectConnector({
-                tonConnect: tonConnectUI,
-            }),
-        );
+        const unregister = addConnector(appKit, new TonConnectConnector({ tonConnect: tonConnectUI }));
 
         return unregister;
     }, [tonConnectUI]);

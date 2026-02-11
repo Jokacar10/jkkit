@@ -9,7 +9,6 @@
 import type { PropsWithChildren } from 'react';
 import { createContext } from 'react';
 import type { AppKit } from '@ton/appkit';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { I18nProvider } from './i18n-provider';
 
@@ -19,14 +18,10 @@ export interface AppKitProviderProps extends PropsWithChildren {
     appKit: AppKit;
 }
 
-const queryClient = new QueryClient();
-
 export function AppKitProvider({ appKit, children }: AppKitProviderProps) {
     return (
         <AppKitContext.Provider value={appKit}>
-            <QueryClientProvider client={queryClient}>
-                <I18nProvider>{children}</I18nProvider>
-            </QueryClientProvider>
+            <I18nProvider>{children}</I18nProvider>
         </AppKitContext.Provider>
     );
 }
