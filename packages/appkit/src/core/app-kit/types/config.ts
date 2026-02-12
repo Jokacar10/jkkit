@@ -9,6 +9,7 @@
 import type { NetworkAdapters } from '@ton/walletkit';
 
 import type { Connector } from '../../../types/connector';
+import type { Provider } from '../../../types/provider';
 
 /**
  * Configuration for AppKit
@@ -23,4 +24,5 @@ export interface AppKitConfig {
      */
     networks?: NetworkAdapters;
     connectors?: Connector[];
+    providers?: Provider[];
 }

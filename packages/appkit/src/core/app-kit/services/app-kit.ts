@@ -8,6 +8,7 @@
 
 import type { NetworkManager } from '@ton/walletkit';
 import { Network, SwapManager } from '@ton/walletkit';
+import type { Provider } from 'src/types/provider';
 
 import type { AppKitConfig } from '../types/config';
 import type { Connector } from '../../../types/connector';
@@ -52,6 +53,12 @@ export class AppKit {
                 this.addConnector(connector);
             });
         }
+
+        if (config.providers) {
+            config.providers.forEach((provider) => {
+                this.registerProvider(provider);
+            });
+        }
     }
 
     /**
@@ -83,6 +90,19 @@ export class AppKit {
         if (oldConnector) {
             oldConnector.destroy();
             this.connectors.splice(this.connectors.indexOf(oldConnector), 1);
+        }
+    }
+
+    /**
+     * Add a provider
+     */
+    registerProvider(provider: Provider): void {
+        switch (provider.type) {
+            case 'swap':
+                this.swapManager.registerProvider(provider);
+                break;
+            default:
+                throw new Error('Unknown provider type');
         }
     }
 

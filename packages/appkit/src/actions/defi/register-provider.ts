@@ -6,21 +6,14 @@
  *
  */
 
-import type { SwapProviderInterface } from '@ton/walletkit';
-
+import type { Provider } from '../../types/provider';
 import type { AppKit } from '../../core/app-kit';
 
-export type RegisterProviderOptions = SwapProviderInterface;
+export type RegisterProviderOptions = Provider;
 
 /**
  * Register provider
  */
 export const registerProvider = (appKit: AppKit, provider: RegisterProviderOptions): void => {
-    switch (provider.type) {
-        case 'swap':
-            appKit.swapManager.registerProvider(provider);
-            break;
-        default:
-            throw new Error('Unknown provider type');
-    }
+    appKit.registerProvider(provider);
 };
