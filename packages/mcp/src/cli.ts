@@ -36,7 +36,6 @@ import {
     WalletV4R2Adapter,
     MemoryStorageAdapter,
     Network,
-    CreateTonMnemonic,
 } from '@ton/walletkit';
 import type { Wallet, ApiClientConfig } from '@ton/walletkit';
 
@@ -105,11 +104,14 @@ async function createWalletAndServer(): Promise<{
         }
         log('Using provided mnemonic');
     } else {
-        mnemonic = await CreateTonMnemonic();
-        log('Generated new wallet');
-        log('IMPORTANT: Save this mnemonic to restore your wallet:');
-        log(`MNEMONIC="${mnemonic.join(' ')}"`);
+        throw new Error('MNEMONIC is required');
     }
+    //  else {
+    //     mnemonic = await CreateTonMnemonic();
+    //     log('Generated new wallet');
+    //     log('IMPORTANT: Save this mnemonic to restore your wallet:');
+    //     log(`MNEMONIC="${mnemonic.join(' ')}"`);
+    // }
 
     // Create signer and wallet adapter
     const signer = await Signer.fromMnemonic(mnemonic, { type: 'ton' });
