@@ -6,7 +6,7 @@
  *
  */
 
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import type { TonConnectUIProviderProps } from '@tonconnect/ui-react';
@@ -31,16 +31,10 @@ export const TonConnectBridge: FC<PropsWithChildren<TonConnectBridgeProps>> = ({
     ...props
 }) => {
     const connector = useConnectorById(connectorId) as TonConnectConnector | undefined;
-    const [tonConnectUI, setTonConnectUI] = useState(connector?.tonConnectUI);
-
-    useEffect(() => {
-        if (connector) {
-            setTonConnectUI(connector.tonConnectUI);
-        }
-    }, [connector]);
+    const tonConnectUI = useMemo(() => connector?.tonConnectUI, [connector]);
 
     if (!tonConnectUI) {
-        return null;
+        throw new Error('TonConnectUI not found');
     }
 
     return (
