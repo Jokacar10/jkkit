@@ -57,3 +57,47 @@ Watch for changes in available connectors (e.g., when a wallet connects).
 Watch for changes in a specific connector.
 
 %%demo/examples/src/appkit/actions/connectors#WATCH_CONNECTOR_BY_ID%%
+
+## Jettons
+
+### `getJettons`
+
+Get all jettons owned by the currently selected wallet.
+
+%%demo/examples/src/appkit/actions/jettons#GET_JETTONS%%
+
+### `getJettonsByAddress`
+
+Get all jettons owned by a specific address.
+
+%%demo/examples/src/appkit/actions/jettons#GET_JETTONS_BY_ADDRESS%%
+
+### `getJettonBalance`
+
+Get the balance of a specific jetton for a wallet address.
+
+%%demo/examples/src/appkit/actions/jettons#GET_JETTON_BALANCE%%
+
+### `getJettonInfo`
+
+Get information about a specific jetton by its address.
+
+%%demo/examples/src/appkit/actions/jettons#GET_JETTON_INFO%%
+
+### `getJettonWalletAddress`
+
+Get the jetton wallet address for a specific jetton and owner address.
+
+%%demo/examples/src/appkit/actions/jettons#GET_JETTON_WALLET_ADDRESS%%
+
+### `createTransferJettonTransaction`
+
+Create a transaction for transferring jettons without sending it.
+
+%%demo/examples/src/appkit/actions/jettons#CREATE_TRANSFER_JETTON_TRANSACTION%%
+
+### `transferJetton`
+
+Transfer jettons to a recipient address.
+
+%%demo/examples/src/appkit/actions/jettons#TRANSFER_JETTON%%

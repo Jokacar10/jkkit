@@ -101,3 +101,111 @@ const unsubscribe = watchConnectorById(appKit, {
 
 // Later: unsubscribe();
 ```
+
+## Jettons
+
+### `getJettons`
+
+Get all jettons owned by the currently selected wallet.
+
+```ts
+const response = await getJettons(appKit);
+if (!response) {
+    console.log('No wallet selected or no jettons found');
+    return;
+}
+console.log('Jettons:', response.jettons.length);
+response.jettons.forEach((j) => console.log(`- ${j.info.name}: ${j.balance.toString()}`));
+```
+
+### `getJettonsByAddress`
+
+Get all jettons owned by a specific address.
+
+```ts
+const selectedWallet = getSelectedWallet(appKit);
+if (!selectedWallet) {
+    console.log('No wallet selected');
+    return;
+}
+
+const response = await getJettonsByAddress(appKit, {
+    address: selectedWallet.getAddress(),
+});
+console.log('Jettons by Address:', response.jettons.length);
+response.jettons.forEach((j) => console.log(`- ${j.info.name}: ${j.balance.toString()}`));
+```
+
+### `getJettonBalance`
+
+Get the balance of a specific jetton for a wallet address.
+
+```ts
+const selectedWallet = getSelectedWallet(appKit);
+if (!selectedWallet) {
+    console.log('No wallet selected');
+    return;
+}
+
+const balance = await getJettonBalance(appKit, {
+    jettonAddress: 'EQDBE420tTQIkoWcZ9pEOTKY63WVmwyIl3hH6yWl0r_h51Tl',
+    ownerAddress: selectedWallet.getAddress(),
+});
+console.log('Jetton Balance:', balance.toString());
+```
+
+### `getJettonInfo`
+
+Get information about a specific jetton by its address.
+
+```ts
+const info = await getJettonInfo(appKit, {
+    address: 'EQDBE420tTQIkoWcZ9pEOTKY63WVmwyIl3hH6yWl0r_h51Tl',
+});
+console.log('Jetton Info:', info);
+```
+
+### `getJettonWalletAddress`
+
+Get the jetton wallet address for a specific jetton and owner address.
+
+```ts
+const selectedWallet = getSelectedWallet(appKit);
+if (!selectedWallet) {
+    console.log('No wallet selected');
+    return;
+}
+
+const address = await getJettonWalletAddress(appKit, {
+    jettonAddress: 'EQDBE420tTQIkoWcZ9pEOTKY63WVmwyIl3hH6yWl0r_h51Tl',
+    ownerAddress: selectedWallet.getAddress(),
+});
+console.log('Jetton Wallet Address:', address);
+```
+
+### `createTransferJettonTransaction`
+
+Create a transaction for transferring jettons without sending it.
+
+```ts
+const tx = await createTransferJettonTransaction(appKit, {
+    jettonAddress: 'EQDBE420tTQIkoWcZ9pEOTKY63WVmwyIl3hH6yWl0r_h51Tl',
+    recipientAddress: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+    amount: '100',
+    comment: 'Hello Jetton',
+});
+console.log('Transfer Transaction:', tx);
+```
+
+### `transferJetton`
+
+Transfer jettons to a recipient address.
+
+```ts
+const result = await transferJetton(appKit, {
+    jettonAddress: 'EQDBE420tTQIkoWcZ9pEOTKY63WVmwyIl3hH6yWl0r_h51Tl',
+    recipientAddress: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+    amount: '100',
+});
+console.log('Transfer Result:', result);
+```
