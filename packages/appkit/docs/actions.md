@@ -428,3 +428,50 @@ const transactionRequest = await buildSwapTransaction(appKit, {
 const transactionResponse = await sendTransaction(appKit, transactionRequest);
 console.log('Swap Transaction:', transactionResponse);
 ```
+
+## Transactions
+
+### `sendTransaction`
+
+Send a generic transaction request.
+
+```ts
+const result = await sendTransaction(appKit, {
+    messages: [
+        {
+            address: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+            amount: '100000000', // 0.1 TON
+        },
+    ],
+});
+
+console.log('Transaction Result:', result);
+```
+
+### `transferTon`
+
+Send a TON transfer transaction.
+
+```ts
+const result = await transferTon(appKit, {
+    recipientAddress: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+    amount: '100000000', // 0.1 TON
+    comment: 'Hello from AppKit!',
+});
+
+console.log('Transfer Result:', result);
+```
+
+### `createTransferTonTransaction`
+
+Create a TON transfer transaction request without sending it.
+
+```ts
+const tx = await createTransferTonTransaction(appKit, {
+    recipientAddress: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+    amount: '100000000', // 0.1 TON
+    comment: 'Draft transaction',
+});
+
+console.log('Transaction Request:', tx);
+```

@@ -207,3 +207,23 @@ Get a swap quote from registered providers.
 Build (assemble) a swap transaction based on a quote. After the transaction is built, you can use `sendTransaction` to execute it on the blockchain.
 
 %%demo/examples/src/appkit/actions/swap#BUILD_SWAP_TRANSACTION%%
+
+## Transactions
+
+### `sendTransaction`
+
+Send a generic transaction request.
+
+%%demo/examples/src/appkit/actions/transaction#SEND_TRANSACTION%%
+
+### `transferTon`
+
+Send a TON transfer transaction.
+
+%%demo/examples/src/appkit/actions/transaction#TRANSFER_TON%%
+
+### `createTransferTonTransaction`
+
+Create a TON transfer transaction request without sending it.
+
+%%demo/examples/src/appkit/actions/transaction#CREATE_TRANSFER_TON_TRANSACTION%%
