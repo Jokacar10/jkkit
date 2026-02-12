@@ -187,3 +187,23 @@ Sign binary data with the connected wallet.
 Sign a TON Cell with the connected wallet. Used for on-chain signature verification.
 
 %%demo/examples/src/appkit/actions/signing#SIGN_CELL%%
+
+## Swap
+
+### `getSwapManager`
+
+Get the `SwapManager` instance to interact with swap providers directly.
+
+%%demo/examples/src/appkit/actions/swap#GET_SWAP_MANAGER%%
+
+### `getSwapQuote`
+
+Get a swap quote from registered providers.
+
+%%demo/examples/src/appkit/actions/swap#GET_SWAP_QUOTE%%
+
+### `buildSwapTransaction`
+
+Build (assemble) a swap transaction based on a quote. After the transaction is built, you can use `sendTransaction` to execute it on the blockchain.
+
+%%demo/examples/src/appkit/actions/swap#BUILD_SWAP_TRANSACTION%%

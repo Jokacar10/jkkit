@@ -387,3 +387,44 @@ const result = await signCell(appKit, {
 
 console.log('Cell Signature:', result.signature);
 ```
+
+## Swap
+
+### `getSwapManager`
+
+Get the `SwapManager` instance to interact with swap providers directly.
+
+```ts
+const swapManager = getSwapManager(appKit);
+```
+
+### `getSwapQuote`
+
+Get a swap quote from registered providers.
+
+```ts
+const quote = await getSwapQuote(appKit, {
+    fromToken: {
+        type: 'jetton',
+        value: 'EQCA14o1-VWhS29szfbpmbu_m7A_9S4m_Ba6sAyALH_mU68j',
+    },
+    toToken: { type: 'ton' },
+    amount: BigInt('1000000000').toString(), // nanotons as string
+    network: 'mainnet' as unknown as Network,
+});
+console.log('Swap Quote:', quote);
+```
+
+### `buildSwapTransaction`
+
+Build (assemble) a swap transaction based on a quote. After the transaction is built, you can use `sendTransaction` to execute it on the blockchain.
+
+```ts
+const transactionRequest = await buildSwapTransaction(appKit, {
+    quote,
+    userAddress: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+    slippageBps: 100, // 1%
+});
+const transactionResponse = await sendTransaction(appKit, transactionRequest);
+console.log('Swap Transaction:', transactionResponse);
+```
