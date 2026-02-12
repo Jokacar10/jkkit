@@ -36,6 +36,5 @@ export type {
     JettonInfoResult,
     TransferResult,
     SwapQuoteResult,
-    SwapResult,
     TransactionInfo,
 } from './services/McpWalletService.js';

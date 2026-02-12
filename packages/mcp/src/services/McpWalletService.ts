@@ -19,7 +19,6 @@
 import { TonWalletKit, MemoryStorageAdapter, Network, wrapWalletInterface } from '@ton/walletkit';
 import type {
     Wallet,
-    SwapQuote,
     SwapQuoteParams,
     SwapParams,
     ApiClientConfig,
@@ -83,10 +82,9 @@ export interface TransferResult {
 }
 
 /**
- * Swap quote result
+ * Swap quote result with transaction params
  */
 export interface SwapQuoteResult {
-    quote: SwapQuote;
     fromToken: string;
     toToken: string;
     fromAmount: string;
@@ -94,14 +92,16 @@ export interface SwapQuoteResult {
     minReceived: string;
     provider: string;
     expiresAt?: number;
-}
-
-/**
- * Swap result
- */
-export interface SwapResult {
-    success: boolean;
-    message: string;
+    /** Raw transaction params ready to send */
+    transaction: {
+        messages: Array<{
+            address: string;
+            amount: string;
+            stateInit?: string;
+            payload?: string;
+        }>;
+        validUntil?: number;
+    };
 }
 
 /**
@@ -410,7 +410,7 @@ export class McpWalletService {
     }
 
     /**
-     * Get swap quote
+     * Get swap quote with transaction params ready to execute
      */
     async getSwapQuote(
         fromToken: string,
@@ -431,8 +431,14 @@ export class McpWalletService {
 
         const quote = await kit.swap.getQuote(params);
 
-        return {
+        // Build transaction params
+        const swapParams: SwapParams = {
             quote,
+            userAddress: this.wallet.getAddress(),
+        };
+        const tx = await kit.swap.buildSwapTransaction(swapParams);
+
+        return {
             fromToken: quote.fromToken.type === 'ton' ? 'TON' : quote.fromToken.value,
             toToken: quote.toToken.type === 'ton' ? 'TON' : quote.toToken.value,
             fromAmount: quote.fromAmount,
@@ -440,34 +446,16 @@ export class McpWalletService {
             minReceived: quote.minReceived,
             provider: quote.providerId,
             expiresAt: quote.expiresAt,
+            transaction: {
+                messages: tx.messages.map((m) => ({
+                    address: m.address,
+                    amount: m.amount.toString(),
+                    stateInit: m.stateInit,
+                    payload: m.payload,
+                })),
+                validUntil: tx.validUntil,
+            },
         };
-    }
-
-    /**
-     * Execute swap
-     */
-    async executeSwap(quote: SwapQuote): Promise<SwapResult> {
-        try {
-            const kit = await this.getKit();
-
-            const params: SwapParams = {
-                quote,
-                userAddress: this.wallet.getAddress(),
-            };
-
-            const tx = await kit.swap.buildSwapTransaction(params);
-            await this.wallet.sendTransaction(tx);
-
-            return {
-                success: true,
-                message: `Successfully swapped ${quote.fromAmount} ${quote.fromToken} for ${quote.toAmount} ${quote.toToken}`,
-            };
-        } catch (error) {
-            return {
-                success: false,
-                message: error instanceof Error ? error.message : 'Unknown error',
-            };
-        }
     }
 
     /**

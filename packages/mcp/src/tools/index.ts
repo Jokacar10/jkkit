@@ -9,3 +9,4 @@
 export { createMcpBalanceTools } from './balance-tools.js';
 export { createMcpTransferTools } from './transfer-tools.js';
 export { createMcpSwapTools } from './swap-tools.js';
+export { createMcpKnownJettonsTools, KNOWN_JETTONS } from './known-jettons-tools.js';
