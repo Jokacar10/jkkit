@@ -56,9 +56,7 @@ Hook to get the jetton wallet address for a specific jetton and owner address.
 
 Hook to transfer jettons to a recipient address.
 
-```tsx
 %%demo/examples/src/appkit/hooks/jettons#USE_TRANSFER_JETTON%%
-```
 
 ## Network
 
@@ -66,17 +64,13 @@ Hook to transfer jettons to a recipient address.
 
 Hook to get network of the selected wallet.
 
-```tsx
 %%demo/examples/src/appkit/hooks/network#USE_NETWORK%%
-```
 
 ### `useNetworks`
 
 Hook to get all configured networks.
 
-```tsx
 %%demo/examples/src/appkit/hooks/network#USE_NETWORKS%%
-```
 
 ## NFT
 
@@ -84,33 +78,25 @@ Hook to get all configured networks.
 
 Hook to get a single NFT.
 
-```tsx
 %%demo/examples/src/appkit/hooks/nft#USE_NFT%%
-```
 
 ### `useNfts`
 
 Hook to get NFTs of the selected wallet.
 
-```tsx
 %%demo/examples/src/appkit/hooks/nft#USE_NFTS%%
-```
 
 ### `useNFTsByAddress`
 
 Hook to get NFTs of a specific address.
 
-```tsx
 %%demo/examples/src/appkit/hooks/nft#USE_NFTS_BY_ADDRESS%%
-```
 
 ### `useTransferNft`
 
 Hook to transfer NFT to another wallet.
 
-```tsx
 %%demo/examples/src/appkit/hooks/nft#USE_TRANSFER_NFT%%
-```
 
 ## Signing
 
@@ -118,22 +104,30 @@ Hook to transfer NFT to another wallet.
 
 Hook to sign binary data with the connected wallet.
 
-```tsx
 %%demo/examples/src/appkit/hooks/signing#USE_SIGN_BINARY%%
-```
 
 ### `useSignCell`
 
 Hook to sign TON Cell data with the connected wallet.
 
-```tsx
 %%demo/examples/src/appkit/hooks/signing#USE_SIGN_CELL%%
-```
 
 ### `useSignText`
 
 Hook to sign text messages with the connected wallet.
 
-```tsx
 %%demo/examples/src/appkit/hooks/signing#USE_SIGN_TEXT%%
-```
+
+## Swap
+
+### `useSwapQuote`
+
+Hook to get a swap quote for a token pair.
+
+%%demo/examples/src/appkit/hooks/swap#USE_SWAP_QUOTE%%
+
+### `useBuildSwapTransaction`
+
+Hook to build a transaction for a swap operation based on a quote.
+
+%%demo/examples/src/appkit/hooks/swap#USE_BUILD_SWAP_TRANSACTION%%

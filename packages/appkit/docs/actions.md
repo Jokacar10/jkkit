@@ -406,11 +406,11 @@ Get a swap quote from registered providers.
 const quote = await getSwapQuote(appKit, {
     fromToken: {
         type: 'jetton',
-        value: 'EQCA14o1-VWhS29szfbpmbu_m7A_9S4m_Ba6sAyALH_mU68j',
+        value: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
     },
     toToken: { type: 'ton' },
-    amount: BigInt('1000000000').toString(), // nanotons as string
-    network: 'mainnet' as unknown as Network,
+    amount: '1000000000', // nanotons as string
+    network: Network.mainnet(),
 });
 console.log('Swap Quote:', quote);
 ```

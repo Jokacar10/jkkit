@@ -6,7 +6,8 @@
  *
  */
 
-import type { AppKit, Network } from '@ton/appkit';
+import type { AppKit } from '@ton/appkit';
+import { Network } from '@ton/appkit';
 import { getSwapManager, getSwapQuote, buildSwapTransaction, sendTransaction } from '@ton/appkit';
 
 export const swapExample = async (appKit: AppKit) => {
@@ -16,10 +17,10 @@ export const swapExample = async (appKit: AppKit) => {
 
     // SAMPLE_START: GET_SWAP_QUOTE
     const quote = await getSwapQuote(appKit, {
-        fromToken: { type: 'jetton', value: 'EQCA14o1-VWhS29szfbpmbu_m7A_9S4m_Ba6sAyALH_mU68j' },
+        fromToken: { type: 'jetton', value: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs' },
         toToken: { type: 'ton' },
-        amount: BigInt('1000000000').toString(), // nanotons as string
-        network: 'mainnet' as unknown as Network,
+        amount: '1000000000', // nanotons as string
+        network: Network.mainnet(),
     });
     console.log('Swap Quote:', quote);
     // SAMPLE_END: GET_SWAP_QUOTE

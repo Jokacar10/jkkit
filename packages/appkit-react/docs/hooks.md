@@ -198,7 +198,24 @@ return <div>Jetton Wallet Address: {walletAddress?.toString()}</div>;
 Hook to transfer jettons to a recipient address.
 
 ```tsx
-%%demo/examples/src/appkit/hooks/jettons#USE_TRANSFER_JETTON%%
+const { mutate: transfer, isPending, error } = useTransferJetton();
+
+const handleTransfer = () => {
+    transfer({
+        recipientAddress: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+        amount: '1000000000', // 1 Jetton (assuming 9 decimals)
+        jettonAddress: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiXme1Xc56Iwobkzgnjj',
+    });
+};
+
+return (
+    <div>
+        <button onClick={handleTransfer} disabled={isPending}>
+            {isPending ? 'Transferring...' : 'Transfer Jetton'}
+        </button>
+        {error && <div>Error: {error.message}</div>}
+    </div>
+);
 ```
 
 ## Network
@@ -208,7 +225,13 @@ Hook to transfer jettons to a recipient address.
 Hook to get network of the selected wallet.
 
 ```tsx
-%%demo/examples/src/appkit/hooks/network#USE_NETWORK%%
+const network = useNetwork();
+
+if (!network) {
+    return <div>Network not selected</div>;
+}
+
+return <div>Current Network: {network.chainId}</div>;
 ```
 
 ### `useNetworks`
@@ -216,7 +239,18 @@ Hook to get network of the selected wallet.
 Hook to get all configured networks.
 
 ```tsx
-%%demo/examples/src/appkit/hooks/network#USE_NETWORKS%%
+const networks = useNetworks();
+
+return (
+    <div>
+        <h3>Available Networks</h3>
+        <ul>
+            {networks.map((network) => (
+                <li key={network.chainId}>{network.chainId}</li>
+            ))}
+        </ul>
+    </div>
+);
 ```
 
 ## NFT
@@ -226,7 +260,30 @@ Hook to get all configured networks.
 Hook to get a single NFT.
 
 ```tsx
-%%demo/examples/src/appkit/hooks/nft#USE_NFT%%
+const {
+    data: nft,
+    isLoading,
+    error,
+} = useNft({
+    address: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+});
+
+if (isLoading) {
+    return <div>Loading...</div>;
+}
+
+if (error) {
+    return <div>Error: {error.message}</div>;
+}
+
+return (
+    <div>
+        <h3>NFT Details</h3>
+        <p>Name: {nft?.info?.name}</p>
+        <p>Collection: {nft?.collection?.name}</p>
+        <p>Owner: {nft?.ownerAddress?.toString()}</p>
+    </div>
+);
 ```
 
 ### `useNfts`
@@ -234,7 +291,34 @@ Hook to get a single NFT.
 Hook to get NFTs of the selected wallet.
 
 ```tsx
-%%demo/examples/src/appkit/hooks/nft#USE_NFTS%%
+const {
+    data: nfts,
+    isLoading,
+    error,
+} = useNfts({
+    limit: 10,
+});
+
+if (isLoading) {
+    return <div>Loading...</div>;
+}
+
+if (error) {
+    return <div>Error: {error.message}</div>;
+}
+
+return (
+    <div>
+        <h3>My NFTs</h3>
+        <ul>
+            {nfts?.nfts.map((nft) => (
+                <li key={nft.address.toString()}>
+                    {nft.info?.name} ({nft.collection?.name})
+                </li>
+            ))}
+        </ul>
+    </div>
+);
 ```
 
 ### `useNFTsByAddress`
@@ -242,7 +326,35 @@ Hook to get NFTs of the selected wallet.
 Hook to get NFTs of a specific address.
 
 ```tsx
-%%demo/examples/src/appkit/hooks/nft#USE_NFTS_BY_ADDRESS%%
+const {
+    data: nfts,
+    isLoading,
+    error,
+} = useNFTsByAddress({
+    address: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+    limit: 10,
+});
+
+if (isLoading) {
+    return <div>Loading...</div>;
+}
+
+if (error) {
+    return <div>Error: {error.message}</div>;
+}
+
+return (
+    <div>
+        <h3>NFTs</h3>
+        <ul>
+            {nfts?.nfts.map((nft) => (
+                <li key={nft.address.toString()}>
+                    {nft.info?.name} ({nft.collection?.name})
+                </li>
+            ))}
+        </ul>
+    </div>
+);
 ```
 
 ### `useTransferNft`
@@ -250,7 +362,24 @@ Hook to get NFTs of a specific address.
 Hook to transfer NFT to another wallet.
 
 ```tsx
-%%demo/examples/src/appkit/hooks/nft#USE_TRANSFER_NFT%%
+const { mutate: transfer, isPending, error } = useTransferNft();
+
+const handleTransfer = () => {
+    transfer({
+        nftAddress: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+        recipientAddress: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+        comment: 'Gift for you',
+    });
+};
+
+return (
+    <div>
+        <button onClick={handleTransfer} disabled={isPending}>
+            {isPending ? 'Transferring...' : 'Transfer NFT'}
+        </button>
+        {error && <div>Error: {error.message}</div>}
+    </div>
+);
 ```
 
 ## Signing
@@ -260,7 +389,27 @@ Hook to transfer NFT to another wallet.
 Hook to sign binary data with the connected wallet.
 
 ```tsx
-%%demo/examples/src/appkit/hooks/signing#USE_SIGN_BINARY%%
+const { mutate: signBinary, isPending, error, data } = useSignBinary();
+
+const handleSign = () => {
+    // Sign "Hello" in binary (Base64: SGVsbG8=)
+    signBinary({ bytes: 'SGVsbG8=' as Base64String });
+};
+
+return (
+    <div>
+        <button onClick={handleSign} disabled={isPending}>
+            {isPending ? 'Signing...' : 'Sign Binary'}
+        </button>
+        {error && <div>Error: {error.message}</div>}
+        {data && (
+            <div>
+                <h4>Signature:</h4>
+                <pre>{data.signature}</pre>
+            </div>
+        )}
+    </div>
+);
 ```
 
 ### `useSignCell`
@@ -268,7 +417,29 @@ Hook to sign binary data with the connected wallet.
 Hook to sign TON Cell data with the connected wallet.
 
 ```tsx
-%%demo/examples/src/appkit/hooks/signing#USE_SIGN_CELL%%
+const { mutate: signCell, isPending, error, data } = useSignCell();
+
+const handleSign = () => {
+    signCell({
+        cell: 'te6cckEBAQEAAgAAAEysuc0=' as Base64String, // Empty cell
+        schema: 'nothing#0 = Nothing',
+    });
+};
+
+return (
+    <div>
+        <button onClick={handleSign} disabled={isPending}>
+            {isPending ? 'Signing...' : 'Sign Cell'}
+        </button>
+        {error && <div>Error: {error.message}</div>}
+        {data && (
+            <div>
+                <h4>Signature:</h4>
+                <pre>{data.signature}</pre>
+            </div>
+        )}
+    </div>
+);
 ```
 
 ### `useSignText`
@@ -276,5 +447,119 @@ Hook to sign TON Cell data with the connected wallet.
 Hook to sign text messages with the connected wallet.
 
 ```tsx
-%%demo/examples/src/appkit/hooks/signing#USE_SIGN_TEXT%%
+const { mutate: signText, isPending, error, data } = useSignText();
+
+const handleSign = () => {
+    signText({ text: 'Hello, TON!' });
+};
+
+return (
+    <div>
+        <button onClick={handleSign} disabled={isPending}>
+            {isPending ? 'Signing...' : 'Sign Text'}
+        </button>
+        {error && <div>Error: {error.message}</div>}
+        {data && (
+            <div>
+                <h4>Signature:</h4>
+                <pre>{data.signature}</pre>
+            </div>
+        )}
+    </div>
+);
+```
+
+## Swap
+
+### `useSwapQuote`
+
+Hook to get a swap quote for a token pair.
+
+```tsx
+const {
+    data: quote,
+    isLoading,
+    error,
+} = useSwapQuote({
+    fromToken: { type: 'ton' },
+    toToken: {
+        type: 'jetton',
+        value: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
+    }, // USDT
+    amount: '1000000000', // 1 TON
+    network: Network.mainnet(),
+});
+
+if (isLoading) {
+    return <div>Loading quote...</div>;
+}
+
+if (error) {
+    return <div>Error: {error.message}</div>;
+}
+
+return (
+    <div>
+        <h3>Swap Quote</h3>
+        {quote && (
+            <div>
+                <p>Expected Output: {quote.toAmount}</p>
+                <p>Price Impact: {quote.priceImpact}</p>
+            </div>
+        )}
+    </div>
+);
+```
+
+### `useBuildSwapTransaction`
+
+Hook to build a transaction for a swap operation based on a quote.
+
+```tsx
+// First, get a quote
+const { data: quote } = useSwapQuote({
+    fromToken: { type: 'ton' },
+    toToken: {
+        type: 'jetton',
+        value: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
+    },
+    amount: '1000000000',
+    network: Network.mainnet(),
+});
+
+// Valid only for building the transaction
+const { mutateAsync: buildTx, isPending: isBuilding } = useBuildSwapTransaction();
+
+// Valid for sending the transaction
+const { mutateAsync: sendTx, isPending: isSending } = useSendTransaction();
+
+const handleSwap = async () => {
+    if (!quote) {
+        return;
+    }
+
+    try {
+        // Build the transaction
+        const transaction = await buildTx({
+            quote,
+            userAddress: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c', // User's wallet address
+            slippageBps: 100, // 1%
+        });
+
+        // Send the transaction
+        await sendTx(transaction);
+    } catch (e) {
+        console.error(e);
+    }
+};
+
+const isPending = isBuilding || isSending;
+
+return (
+    <div>
+        <button onClick={handleSwap} disabled={!quote || isPending}>
+            {isPending ? 'Processing...' : 'Swap'}
+        </button>
+    </div>
+);
 ```
