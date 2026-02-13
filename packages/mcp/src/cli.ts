@@ -229,11 +229,12 @@ async function createWalletAndServer(): Promise<{
         log(`Network: ${NETWORK}`);
         log(`Version: ${WALLET_VERSION}`);
     } else {
+        throw new Error('MNEMONIC is required for mnemonic mode');
         // Controlled wallet mode
-        wallet = await createControlledWallet(kit, network);
-        log(`Controlled wallet address: ${wallet.getAddress()}`);
-        log(`Network: ${NETWORK}`);
-        log('Mode: Controlled (MCP keypair)');
+        // wallet = await createControlledWallet(kit, network);
+        // log(`Controlled wallet address: ${wallet.getAddress()}`);
+        // log(`Network: ${NETWORK}`);
+        // log('Mode: Controlled (MCP keypair)');
     }
 
     // Create MCP server with the wallet

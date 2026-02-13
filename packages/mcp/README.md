@@ -257,6 +257,26 @@ const transport = new StdioServerTransport();
 await server.connect(transport);
 ```
 
+## Agent Skills
+
+This package includes skill files for AI agent integration:
+
+- **`skills/SKILL.md`** - Concise skill description for Claude Code and compatible agents
+- **`llms.txt`** - Detailed tool documentation for LLM context
+
+### Using with Claude Code
+
+Copy the skill to your project:
+
+```bash
+mkdir -p .claude/skills/ton-wallet
+cp node_modules/@ton/mcp/skills/SKILL.md .claude/skills/ton-wallet/
+```
+
+### Using llms.txt
+
+The `llms.txt` file follows the [llms.txt standard](https://llmstxt.org/) and can be used to provide context to any LLM about the available tools.
+
 ## License
 
 MIT

@@ -1,6 +1,6 @@
 {
   "name": "@ton/mcp",
-  "version": "0.1.8",
+  "version": "0.1.10",
   "description": "TON MCP Server - Model Context Protocol server for TON blockchain wallet operations",
   "license": "MIT",
   "type": "module",
@@ -35,6 +35,8 @@
   },
   "files": [
     "dist",
+    "skills",
+    "llms.txt",
     "README.md"
   ],
   "scripts": {
