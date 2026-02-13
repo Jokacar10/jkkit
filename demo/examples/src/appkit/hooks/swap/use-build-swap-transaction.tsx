@@ -9,6 +9,8 @@
 import { Network } from '@ton/appkit';
 import { useBuildSwapTransaction, useSendTransaction, useSwapQuote } from '@ton/appkit-react';
 
+/* eslint-disable no-console */
+
 export const UseBuildSwapTransactionExample = () => {
     // SAMPLE_START: USE_BUILD_SWAP_TRANSACTION
     // First, get a quote

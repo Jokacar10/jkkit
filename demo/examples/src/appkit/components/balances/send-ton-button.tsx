@@ -6,6 +6,8 @@
  *
  */
 
+/* eslint-disable no-console */
+
 import { SendTonButton } from '@ton/appkit-react';
 
 export const SendTonButtonExample = () => {

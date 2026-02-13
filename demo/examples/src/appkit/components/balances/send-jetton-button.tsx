@@ -6,6 +6,8 @@
  *
  */
 
+/* eslint-disable no-console */
+
 import { SendJettonButton } from '@ton/appkit-react';
 
 export const SendJettonButtonExample = () => {

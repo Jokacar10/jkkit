@@ -10,6 +10,8 @@ import type { Base64String } from '@ton/appkit';
 import { Transaction } from '@ton/appkit-react';
 import { beginCell } from '@ton/core';
 
+/* eslint-disable no-console */
+
 export const TransactionExample = () => {
     // SAMPLE_START: TRANSACTION
     return (
