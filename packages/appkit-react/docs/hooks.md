@@ -634,3 +634,169 @@ return (
 );
 ```
 
+## Wallets
+
+### `useAddress`
+
+Hook to get current wallet address.
+
+```tsx
+const address = useAddress();
+
+if (!address) {
+    return <div>Wallet not connected</div>;
+}
+
+return <div>Current Address: {address}</div>;
+```
+
+### `useConnect`
+
+Hook to connect a wallet.
+
+```tsx
+const [wallet] = useSelectedWallet();
+const { mutate: connect, isPending: isConnecting, error: connectError } = useConnect();
+const { mutate: disconnect, isPending: isDisconnecting } = useDisconnect();
+
+if (wallet) {
+    return (
+        <div>
+            <button
+                onClick={() => {
+                    disconnect({ connectorId: wallet.connectorId });
+                }}
+                disabled={isDisconnecting}
+            >
+                {isDisconnecting ? 'Disconnecting...' : 'Disconnect'}
+            </button>
+        </div>
+    );
+}
+
+return (
+    <div>
+        <button
+            onClick={() => connect({ connectorId: 'injected' })} // Connect to injected wallet (e.g. Tonkeeper)
+            disabled={isConnecting}
+        >
+            {isConnecting ? 'Connecting...' : 'Connect Wallet'}
+        </button>
+        {connectError && <div>Error: {connectError.message}</div>}
+    </div>
+);
+```
+
+### `useConnectedWallets`
+
+Hook to get all connected wallets.
+
+```tsx
+const connectedWallets = useConnectedWallets();
+
+return (
+    <div>
+        <h3>Connected Wallets:</h3>
+        <ul>
+            {connectedWallets.map((wallet) => (
+                <li key={wallet.getAddress()}>
+                    {wallet.getAddress()} ({wallet.getNetwork().toString()})
+                </li>
+            ))}
+        </ul>
+    </div>
+);
+```
+
+### `useConnectorById`
+
+Hook to get a connector by its ID.
+
+```tsx
+const connector = useConnectorById('injected');
+
+if (!connector) {
+    return <div>Injected connector not found</div>;
+}
+
+return (
+    <div>
+        <h3>Connector Details:</h3>
+        <p>ID: {connector.id}</p>
+        <p>Type: {connector.type}</p>
+    </div>
+);
+```
+
+### `useConnectors`
+
+Hook to get all available connectors.
+
+```tsx
+const connectors = useConnectors();
+const { mutate: connect } = useConnect();
+
+return (
+    <div>
+        <h3>Available Connectors:</h3>
+        <ul>
+            {connectors.map((connector) => (
+                <li key={connector.id}>
+                    <button onClick={() => connect({ connectorId: connector.id })}>{connector.type}</button>
+                </li>
+            ))}
+        </ul>
+    </div>
+);
+```
+
+### `useDisconnect`
+
+Hook to disconnect a wallet.
+
+```tsx
+const [wallet] = useSelectedWallet();
+const { mutate: disconnect, isPending, error } = useDisconnect();
+
+if (!wallet) {
+    return <div>Wallet not connected</div>;
+}
+
+return (
+    <div>
+        <p>Connected: {wallet.getAddress()}</p>
+        <button
+            onClick={() => {
+                disconnect({ connectorId: wallet.connectorId });
+            }}
+            disabled={isPending}
+        >
+            {isPending ? 'Disconnecting...' : 'Disconnect'}
+        </button>
+        {error && <div>Error: {error.message}</div>}
+    </div>
+);
+```
+
+### `useSelectedWallet`
+
+Hook to get and set the currently selected wallet.
+
+```tsx
+const [wallet, setSelectedWallet] = useSelectedWallet();
+
+return (
+    <div>
+        {wallet ? (
+            <div>
+                <p>Current Wallet: {wallet.getAddress()}</p>
+                <button onClick={() => setSelectedWallet(null)}>Deselect Wallet</button>
+            </div>
+        ) : (
+            <p>No wallet selected</p>
+        )}
+    </div>
+);
+```
+
+

@@ -146,3 +146,48 @@ Hook to simplify transferring TON to another address.
 
 %%demo/examples/src/appkit/hooks/transaction#USE_TRANSFER_TON%%
 
+## Wallets
+
+### `useAddress`
+
+Hook to get current wallet address.
+
+%%demo/examples/src/appkit/hooks/wallets#USE_ADDRESS%%
+
+### `useConnect`
+
+Hook to connect a wallet.
+
+%%demo/examples/src/appkit/hooks/wallets#USE_CONNECT%%
+
+### `useConnectedWallets`
+
+Hook to get all connected wallets.
+
+%%demo/examples/src/appkit/hooks/wallets#USE_CONNECTED_WALLETS%%
+
+### `useConnectorById`
+
+Hook to get a connector by its ID.
+
+%%demo/examples/src/appkit/hooks/wallets#USE_CONNECTOR_BY_ID%%
+
+### `useConnectors`
+
+Hook to get all available connectors.
+
+%%demo/examples/src/appkit/hooks/wallets#USE_CONNECTORS%%
+
+### `useDisconnect`
+
+Hook to disconnect a wallet.
+
+%%demo/examples/src/appkit/hooks/wallets#USE_DISCONNECT%%
+
+### `useSelectedWallet`
+
+Hook to get and set the currently selected wallet.
+
+%%demo/examples/src/appkit/hooks/wallets#USE_SELECTED_WALLET%%
+
+
