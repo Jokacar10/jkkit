@@ -12,7 +12,7 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
     test: {
-        environment: 'node',
+        environment: 'happy-dom',
         alias: {
             '@tonconnect/sdk': path.resolve(__dirname, 'src/__mocks__/@tonconnect/sdk.ts'),
             '@tonconnect/ui-react': path.resolve(__dirname, 'src/__mocks__/@tonconnect/ui-react.ts'),
