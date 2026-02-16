@@ -92,10 +92,10 @@ return (
 
 ## Wallets
 
-### `ConnectButton`
+### `TonConnectButton`
 
 A button that triggers the wallet connection flow.
 
 ```tsx
-return <ConnectButton />;
+return <TonConnectButton />;
 ```
