@@ -34,10 +34,12 @@ export const api: WalletKitBridgeApi = {
     sign: cryptography.sign,
     createTonMnemonic: cryptography.createTonMnemonic,
 
-    // Wallets
-    createSigner: wallets.createSigner,
-    createAdapter: wallets.createAdapter,
-    getAdapterAddress: wallets.getAdapterAddress,
+    // Wallets — stateless factory helpers
+    publicKeyFromSecretKey: wallets.publicKeyFromSecretKey,
+    computeWalletAddress: wallets.computeWalletAddress,
+    addWalletWithSigner: wallets.addWalletWithSigner,
+
+    // Wallets — proxy adapter (host apps)
     addWallet: wallets.addWallet,
     getWallets: wallets.getWallets,
     getWallet: wallets.getWalletById,

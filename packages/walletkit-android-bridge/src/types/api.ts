@@ -22,9 +22,7 @@ import type {
     TransactionEmulatedPreview,
     TransactionRequest,
     Wallet,
-    WalletAdapter,
     WalletResponse,
-    WalletSigner,
 } from '@ton/walletkit';
 
 /**
@@ -54,24 +52,35 @@ export interface CreateTonMnemonicArgs {
     count?: number;
 }
 
-export interface CreateSignerArgs {
-    mnemonic?: string[];
-    secretKey?: string;
-    mnemonicType?: 'ton' | 'bip39';
+export interface PublicKeyFromSecretKeyArgs {
+    secretKey: string;
 }
 
-export interface CreateAdapterArgs {
-    signerId: string;
-    walletVersion: 'v4r2' | 'v5r1';
-    network: { chainId: string }; // Required - Kotlin must specify the network
+export interface ComputeWalletAddressArgs {
+    publicKey: string;
+    version: 'v5r1' | 'v4r2';
+    network: { chainId: string };
     workchain?: number;
     walletId?: number;
+}
+
+export interface AddWalletWithSignerArgs {
+    secretKey?: string;
     publicKey?: string;
+    signerId?: string;
     isCustom?: boolean;
+    version: 'v5r1' | 'v4r2';
+    network: { chainId: string };
+    workchain?: number;
+    walletId?: number;
 }
 
 export interface AddWalletArgs {
     adapterId: string;
+    walletId: string;
+    publicKey: string;
+    network: { chainId: string };
+    address: string;
 }
 
 export interface RemoveWalletArgs {
@@ -265,38 +274,24 @@ export interface WalletKitBridgeApi {
     init(config?: WalletKitBridgeInitConfig): PromiseOrValue<{ ok: true }>;
     setEventsListeners(args?: SetEventsListenersArgs): PromiseOrValue<{ ok: true }>;
     removeEventListeners(): PromiseOrValue<{ ok: true }>;
-    // Returns raw keyPair with Uint8Array - Kotlin handles conversion
     mnemonicToKeyPair(args: MnemonicToKeyPairArgs): PromiseOrValue<{ publicKey: Uint8Array; secretKey: Uint8Array }>;
-    // Returns signature string directly
     sign(args: SignArgs): PromiseOrValue<string>;
-    // Returns mnemonic words array directly
     createTonMnemonic(args?: CreateTonMnemonicArgs): PromiseOrValue<string[]>;
-    // Returns temp ID and signer - Kotlin extracts signerId and publicKey
-    createSigner(args: CreateSignerArgs): PromiseOrValue<{ _tempId: string; signer: WalletSigner }>;
-    // Returns temp ID and adapter - Kotlin extracts adapterId and address
-    createAdapter(args: CreateAdapterArgs): PromiseOrValue<{ _tempId: string; adapter: WalletAdapter }>;
-    // Returns address string directly
-    getAdapterAddress(args: { adapterId: string }): PromiseOrValue<string>;
-    // Returns walletId with wallet object, or null
+    publicKeyFromSecretKey(args: PublicKeyFromSecretKeyArgs): PromiseOrValue<string>;
+    computeWalletAddress(args: ComputeWalletAddressArgs): PromiseOrValue<string>;
+    addWalletWithSigner(args: AddWalletWithSignerArgs): PromiseOrValue<{ walletId: string | undefined; wallet: Wallet } | null>;
     addWallet(args: AddWalletArgs): PromiseOrValue<{ walletId: string | undefined; wallet: Wallet } | null>;
-    // Returns array of walletId with wallet objects
     getWallets(): PromiseOrValue<{ walletId: string | undefined; wallet: Wallet }[]>;
-    // Takes walletId, returns walletId with wallet object or null
     getWallet(args: { walletId: string }): PromiseOrValue<{ walletId: string | undefined; wallet: Wallet } | null>;
-    // Returns address string or null directly
     getWalletAddress(args: { walletId: string }): PromiseOrValue<string | null>;
-    // Returns void
     removeWallet(args: RemoveWalletArgs): PromiseOrValue<void>;
-    // Returns balance as string or undefined
     getBalance(args: GetBalanceArgs): PromiseOrValue<string | undefined>;
-    // Returns transactions array directly
     getRecentTransactions(args: GetRecentTransactionsArgs): PromiseOrValue<Transaction[]>;
     handleTonConnectUrl(args: HandleTonConnectUrlArgs): PromiseOrValue<void>;
     createTransferTonTransaction(args: CreateTransferTonTransactionArgs): PromiseOrValue<TransactionRequest>;
     createTransferMultiTonTransaction(args: CreateTransferMultiTonTransactionArgs): PromiseOrValue<TransactionRequest>;
     getTransactionPreview(args: TransactionContentArgs): PromiseOrValue<TransactionEmulatedPreview>;
     handleNewTransaction(args: TransactionContentArgs): PromiseOrValue<{ success: boolean }>;
-    // Returns result from wallet.sendTransaction
     sendTransaction(args: TransactionContentArgs): PromiseOrValue<SendTransactionResponse>;
     approveConnectRequest(args: ApproveConnectRequestArgs): PromiseOrValue<void>;
     rejectConnectRequest(args: RejectConnectRequestArgs): PromiseOrValue<{ success: boolean }>;

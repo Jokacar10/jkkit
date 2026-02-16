@@ -7,19 +7,17 @@
  */
 
 /**
- * wallets.ts – Wallet management operations
- *
- * Pure pass-through bridge - returns raw JS objects/proxies.
- * Kotlin is responsible for adapting to whatever JS returns.
+ * Wallet management operations.
  */
 
-import type { Hex, Network, WalletAdapter } from '@ton/walletkit';
+import type { Hex, Network, WalletAdapter, ApiClient, Base64String, UserFriendlyAddress } from '@ton/walletkit';
+import type { WalletId } from '@ton/walletkit';
+import type { TransactionRequest } from '@ton/walletkit';
+import type { PreparedSignData } from '@ton/walletkit';
+import type { ProofMessage } from '@ton/walletkit';
 
 import { Signer, WalletV4R2Adapter, WalletV5R1Adapter } from '../core/moduleLoader';
 import { kit, wallet, getKit } from '../utils/bridge';
-import { signWithCustomSigner } from './cryptography';
-
-type SignerInstance = { sign: (bytes: Iterable<number>) => Promise<Hex>; publicKey: Hex };
 
 /**
  * Lists all wallets.
@@ -50,103 +48,157 @@ export async function getBalance(args: { walletId: string }) {
     return wallet(args.walletId, 'getBalance');
 }
 
-const signerStore = new Map<string, SignerInstance>();
-const adapterStore = new Map<string, unknown>();
-
-type CreateAdapterArgs = {
-    signerId: string;
-    isCustom?: boolean;
-    publicKey?: string;
-    walletVersion?: string;
-    network: string;
-    workchain: number;
-    walletId?: string;
-};
-
-type CreateSignerArgs = {
-    mnemonic?: string[];
-    secretKey?: string;
-    mnemonicType?: string;
-};
-
-type AddWalletArgs = {
-    adapterId: string;
-};
-
-async function getSigner(args: CreateAdapterArgs): Promise<SignerInstance> {
-    if (args.isCustom && args.publicKey) {
-        return {
-            sign: async (bytes: Iterable<number>): Promise<Hex> => {
-                return await signWithCustomSigner(args.signerId, Uint8Array.from(bytes));
-            },
-            publicKey: args.publicKey as Hex,
-        };
-    }
-
-    const storedSigner = signerStore.get(args.signerId);
-    if (!storedSigner) {
-        throw new Error(`Signer not found: ${args.signerId}`);
-    }
-    return storedSigner;
+/**
+ * Derive public key from a secret key.
+ */
+export async function publicKeyFromSecretKey(args: { secretKey: string }) {
+    const signer = await Signer!.fromPrivateKey(args.secretKey);
+    return signer.publicKey;
 }
 
-export async function createSigner(args: CreateSignerArgs) {
-    if (!Signer) {
-        throw new Error('Signer module not loaded');
-    }
-    if (!args.mnemonic?.length && !args.secretKey) {
-        throw new Error('Either mnemonic or secretKey is required');
-    }
-    const signer =
-        args.mnemonic && args.mnemonic.length > 0
-            ? ((await Signer.fromMnemonic(args.mnemonic, { type: args.mnemonicType || 'ton' })) as SignerInstance)
-            : ((await Signer.fromPrivateKey(args.secretKey as string)) as SignerInstance);
-
-    const tempId = `signer_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
-    signerStore.set(tempId, signer);
-
-    return { _tempId: tempId, signer };
-}
-
-export async function createAdapter(args: CreateAdapterArgs) {
+/**
+ * Compute wallet address from public key + version + network. Stateless.
+ * Creates a temporary adapter just to get the address, then discards it.
+ */
+export async function computeWalletAddress(args: {
+    publicKey: string;
+    version: 'v5r1' | 'v4r2';
+    network: { chainId: string };
+    workchain?: number;
+    walletId?: number;
+}) {
     const instance = await getKit();
-    const signer = await getSigner(args);
-    const AdapterClass = args.walletVersion === 'v5r1' ? WalletV5R1Adapter : WalletV4R2Adapter;
-    if (!AdapterClass) {
-        throw new Error(`WalletAdapter module not loaded`);
-    }
     const network = args.network as unknown as Network;
-    const adapter = await AdapterClass.create(signer, {
+    const dummySigner = { publicKey: args.publicKey as Hex, sign: async () => '0x' as Hex };
+    const AdapterClass = args.version === 'v5r1' ? WalletV5R1Adapter : WalletV4R2Adapter;
+    const adapter = await AdapterClass!.create(dummySigner, {
         client: instance.getApiClient(network),
         network,
-        workchain: args.workchain,
+        workchain: args.workchain ?? 0,
         walletId: args.walletId,
     });
-
-    const tempId = `adapter_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
-    adapterStore.set(tempId, adapter);
-
-    return { _tempId: tempId, adapter };
-}
-
-export async function getAdapterAddress(args: { adapterId: string }) {
-    const adapter = adapterStore.get(args.adapterId) as WalletAdapter | undefined;
-    if (!adapter) {
-        throw new Error(`Adapter not found: ${args.adapterId}`);
-    }
     return adapter.getAddress();
 }
 
-export async function addWallet(args: AddWalletArgs) {
+/**
+ * Create signer + adapter + add wallet in one stateless call.
+ * For key-based signers: pass secretKey. JS creates signer from it.
+ * For custom signers: pass publicKey + signerId + isCustom. JS creates a signer
+ * that delegates signing back to Kotlin via WalletKitNative.signWithCustomSigner.
+ */
+export async function addWalletWithSigner(args: {
+    secretKey?: string;
+    publicKey?: string;
+    signerId?: string;
+    isCustom?: boolean;
+    version: 'v5r1' | 'v4r2';
+    network: { chainId: string };
+    workchain?: number;
+    walletId?: number;
+}) {
     const instance = await getKit();
-    const adapter = adapterStore.get(args.adapterId);
-    if (!adapter) {
-        throw new Error(`Adapter not found: ${args.adapterId}`);
+    const network = args.network as unknown as Network;
+
+    let signer;
+    if (args.isCustom && args.publicKey && args.signerId) {
+        const signerId = args.signerId;
+        signer = {
+            publicKey: args.publicKey as Hex,
+            sign: async (bytes: Iterable<number>): Promise<Hex> => {
+                const result = await window.WalletKitNative?.signWithCustomSigner?.(signerId, Array.from(bytes));
+                return result as Hex;
+            },
+        };
+    } else if (args.secretKey) {
+        signer = await Signer!.fromPrivateKey(args.secretKey);
+    } else {
+        throw new Error('Either secretKey or (publicKey + signerId + isCustom) required');
     }
 
-    const w = await instance.addWallet(adapter as Parameters<typeof instance.addWallet>[0]);
-    adapterStore.delete(args.adapterId);
+    const AdapterClass = args.version === 'v5r1' ? WalletV5R1Adapter : WalletV4R2Adapter;
+    const adapter = await AdapterClass!.create(signer, {
+        client: instance.getApiClient(network),
+        network,
+        workchain: args.workchain ?? 0,
+        walletId: args.walletId,
+    });
 
+    const w = await instance.addWallet(adapter as Parameters<typeof instance.addWallet>[0]);
+    if (!w) return null;
+    return { walletId: w.getWalletId?.(), wallet: w };
+}
+
+export async function addWallet(args: {
+    adapterId: string;
+    walletId: string;
+    publicKey: string;
+    network: { chainId: string };
+    address: string;
+}) {
+    const instance = await getKit();
+    const { adapterId, walletId, publicKey, address } = args;
+    const network = args.network as unknown as Network;
+
+    const proxyAdapter: WalletAdapter = {
+        getPublicKey(): Hex {
+            return publicKey as Hex;
+        },
+        getNetwork(): Network {
+            return network;
+        },
+        getClient(): ApiClient {
+            return instance.getApiClient(network);
+        },
+        getAddress(): UserFriendlyAddress {
+            return address as UserFriendlyAddress;
+        },
+        getWalletId(): WalletId {
+            return walletId as WalletId;
+        },
+        async getStateInit(): Promise<Base64String> {
+            const result = await window.WalletKitNative?.adapterGetStateInit?.(adapterId);
+            if (!result) throw new Error('adapterGetStateInit not available');
+            return result as Base64String;
+        },
+        async getSignedSendTransaction(
+            input: TransactionRequest,
+            options?: { fakeSignature: boolean },
+        ): Promise<Base64String> {
+            const result = await window.WalletKitNative?.adapterSignTransaction?.(
+                adapterId,
+                JSON.stringify(input),
+                options?.fakeSignature ?? false,
+            );
+            if (!result) throw new Error('adapterSignTransaction not available');
+            return result as Base64String;
+        },
+        async getSignedSignData(
+            input: PreparedSignData,
+            options?: { fakeSignature: boolean },
+        ): Promise<Hex> {
+            const result = await window.WalletKitNative?.adapterSignData?.(
+                adapterId,
+                JSON.stringify(input),
+                options?.fakeSignature ?? false,
+            );
+            if (!result) throw new Error('adapterSignData not available');
+            return result as Hex;
+        },
+        async getSignedTonProof(
+            input: ProofMessage,
+            options?: { fakeSignature: boolean },
+        ): Promise<Hex> {
+            const result = await window.WalletKitNative?.adapterSignTonProof?.(
+                adapterId,
+                JSON.stringify(input),
+                options?.fakeSignature ?? false,
+            );
+            if (!result) throw new Error('adapterSignTonProof not available');
+            return result as Hex;
+        },
+    };
+
+    const w = await instance.addWallet(proxyAdapter as Parameters<typeof instance.addWallet>[0]);
     if (!w) return null;
     return { walletId: w.getWalletId?.(), wallet: w };
 }
