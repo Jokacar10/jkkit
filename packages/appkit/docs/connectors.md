@@ -4,7 +4,7 @@ AppKit supports wallet connections through connectors. The primary connector is 
 
 ## TonConnect
 
-To use TonConnect, you need to install `@tonconnect/ui` or `@tonconnect/ui-react` (if using React) and `@ton/appkit`.
+To use TonConnect, you need to install `@tonconnect/ui` and `@ton/appkit`.
 
 ### Installation
 
@@ -12,34 +12,87 @@ To use TonConnect, you need to install `@tonconnect/ui` or `@tonconnect/ui-react
 npm install @ton/appkit @tonconnect/ui
 ```
 
-### Setup
+### Import
 
-You can set up `TonConnectConnector` by passing a `TonConnectUI` instance.
+`TonConnectConnector` is located in a separate entry point `@ton/appkit/tonconnect` to allow tree-shaking for users who don't need TonConnect functionality.
 
 ```typescript
-import { AppKit } from '@ton/appkit';
 import { TonConnectConnector } from '@ton/appkit/tonconnect';
-import { TonConnectUI } from '@tonconnect/ui';
+```
 
-// 1. Initialize AppKit
+### Setup
+
+You can set up `TonConnectConnector` by passing `tonConnectOptions`. The connector will create the `TonConnectUI` instance internally.
+
+```ts
 const appKit = new AppKit({
     networks: {
-        '-239': {}, // Mainnet
+        [Network.mainnet().chainId]: {
+            apiClient: {
+                url: 'https://toncenter.com',
+                key: 'your-key',
+            },
+        },
     },
+    connectors: [
+        new TonConnectConnector({
+            tonConnectOptions: {
+                manifestUrl: 'https://my-app.com/tonconnect-manifest.json',
+            },
+        }),
+    ],
 });
+```
 
-// 2. Create TonConnectUI instance
-const tonConnect = new TonConnectUI({
+Alternatively, you can pass an existing `TonConnectUI` instance:
+
+```ts
+// 1. Create TonConnectUI instance
+const tonConnectUI = new TonConnectUI({
     manifestUrl: 'https://my-app.com/tonconnect-manifest.json',
 });
 
-// 3. Add TonConnect connector to AppKit
-appKit.addConnector(new TonConnectConnector({ tonConnect }));
+// 2. Initialize AppKit
+const appKit = new AppKit({
+    networks: {
+        [Network.mainnet().chainId]: {
+            apiClient: {
+                url: 'https://toncenter.com',
+                key: 'your-key',
+            },
+        },
+    },
+    connectors: [new TonConnectConnector({ tonConnectUI })],
+});
 ```
 
-### Usage with React
+### Add Connector Dynamically
 
-If you are using `@ton/appkit-react`, the connector setup is handled internally by the `AppKitProvider` or similar setup, but for standalone usage or custom integrations, the above approach is standard.
+In some cases, you may need to add a connector after initialization. You can use the `addConnector` method for this purpose.
+
+```ts
+// 1. Initialize AppKit
+const appKit = new AppKit({
+    networks: {
+        [Network.mainnet().chainId]: {
+            apiClient: {
+                url: 'https://toncenter.com',
+                key: 'your-key',
+            },
+        },
+    },
+});
+
+// 2. Initialize TonConnect connector
+const connector = new TonConnectConnector({
+    tonConnectOptions: {
+        manifestUrl: 'https://my-app.com/tonconnect-manifest.json',
+    },
+});
+
+// 3. Add connector dynamically
+appKit.addConnector(connector);
+```
 
 ### Configuration
 
@@ -47,8 +100,36 @@ If you are using `@ton/appkit-react`, the connector setup is handled internally 
 
 ```typescript
 interface TonConnectConnectorConfig {
-    tonConnect: TonConnectUI;
-    id?: string; // Optional custom ID
-    metadata?: ConnectorMetadata; // Optional metadata
+    /**
+     * TonConnectUI options or instance
+     */
+    tonConnectUI?: TonConnectUI;
+    tonConnectOptions?: TonConnectUiCreateOptions;
+    /**
+     * Connector ID
+     * @default 'tonconnect'
+     */
+    id?: string;
+    /**
+     * Connector metadata
+     */
+    metadata?: ConnectorMetadata;
+}
+```
+
+### Connector Metadata
+
+You can provide metadata for the connector, which can be used to display connector information in the UI.
+
+```typescript
+interface ConnectorMetadata {
+    /**
+     * Connector name
+     */
+    name: string;
+    /**
+     * Connector icon URL
+     */
+    iconUrl?: string;
 }
 ```

@@ -37,6 +37,16 @@
         "types": "./dist/queries/index.d.ts",
         "default": "./dist/queries/index.cjs"
       }
+    },
+    "./swap/omniston": {
+      "import": {
+        "types": "./dist/swap/omniston/index.d.ts",
+        "default": "./dist/swap/omniston/index.js"
+      },
+      "require": {
+        "types": "./dist/swap/omniston/index.d.ts",
+        "default": "./dist/swap/omniston/index.cjs"
+      }
     }
   },
   "typesVersions": {
@@ -46,6 +56,9 @@
       ],
       "queries": [
         "./dist/queries/index.d.ts"
+      ],
+      "swap/omniston": [
+        "./dist/swap/omniston/index.d.ts"
       ]
     }
   },
@@ -62,14 +75,17 @@
   "peerDependencies": {
     "@tanstack/query-core": ">=5.0.0",
     "@ton/core": "^0.62.0 || ^0.63.0",
-    "@tonconnect/protocol": ">=2.4.1",
+    "@ton/crypto": "^3.3.0",
     "@tonconnect/ui": ">=2.4.1"
   },
   "peerDependenciesMeta": {
-    "@tonconnect/protocol": {
+    "@tonconnect/ui": {
       "optional": true
     },
-    "@tonconnect/ui": {
+    "@ston-fi/omniston-sdk": {
+      "optional": true
+    },
+    "@tanstack/query-core": {
       "optional": true
     }
   },
@@ -80,7 +96,6 @@
   "devDependencies": {
     "@tanstack/query-core": "catalog:",
     "@ton/core": "catalog:",
-    "@tonconnect/protocol": "catalog:",
     "@tonconnect/ui": "catalog:",
     "tsup": "^8.5.0",
     "typescript": "~5.8.3",

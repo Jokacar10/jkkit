@@ -15,6 +15,7 @@ export {
 export { getBalance, type GetBalanceOptions, type GetBalanceReturnType } from './balances/get-balance';
 
 // Connectors
+export { addConnector, type AddConnectorParameters, type AddConnectorReturnType } from './connectors/add-connector';
 export { connect, type ConnectParameters, type ConnectReturnType } from './connectors/connect';
 export { disconnect, type DisconnectReturnType, type DisconnectParameters } from './connectors/disconnect';
 export { getConnectors, type GetConnectorsReturnType } from './connectors/get-connectors';

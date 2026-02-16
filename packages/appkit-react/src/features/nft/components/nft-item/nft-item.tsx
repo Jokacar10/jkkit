@@ -6,7 +6,7 @@
  *
  */
 
-import type { NFT } from '@ton/walletkit';
+import type { NFT } from '@ton/appkit';
 import { useMemo, useCallback } from 'react';
 import type { FC, ComponentProps, SyntheticEvent } from 'react';
 import { getFormattedNftInfo } from '@ton/appkit';

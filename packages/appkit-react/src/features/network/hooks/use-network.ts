@@ -6,7 +6,7 @@
  *
  */
 
-import type { Network } from '@ton/walletkit';
+import type { Network } from '@ton/appkit';
 import { useMemo } from 'react';
 
 import { useSelectedWallet } from '../../wallets';

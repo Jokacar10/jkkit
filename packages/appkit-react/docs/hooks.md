@@ -1,72 +1,825 @@
-# AppKit UI React Hooks
+# Hooks
 
-`@ton/appkit-react` provides a React-friendly interface to AppKit, leveraging TanStack Query for data fetching.
+AppKit React provides a set of hooks to interact with the blockchain and wallets.
 
-## Core Hooks
+## Core
+ 
+ ### `useAppKit`
+ 
+ Hook to access the `AppKit` instance.
+ 
+ ```ts
+const appKit = useAppKit();
+```
+ 
+ ### `useAppKitTheme`
+ 
+ Hook to access and toggle the current theme.
+ 
+ ```tsx
+const [theme, setTheme] = useAppKitTheme();
 
-### `useAppKit`
-Returns the global AppKit instance. Useful when you need to call standalone actions directly.
+return (
+    <div>
+        <h3>Current Theme: {theme}</h3>
+        <button onClick={() => setTheme('dark')}>Set Dark Theme</button>
+        <button onClick={() => setTheme('light')}>Set Light Theme</button>
+    </div>
+);
+```
+ 
+ ## Balances
 
-### `useAppKitTheme`
-Returns the current theme (`'light'` or `'dark'`) and a function to switch it.
+### `useBalance`
 
-### `useI18n`
-Provides access to the internationalization context.
+Hook to get the TON balance of the currently selected wallet.
 
-## Wallet & Connection
+```tsx
+const { data: balance, isLoading, error } = useBalance();
 
-### `useConnect` / `useDisconnect`
-Hooks to programmatically trigger the connection or disconnection flows.
+if (isLoading) {
+    return <div>Loading...</div>;
+}
 
-### `useConnectors`
-Returns a list of all available wallet connection providers (e.g., TonConnect).
+if (error) {
+    return <div>Error: {error.message}</div>;
+}
 
-### `useConnectedWallets`
-A reactive hook that returns an array of all currently connected wallets.
+return <div>Balance: {balance?.toString()}</div>;
+```
 
-### `useSelectedWallet`
-Returns the currently "active" wallet that the user is interacting with.
+### `useBalanceByAddress`
 
-## Asset Hooks
+Hook to fetch the TON balance of a specific address.
 
-These hooks are reactive and will automatically update when the balance or asset list changes.
+```tsx
+const {
+    data: balance,
+    isLoading,
+    error,
+} = useBalanceByAddress({
+    address: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+});
 
-### `useBalance` / `useSelectedWalletBalance`
-Fetch TON balance. `useSelectedWalletBalance` is a zero-config hook for the active wallet.
+if (isLoading) {
+    return <div>Loading...</div>;
+}
 
-### `useJettons` / `useSelectedWalletJettons`
-Fetch the list of Jettons. `useSelectedWalletJettons` handles the address logic for you.
+if (error) {
+    return <div>Error: {error.message}</div>;
+}
+
+return <div>Balance: {balance?.toString()}</div>;
+```
+
+## Jettons
+
+### `useJettons`
+
+Hook to get all jettons owned by the currently selected wallet.
+
+```tsx
+const { data: jettons, isLoading, error } = useJettons();
+
+if (isLoading) {
+    return <div>Loading...</div>;
+}
+
+if (error) {
+    return <div>Error: {error.message}</div>;
+}
+
+return (
+    <div>
+        <h3>Jettons</h3>
+        <ul>
+            {jettons?.jettons.map((jetton) => (
+                <li key={jetton.walletAddress}>
+                    {jetton.info.name}: {jetton.balance}
+                </li>
+            ))}
+        </ul>
+    </div>
+);
+```
+
+### `useJettonsByAddress`
+
+Hook to get all jettons owned by a specific address.
+
+```tsx
+const {
+    data: jettons,
+    isLoading,
+    error,
+} = useJettonsByAddress({
+    address: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+});
+
+if (isLoading) {
+    return <div>Loading...</div>;
+}
+
+if (error) {
+    return <div>Error: {error.message}</div>;
+}
+
+return (
+    <div>
+        <h3>Jettons</h3>
+        <ul>
+            {jettons?.jettons.map((jetton) => (
+                <li key={jetton.walletAddress}>
+                    {jetton.info.name}: {jetton.balance}
+                </li>
+            ))}
+        </ul>
+    </div>
+);
+```
+
+### `useJettonBalanceByAddress`
+
+Hook to get the balance of a specific jetton for a wallet address.
+
+```tsx
+const {
+    data: balance,
+    isLoading,
+    error,
+} = useJettonBalanceByAddress({
+    ownerAddress: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+    jettonAddress: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiXme1Xc56Iwobkzgnjj',
+});
+
+if (isLoading) {
+    return <div>Loading...</div>;
+}
+
+if (error) {
+    return <div>Error: {error.message}</div>;
+}
+
+return <div>Jetton Balance: {balance}</div>;
+```
 
 ### `useJettonInfo`
-Fetches metadata (name, decimals) for a specific Jetton.
 
-### `useNfts` / `useSelectedWalletNfts`
-Fetch NFTs. `useSelectedWalletNfts` lists NFTs for the currently connected wallet.
+Hook to get information about a specific jetton by its address.
 
-## Transaction Hooks
+```tsx
+const {
+    data: info,
+    isLoading,
+    error,
+} = useJettonInfo({
+    address: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiXme1Xc56Iwobkzgnjj',
+});
 
-Reactive hooks for performing operations with built-in loading and error states.
+if (isLoading) {
+    return <div>Loading...</div>;
+}
 
-### `useSendTransaction`
-The general-purpose hook for sending any transaction request.
+if (error) {
+    return <div>Error: {error.message}</div>;
+}
 
-### `useTransferTon` / `useTransferJetton` / `useTransferNft`
-Convenience hooks for specific asset transfers.
+return (
+    <div>
+        <h3>Jetton Info</h3>
+        <p>Name: {info?.name}</p>
+        <p>Symbol: {info?.symbol}</p>
+        <p>Decimals: {info?.decimals}</p>
+    </div>
+);
+```
 
-## DeFi Hooks
+### `useJettonWalletAddress`
 
-### `useSwapQuote` / `useBuildSwapTransaction`
-Hooks for integrating DEX swap functionality into your UI.
+Hook to get the jetton wallet address for a specific jetton and owner address.
 
-## Network Hooks
+```tsx
+const {
+    data: walletAddress,
+    isLoading,
+    error,
+} = useJettonWalletAddress({
+    ownerAddress: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+    jettonAddress: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiXme1Xc56Iwobkzgnjj',
+});
+
+if (isLoading) {
+    return <div>Loading...</div>;
+}
+
+if (error) {
+    return <div>Error: {error.message}</div>;
+}
+
+return <div>Jetton Wallet Address: {walletAddress?.toString()}</div>;
+```
+
+### `useTransferJetton`
+
+Hook to transfer jettons to a recipient address.
+
+```tsx
+const { mutate: transfer, isPending, error } = useTransferJetton();
+
+const handleTransfer = () => {
+    transfer({
+        recipientAddress: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+        amount: '1000000000', // 1 Jetton (assuming 9 decimals)
+        jettonAddress: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiXme1Xc56Iwobkzgnjj',
+    });
+};
+
+return (
+    <div>
+        <button onClick={handleTransfer} disabled={isPending}>
+            {isPending ? 'Transferring...' : 'Transfer Jetton'}
+        </button>
+        {error && <div>Error: {error.message}</div>}
+    </div>
+);
+```
+
+## Network
+
+### `useNetwork`
+
+Hook to get network of the selected wallet.
+
+```tsx
+const network = useNetwork();
+
+if (!network) {
+    return <div>Network not selected</div>;
+}
+
+return <div>Current Network: {network.chainId}</div>;
+```
 
 ### `useNetworks`
-Returns the list of configured networks (mainnet, testnet, custom).
 
-### `useSelectedWalletNetwork`
-Returns the network associated with the currently selected wallet.
+Hook to get all configured networks.
 
-## Signing Hooks
+```tsx
+const networks = useNetworks();
 
-### `useSignText` / `useSignBinary` / `useSignCell`
-Hooks for requesting digital signatures from the connected wallet.
+return (
+    <div>
+        <h3>Available Networks</h3>
+        <ul>
+            {networks.map((network) => (
+                <li key={network.chainId}>{network.chainId}</li>
+            ))}
+        </ul>
+    </div>
+);
+```
+
+## NFT
+
+### `useNft`
+
+Hook to get a single NFT.
+
+```tsx
+const {
+    data: nft,
+    isLoading,
+    error,
+} = useNft({
+    address: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+});
+
+if (isLoading) {
+    return <div>Loading...</div>;
+}
+
+if (error) {
+    return <div>Error: {error.message}</div>;
+}
+
+return (
+    <div>
+        <h3>NFT Details</h3>
+        <p>Name: {nft?.info?.name}</p>
+        <p>Collection: {nft?.collection?.name}</p>
+        <p>Owner: {nft?.ownerAddress?.toString()}</p>
+    </div>
+);
+```
+
+### `useNfts`
+
+Hook to get NFTs of the selected wallet.
+
+```tsx
+const {
+    data: nfts,
+    isLoading,
+    error,
+} = useNfts({
+    limit: 10,
+});
+
+if (isLoading) {
+    return <div>Loading...</div>;
+}
+
+if (error) {
+    return <div>Error: {error.message}</div>;
+}
+
+return (
+    <div>
+        <h3>My NFTs</h3>
+        <ul>
+            {nfts?.nfts.map((nft) => (
+                <li key={nft.address.toString()}>
+                    {nft.info?.name} ({nft.collection?.name})
+                </li>
+            ))}
+        </ul>
+    </div>
+);
+```
+
+### `useNFTsByAddress`
+
+Hook to get NFTs of a specific address.
+
+```tsx
+const {
+    data: nfts,
+    isLoading,
+    error,
+} = useNFTsByAddress({
+    address: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+    limit: 10,
+});
+
+if (isLoading) {
+    return <div>Loading...</div>;
+}
+
+if (error) {
+    return <div>Error: {error.message}</div>;
+}
+
+return (
+    <div>
+        <h3>NFTs</h3>
+        <ul>
+            {nfts?.nfts.map((nft) => (
+                <li key={nft.address.toString()}>
+                    {nft.info?.name} ({nft.collection?.name})
+                </li>
+            ))}
+        </ul>
+    </div>
+);
+```
+
+### `useTransferNft`
+
+Hook to transfer NFT to another wallet.
+
+```tsx
+const { mutate: transfer, isPending, error } = useTransferNft();
+
+const handleTransfer = () => {
+    transfer({
+        nftAddress: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+        recipientAddress: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+        comment: 'Gift for you',
+    });
+};
+
+return (
+    <div>
+        <button onClick={handleTransfer} disabled={isPending}>
+            {isPending ? 'Transferring...' : 'Transfer NFT'}
+        </button>
+        {error && <div>Error: {error.message}</div>}
+    </div>
+);
+```
+
+## Signing
+
+### `useSignBinary`
+
+Hook to sign binary data with the connected wallet.
+
+```tsx
+const { mutate: signBinary, isPending, error, data } = useSignBinary();
+
+const handleSign = () => {
+    // Sign "Hello" in binary (Base64: SGVsbG8=)
+    signBinary({ bytes: 'SGVsbG8=' as Base64String });
+};
+
+return (
+    <div>
+        <button onClick={handleSign} disabled={isPending}>
+            {isPending ? 'Signing...' : 'Sign Binary'}
+        </button>
+        {error && <div>Error: {error.message}</div>}
+        {data && (
+            <div>
+                <h4>Signature:</h4>
+                <pre>{data.signature}</pre>
+            </div>
+        )}
+    </div>
+);
+```
+
+### `useSignCell`
+
+Hook to sign TON Cell data with the connected wallet.
+
+```tsx
+const { mutate: signCell, isPending, error, data } = useSignCell();
+
+const handleSign = () => {
+    signCell({
+        cell: 'te6cckEBAQEAAgAAAEysuc0=' as Base64String, // Empty cell
+        schema: 'nothing#0 = Nothing',
+    });
+};
+
+return (
+    <div>
+        <button onClick={handleSign} disabled={isPending}>
+            {isPending ? 'Signing...' : 'Sign Cell'}
+        </button>
+        {error && <div>Error: {error.message}</div>}
+        {data && (
+            <div>
+                <h4>Signature:</h4>
+                <pre>{data.signature}</pre>
+            </div>
+        )}
+    </div>
+);
+```
+
+### `useSignText`
+
+Hook to sign text messages with the connected wallet.
+
+```tsx
+const { mutate: signText, isPending, error, data } = useSignText();
+
+const handleSign = () => {
+    signText({ text: 'Hello, TON!' });
+};
+
+return (
+    <div>
+        <button onClick={handleSign} disabled={isPending}>
+            {isPending ? 'Signing...' : 'Sign Text'}
+        </button>
+        {error && <div>Error: {error.message}</div>}
+        {data && (
+            <div>
+                <h4>Signature:</h4>
+                <pre>{data.signature}</pre>
+            </div>
+        )}
+    </div>
+);
+```
+
+## Swap
+
+### `useSwapQuote`
+
+Hook to get a swap quote for a token pair.
+
+```tsx
+const {
+    data: quote,
+    isLoading,
+    error,
+} = useSwapQuote({
+    fromToken: { type: 'ton' },
+    toToken: {
+        type: 'jetton',
+        value: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
+    }, // USDT
+    amount: '1000000000', // 1 TON
+    network: Network.mainnet(),
+});
+
+if (isLoading) {
+    return <div>Loading quote...</div>;
+}
+
+if (error) {
+    return <div>Error: {error.message}</div>;
+}
+
+return (
+    <div>
+        <h3>Swap Quote</h3>
+        {quote && (
+            <div>
+                <p>Expected Output: {quote.toAmount}</p>
+                <p>Price Impact: {quote.priceImpact}</p>
+            </div>
+        )}
+    </div>
+);
+```
+
+### `useBuildSwapTransaction`
+
+Hook to build a transaction for a swap operation based on a quote.
+
+```tsx
+// First, get a quote
+const { data: quote } = useSwapQuote({
+    fromToken: { type: 'ton' },
+    toToken: {
+        type: 'jetton',
+        value: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
+    },
+    amount: '1000000000',
+    network: Network.mainnet(),
+});
+
+// Valid only for building the transaction
+const { mutateAsync: buildTx, isPending: isBuilding } = useBuildSwapTransaction();
+
+// Valid for sending the transaction
+const { mutateAsync: sendTx, isPending: isSending } = useSendTransaction();
+
+const handleSwap = async () => {
+    if (!quote) {
+        return;
+    }
+
+    try {
+        // Build the transaction
+        const transaction = await buildTx({
+            quote,
+            userAddress: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c', // User's wallet address
+            slippageBps: 100, // 1%
+        });
+
+        // Send the transaction
+        await sendTx(transaction);
+    } catch (e) {
+        console.error(e);
+    }
+};
+
+const isPending = isBuilding || isSending;
+
+return (
+    <div>
+        <button onClick={handleSwap} disabled={!quote || isPending}>
+            {isPending ? 'Processing...' : 'Swap'}
+        </button>
+    </div>
+);
+```
+
+## Transaction
+
+### `useSendTransaction`
+
+Hook to send a transaction to the blockchain.
+
+```tsx
+const { mutate: sendTransaction, isPending, error, data } = useSendTransaction();
+
+const handleSendStructure = () => {
+    // Send a transaction with a specific structure
+    sendTransaction({
+        validUntil: Math.floor(Date.now() / 1000) + 600, // 10 minutes from now
+        messages: [
+            {
+                address: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+                amount: '1000000000', // 1 TON in nanotons
+                payload: 'te6cckEBAQEAAgAAAEysuc0=' as Base64String, // Optional payload (cell)
+            },
+        ],
+    });
+};
+
+return (
+    <div>
+        <button onClick={handleSendStructure} disabled={isPending}>
+            {isPending ? 'Sending...' : 'Send Transaction'}
+        </button>
+        {error && <div>Error: {error.message}</div>}
+        {data && (
+            <div>
+                <h4>Transaction Sent!</h4>
+                <p>BOC: {data.boc}</p>
+            </div>
+        )}
+    </div>
+);
+```
+
+### `useTransferTon`
+
+Hook to simplify transferring TON to another address.
+
+```tsx
+const { mutate: transferTon, isPending, error, data } = useTransferTon();
+
+const handleTransfer = () => {
+    transferTon({
+        recipientAddress: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+        amount: '1000000000', // 1 TON in nanotons
+        comment: 'Hello from AppKit!',
+    });
+};
+
+return (
+    <div>
+        <button onClick={handleTransfer} disabled={isPending}>
+            {isPending ? 'Transferring...' : 'Transfer TON'}
+        </button>
+        {error && <div>Error: {error.message}</div>}
+        {data && (
+            <div>
+                <h4>Transfer Successful!</h4>
+                <p>BOC: {data.boc}</p>
+            </div>
+        )}
+    </div>
+);
+```
+
+## Wallets
+
+### `useAddress`
+
+Hook to get current wallet address.
+
+```tsx
+const address = useAddress();
+
+if (!address) {
+    return <div>Wallet not connected</div>;
+}
+
+return <div>Current Address: {address}</div>;
+```
+
+### `useConnect`
+
+Hook to connect a wallet.
+
+```tsx
+const [wallet] = useSelectedWallet();
+const { mutate: connect, isPending: isConnecting, error: connectError } = useConnect();
+const { mutate: disconnect, isPending: isDisconnecting } = useDisconnect();
+
+if (wallet) {
+    return (
+        <div>
+            <button
+                onClick={() => {
+                    disconnect({ connectorId: wallet.connectorId });
+                }}
+                disabled={isDisconnecting}
+            >
+                {isDisconnecting ? 'Disconnecting...' : 'Disconnect'}
+            </button>
+        </div>
+    );
+}
+
+return (
+    <div>
+        <button onClick={() => connect({ connectorId: 'tonconnect' })} disabled={isConnecting}>
+            {isConnecting ? 'Connecting...' : 'Connect Wallet'}
+        </button>
+        {connectError && <div>Error: {connectError.message}</div>}
+    </div>
+);
+```
+
+### `useConnectedWallets`
+
+Hook to get all connected wallets.
+
+```tsx
+const connectedWallets = useConnectedWallets();
+
+return (
+    <div>
+        <h3>Connected Wallets:</h3>
+        <ul>
+            {connectedWallets.map((wallet) => (
+                <li key={wallet.getAddress()}>
+                    {wallet.getAddress()} ({wallet.getNetwork().toString()})
+                </li>
+            ))}
+        </ul>
+    </div>
+);
+```
+
+### `useConnectorById`
+
+Hook to get a connector by its ID.
+
+```tsx
+const connector = useConnectorById('injected');
+
+if (!connector) {
+    return <div>Injected connector not found</div>;
+}
+
+return (
+    <div>
+        <h3>Connector Details:</h3>
+        <p>ID: {connector.id}</p>
+        <p>Type: {connector.type}</p>
+    </div>
+);
+```
+
+### `useConnectors`
+
+Hook to get all available connectors.
+
+```tsx
+const connectors = useConnectors();
+const { mutate: connect } = useConnect();
+
+return (
+    <div>
+        <h3>Available Connectors:</h3>
+        <ul>
+            {connectors.map((connector) => (
+                <li key={connector.id}>
+                    <button onClick={() => connect({ connectorId: connector.id })}>{connector.type}</button>
+                </li>
+            ))}
+        </ul>
+    </div>
+);
+```
+
+### `useDisconnect`
+
+Hook to disconnect a wallet.
+
+```tsx
+const [wallet] = useSelectedWallet();
+const { mutate: disconnect, isPending, error } = useDisconnect();
+
+if (!wallet) {
+    return <div>Wallet not connected</div>;
+}
+
+return (
+    <div>
+        <p>Connected: {wallet.getAddress()}</p>
+        <button
+            onClick={() => {
+                disconnect({ connectorId: wallet.connectorId });
+            }}
+            disabled={isPending}
+        >
+            {isPending ? 'Disconnecting...' : 'Disconnect'}
+        </button>
+        {error && <div>Error: {error.message}</div>}
+    </div>
+);
+```
+
+### `useSelectedWallet`
+
+Hook to get and set the currently selected wallet.
+
+```tsx
+const [wallet, setSelectedWallet] = useSelectedWallet();
+
+return (
+    <div>
+        {wallet ? (
+            <div>
+                <p>Current Wallet: {wallet.getAddress()}</p>
+                <button onClick={() => setSelectedWallet(null)}>Deselect Wallet</button>
+            </div>
+        ) : (
+            <p>No wallet selected</p>
+        )}
+    </div>
+);
+```
+
+

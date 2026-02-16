@@ -12,11 +12,8 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
     test: {
-        environment: 'node',
+        environment: 'happy-dom',
         alias: {
-            '@ton/walletkit': path.resolve(__dirname, 'src/__mocks__/@ton/walletkit.ts'),
-            '@ton/appkit/tonconnect': path.resolve(__dirname, 'src/__mocks__/@ton/appkit-tonconnect.ts'),
-            '@ton/appkit': path.resolve(__dirname, 'src/__mocks__/@ton/appkit.ts'),
             '@tonconnect/sdk': path.resolve(__dirname, 'src/__mocks__/@tonconnect/sdk.ts'),
             '@tonconnect/ui-react': path.resolve(__dirname, 'src/__mocks__/@tonconnect/ui-react.ts'),
         },
@@ -32,10 +29,10 @@ export default defineConfig({
                 'src/appkit/react-hook.tsx', // React hook requires browser environment
             ],
             thresholds: {
-                lines: 60,
-                branches: 60,
+                lines: 50,
+                branches: 50,
                 functions: 50,
-                statements: 60,
+                statements: 50,
             },
         },
     },

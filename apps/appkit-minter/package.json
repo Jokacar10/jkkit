@@ -20,7 +20,6 @@
     "@ton/appkit-react": "workspace:*",
     "@ton/core": "catalog:",
     "@ton/crypto": "catalog:",
-    "@ton/walletkit": "workspace:*",
     "@tonconnect/sdk": "catalog:",
     "@tonconnect/ui-react": "catalog:",
     "buffer": "^6.0.3",
