@@ -56,7 +56,12 @@ return (
                 {
                     address: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c', // Recipient address
                     amount: '100000000', // 0.1 TON
-                    payload: beginCell().storeUint(0, 32).storeStringTail('Hello').endCell().toBoc().toString('base64'),
+                    payload: beginCell()
+                        .storeUint(0, 32)
+                        .storeStringTail('Hello')
+                        .endCell()
+                        .toBoc()
+                        .toString('base64') as Base64String,
                 },
             ],
         })}

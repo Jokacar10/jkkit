@@ -6,7 +6,7 @@
  *
  */
 
-import { AppKit, Network } from '@ton/appkit';
+import { AppKit, Network, registerProvider } from '@ton/appkit';
 import { OmnistonSwapProvider } from '@ton/appkit/swap/omniston';
 
 export const swapProviderInitExample = async () => {
@@ -54,7 +54,7 @@ export const swapProviderRegisterExample = async () => {
         apiUrl: 'https://api.ston.fi',
     });
 
-    appKit.registerProvider(provider);
+    registerProvider(appKit, provider);
     // SAMPLE_END: SWAP_PROVIDER_REGISTER
 
     return appKit;

@@ -58,7 +58,7 @@ const provider = new OmnistonSwapProvider({
     apiUrl: 'https://api.ston.fi',
 });
 
-appKit.registerProvider(provider);
+registerProvider(appKit, provider);
 ```
 
 ## Configuration
