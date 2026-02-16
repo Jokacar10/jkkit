@@ -6,4 +6,4 @@
  *
  */
 
-export { ConnectButton } from './connect-button';
+export { TonConnectButton } from '@tonconnect/ui-react';

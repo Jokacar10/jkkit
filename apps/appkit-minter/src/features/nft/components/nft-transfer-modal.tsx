@@ -128,7 +128,7 @@ export const NftTransferModal: React.FC<NftTransferModalProps> = ({ nft, isOpen,
 
                     <div className="flex mt-6 gap-3">
                         <Transaction
-                            getTransactionRequest={createTransferTransaction}
+                            request={createTransferTransaction}
                             onSuccess={() => {
                                 handleClose();
                                 toast.success('NFT transferred successfully');

@@ -7,7 +7,7 @@
  */
 
 import type React from 'react';
-import { ConnectButton } from '@ton/appkit-react';
+import { TonConnectButton } from '@ton/appkit-react';
 
 import { ThemeSwitcher } from './theme-switcher';
 
@@ -35,7 +35,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, title = 'NFT Minter' }
                         <h1 className="text-xl font-bold text-foreground">{title}</h1>
                     </div>
 
-                    <ConnectButton className="ml-auto mr-2" />
+                    <TonConnectButton className="ml-auto mr-2" />
 
                     <ThemeSwitcher />
                 </div>

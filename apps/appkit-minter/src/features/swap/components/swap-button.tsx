@@ -54,10 +54,6 @@ export const SwapButton: FC = () => {
     }, [isLoading, isError, quote]);
 
     return (
-        <Transaction
-            getTransactionRequest={handleBuildSwapTransaction}
-            disabled={!quote || isLoading || isError}
-            text={buttonText}
-        />
+        <Transaction request={handleBuildSwapTransaction} disabled={!quote || isLoading || isError} text={buttonText} />
     );
 };

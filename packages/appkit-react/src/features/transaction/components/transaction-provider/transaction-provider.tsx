@@ -8,9 +8,10 @@
 
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import type { FC, PropsWithChildren } from 'react';
-import type { SendTransactionParameters, SendTransactionReturnType } from '@ton/appkit';
+import type { SendTransactionReturnType } from '@ton/appkit';
 
 import { useSendTransaction } from '../../hooks/use-send-transaction';
+import type { TransactionRequest } from '../transaction/transaction';
 
 export interface TransactionContextType {
     /** Function to submit the transaction */
@@ -40,7 +41,7 @@ export function useTransactionContext() {
 
 export interface TransactionProviderProps extends PropsWithChildren {
     /** The transaction request parameters */
-    getTransactionRequest: () => Promise<SendTransactionParameters | null>;
+    request: TransactionRequest;
     /** Callback when an error occurs */
     onError?: (error: Error) => void;
     /** Callback when the transaction is successful */
@@ -51,7 +52,7 @@ export interface TransactionProviderProps extends PropsWithChildren {
 
 export const TransactionProvider: FC<TransactionProviderProps> = ({
     children,
-    getTransactionRequest,
+    request,
     onError,
     onSuccess,
     disabled = false,
@@ -83,7 +84,7 @@ export const TransactionProvider: FC<TransactionProviderProps> = ({
         setIsPreparing(true);
 
         try {
-            const transactionRequest = await getTransactionRequest();
+            const transactionRequest = typeof request === 'function' ? await request() : request;
 
             if (!transactionRequest) {
                 return;
@@ -96,7 +97,7 @@ export const TransactionProvider: FC<TransactionProviderProps> = ({
         } finally {
             setIsPreparing(false);
         }
-    }, [sendTransaction, getTransactionRequest, disabled, isPreparing, isPending, onError]);
+    }, [sendTransaction, request, disabled, isPreparing, isPending, onError]);
 
     const value = useMemo(
         () => ({

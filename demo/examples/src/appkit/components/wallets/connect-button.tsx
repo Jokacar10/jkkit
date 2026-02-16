@@ -6,10 +6,10 @@
  *
  */
 
-import { ConnectButton } from '@ton/appkit-react';
+import { TonConnectButton } from '@ton/appkit-react';
 
 export const ConnectButtonExample = () => {
     // SAMPLE_START: CONNECT_BUTTON
-    return <ConnectButton />;
+    return <TonConnectButton />;
     // SAMPLE_END: CONNECT_BUTTON
 };

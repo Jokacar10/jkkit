@@ -65,8 +65,7 @@ A drop-in component that handles the entire transaction flow.
 ```tsx
 return (
     <Transaction
-        getTransactionRequest={async () => ({
-            validUntil: Math.floor(Date.now() / 1000) + 600,
+        request={{
             messages: [
                 {
                     address: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c', // Recipient address
@@ -79,7 +78,7 @@ return (
                         .toString('base64') as Base64String,
                 },
             ],
-        })}
+        }}
         text="Send Transaction"
         onSuccess={(result) => {
             console.log('Transaction sent:', result);

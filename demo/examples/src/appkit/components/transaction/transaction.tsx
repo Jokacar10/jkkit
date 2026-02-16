@@ -16,8 +16,7 @@ export const TransactionExample = () => {
     // SAMPLE_START: TRANSACTION
     return (
         <Transaction
-            getTransactionRequest={async () => ({
-                validUntil: Math.floor(Date.now() / 1000) + 600,
+            request={{
                 messages: [
                     {
                         address: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c', // Recipient address
@@ -30,7 +29,7 @@ export const TransactionExample = () => {
                             .toString('base64') as Base64String,
                     },
                 ],
-            })}
+            }}
             text="Send Transaction"
             onSuccess={(result) => {
                 console.log('Transaction sent:', result);

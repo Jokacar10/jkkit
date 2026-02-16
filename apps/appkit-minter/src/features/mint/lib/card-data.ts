@@ -8,6 +8,7 @@
 
 import { RarityValues, RARITY_CONFIGS } from '../types/card';
 import type { Rarity } from '../types/card';
+import { textToSvgPath, getTextWidth } from './svg-glyphs';
 
 // Card names organized by rarity
 export const CARD_NAMES: Record<Rarity, string[]> = {
@@ -103,11 +104,19 @@ export function getRandomDescription(rarity: Rarity): string {
 }
 
 /**
- * Generate a placeholder image URL based on rarity
+ * Generate a placeholder image URL based on rarity (inline SVG with path-based text)
  */
-export function getCardImageUrl(rarity: Rarity, name: string): string {
+export async function getCardImageUrl(rarity: Rarity, name: string): Promise<string> {
     const config = RARITY_CONFIGS[rarity];
-    const encodedName = encodeURIComponent(name);
-    const bgColor = config.color.replace('#', '');
-    return `https://placehold.co/300x400/${bgColor}/ffffff?text=${encodedName}`;
+    const fontSize = 18;
+    const textWidth = await getTextWidth(name, fontSize);
+    const textX = (300 - textWidth) / 2;
+    const textY = 200 + fontSize / 3; // Approximate vertical centering
+    const textPath = await textToSvgPath(name, fontSize, textX, textY);
+
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="400" viewBox="0 0 300 400">
+        <rect width="300" height="400" fill="${config.color}"/>
+        <path d="${textPath}" fill="#ffffff"/>
+    </svg>`;
+    return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }

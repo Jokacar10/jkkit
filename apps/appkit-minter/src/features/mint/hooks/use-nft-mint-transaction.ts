@@ -14,16 +14,26 @@ import type { Base64String, TransactionRequest } from '@ton/appkit';
 import { useMinterStore } from '../store/minter-store';
 import { buildSingleNftStateInit, encodeOnChainContent } from '../contracts';
 
+type UseNftTransactionType =
+    | {
+          canMint: true;
+          createMintTransaction: () => Promise<TransactionRequest>;
+      }
+    | {
+          canMint: false;
+          createMintTransaction: () => Promise<null>;
+      };
+
 /**
  * Hook to create NFT mint transaction request
  */
-export function useNftMintTransaction() {
+export function useNftMintTransaction(): UseNftTransactionType {
     const currentCard = useMinterStore((state) => state.currentCard);
     const [wallet] = useSelectedWallet();
 
-    const createMintTransaction = useCallback(async (): Promise<TransactionRequest | null> => {
+    const createMintTransaction = useCallback(async (): Promise<TransactionRequest> => {
         if (!currentCard || !wallet) {
-            return null;
+            throw new Error('Cannot mint NFT: No current card or wallet');
         }
 
         const walletAddress = Address.parse(wallet.getAddress());
@@ -62,8 +72,17 @@ export function useNftMintTransaction() {
         };
     }, [currentCard, wallet]);
 
-    return {
-        createMintTransaction,
-        canMint: !!currentCard && !!wallet,
-    };
+    const canMint = !!currentCard && !!wallet;
+
+    if (canMint) {
+        return {
+            createMintTransaction,
+            canMint: true,
+        };
+    } else {
+        return {
+            createMintTransaction: () => Promise.reject(new Error('Cannot mint NFT: No current card or wallet')),
+            canMint: false,
+        };
+    }
 }

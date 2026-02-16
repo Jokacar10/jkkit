@@ -14,7 +14,7 @@ import { useAppKit } from '../../../../hooks/use-app-kit';
 import { Transaction } from '../../../transaction';
 import type { TransactionProps } from '../../../transaction';
 
-export interface SendButtonProps extends Omit<TransactionProps, 'getTransactionRequest'> {
+export interface SendButtonProps extends Omit<TransactionProps, 'request'> {
     tokenType: 'TON' | 'JETTON';
     recipientAddress: string;
     amount: string;
@@ -53,11 +53,5 @@ export const SendButton: FC<SendButtonProps> = ({
         });
     }, [appKit, tokenType, recipientAddress, amount, comment, jettonAddress]);
 
-    return (
-        <Transaction
-            getTransactionRequest={createTransferTransaction}
-            disabled={!recipientAddress || !amount}
-            {...props}
-        />
-    );
+    return <Transaction request={createTransferTransaction} disabled={!recipientAddress || !amount} {...props} />;
 };

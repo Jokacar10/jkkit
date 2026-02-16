@@ -66,7 +66,7 @@ describe('TransactionExample Component', () => {
         });
 
         await waitFor(() => {
-            // It calls sendTransaction with the request returned by getTransactionRequest
+            // It calls sendTransaction with the request returned by request
             expect(mockSendTransaction).toHaveBeenCalled();
             // We can check arguments more specifically if we want
             // The message is a Cell with "Hello, world!" string

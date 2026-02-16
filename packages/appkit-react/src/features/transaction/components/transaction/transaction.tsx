@@ -21,9 +21,14 @@ export interface TransactionRenderProps {
     text: ReactNode;
 }
 
+export type TransactionRequest =
+    | SendTransactionParameters
+    | (() => SendTransactionParameters)
+    | (() => Promise<SendTransactionParameters>);
+
 export interface TransactionProps extends Omit<ComponentProps<'button'>, 'children' | 'onError'> {
     /** The transaction request parameters */
-    getTransactionRequest: () => Promise<SendTransactionParameters | null>;
+    request: TransactionRequest;
     /** Callback when an error occurs */
     onError?: (error: Error) => void;
     /** Callback when the transaction is successful */
@@ -80,7 +85,7 @@ const TransactionContent: FC<TransactionContentProps> = ({ text, children, ...pr
 };
 
 export const Transaction: FC<TransactionProps> = ({
-    getTransactionRequest,
+    request,
     children,
     className,
     onError,
@@ -90,12 +95,7 @@ export const Transaction: FC<TransactionProps> = ({
     ...props
 }) => {
     return (
-        <TransactionProvider
-            getTransactionRequest={getTransactionRequest}
-            onError={onError}
-            onSuccess={onSuccess}
-            disabled={disabled}
-        >
+        <TransactionProvider request={request} onError={onError} onSuccess={onSuccess} disabled={disabled}>
             <TransactionContent className={className} text={text} {...props}>
                 {children}
             </TransactionContent>

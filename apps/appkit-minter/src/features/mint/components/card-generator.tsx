@@ -91,9 +91,9 @@ export const CardGenerator: React.FC<CardGeneratorProps> = ({ className }) => {
                         {currentCard ? 'New' : 'Generate'}
                     </Button>
 
-                    {isConnected && (
+                    {isConnected && canMint && (
                         <Transaction
-                            getTransactionRequest={createMintTransaction}
+                            request={createMintTransaction}
                             onSuccess={() => {
                                 mintCard();
                                 setMintErrorLocal(null);
