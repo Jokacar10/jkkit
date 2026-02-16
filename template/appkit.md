@@ -21,7 +21,7 @@ A dApp-side integration layer for TON Connect with a unified asset API for TON, 
 This guide shows how to integrate `@ton/appkit` into your dApp for asset operations with TonConnect wallets.
 
 ```bash
-npm install @ton/appkit @tonconnect/sdk
+npm install @ton/appkit @ton/core @ton/crypto
 ```
 
 ## Peer Dependencies
