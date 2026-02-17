@@ -119,14 +119,3 @@ const appKit = new AppKit({
 ```
 
 Multiple providers can be registered. AppKit uses the first provider by default; pass `providerId` to hooks to target a specific one.
-
-## Entry Points
-
-Providers are imported from separate entry points to keep dependencies optional:
-
-```
-@ton/appkit/swap/my-dex     → re-exports from @ton/walletkit/swap/my-dex
-@ton/walletkit/swap/my-dex  → your SwapProvider implementation
-```
-
-See the existing provider implementations in `packages/walletkit/src/defi/swap/` for reference.
