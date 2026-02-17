@@ -1,9 +1,5 @@
-name: Release
-
-on:
-  workflow_dispatch:
-    branches:
-      - release
+name: Debug Workflow
+on: workflow_dispatch
 
 permissions:
   contents: write
@@ -13,7 +9,6 @@ jobs:
   release:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    environment: Release
 
     steps:
 
@@ -101,47 +96,8 @@ jobs:
             echo "Warning: iOS bridge checksums not found"
           fi
 
-      - name: Create Release Draft
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: v${{ steps.check_versions.outputs.walletkit_version }}
-          name: Release v${{ steps.check_versions.outputs.walletkit_version }}
-          draft: true
-          files: |
-            release-artifacts/ton-walletkit-*.tgz
-            release-artifacts/walletkit-ios-bridge-*.tgz
-            release-artifacts/walletkit-android-bridge-*.tgz
-            release-artifacts/walletkit-android-bridge.checksums.json
-            release-artifacts/walletkit-ios-bridge.checksums.json
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish @ton/walletkit
-        if: steps.check_versions.outputs.walletkit_exists == 'false'
+      - name: Debug git status
         run: |
-          pnpm publish \
-            --filter="@ton/walletkit" \
-            --access=public \
-            --publish-branch=release \
-            --tag=${{ steps.check_versions.outputs.walletkit_tag }} \
-            --verbose
-
-      - name: Publish @ton/appkit
-        if: steps.check_versions.outputs.appkit_exists == 'false'
-        run: |
-          pnpm publish \
-            --filter="@ton/appkit" \
-            --access=public \
-            --publish-branch=release \
-            --tag=${{ steps.check_versions.outputs.appkit_tag }} \
-            --verbose
-
-      - name: Publish @ton/appkit-react
-        if: steps.check_versions.outputs.appkit_react_exists == 'false'
-        run: |
-          pnpm publish \
-            --filter="@ton/appkit-react" \
-            --access=public \
-            --publish-branch=release \
-            --tag=${{ steps.check_versions.outputs.appkit_react_tag }} \
-            --verbose
+          echo "=== Git Status Debug ==="
+          git status
+          echo "=== End Git Status Debug ==="
