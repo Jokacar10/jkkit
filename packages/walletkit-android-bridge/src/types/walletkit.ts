@@ -59,6 +59,9 @@ export interface AndroidBridgeType {
 
 export interface WalletKitNativeBridgeType {
     postMessage(json: string): void;
+    // Custom signer callback: JS delegates sign() to Kotlin for custom signers
+    signWithCustomSigner?(signerId: string, data: number[]): string;
+    // Proxy adapter callbacks: JS delegates adapter methods to Kotlin
     adapterGetStateInit?(adapterId: string): string;
     adapterSignTransaction?(adapterId: string, inputJson: string, fakeSignature: boolean): string;
     adapterSignData?(adapterId: string, inputJson: string, fakeSignature: boolean): string;

@@ -52,24 +52,22 @@ export interface CreateTonMnemonicArgs {
     count?: number;
 }
 
-export interface PublicKeyFromSecretKeyArgs {
+export interface CreateSignerFromMnemonicArgs {
+    mnemonic: string[];
+    mnemonicType?: string;
+}
+
+export interface CreateSignerFromPrivateKeyArgs {
     secretKey: string;
 }
 
-export interface ComputeWalletAddressArgs {
+export interface CreateSignerFromCustomArgs {
+    signerId: string;
     publicKey: string;
-    version: 'v5r1' | 'v4r2';
-    network: { chainId: string };
-    workchain?: number;
-    walletId?: number;
 }
 
-export interface AddWalletWithSignerArgs {
-    secretKey?: string;
-    publicKey?: string;
-    signerId?: string;
-    isCustom?: boolean;
-    version: 'v5r1' | 'v4r2';
+export interface CreateWalletAdapterArgs {
+    signerId: string;
     network: { chainId: string };
     workchain?: number;
     walletId?: number;
@@ -77,10 +75,14 @@ export interface AddWalletWithSignerArgs {
 
 export interface AddWalletArgs {
     adapterId: string;
-    walletId: string;
-    publicKey: string;
-    network: { chainId: string };
-    address: string;
+    walletId?: string;
+    publicKey?: string;
+    network?: { chainId: string };
+    address?: string;
+}
+
+export interface ReleaseRefArgs {
+    id: string;
 }
 
 export interface RemoveWalletArgs {
@@ -277,10 +279,13 @@ export interface WalletKitBridgeApi {
     mnemonicToKeyPair(args: MnemonicToKeyPairArgs): PromiseOrValue<{ publicKey: Uint8Array; secretKey: Uint8Array }>;
     sign(args: SignArgs): PromiseOrValue<string>;
     createTonMnemonic(args?: CreateTonMnemonicArgs): PromiseOrValue<string[]>;
-    publicKeyFromSecretKey(args: PublicKeyFromSecretKeyArgs): PromiseOrValue<string>;
-    computeWalletAddress(args: ComputeWalletAddressArgs): PromiseOrValue<string>;
-    addWalletWithSigner(args: AddWalletWithSignerArgs): PromiseOrValue<{ walletId: string | undefined; wallet: Wallet } | null>;
+    createSignerFromMnemonic(args: CreateSignerFromMnemonicArgs): PromiseOrValue<{ signerId: string; publicKey: string }>;
+    createSignerFromPrivateKey(args: CreateSignerFromPrivateKeyArgs): PromiseOrValue<{ signerId: string; publicKey: string }>;
+    createSignerFromCustom(args: CreateSignerFromCustomArgs): PromiseOrValue<{ signerId: string; publicKey: string }>;
+    createV5R1WalletAdapter(args: CreateWalletAdapterArgs): PromiseOrValue<{ adapterId: string; address: string }>;
+    createV4R2WalletAdapter(args: CreateWalletAdapterArgs): PromiseOrValue<{ adapterId: string; address: string }>;
     addWallet(args: AddWalletArgs): PromiseOrValue<{ walletId: string | undefined; wallet: Wallet } | null>;
+    releaseRef(args: ReleaseRefArgs): PromiseOrValue<{ ok: boolean }>;
     getWallets(): PromiseOrValue<{ walletId: string | undefined; wallet: Wallet }[]>;
     getWallet(args: { walletId: string }): PromiseOrValue<{ walletId: string | undefined; wallet: Wallet } | null>;
     getWalletAddress(args: { walletId: string }): PromiseOrValue<string | null>;

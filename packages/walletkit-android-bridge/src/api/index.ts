@@ -34,13 +34,16 @@ export const api: WalletKitBridgeApi = {
     sign: cryptography.sign,
     createTonMnemonic: cryptography.createTonMnemonic,
 
-    // Wallets — stateless factory helpers
-    publicKeyFromSecretKey: wallets.publicKeyFromSecretKey,
-    computeWalletAddress: wallets.computeWalletAddress,
-    addWalletWithSigner: wallets.addWalletWithSigner,
+    // Wallets — 3-step factory
+    createSignerFromMnemonic: wallets.createSignerFromMnemonic,
+    createSignerFromPrivateKey: wallets.createSignerFromPrivateKey,
+    createSignerFromCustom: wallets.createSignerFromCustom,
+    createV5R1WalletAdapter: wallets.createV5R1WalletAdapter,
+    createV4R2WalletAdapter: wallets.createV4R2WalletAdapter,
 
-    // Wallets — proxy adapter (host apps)
+    // Wallets — unified addWallet (registry path + proxy adapter path)
     addWallet: wallets.addWallet,
+    releaseRef: wallets.releaseRef,
     getWallets: wallets.getWallets,
     getWallet: wallets.getWalletById,
     getWalletAddress: wallets.getWalletAddress,
