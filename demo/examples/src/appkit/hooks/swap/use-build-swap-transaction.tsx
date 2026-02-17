@@ -17,7 +17,7 @@ export const UseBuildSwapTransactionExample = () => {
     const { data: quote } = useSwapQuote({
         fromToken: { type: 'ton' },
         toToken: { type: 'jetton', value: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs' },
-        amount: '1000000000',
+        amount: '1000000000', // 1 TON in nanotons (raw format)
         network: Network.mainnet(),
     });
 

@@ -441,7 +441,7 @@ Create a TON transfer transaction request without sending it.
 ```ts
 const tx = await createTransferTonTransaction(appKit, {
     recipientAddress: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
-    amount: '0.1', // 0.1 TON
+    amount: '0.1', // 0.1 TON (human-readable format)
     comment: 'Draft transaction',
 });
 
@@ -457,7 +457,7 @@ const result = await sendTransaction(appKit, {
     messages: [
         {
             address: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
-            amount: '100000000', // 0.1 TON
+            amount: '100000000', // 0.1 TON in nanotons (raw format)
         },
     ],
 });
@@ -472,7 +472,7 @@ Transfer TON to a recipient address.
 ```ts
 const result = await transferTon(appKit, {
     recipientAddress: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
-    amount: '100000000', // 0.1 TON
+    amount: '0.1', // 0.1 TON (human-readable format)
     comment: 'Hello from AppKit!',
 });
 

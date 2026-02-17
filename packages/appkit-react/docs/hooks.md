@@ -513,7 +513,7 @@ const {
         type: 'jetton',
         value: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
     }, // USDT
-    amount: '1000000000', // 1 TON
+    amount: '1000000000', // 1 TON in nanotons (raw format)
     network: Network.mainnet(),
 });
 
@@ -550,7 +550,7 @@ const { data: quote } = useSwapQuote({
         type: 'jetton',
         value: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
     },
-    amount: '1000000000',
+    amount: '1000000000', // 1 TON in nanotons (raw format)
     network: Network.mainnet(),
 });
 
@@ -640,7 +640,7 @@ const { mutate: transferTon, isPending, error, data } = useTransferTon();
 const handleTransfer = () => {
     transferTon({
         recipientAddress: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
-        amount: '1', // 1 TON
+        amount: '1', // 1 TON (human-readable format)
         comment: 'Hello from AppKit!',
     });
 };
