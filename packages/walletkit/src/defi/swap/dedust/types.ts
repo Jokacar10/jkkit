@@ -6,8 +6,6 @@
  *
  */
 
-import type { PoolType } from '@dedust/sdk';
-
 /**
  * Configuration options for DeDustSwapProvider
  */
@@ -24,28 +22,118 @@ export interface DeDustSwapProviderConfig {
     defaultSlippageBps?: number;
 
     /**
-     * Gas amount for TON swaps (in nanotons)
-     * @default 250000000 (0.25 TON)
+     * API base URL
+     * @default 'https://api-mainnet.dedust.io'
      */
-    gasAmount?: string;
+    apiUrl?: string;
 
     /**
-     * Gas amount for Jetton swaps (in nanotons)
-     * @default 300000000 (0.3 TON)
+     * Referral address for fee sharing
      */
-    jettonGasAmount?: string;
+    referralAddress?: string;
 
     /**
-     * Forward amount for Jetton transfers (in nanotons)
-     * @default 250000000 (0.25 TON)
+     * Referral fee in basis points (max 100 = 1%)
      */
-    forwardAmount?: string;
+    referralFeeBps?: number;
 
     /**
-     * TonClient4 endpoint URL
-     * @default 'https://mainnet-v4.tonhubapi.com'
+     * Only use verified pools
+     * @default true
      */
-    endpoint?: string;
+    onlyVerifiedPools?: boolean;
+
+    /**
+     * Maximum number of route splits
+     * @default 4
+     */
+    maxSplits?: number;
+
+    /**
+     * Maximum route length (hops)
+     * @default 3
+     */
+    maxLength?: number;
+
+    /**
+     * Minimum pool TVL in USD
+     * @default '5000'
+     */
+    minPoolUsdTvl?: string;
+}
+
+/**
+ * Route step from DeDust Router API
+ */
+export interface DeDustRouteStep {
+    pool_address: string;
+    is_stable: boolean;
+    in_minter: string;
+    out_minter: string;
+    in_amount: string;
+    out_amount: string;
+    network_fee: string;
+    protocol_slug: string;
+    stonfi_extra_details?: {
+        router: string;
+        from_router_wallet: string;
+        to_router_wallet: string;
+    };
+}
+
+/**
+ * Swap data from DeDust Router API quote response
+ */
+export interface DeDustSwapData {
+    slippage_bps: number;
+    routes: DeDustRouteStep[][];
+}
+
+/**
+ * Quote response from DeDust Router API
+ */
+export interface DeDustQuoteResponse {
+    in_amount: string;
+    out_amount: string;
+    swap_data: DeDustSwapData;
+    swap_is_possible: boolean;
+    price_impact?: number;
+    improvement?: string;
+    in_minter_price?: string;
+    out_minter_price?: string;
+}
+
+/**
+ * Swap request to DeDust Router API
+ */
+export interface DeDustSwapRequest {
+    sender_address: string;
+    swap_data: {
+        slippage_bps: number;
+        routes: DeDustRouteStep[];
+    };
+    referral_address?: string;
+    referral_fee?: number;
+    jetton_wallet_state_init?: string;
+    custom_payload?: string;
+}
+
+/**
+ * Swap transaction from DeDust Router API
+ */
+export interface DeDustSwapTransaction {
+    address: string;
+    amount: string;
+    payload: string;
+    state_init?: string;
+}
+
+/**
+ * Swap response from DeDust Router API
+ */
+export interface DeDustSwapResponse {
+    query_id: number;
+    transactions: DeDustSwapTransaction[];
 }
 
 /**
@@ -53,39 +141,9 @@ export interface DeDustSwapProviderConfig {
  */
 export interface DeDustQuoteMetadata {
     /**
-     * Pool address for the swap
+     * Raw quote response from API
      */
-    poolAddress: string;
-
-    /**
-     * Pool type (volatile or stable)
-     */
-    poolType: PoolType;
-
-    /**
-     * Vault address for the source token
-     */
-    vaultAddress: string;
-
-    /**
-     * Is the source token native TON
-     */
-    isNativeSwap: boolean;
-
-    /**
-     * Jetton wallet address for source token (only for jetton swaps)
-     */
-    jettonWalletAddress?: string;
-
-    /**
-     * Estimated output amount from pool
-     */
-    estimatedOutput: string;
-
-    /**
-     * Minimum output amount after slippage
-     */
-    minOutput: string;
+    quoteResponse: DeDustQuoteResponse;
 
     /**
      * Slippage used for the quote in basis points
@@ -98,18 +156,44 @@ export interface DeDustQuoteMetadata {
  */
 export interface DeDustProviderOptions {
     /**
-     * Pool type to use for the swap
-     * @default PoolType.VOLATILE
+     * Protocols to use for routing
+     * Available: 'dedust', 'dedust_v3', 'dedust_v3_memepad', 'stonfi_v1', 'stonfi_v2', 'tonco', 'memeslab', 'tonfun'
+     * @default all protocols
      */
-    poolType?: PoolType;
+    protocols?: string[];
 
     /**
-     * Custom gas amount for the swap (in nanotons)
+     * Protocols to exclude from routing
      */
-    gasAmount?: string;
+    excludeProtocols?: string[];
 
     /**
-     * Custom forward amount for jetton transfers (in nanotons)
+     * Only use verified pools
      */
-    forwardAmount?: string;
+    onlyVerifiedPools?: boolean;
+
+    /**
+     * Maximum number of route splits
+     */
+    maxSplits?: number;
+
+    /**
+     * Maximum route length (hops)
+     */
+    maxLength?: number;
+
+    /**
+     * Exclude volatile pools
+     */
+    excludeVolatilePools?: boolean;
+
+    /**
+     * Custom referral address (overrides config)
+     */
+    referralAddress?: string;
+
+    /**
+     * Custom referral fee in basis points (overrides config)
+     */
+    referralFeeBps?: number;
 }

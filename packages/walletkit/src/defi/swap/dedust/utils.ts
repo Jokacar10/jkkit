@@ -7,49 +7,40 @@
  */
 
 import { Address } from '@ton/core';
-import { Asset } from '@dedust/sdk';
 
 import { Network } from '../../../api/models';
 import type { DeDustQuoteMetadata } from './types';
 import type { SwapToken } from '../../../api/models';
 
 /**
- * Native TON address used by DeDust protocol
+ * Native TON identifier used by DeDust Router API
  */
-export const NATIVE_TON_ADDRESS = 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c';
+export const NATIVE_TON_MINTER = 'native';
 
 /**
- * Convert SwapToken to DeDust Asset
+ * Convert SwapToken to DeDust minter address string
+ * DeDust API expects user-friendly address format (e.g., EQBlqsm144Dq6SjbPI4jjZvA1hqTIP3CvHovbIfW_t-SCALE)
  */
-export const tokenToAsset = (token: SwapToken): Asset => {
+export const tokenToMinter = (token: SwapToken): string => {
     if (token.type === 'ton') {
-        return Asset.native();
+        return NATIVE_TON_MINTER;
     }
-    return Asset.jetton(Address.parse(token.value));
+    // Return user-friendly address format (base64 with workchain prefix)
+    return Address.parse(token.value).toString({ bounceable: true, urlSafe: true });
 };
 
 /**
- * Convert SwapToken to address string
+ * Convert DeDust minter address string to SwapToken
  */
-export const tokenToAddress = (token: SwapToken): string => {
-    if (token.type === 'ton') {
-        return NATIVE_TON_ADDRESS;
-    }
-    return Address.parse(token.value).toRawString();
-};
-
-/**
- * Convert address string to SwapToken
- */
-export const addressToToken = (address: string): SwapToken => {
-    if (address === NATIVE_TON_ADDRESS) {
+export const minterToToken = (minter: string): SwapToken => {
+    if (minter === NATIVE_TON_MINTER) {
         return { type: 'ton' };
     }
 
     try {
-        return { type: 'jetton', value: Address.parseRaw(address).toString() };
+        return { type: 'jetton', value: Address.parseRaw(minter).toString() };
     } catch {
-        return { type: 'jetton', value: address };
+        return { type: 'jetton', value: minter };
     }
 };
 
@@ -70,19 +61,6 @@ export const validateNetwork = (network: Network): void => {
 };
 
 /**
- * Calculate minimum output amount with slippage
- * @param amount - Amount in raw units (string)
- * @param slippageBps - Slippage in basis points (100 = 1%)
- * @returns Minimum output amount as string
- */
-export const calculateMinOutput = (amount: string, slippageBps: number): string => {
-    const amountBigInt = BigInt(amount);
-    const slippageMultiplier = BigInt(10000 - slippageBps);
-    const minOutput = (amountBigInt * slippageMultiplier) / BigInt(10000);
-    return minOutput.toString();
-};
-
-/**
  * Type guard for DeDustQuoteMetadata
  */
 export const isDeDustQuoteMetadata = (metadata: unknown): metadata is DeDustQuoteMetadata => {
@@ -93,11 +71,6 @@ export const isDeDustQuoteMetadata = (metadata: unknown): metadata is DeDustQuot
     const meta = metadata as Record<string, unknown>;
 
     return (
-        typeof meta.poolAddress === 'string' &&
-        typeof meta.vaultAddress === 'string' &&
-        typeof meta.isNativeSwap === 'boolean' &&
-        typeof meta.estimatedOutput === 'string' &&
-        typeof meta.minOutput === 'string' &&
-        typeof meta.slippageBps === 'number'
+        typeof meta.quoteResponse === 'object' && meta.quoteResponse !== null && typeof meta.slippageBps === 'number'
     );
 };

@@ -7,5 +7,11 @@
  */
 
 export { DeDustSwapProvider } from './DeDustSwapProvider';
-export type { DeDustSwapProviderConfig, DeDustQuoteMetadata, DeDustProviderOptions } from './types';
+export type {
+    DeDustSwapProviderConfig,
+    DeDustQuoteMetadata,
+    DeDustProviderOptions,
+    DeDustQuoteResponse,
+    DeDustRouteStep,
+} from './types';
 export { isDeDustQuoteMetadata } from './utils';

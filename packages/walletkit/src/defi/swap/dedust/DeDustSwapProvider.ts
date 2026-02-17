@@ -6,94 +6,92 @@
  *
  */
 
-import { Factory, MAINNET_FACTORY_ADDR, PoolType, ReadinessStatus, VaultJetton, JettonRoot } from '@dedust/sdk';
-import { Address, beginCell } from '@ton/core';
-import type { OpenedContract } from '@ton/core';
-import { TonClient4 } from '@ton/ton';
+import { Address } from '@ton/core';
 
-import type { DeDustQuoteMetadata, DeDustSwapProviderConfig, DeDustProviderOptions } from './types';
+import type {
+    DeDustQuoteMetadata,
+    DeDustSwapProviderConfig,
+    DeDustProviderOptions,
+    DeDustQuoteResponse,
+    DeDustSwapResponse,
+} from './types';
 import { SwapProvider } from '../SwapProvider';
 import type { SwapQuoteParams, SwapQuote, SwapParams } from '../../../api/models';
 import { SwapError } from '../errors';
 import { globalLogger } from '../../../core/Logger';
-import { tokenToAsset, isNativeTon, validateNetwork, calculateMinOutput, isDeDustQuoteMetadata } from './utils';
+import { tokenToMinter, validateNetwork, isDeDustQuoteMetadata } from './utils';
 import type { TransactionRequest } from '../../../api/models';
-import { Uint8ArrayToBase64, asBase64 } from '../../../utils';
+import { asBase64 } from '../../../utils';
 
 const log = globalLogger.createChild('DeDustSwapProvider');
 
 /**
- * Default gas amount for TON swaps (0.25 TON)
+ * Default API URL for DeDust Router
  */
-const DEFAULT_GAS_AMOUNT = '250000000';
+const DEFAULT_API_URL = 'https://api-mainnet.dedust.io';
 
 /**
- * Default gas amount for Jetton swaps (0.3 TON)
+ * Default protocols to use for routing
  */
-const DEFAULT_JETTON_GAS_AMOUNT = '300000000';
+const DEFAULT_PROTOCOLS = [
+    'dedust',
+    'dedust_v3',
+    'dedust_v3_memepad',
+    'stonfi_v1',
+    'stonfi_v2',
+    'tonco',
+    // 'memeslab',
+    // 'tonfun',
+];
 
 /**
- * Default forward amount for Jetton transfers (0.25 TON)
- */
-const DEFAULT_FORWARD_AMOUNT = '250000000';
-
-/**
- * Swap provider implementation for DeDust protocol
+ * Swap provider implementation for DeDust protocol using Router v2 API
  *
- * Uses the DeDust SDK to get quotes and build swap transactions
- * on TON blockchain.
+ * Uses the DeDust Router API to get quotes and build swap transactions
+ * with optimal routing across multiple pools and protocols.
  *
  * @example
  * ```typescript
- * // Import from separate entry point to avoid bundling DeDust SDK
  * import { DeDustSwapProvider } from '@ton/walletkit/swap/dedust';
  *
  * const provider = new DeDustSwapProvider({
  *   defaultSlippageBps: 100, // 1%
- *   endpoint: 'https://mainnet-v4.tonhubapi.com'
+ *   referralAddress: 'EQ...',
+ *   referralFeeBps: 50 // 0.5%
  * });
  *
  * kit.swap.registerProvider('dedust', provider);
  * ```
  */
-export class DeDustSwapProvider extends SwapProvider<DeDustProviderOptions> {
-    private readonly endpoint: string;
+export class DeDustSwapProvider extends SwapProvider<DeDustProviderOptions, DeDustProviderOptions> {
+    private readonly apiUrl: string;
     private readonly defaultSlippageBps: number;
-    private readonly gasAmount: string;
-    private readonly jettonGasAmount: string;
-    private readonly forwardAmount: string;
-    private tonClient$?: TonClient4;
-    private factory$?: OpenedContract<Factory>;
+    private readonly referralAddress?: string;
+    private readonly referralFeeBps?: number;
+    private readonly onlyVerifiedPools: boolean;
+    private readonly maxSplits: number;
+    private readonly maxLength: number;
+    private readonly minPoolUsdTvl: string;
 
     readonly providerId: string;
 
     constructor(config?: DeDustSwapProviderConfig) {
         super();
         this.providerId = config?.providerId ?? 'dedust';
-        this.endpoint = config?.endpoint ?? 'https://mainnet-v4.tonhubapi.com';
+        this.apiUrl = config?.apiUrl ?? DEFAULT_API_URL;
         this.defaultSlippageBps = config?.defaultSlippageBps ?? 100; // 1% default
-        this.gasAmount = config?.gasAmount ?? DEFAULT_GAS_AMOUNT;
-        this.jettonGasAmount = config?.jettonGasAmount ?? DEFAULT_JETTON_GAS_AMOUNT;
-        this.forwardAmount = config?.forwardAmount ?? DEFAULT_FORWARD_AMOUNT;
+        this.referralAddress = config?.referralAddress;
+        this.referralFeeBps = config?.referralFeeBps;
+        this.onlyVerifiedPools = config?.onlyVerifiedPools ?? true;
+        this.maxSplits = config?.maxSplits ?? 4;
+        this.maxLength = config?.maxLength ?? 3;
+        this.minPoolUsdTvl = config?.minPoolUsdTvl ?? '5000';
 
         log.info('DeDustSwapProvider initialized', {
-            endpoint: this.endpoint,
+            apiUrl: this.apiUrl,
             defaultSlippageBps: this.defaultSlippageBps,
+            hasReferral: !!this.referralAddress,
         });
-    }
-
-    private get tonClient(): TonClient4 {
-        if (!this.tonClient$) {
-            this.tonClient$ = new TonClient4({ endpoint: this.endpoint });
-        }
-        return this.tonClient$;
-    }
-
-    private get factory(): OpenedContract<Factory> {
-        if (!this.factory$) {
-            this.factory$ = this.tonClient.open(Factory.createFromAddress(MAINNET_FACTORY_ADDR));
-        }
-        return this.factory$;
     }
 
     async getQuote(params: SwapQuoteParams<DeDustProviderOptions>): Promise<SwapQuote> {
@@ -107,95 +105,85 @@ export class DeDustSwapProvider extends SwapProvider<DeDustProviderOptions> {
         // Validate network (DeDust only supports mainnet)
         validateNetwork(params.network);
 
-        if (params.isReverseSwap) {
-            throw new SwapError(
-                'DeDust does not support reverse swaps (specifying output amount)',
-                SwapError.INVALID_PARAMS,
-            );
-        }
+        const slippageBps = params.slippageBps ?? this.defaultSlippageBps;
+        const swapMode = params.isReverseSwap ? 'exact_out' : 'exact_in';
 
         try {
-            const fromAsset = tokenToAsset(params.fromToken);
-            const toAsset = tokenToAsset(params.toToken);
-            const slippageBps = params.slippageBps ?? this.defaultSlippageBps;
-            const poolType = params.providerOptions?.poolType ?? PoolType.VOLATILE;
+            const inMinter = tokenToMinter(params.fromToken);
+            const outMinter = tokenToMinter(params.toToken);
 
-            // Get pool
-            const pool = this.tonClient.open(await this.factory.getPool(poolType, [fromAsset, toAsset]));
+            const requestBody = {
+                in_minter: inMinter,
+                out_minter: outMinter,
+                amount: params.amount,
+                swap_mode: swapMode,
+                slippage_bps: slippageBps,
+                protocols: params.providerOptions?.protocols ?? DEFAULT_PROTOCOLS,
+                exclude_protocols: params.providerOptions?.excludeProtocols,
+                only_verified_pools: params.providerOptions?.onlyVerifiedPools ?? this.onlyVerifiedPools,
+                max_splits: params.providerOptions?.maxSplits ?? this.maxSplits,
+                max_length: params.providerOptions?.maxLength ?? this.maxLength,
+                min_pool_usd_tvl: this.minPoolUsdTvl,
+                exclude_volatile_pools: params.providerOptions?.excludeVolatilePools,
+            };
 
-            // Check if pool exists and is ready
-            const poolStatus = await pool.getReadinessStatus();
-            if (poolStatus !== ReadinessStatus.READY) {
-                throw new SwapError(
-                    `Pool for ${params.fromToken.type}/${params.toToken.type} does not exist or is not ready`,
-                    SwapError.INSUFFICIENT_LIQUIDITY,
-                );
-            }
-
-            // Get vault for source token
-            const isNativeSwap = isNativeTon(params.fromToken);
-            let vaultAddress: Address;
-
-            if (isNativeSwap) {
-                const tonVault = this.tonClient.open(await this.factory.getNativeVault());
-                const vaultStatus = await tonVault.getReadinessStatus();
-                if (vaultStatus !== ReadinessStatus.READY) {
-                    throw new SwapError('Native TON vault is not ready', SwapError.INSUFFICIENT_LIQUIDITY);
-                }
-                vaultAddress = tonVault.address;
-            } else {
-                if (params.fromToken.type !== 'jetton') {
-                    throw new SwapError('Invalid token type', SwapError.INVALID_PARAMS);
-                }
-                const jettonAddress = Address.parse(params.fromToken.value);
-                const jettonVault = this.tonClient.open(await this.factory.getJettonVault(jettonAddress));
-                const vaultStatus = await jettonVault.getReadinessStatus();
-                if (vaultStatus !== ReadinessStatus.READY) {
-                    throw new SwapError(
-                        `Jetton vault for ${params.fromToken.value} is not ready`,
-                        SwapError.INSUFFICIENT_LIQUIDITY,
-                    );
-                }
-                vaultAddress = jettonVault.address;
-            }
-
-            // Get estimated output from pool
-            const amountIn = BigInt(params.amount);
-            const { amountOut: estimatedOutput } = await pool.getEstimatedSwapOut({
-                assetIn: fromAsset,
-                amountIn,
+            const response = await fetch(`${this.apiUrl}/v1/router/quote`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                },
+                body: JSON.stringify(requestBody),
             });
-            const minOutput = calculateMinOutput(estimatedOutput.toString(), slippageBps);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                log.error('DeDust quote API error', { status: response.status, error: errorText });
+
+                if (response.status === 400) {
+                    throw new SwapError(`No route found for swap: ${errorText}`, SwapError.INSUFFICIENT_LIQUIDITY);
+                }
+
+                throw new SwapError(`DeDust API error: ${response.status} ${errorText}`, SwapError.NETWORK_ERROR);
+            }
+
+            const quoteResponse: DeDustQuoteResponse = await response.json();
+
+            if (!quoteResponse.swap_is_possible) {
+                throw new SwapError('Swap is not possible for this pair', SwapError.INSUFFICIENT_LIQUIDITY);
+            }
+
+            if (!quoteResponse.swap_data?.routes || quoteResponse.swap_data.routes.length === 0) {
+                throw new SwapError('No routes found for this swap', SwapError.INSUFFICIENT_LIQUIDITY);
+            }
+
+            // Calculate min received based on slippage
+            const outAmount = BigInt(quoteResponse.out_amount);
+            const minReceived = (outAmount * BigInt(10000 - slippageBps)) / BigInt(10000);
 
             // Build metadata
             const metadata: DeDustQuoteMetadata = {
-                poolAddress: pool.address.toString(),
-                poolType,
-                vaultAddress: vaultAddress.toString(),
-                isNativeSwap,
-                estimatedOutput: estimatedOutput.toString(),
-                minOutput,
+                quoteResponse,
                 slippageBps,
             };
-
-            // If it's a jetton swap, we need the user's jetton wallet address
-            // This will be determined at build time when we have the user address
 
             const swapQuote: SwapQuote = {
                 metadata,
                 providerId: this.providerId,
                 fromToken: params.fromToken,
                 toToken: params.toToken,
-                fromAmount: params.amount,
-                toAmount: estimatedOutput.toString(),
-                minReceived: minOutput,
+                fromAmount: quoteResponse.in_amount,
+                toAmount: quoteResponse.out_amount,
+                minReceived: minReceived.toString(),
                 network: params.network,
+                priceImpact: quoteResponse.price_impact ? Math.round(quoteResponse.price_impact * 100) : undefined,
             };
 
             log.debug('Received DeDust quote', {
-                poolAddress: pool.address.toString(),
-                estimatedOutput: estimatedOutput.toString(),
-                minOutput,
+                inAmount: quoteResponse.in_amount,
+                outAmount: quoteResponse.out_amount,
+                minReceived: minReceived.toString(),
+                routeCount: quoteResponse.swap_data.routes.length,
             });
 
             return swapQuote;
@@ -214,7 +202,7 @@ export class DeDustSwapProvider extends SwapProvider<DeDustProviderOptions> {
         }
     }
 
-    async buildSwapTransaction(params: SwapParams): Promise<TransactionRequest> {
+    async buildSwapTransaction(params: SwapParams<DeDustProviderOptions>): Promise<TransactionRequest> {
         log.debug('Building DeDust swap transaction', params);
 
         const metadata = params.quote.metadata;
@@ -224,49 +212,59 @@ export class DeDustSwapProvider extends SwapProvider<DeDustProviderOptions> {
         }
 
         try {
-            const userAddress = Address.parse(params.userAddress);
-            const poolAddress = Address.parse(metadata.poolAddress);
-            const vaultAddress = Address.parse(metadata.vaultAddress);
+            const userAddress = Address.parse(params.userAddress).toRawString();
 
-            // Use custom slippage if provided, otherwise use quote slippage
-            const slippageBps = params.slippageBps ?? metadata.slippageBps;
-            const minOutput =
-                params.slippageBps !== undefined
-                    ? calculateMinOutput(metadata.estimatedOutput, slippageBps)
-                    : metadata.minOutput;
+            // Use custom referral from params, or fall back to config
+            const referralAddress = params.providerOptions?.referralAddress ?? this.referralAddress;
+            const referralFeeBps = params.providerOptions?.referralFeeBps ?? this.referralFeeBps;
 
-            const destinationAddress = params.destinationAddress
-                ? Address.parse(params.destinationAddress)
-                : userAddress;
+            const requestBody = {
+                sender_address: userAddress,
+                swap_data: metadata.quoteResponse.swap_data,
+                referral_address: referralAddress ? Address.parse(referralAddress).toRawString() : undefined,
+                referral_fee: referralFeeBps,
+            };
 
-            if (metadata.isNativeSwap) {
-                // Native TON swap
-                return this.buildNativeSwapTransaction(
-                    userAddress,
-                    poolAddress,
-                    vaultAddress,
-                    BigInt(params.quote.fromAmount),
-                    BigInt(minOutput),
-                    destinationAddress,
-                    params.quote.network,
-                );
-            } else {
-                // Jetton swap
-                if (params.quote.fromToken.type !== 'jetton') {
-                    throw new SwapError('Invalid token type for jetton swap', SwapError.INVALID_PARAMS);
-                }
-                const jettonAddress = Address.parse(params.quote.fromToken.value);
-                return this.buildJettonSwapTransaction(
-                    userAddress,
-                    poolAddress,
-                    vaultAddress,
-                    jettonAddress,
-                    BigInt(params.quote.fromAmount),
-                    BigInt(minOutput),
-                    destinationAddress,
-                    params.quote.network,
+            const response = await fetch(`${this.apiUrl}/v1/router/swap`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                },
+                body: JSON.stringify(requestBody),
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                log.error('DeDust swap API error', { status: response.status, error: errorText });
+                throw new SwapError(
+                    `DeDust swap API error: ${response.status} ${errorText}`,
+                    SwapError.BUILD_TX_FAILED,
                 );
             }
+
+            const swapResponse: DeDustSwapResponse = await response.json();
+
+            if (!swapResponse.transactions || swapResponse.transactions.length === 0) {
+                throw new SwapError('No transactions returned from swap API', SwapError.BUILD_TX_FAILED);
+            }
+
+            const transaction: TransactionRequest = {
+                fromAddress: params.userAddress,
+                messages: swapResponse.transactions.map((tx) => ({
+                    address: Address.parse(tx.address).toString(),
+                    amount: tx.amount,
+                    payload: asBase64(tx.payload),
+                    stateInit: tx.state_init ? asBase64(tx.state_init) : undefined,
+                })),
+                network: params.quote.network,
+            };
+
+            log.debug('Built DeDust swap transaction', {
+                messageCount: transaction.messages.length,
+            });
+
+            return transaction;
         } catch (error) {
             log.error('Failed to build DeDust swap transaction', { error, params });
 
@@ -280,108 +278,5 @@ export class DeDustSwapProvider extends SwapProvider<DeDustProviderOptions> {
                 error,
             );
         }
-    }
-
-    /**
-     * Build transaction for native TON swap
-     */
-    private buildNativeSwapTransaction(
-        userAddress: Address,
-        poolAddress: Address,
-        vaultAddress: Address,
-        amountIn: bigint,
-        minOutput: bigint,
-        destinationAddress: Address,
-        network: SwapQuote['network'],
-    ): TransactionRequest {
-        // Build swap params ref (required by DeDust protocol)
-        // Format: deadline (32 bits) + recipient (address) + referral (address) + fulfillPayload (maybe ref) + rejectPayload (maybe ref)
-        const swapParams = beginCell()
-            .storeUint(0, 32) // deadline (0 = no deadline)
-            .storeAddress(destinationAddress) // recipient address
-            .storeAddress(null) // referral address (none)
-            .storeMaybeRef(null) // fulfill payload
-            .storeMaybeRef(null) // reject payload
-            .endCell();
-
-        // Build swap payload for native TON vault
-        // Format: op (32) + query_id (64) + amount (coins) + pool_address + reserved (1 bit) + limit (coins) + next (maybe ref) + swap_params (ref)
-        const swapPayload = beginCell()
-            .storeUint(0xea06185d, 32) // swap op
-            .storeUint(0, 64) // query_id
-            .storeCoins(amountIn) // amount to swap
-            .storeAddress(poolAddress) // pool address
-            .storeUint(0, 1) // reserved
-            .storeCoins(minOutput) // limit (minimum output)
-            .storeMaybeRef(null) // next (for multi-hop)
-            .storeRef(swapParams) // swap params (required)
-            .endCell();
-
-        const gasAmount = BigInt(this.gasAmount);
-        const totalAmount = amountIn + gasAmount;
-
-        return {
-            fromAddress: userAddress.toString(),
-            messages: [
-                {
-                    address: vaultAddress.toString(),
-                    amount: totalAmount.toString(),
-                    payload: asBase64(Uint8ArrayToBase64(swapPayload.toBoc())),
-                },
-            ],
-            network,
-        };
-    }
-
-    /**
-     * Build transaction for Jetton swap
-     */
-    private async buildJettonSwapTransaction(
-        userAddress: Address,
-        poolAddress: Address,
-        vaultAddress: Address,
-        jettonAddress: Address,
-        amountIn: bigint,
-        minOutput: bigint,
-        destinationAddress: Address,
-        network: SwapQuote['network'],
-    ): Promise<TransactionRequest> {
-        // Get user's jetton wallet address
-        const jettonRoot = this.tonClient.open(JettonRoot.createFromAddress(jettonAddress));
-        const jettonWallet = this.tonClient.open(await jettonRoot.getWallet(userAddress));
-
-        // Build forward payload for jetton transfer using SDK
-        const forwardPayload = VaultJetton.createSwapPayload({
-            poolAddress,
-            limit: minOutput,
-            swapParams: {
-                recipientAddress: destinationAddress,
-            },
-        });
-
-        // Build jetton transfer message
-        const forwardAmount = BigInt(this.forwardAmount);
-        const transferPayload = beginCell()
-            .storeUint(0xf8a7ea5, 32) // transfer op
-            .storeUint(0, 64) // query_id
-            .storeCoins(amountIn) // amount
-            .storeAddress(vaultAddress) // destination
-            .storeAddress(userAddress) // response_destination
-            .storeMaybeRef(null) // custom_payload
-            .storeCoins(forwardAmount) // forward_ton_amount
-            .storeMaybeRef(forwardPayload) // forward_payload
-            .endCell();
-
-        return {
-            fromAddress: userAddress.toString(),
-            messages: [
-                {
-                    address: jettonWallet.address.toString(),
-                    amount: this.jettonGasAmount,
-                    payload: asBase64(Uint8ArrayToBase64(transferPayload.toBoc())),
-                },
-            ],
-            network,
-        };
     }
 }

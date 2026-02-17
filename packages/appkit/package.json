@@ -92,12 +92,6 @@
     "@ston-fi/omniston-sdk": {
       "optional": true
     },
-    "@dedust/sdk": {
-      "optional": true
-    },
-    "@ton/ton": {
-      "optional": true
-    },
     "@tanstack/query-core": {
       "optional": true
     }

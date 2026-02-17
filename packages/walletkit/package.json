@@ -97,18 +97,10 @@
   "peerDependenciesMeta": {
     "@ston-fi/omniston-sdk": {
       "optional": true
-    },
-    "@dedust/sdk": {
-      "optional": true
-    },
-    "@ton/ton": {
-      "optional": true
     }
   },
   "optionalDependencies": {
-    "@ston-fi/omniston-sdk": "^0.7.8",
-    "@dedust/sdk": "^0.8.7",
-    "@ton/ton": "^15.2.1"
+    "@ston-fi/omniston-sdk": "^0.7.8"
   },
   "devDependencies": {
     "@jest/globals": "^30.2.0",
