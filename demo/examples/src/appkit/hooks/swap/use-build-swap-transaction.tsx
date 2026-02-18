@@ -17,7 +17,7 @@ export const UseBuildSwapTransactionExample = () => {
     const { data: quote } = useSwapQuote({
         from: { address: 'ton', decimals: 9 },
         to: { address: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs', decimals: 6 },
-        amount: '1000000000', // 1 TON in nanotons (raw format)
+        amount: '1', // human-readable amount as string
         network: Network.mainnet(),
     });
 

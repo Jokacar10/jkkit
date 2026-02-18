@@ -412,7 +412,7 @@ const quote = await getSwapQuote(appKit, {
         decimals: 6,
     },
     to: { address: 'ton', decimals: 9 },
-    amount: '1', // human-readable amount as string
+    amount: '1000000000', // nanotons as string
     network: Network.mainnet(),
 });
 console.log('Swap Quote:', quote);

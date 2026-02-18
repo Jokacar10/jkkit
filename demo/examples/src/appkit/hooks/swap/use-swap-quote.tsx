@@ -6,7 +6,6 @@
  *
  */
 
-import { Network } from '@ton/appkit';
 import { useSwapQuote } from '@ton/appkit-react';
 
 export const UseSwapQuoteExample = () => {
@@ -18,8 +17,7 @@ export const UseSwapQuoteExample = () => {
     } = useSwapQuote({
         from: { address: 'ton', decimals: 9 },
         to: { address: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs', decimals: 6 }, // USDT
-        amount: '1000000000', // 1 TON in nanotons (raw format)
-        network: Network.mainnet(),
+        amount: '1', // human-readable amount as string
     });
 
     if (isLoading) {

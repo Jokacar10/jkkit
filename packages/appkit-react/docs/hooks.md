@@ -513,8 +513,7 @@ const {
         address: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
         decimals: 6,
     }, // USDT
-    amount: '1000000000', // 1 TON in nanotons (raw format)
-    network: Network.mainnet(),
+    amount: '1', // human-readable amount as string
 });
 
 if (isLoading) {
@@ -550,7 +549,7 @@ const { data: quote } = useSwapQuote({
         address: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
         decimals: 6,
     },
-    amount: '1000000000', // 1 TON in nanotons (raw format)
+    amount: '1', // human-readable amount as string
     network: Network.mainnet(),
 });
 
