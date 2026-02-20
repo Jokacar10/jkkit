@@ -109,8 +109,11 @@ export interface TransferResult {
 export interface SwapQuoteResult {
     fromToken: string;
     toToken: string;
+    /** Amount to swap from in human-readable format (e.g., "1.5") */
     fromAmount: string;
+    /** Amount to receive in human-readable format (e.g., "2.3") */
     toAmount: string;
+    /** Minimum amount to receive after slippage in human-readable format */
     minReceived: string;
     provider: string;
     expiresAt?: number;
@@ -433,6 +436,10 @@ export class McpWalletService {
 
     /**
      * Get swap quote with transaction params ready to execute
+     * @param fromToken Token to swap from ("TON" or jetton address)
+     * @param toToken Token to swap to ("TON" or jetton address)
+     * @param amount Amount to swap in human-readable format (e.g., "1.5" for 1.5 TON)
+     * @param slippageBps Slippage tolerance in basis points (default 100 = 1%)
      */
     async getSwapQuote(
         fromToken: string,
@@ -443,9 +450,20 @@ export class McpWalletService {
         const network = this.wallet.getNetwork();
         const kit = await this.getKit();
 
+        // Get decimals for tokens (TON has 9 decimals, jettons need to be fetched)
+        const getDecimals = async (token: string): Promise<number> => {
+            if (token === 'TON' || token === 'ton') {
+                return 9;
+            }
+            const jettonInfo = await kit.jettons.getJettonInfo(token, network);
+            return jettonInfo?.decimals ?? 9;
+        };
+
+        const [fromDecimals, toDecimals] = await Promise.all([getDecimals(fromToken), getDecimals(toToken)]);
+
         const params: SwapQuoteParams = {
-            fromToken: fromToken === 'TON' ? { type: 'ton' } : { type: 'jetton', value: fromToken },
-            toToken: toToken === 'TON' ? { type: 'ton' } : { type: 'jetton', value: toToken },
+            from: { address: fromToken === 'TON' ? 'ton' : fromToken, decimals: fromDecimals },
+            to: { address: toToken === 'TON' ? 'ton' : toToken, decimals: toDecimals },
             amount: amount,
             network,
             slippageBps,
@@ -461,8 +479,8 @@ export class McpWalletService {
         const tx = await kit.swap.buildSwapTransaction(swapParams);
 
         return {
-            fromToken: quote.fromToken.type === 'ton' ? 'TON' : quote.fromToken.value,
-            toToken: quote.toToken.type === 'ton' ? 'TON' : quote.toToken.value,
+            fromToken: quote.fromToken.address === 'ton' ? 'TON' : quote.fromToken.address,
+            toToken: quote.toToken.address === 'ton' ? 'TON' : quote.toToken.address,
             fromAmount: quote.fromAmount,
             toAmount: quote.toAmount,
             minReceived: quote.minReceived,

@@ -31,6 +31,7 @@ import type { SwapProviderInterface } from '../../api/interfaces';
 export abstract class SwapProvider<TQuoteOptions = undefined, TSwapOptions = undefined>
     implements SwapProviderInterface<TQuoteOptions, TSwapOptions>
 {
+    readonly type = 'swap';
     abstract readonly providerId: string;
 
     /**

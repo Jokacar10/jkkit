@@ -264,7 +264,7 @@ export function createToolDefinitions(context: ToolContext): ToolDefinition[] {
                     toAmount: quote.toAmount,
                     minReceived: quote.minReceived,
                     provider: quote.provider,
-                    quoteId: JSON.stringify(quote.quote),
+                    transaction: JSON.stringify(quote.transaction),
                 };
             },
         },
@@ -274,18 +274,18 @@ export function createToolDefinitions(context: ToolContext): ToolDefinition[] {
             parameters: {
                 type: 'object',
                 properties: {
-                    quote_id: {
+                    transaction: {
                         type: 'string',
-                        description: 'The quote ID from get_swap_quote',
+                        description: 'The transaction JSON from get_swap_quote',
                     },
                 },
-                required: ['quote_id'],
+                required: ['transaction'],
             },
             handler: async (args: Record<string, unknown>) => {
-                const quoteId = args.quote_id as string;
-                const quote = JSON.parse(quoteId);
+                const transactionJson = args.transaction as string;
+                const transaction = JSON.parse(transactionJson);
 
-                const result = await walletService.executeSwap(quote);
+                const result = await walletService.sendRawTransaction(transaction);
 
                 return result;
             },
@@ -320,15 +320,15 @@ export function createToolDefinitions(context: ToolContext): ToolDefinition[] {
                 // Get fresh quote
                 const quote = await walletService.getSwapQuote(fromToken, toToken, amount);
 
-                if (!quote.quote) {
+                if (!quote.transaction) {
                     return {
                         success: false,
                         message: 'Failed to get swap quote',
                     };
                 }
 
-                // Execute swap
-                const result = await walletService.executeSwap(quote.quote);
+                // Execute swap using the transaction from the quote
+                const result = await walletService.sendRawTransaction(quote.transaction);
 
                 return {
                     success: result.success,
