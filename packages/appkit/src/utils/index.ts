@@ -11,6 +11,7 @@ export { formatUnits, parseUnits } from '@ton/walletkit';
 export * from './amount/validate-numeric-string';
 export * from './arrays/key-by';
 export * from './arrays/random-from-array';
+export * from './transaction/get-normalized-ext-message-hash';
 export * from './errors/get-error-message';
 export * from './functions/noop';
 export * from './jetton/jetton-info';

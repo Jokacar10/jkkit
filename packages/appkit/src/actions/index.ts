@@ -104,6 +104,15 @@ export {
 } from './transaction/send-transaction';
 export { transferTon, type TransferTonParameters, type TransferTonReturnType } from './transaction/transfer-ton';
 export {
+    getTransactionStatus,
+    type GetTransactionStatusParameters,
+    type GetTransactionStatusReturnType,
+    type TransactionStatusData,
+    type TransactionStatusType,
+    type TransactionAction,
+    type GetTransactionStatusErrorType,
+} from './transaction/get-transaction-status';
+export {
     createTransferNftTransaction,
     type CreateTransferNftTransactionParameters,
     type CreateTransferNftTransactionReturnType,
