@@ -19,6 +19,82 @@ import type { ProofMessage } from '@ton/walletkit';
 import { Signer, WalletV4R2Adapter, WalletV5R1Adapter } from '../core/moduleLoader';
 import { kit, wallet, getKit } from '../utils/bridge';
 import { retain, retainWithId, get, release } from '../utils/registry';
+import { bridgeRequest } from '../transport/nativeBridge';
+
+// ──────────────────────────────────────────────────────────────────────────────
+// ProxyWalletAdapter
+//
+// Wraps a Kotlin-side TONWalletAdapter registered in AdapterManager.
+// Data accessors (publicKey, network, address, walletId) use cached values
+// passed at construction.  Signing/stateInit operations delegate to Kotlin
+// via the reverse-RPC `bridgeRequest` channel.
+// ──────────────────────────────────────────────────────────────────────────────
+
+class ProxyWalletAdapter implements WalletAdapter {
+    constructor(
+        private readonly adapterId: string,
+        private readonly _publicKey: Hex,
+        private readonly _network: Network,
+        private readonly _address: UserFriendlyAddress,
+        private readonly _walletId: WalletId,
+        private readonly _client: ApiClient,
+    ) {}
+
+    getPublicKey(): Hex {
+        return this._publicKey;
+    }
+    getNetwork(): Network {
+        return this._network;
+    }
+    getClient(): ApiClient {
+        return this._client;
+    }
+    getAddress(): UserFriendlyAddress {
+        return this._address;
+    }
+    getWalletId(): WalletId {
+        return this._walletId;
+    }
+
+    async getStateInit(): Promise<Base64String> {
+        const result = await bridgeRequest('adapterGetStateInit', { adapterId: this.adapterId });
+        if (!result) throw new Error('adapterGetStateInit: no result from native');
+        return result as Base64String;
+    }
+
+    async getSignedSendTransaction(
+        input: TransactionRequest,
+        options?: { fakeSignature: boolean },
+    ): Promise<Base64String> {
+        const result = await bridgeRequest('adapterSignTransaction', {
+            adapterId: this.adapterId,
+            input: JSON.stringify(input),
+            fakeSignature: options?.fakeSignature ?? false,
+        });
+        if (!result) throw new Error('adapterSignTransaction: no result from native');
+        return result as Base64String;
+    }
+
+    async getSignedSignData(input: PreparedSignData, options?: { fakeSignature: boolean }): Promise<Hex> {
+        const result = await bridgeRequest('adapterSignData', {
+            adapterId: this.adapterId,
+            input: JSON.stringify(input),
+            fakeSignature: options?.fakeSignature ?? false,
+        });
+        if (!result) throw new Error('adapterSignData: no result from native');
+        return result as Hex;
+    }
+
+    async getSignedTonProof(input: ProofMessage, options?: { fakeSignature: boolean }): Promise<Hex> {
+        const result = await bridgeRequest('adapterSignTonProof', {
+            adapterId: this.adapterId,
+            input: JSON.stringify(input),
+            fakeSignature: options?.fakeSignature ?? false,
+        });
+        if (!result) throw new Error('adapterSignTonProof: no result from native');
+        return result as Hex;
+    }
+}
 
 /**
  * Lists all wallets.
@@ -65,8 +141,11 @@ export async function createSignerFromCustom(args: { signerId: string; publicKey
     const proxySigner = {
         publicKey: publicKey as Hex,
         sign: async (bytes: Iterable<number>): Promise<Hex> => {
-            const result = await window.WalletKitNative?.signWithCustomSigner?.(signerId, Array.from(bytes));
-            if (!result) throw new Error('signWithCustomSigner not available');
+            const result = await bridgeRequest('signWithCustomSigner', {
+                signerId,
+                data: Array.from(bytes),
+            });
+            if (!result) throw new Error('signWithCustomSigner: no result from native');
             return result as Hex;
         },
     };
@@ -133,58 +212,14 @@ export async function addWallet(args: {
         const { adapterId, walletId, publicKey, address } = args;
         const network = args.network as unknown as Network;
 
-        const proxyAdapter: WalletAdapter = {
-            getPublicKey(): Hex {
-                return publicKey as Hex;
-            },
-            getNetwork(): Network {
-                return network;
-            },
-            getClient(): ApiClient {
-                return instance.getApiClient(network);
-            },
-            getAddress(): UserFriendlyAddress {
-                return address as UserFriendlyAddress;
-            },
-            getWalletId(): WalletId {
-                return walletId as WalletId;
-            },
-            async getStateInit(): Promise<Base64String> {
-                const result = await window.WalletKitNative?.adapterGetStateInit?.(adapterId);
-                if (!result) throw new Error('adapterGetStateInit not available');
-                return result as Base64String;
-            },
-            async getSignedSendTransaction(
-                input: TransactionRequest,
-                options?: { fakeSignature: boolean },
-            ): Promise<Base64String> {
-                const result = await window.WalletKitNative?.adapterSignTransaction?.(
-                    adapterId,
-                    JSON.stringify(input),
-                    options?.fakeSignature ?? false,
-                );
-                if (!result) throw new Error('adapterSignTransaction not available');
-                return result as Base64String;
-            },
-            async getSignedSignData(input: PreparedSignData, options?: { fakeSignature: boolean }): Promise<Hex> {
-                const result = await window.WalletKitNative?.adapterSignData?.(
-                    adapterId,
-                    JSON.stringify(input),
-                    options?.fakeSignature ?? false,
-                );
-                if (!result) throw new Error('adapterSignData not available');
-                return result as Hex;
-            },
-            async getSignedTonProof(input: ProofMessage, options?: { fakeSignature: boolean }): Promise<Hex> {
-                const result = await window.WalletKitNative?.adapterSignTonProof?.(
-                    adapterId,
-                    JSON.stringify(input),
-                    options?.fakeSignature ?? false,
-                );
-                if (!result) throw new Error('adapterSignTonProof not available');
-                return result as Hex;
-            },
-        };
+        const proxyAdapter = new ProxyWalletAdapter(
+            adapterId,
+            publicKey as Hex,
+            network,
+            address as UserFriendlyAddress,
+            walletId as WalletId,
+            instance.getApiClient(network),
+        );
 
         const w = await instance.addWallet(proxyAdapter as Parameters<typeof instance.addWallet>[0]);
         if (!w) return null;
@@ -193,14 +228,29 @@ export async function addWallet(args: {
 
     const adapter = get<WalletAdapter>(args.adapterId);
     if (!adapter) throw new Error(`Adapter not found in registry: ${args.adapterId}`);
-    release(args.adapterId);
 
     const w = await instance.addWallet(adapter as Parameters<typeof instance.addWallet>[0]);
     if (!w) return null;
     return { walletId: w.getWalletId?.(), wallet: w };
 }
 
+/**
+ * Releases a JS-side registry object (signer or adapter created by createV5R1/createV4R2).
+ */
 export function releaseRef(args: { id: string }) {
     release(args.id);
+    return { ok: true };
+}
+
+/**
+ * Releases a Kotlin-side native adapter registered in AdapterManager.
+ * Called by Kotlin when adapter.close() is invoked.
+ * For proxy adapters the JS side has no registry entry — this is a no-op on JS,
+ * but the Kotlin side uses it to confirm cleanup is complete.
+ */
+export function releaseAdapter(args: { adapterId: string }) {
+    // Proxy adapters aren't stored in the JS registry (they're closures over adapterId).
+    // But if a JS-side adapter was also retained (createV5R1/createV4R2), clean it up.
+    release(args.adapterId);
     return { ok: true };
 }

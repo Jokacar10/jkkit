@@ -85,6 +85,10 @@ export interface ReleaseRefArgs {
     id: string;
 }
 
+export interface ReleaseAdapterArgs {
+    adapterId: string;
+}
+
 export interface RemoveWalletArgs {
     walletId: string;
 }
@@ -290,6 +294,7 @@ export interface WalletKitBridgeApi {
     createV4R2WalletAdapter(args: CreateWalletAdapterArgs): PromiseOrValue<{ adapterId: string; address: string }>;
     addWallet(args: AddWalletArgs): PromiseOrValue<{ walletId: string | undefined; wallet: Wallet } | null>;
     releaseRef(args: ReleaseRefArgs): PromiseOrValue<{ ok: boolean }>;
+    releaseAdapter(args: ReleaseAdapterArgs): PromiseOrValue<{ ok: boolean }>;
     getWallets(): PromiseOrValue<{ walletId: string | undefined; wallet: Wallet }[]>;
     getWallet(args: { walletId: string }): PromiseOrValue<{ walletId: string | undefined; wallet: Wallet } | null>;
     getWalletAddress(args: { walletId: string }): PromiseOrValue<string | null>;

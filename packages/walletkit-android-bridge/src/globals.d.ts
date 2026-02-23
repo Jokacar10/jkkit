@@ -20,6 +20,7 @@ declare global {
     interface Window {
         walletkitBridge?: WalletKitBridgeApi;
         __walletkitCall?: (id: string, method: WalletKitApiMethod, paramsJson?: string | null) => void;
+        __walletkitResponse?: (id: string, resultJson?: string | null, errorJson?: string | null) => void;
         WalletKitNative?: WalletKitNativeBridgeType;
         AndroidBridge?: AndroidBridgeType;
     }
