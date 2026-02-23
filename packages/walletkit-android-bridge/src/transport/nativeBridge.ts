@@ -9,12 +9,12 @@
 import type { BridgePayload } from '../types';
 import { bigIntReplacer } from '../utils/serialization';
 import { warn, error, info } from '../utils/logger';
+import { v7 as uuidv7 } from 'uuid';
 
 // Reverse-RPC: JS sends {kind:'request', id, method, params} via postMessage.
 // Kotlin responds via window.__walletkitResponse(id, resultJson, errorJson).
 
 const pendingRequests = new Map<string, { resolve: (v: unknown) => void; reject: (e: Error) => void }>();
-let nextRequestId = 1;
 
 /**
  * Synchronous bridge call via @JavascriptInterface (WalletKitNative.adapterCallSync).
@@ -32,7 +32,7 @@ export function bridgeRequestSync(method: string, params: Record<string, unknown
  * Send a request to Kotlin via postMessage and wait for a response.
  */
 export function bridgeRequest(method: string, params: Record<string, unknown>): Promise<unknown> {
-    const id = `req_${nextRequestId++}`;
+    const id = uuidv7();
     return new Promise<unknown>((resolve, reject) => {
         pendingRequests.set(id, { resolve, reject });
         postToNative({ kind: 'request', id, method, params });
