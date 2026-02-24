@@ -6,9 +6,8 @@
  *
  */
 
-import type { ToncenterTransaction } from '@ton/walletkit';
-
-import { getTxOpcode } from './get-tx-opcode';
+import type { ToncenterTransaction } from '../../types/toncenter/emulation';
+import { getTxOpcode } from './getTxOpcode';
 
 /**
  * Generic factory function to create a failure detector.

@@ -6,9 +6,8 @@
  *
  */
 
-import type { ToncenterTracesResponse, ToncenterTraceItem } from '@ton/walletkit';
-
-import { isJettonTransferTrace, isJettonTransferFailed } from './is-jetton-transfer';
+import type { ToncenterTracesResponse, ToncenterTraceItem } from '../../types/toncenter/emulation';
+import { isJettonTransferTrace, isJettonTransferFailed } from './isJettonTransfer';
 
 /**
  * Fallback: strictly check the root (first) transaction.

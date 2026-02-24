@@ -31,6 +31,12 @@ Parameters:
 - limit (optional): 1-100, default 20
 Returns: transactions with type (TonTransfer, JettonTransfer, JettonSwap), amounts, addresses
 
+### get_transaction_status
+Get the status of a transaction by its BOC to know if it is pending, completed, or failed.
+Parameters:
+- boc (required): Transaction BOC (Base64 string)
+Returns: Transaction status (pending, completed, failed) and trace details
+
 ### get_known_jettons
 Get list of known/popular Jettons on TON.
 Returns: array with symbol, name, address, decimals

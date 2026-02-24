@@ -143,6 +143,7 @@ export type {
     NftTransferRawParams,
     CreateTransferTransactionParams,
 } from './utils/messageBuilders';
+export { getTransactionStatus } from './utils/toncenter/getTransactionStatus';
 
 // Asset helpers
 export {

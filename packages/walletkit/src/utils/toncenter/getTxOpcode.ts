@@ -6,7 +6,7 @@
  *
  */
 
-import type { ToncenterTransaction } from '@ton/walletkit';
+import type { ToncenterTransaction } from '../../types/toncenter/emulation';
 
 /**
  * Returns the resolved opcode for a transaction.
@@ -15,5 +15,5 @@ export const getTxOpcode = (tx: ToncenterTransaction): string | null => {
     const msg = tx.in_msg;
     if (!msg) return null;
 
-    return msg.opcode;
+    return msg.opcode ?? null;
 };

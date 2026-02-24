@@ -6,8 +6,8 @@
  *
  */
 
-import { createTraceTypeDetector } from './create-trace-type-detector';
-import { createFailureDetector } from './create-failure-detector';
+import { createTraceTypeDetector } from './createTraceTypeDetector';
+import { createFailureDetector } from './createFailureDetector';
 
 const JETTON_TRIGGER_OPCODES = new Set(['0x0f8a7ea5']); // jetton_transfer initiates the flow
 

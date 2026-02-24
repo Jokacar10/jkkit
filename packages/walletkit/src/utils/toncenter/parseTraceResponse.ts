@@ -1,0 +1,43 @@
+/**
+ * Copyright (c) TonTech.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+import type { ToncenterTracesResponse } from '../../types/toncenter/emulation';
+import type { TransactionStatusResponse } from '../../api/models/transactions/TransactionStatus';
+import type { TransactionStatus } from '../../api/models/transactions/TransactionStatus';
+import { isFailedTx } from './isFailedTx';
+
+/**
+ * Helper to parse ToncenterTracesResponse into TransactionStatusResponse.
+ * Returns null if no traces are found.
+ */
+export const parseTraceResponse = (response: ToncenterTracesResponse): TransactionStatusResponse | null => {
+    if (!response.traces || response.traces.length === 0) {
+        return null;
+    }
+
+    const trace = response.traces[0];
+    const traceInfo = trace.trace_info;
+
+    const isEffectivelyCompleted =
+        traceInfo.trace_state === 'complete' ||
+        (traceInfo.trace_state === 'pending' && traceInfo.pending_messages === 0);
+
+    let status: TransactionStatus = 'pending';
+    if (isFailedTx(response)) {
+        status = 'failed';
+    } else if (isEffectivelyCompleted) {
+        status = 'completed';
+    }
+
+    return {
+        status,
+        totalMessages: traceInfo.messages,
+        pendingMessages: traceInfo.pending_messages,
+        completedMessages: traceInfo.messages - traceInfo.pending_messages,
+    };
+};

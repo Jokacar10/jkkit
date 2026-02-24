@@ -6,26 +6,11 @@
  *
  */
 
-import { Cell, loadMessage } from '@ton/core';
-import type { ToncenterTracesResponse } from '@ton/walletkit';
+import type { TransactionStatusResponse } from '@ton/walletkit';
+import { getTransactionStatus as walletKitGetTransactionStatus } from '@ton/walletkit';
 
-import { Network } from '../../types/network';
 import type { AppKit } from '../../core/app-kit';
-import { getNormalizedExtMessageHash } from '../../utils';
-import { isFailedTx } from '../../utils';
-
-export type TransactionStatusType = 'pending' | 'completed' | 'failed';
-
-export interface TransactionStatusData {
-    /** Overall status of the transaction trace */
-    status: TransactionStatusType;
-    /** Total messages in the trace */
-    totalMessages: number;
-    /** Messages still pending */
-    pendingMessages: number;
-    /** Number of completed messages (totalMessages - pendingMessages) */
-    completedMessages: number;
-}
+import { Network } from '../../types/network';
 
 export interface GetTransactionStatusParameters {
     /** BOC of the sent transaction (base64) */
@@ -34,40 +19,9 @@ export interface GetTransactionStatusParameters {
     network?: Network;
 }
 
-export type GetTransactionStatusReturnType = TransactionStatusData;
+export type GetTransactionStatusReturnType = TransactionStatusResponse;
 
 export type GetTransactionStatusErrorType = Error;
-
-/**
- * Helper to parse ToncenterTracesResponse into TransactionStatusData.
- * Returns null if no traces are found.
- */
-const parseTraceResponse = (response: ToncenterTracesResponse): TransactionStatusData | null => {
-    if (!response.traces || response.traces.length === 0) {
-        return null;
-    }
-
-    const trace = response.traces[0];
-    const traceInfo = trace.trace_info;
-
-    const isEffectivelyCompleted =
-        traceInfo.trace_state === 'complete' ||
-        (traceInfo.trace_state === 'pending' && traceInfo.pending_messages === 0);
-
-    let status: TransactionStatusType = 'pending';
-    if (isFailedTx(response)) {
-        status = 'failed';
-    } else if (isEffectivelyCompleted) {
-        status = 'completed';
-    }
-
-    return {
-        status,
-        totalMessages: traceInfo.messages,
-        pendingMessages: traceInfo.pending_messages,
-        completedMessages: traceInfo.messages - traceInfo.pending_messages,
-    };
-};
 
 /**
  * Get the status of a transaction by its BOC.
@@ -91,40 +45,7 @@ export const getTransactionStatus = async (
 ): Promise<GetTransactionStatusReturnType> => {
     const { boc, network } = parameters;
 
-    // Parse the BOC to get the external message hash
-    const cell = Cell.fromBase64(boc);
-    const message = loadMessage(cell.beginParse());
-    const hash =
-        message.info.type === 'external-in'
-            ? getNormalizedExtMessageHash(message).toString('base64')
-            : cell.hash().toString('base64');
-
     const client = appKit.networkManager.getClient(network ?? Network.mainnet());
 
-    // First try pending traces (transaction still being processed)
-    try {
-        const pendingResponse = await client.getPendingTrace({ externalMessageHash: [hash] });
-        const pendingStatus = parseTraceResponse(pendingResponse);
-        if (pendingStatus) return pendingStatus;
-    } catch (_e) {
-        //
-    }
-
-    // Try completed traces
-    try {
-        const traceResponse = await client.getTrace({ traceId: [hash] });
-        const completedStatus = parseTraceResponse(traceResponse);
-        if (completedStatus) return completedStatus;
-    } catch (_e) {
-        //
-    }
-
-    // If neither pending nor completed trace found, the transaction
-    // is likely still propagating to the network
-    return {
-        status: 'pending',
-        totalMessages: 0,
-        pendingMessages: 0,
-        completedMessages: 0,
-    };
+    return walletKitGetTransactionStatus(client, boc);
 };
