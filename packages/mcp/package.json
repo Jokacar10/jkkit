@@ -1,6 +1,6 @@
 {
   "name": "@ton/mcp",
-  "version": "0.1.6",
+  "version": "0.1.12",
   "description": "TON MCP Server - Model Context Protocol server for TON blockchain wallet operations",
   "license": "MIT",
   "type": "module",
@@ -18,6 +18,16 @@
         "types": "./dist/index.d.ts",
         "default": "./dist/index.cjs"
       }
+    },
+    "./serverless": {
+      "import": {
+        "types": "./dist/serverless.d.ts",
+        "default": "./dist/serverless.js"
+      },
+      "require": {
+        "types": "./dist/serverless.d.ts",
+        "default": "./dist/serverless.cjs"
+      }
     }
   },
   "publishConfig": {
@@ -25,6 +35,8 @@
   },
   "files": [
     "dist",
+    "skills",
+    "llms.txt",
     "README.md"
   ],
   "scripts": {
