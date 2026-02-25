@@ -64,7 +64,7 @@ export async function createWalletAdapter(params: CreateWalletAdapterParams): Pr
         network == 'tetra'
             ? {
                   type: 'l2',
-                  globalId: 8124123,
+                  globalId: 662387,
               }
             : undefined;
 
