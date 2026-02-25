@@ -8,7 +8,6 @@
 
 import type { ExtraCurrency, AccountStatus } from '@ton/core';
 import { Address } from '@ton/core';
-import { CHAIN } from '@tonconnect/protocol';
 
 import { Base64ToBigInt, Base64Normalize, Base64ToHex } from '../utils/base64';
 import type { FullAccountState, TransactionId } from '../types/toncenter/api';
@@ -51,7 +50,6 @@ import type {
     GetMethodResult,
     Jetton,
     JettonsResponse,
-    Network,
     NFTsRequest,
     NFTsResponse,
     RawStackItem,
@@ -60,6 +58,7 @@ import type {
     UserFriendlyAddress,
     UserNFTsRequest,
 } from '../api/models';
+import { Network } from '../api/models';
 import { asAddressFriendly } from '../utils/address';
 import type { ToncenterEmulationResult } from '../utils/toncenterEmulation';
 
@@ -100,9 +99,11 @@ export class ApiClientToncenter implements ApiClient {
         this.network = config.network;
 
         const dnsResolver =
-            this.network?.chainId === CHAIN.MAINNET ? ROOT_DNS_RESOLVER_MAINNET : ROOT_DNS_RESOLVER_TESTNET;
+            this.network?.chainId === Network.mainnet().chainId ? ROOT_DNS_RESOLVER_MAINNET : ROOT_DNS_RESOLVER_TESTNET;
         const defaultEndpoint =
-            this.network?.chainId === CHAIN.MAINNET ? 'https://toncenter.com' : 'https://testnet.toncenter.com';
+            this.network?.chainId === Network.mainnet().chainId
+                ? 'https://toncenter.com'
+                : 'https://testnet.toncenter.com';
 
         this.dnsResolver = config.dnsResolver ?? dnsResolver;
         this.endpoint = config.endpoint ?? defaultEndpoint;

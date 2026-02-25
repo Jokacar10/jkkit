@@ -53,6 +53,8 @@ async function initializeWalletKit() {
                         key: ENV_TON_API_KEY_TESTNET,
                     },
                 },
+
+                // TODO: Tetra
             },
         });
 
