@@ -101,6 +101,8 @@ Get recent transaction history for the wallet (TON transfers, Jetton transfers, 
 #### `get_transaction_status`
 Get the status of a transaction by its normalized hash to know if it is pending, completed, or failed. In TON, a transaction is considered "complete" only when the entire trace finishes processing.
 
+**Important:** Always call this after `send_ton`, `send_jetton`, `send_nft`, or `send_raw_transaction` to verify the transaction actually happened—the send response alone does not guarantee on-chain finality.
+
 **Parameters:**
 - `normalizedHash` (required): Normalized hash of the external-in transaction (Base64 string). Note: This must be the *normalized* hash of the message sent to the network.
 
@@ -108,6 +110,8 @@ Get the status of a transaction by its normalized hash to know if it is pending,
 
 #### `send_ton`
 Send TON to an address. Amount is in human-readable format (e.g., `"1.5"` means 1.5 TON).
+
+**Important:** After sending, call `get_transaction_status` with the `normalizedHash` from the response to verify the transaction actually completed on-chain.
 
 **Parameters:**
 - `toAddress` (required): Recipient TON address

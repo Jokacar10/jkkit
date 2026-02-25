@@ -144,7 +144,8 @@ export function createMcpNftTools(service: McpWalletService) {
         },
 
         send_nft: {
-            description: 'Transfer an NFT from the wallet to another address.',
+            description:
+                'Transfer an NFT from the wallet to another address. After sending, call get_transaction_status with the returned normalizedHash to verify the transaction completed on-chain.',
             inputSchema: sendNftSchema,
             handler: async (args: z.infer<typeof sendNftSchema>): Promise<ToolResponse> => {
                 try {
