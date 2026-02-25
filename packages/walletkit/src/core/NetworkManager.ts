@@ -87,7 +87,7 @@ export class KitNetworkManager implements NetworkManager {
         if (network.chainId == Network.mainnet().chainId) {
             defaultEndpoint = 'https://toncenter.com';
         } else if (network.chainId == Network.tetra().chainId) {
-            defaultEndpoint = 'https://tetra.tonapi.io/';
+            defaultEndpoint = 'https://tetra.tonapi.io';
         } else {
             defaultEndpoint = 'https://testnet.toncenter.com';
         }

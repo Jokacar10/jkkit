@@ -178,7 +178,7 @@ export class TonWalletKit implements ITonWalletKit {
                             name: 'ton_addr',
                             address: Address.parse(walletAddress).toRawString(),
                             // TODO: Support multiple networks
-                            network: wallet.getNetwork().chainId === CHAIN.MAINNET ? CHAIN.MAINNET : CHAIN.TESTNET,
+                            network: wallet.getNetwork().chainId,
                             walletStateInit,
                             publicKey,
                         },

@@ -8,7 +8,6 @@
 
 // Utility functions for WalletV4R2 Ledger adapter
 
-import { CHAIN } from '@tonconnect/protocol';
 import { TonTransport } from '@ton-community/ton-ledger';
 import type Transport from '@ledgerhq/hw-transport';
 import type { WalletAdapter, ApiClient } from '@ton/walletkit';
@@ -69,7 +68,7 @@ export async function createWalletV4R2Ledger(
             const response = await tonTransport.getAddress(config.path, {
                 chain: config.workchain ?? 0,
                 bounceable: false,
-                testOnly: config.network?.chainId === CHAIN.TESTNET,
+                testOnly: config.network?.chainId === Network.testnet().chainId,
                 walletVersion: 'v4',
             });
             publicKey = response.publicKey;
