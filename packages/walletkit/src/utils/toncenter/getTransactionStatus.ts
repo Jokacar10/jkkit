@@ -29,6 +29,7 @@ export async function getTransactionStatus(
 
     // First try pending traces (transaction still being processed)
     try {
+        // TODO - do not retry if response is 404 (or equivalent)
         const pendingResponse = await client.getPendingTrace({ externalMessageHash: [hashToSearch] });
         const pendingStatus = parseTraceResponse(pendingResponse);
         if (pendingStatus) return pendingStatus;
@@ -38,6 +39,7 @@ export async function getTransactionStatus(
 
     // Try completed traces
     try {
+        // TODO - do not retry if response is 404 (or equivalent)
         const traceResponse = await client.getTrace({ traceId: [hashToSearch] });
         const completedStatus = parseTraceResponse(traceResponse);
         if (completedStatus) return completedStatus;
