@@ -10,9 +10,9 @@ import type { ComponentProps, FC } from 'react';
 import clsx from 'clsx';
 import type { TransactionStatus } from '@ton/appkit';
 
-import styles from './transaction-status.module.css';
+import styles from './transaction-progress.module.css';
 
-export interface TransactionStatusIconsProps extends ComponentProps<'svg'> {
+export interface TransactionProgressIconsProps extends ComponentProps<'svg'> {
     status: TransactionStatus;
     isError: boolean;
 }
@@ -71,7 +71,7 @@ const FailedIcon: FC<ComponentProps<'svg'>> = ({ className }) => (
     </svg>
 );
 
-export const TransactionStatusIcon: FC<TransactionStatusIconsProps> = ({ status, isError, ...props }) => {
+export const TransactionProgressIcon: FC<TransactionProgressIconsProps> = ({ status, isError, ...props }) => {
     if (status === 'completed') return <SuccessIcon {...props} />;
 
     if (status === 'failed' || isError) return <FailedIcon {...props} />;

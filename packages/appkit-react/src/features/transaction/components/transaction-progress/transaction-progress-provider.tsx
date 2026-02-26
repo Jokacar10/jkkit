@@ -13,28 +13,28 @@ import type { GetTransactionStatusErrorType } from '@ton/appkit/queries';
 
 import { useTransactionStatus } from '../../hooks/use-transaction-status';
 
-export interface TransactionStatusContextValue extends GetTransactionStatusReturnType {
+export interface TransactionProgressContextValue extends GetTransactionStatusReturnType {
     isFetching: boolean;
     error: GetTransactionStatusErrorType | null;
     boc: string;
 }
 
-export const TransactionStatusContext = createContext<TransactionStatusContextValue | undefined>(undefined);
+export const TransactionProgressContext = createContext<TransactionProgressContextValue | undefined>(undefined);
 
-export const useTransactionStatusContext = () => {
-    const context = useContext(TransactionStatusContext);
+export const useTransactionProgressContext = () => {
+    const context = useContext(TransactionProgressContext);
     if (!context) {
-        throw new Error('useTransactionStatusContext must be used within a TransactionStatusProvider');
+        throw new Error('useTransactionProgressContext must be used within a TransactionProgressProvider');
     }
     return context;
 };
 
-export interface TransactionStatusProviderProps {
+export interface TransactionProgressProviderProps {
     boc: string;
     children: ReactNode;
 }
 
-export const TransactionStatusProvider = ({ boc, children }: TransactionStatusProviderProps) => {
+export const TransactionProgressProvider = ({ boc, children }: TransactionProgressProviderProps) => {
     const { data, isFetching, error } = useTransactionStatus({
         boc,
         query: {
@@ -46,7 +46,7 @@ export const TransactionStatusProvider = ({ boc, children }: TransactionStatusPr
         },
     });
 
-    const value: TransactionStatusContextValue = {
+    const value: TransactionProgressContextValue = {
         status: data?.status ?? 'pending',
         totalMessages: data?.totalMessages ?? 0,
         pendingMessages: data?.pendingMessages ?? 0,
@@ -56,5 +56,5 @@ export const TransactionStatusProvider = ({ boc, children }: TransactionStatusPr
         boc,
     };
 
-    return <TransactionStatusContext.Provider value={value}>{children}</TransactionStatusContext.Provider>;
+    return <TransactionProgressContext.Provider value={value}>{children}</TransactionProgressContext.Provider>;
 };

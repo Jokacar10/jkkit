@@ -9,22 +9,22 @@
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { I18nProvider } from '../../../../providers/i18n-provider';
-import { TransactionStatusContext } from './transaction-status-provider';
-import { TransactionStatusContent } from './transaction-status';
-import type { TransactionStatusContextValue } from './transaction-status-provider';
+import { TransactionProgressContext } from './transaction-progress-provider';
+import { TransactionProgressContent } from './transaction-progress';
+import type { TransactionProgressContextValue } from './transaction-progress-provider';
 
 // Create a preview wrapper that supplies necessary contexts
-const TransactionStatusPreview = ({
+const TransactionProgressPreview = ({
     status = 'pending',
     totalMessages = 0,
-    completedMessages = 0,
+    onchainMessages = 0,
     pendingMessages = 0,
     error = null,
-}: Partial<TransactionStatusContextValue>) => {
-    const contextValue: TransactionStatusContextValue = {
+}: Partial<TransactionProgressContextValue>) => {
+    const contextValue: TransactionProgressContextValue = {
         status,
         totalMessages,
-        completedMessages,
+        onchainMessages,
         pendingMessages,
         isFetching: status === 'pending',
         error,
@@ -33,18 +33,18 @@ const TransactionStatusPreview = ({
 
     return (
         <I18nProvider>
-            <TransactionStatusContext.Provider value={contextValue}>
+            <TransactionProgressContext.Provider value={contextValue}>
                 <div style={{ width: '400px', display: 'flex', justifyContent: 'center' }}>
-                    <TransactionStatusContent />
+                    <TransactionProgressContent />
                 </div>
-            </TransactionStatusContext.Provider>
+            </TransactionProgressContext.Provider>
         </I18nProvider>
     );
 };
 
-const meta: Meta<typeof TransactionStatusPreview> = {
-    title: 'Public/Features/Transaction/TransactionStatus',
-    component: TransactionStatusPreview,
+const meta: Meta<typeof TransactionProgressPreview> = {
+    title: 'Public/Features/Transaction/TransactionProgress',
+    component: TransactionProgressPreview,
     tags: ['autodocs'],
     parameters: {
         layout: 'centered',
@@ -53,13 +53,13 @@ const meta: Meta<typeof TransactionStatusPreview> = {
 
 export default meta;
 
-type Story = StoryObj<typeof TransactionStatusPreview>;
+type Story = StoryObj<typeof TransactionProgressPreview>;
 
 export const PendingInitial: Story = {
     args: {
         status: 'pending',
         totalMessages: 0,
-        completedMessages: 0,
+        onchainMessages: 0,
     },
 };
 
@@ -67,7 +67,7 @@ export const PendingWithProgress: Story = {
     args: {
         status: 'pending',
         totalMessages: 5,
-        completedMessages: 3,
+        onchainMessages: 3,
         pendingMessages: 2,
     },
 };
@@ -76,7 +76,7 @@ export const Completed: Story = {
     args: {
         status: 'completed',
         totalMessages: 5,
-        completedMessages: 5,
+        onchainMessages: 5,
         pendingMessages: 0,
     },
 };

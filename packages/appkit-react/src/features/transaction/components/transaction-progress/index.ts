@@ -6,5 +6,5 @@
  *
  */
 
-export * from './transaction-status';
-export * from './transaction-status-provider';
+export * from './transaction-progress';
+export * from './transaction-progress-provider';

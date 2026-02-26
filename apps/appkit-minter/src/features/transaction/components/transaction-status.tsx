@@ -8,7 +8,7 @@
 
 import { clsx } from 'clsx';
 import { Loader2, CheckCircle2, XCircle, Clock } from 'lucide-react';
-import { TransactionStatus as AppKitTransactionStatus } from '@ton/appkit-react';
+import { TransactionProgress } from '@ton/appkit-react';
 
 export interface TransactionStatusProps {
     boc: string;
@@ -43,7 +43,7 @@ export const TransactionStatus = ({ boc, className }: TransactionStatusProps) =>
     };
 
     return (
-        <AppKitTransactionStatus boc={boc}>
+        <TransactionProgress boc={boc}>
             {({ status, totalMessages, onchainMessages, pendingMessages, error, isFetching }) => {
                 if (error) {
                     return (
@@ -88,6 +88,6 @@ export const TransactionStatus = ({ boc, className }: TransactionStatusProps) =>
                     </div>
                 );
             }}
-        </AppKitTransactionStatus>
+        </TransactionProgress>
     );
 };

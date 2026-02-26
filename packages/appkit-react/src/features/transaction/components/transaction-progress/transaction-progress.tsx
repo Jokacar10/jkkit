@@ -11,26 +11,26 @@ import type { FC, ReactNode, ComponentProps } from 'react';
 import { clsx } from 'clsx';
 
 import { useI18n } from '../../../../hooks/use-i18n';
-import { TransactionStatusProvider, useTransactionStatusContext } from './transaction-status-provider';
-import type { TransactionStatusContextValue } from './transaction-status-provider';
-import { TransactionStatusIcon } from './transaction-status-icons';
-import styles from './transaction-status.module.css';
+import { TransactionProgressProvider, useTransactionProgressContext } from './transaction-progress-provider';
+import type { TransactionProgressContextValue } from './transaction-progress-provider';
+import { TransactionProgressIcon } from './transaction-progress-icons';
+import styles from './transaction-progress.module.css';
 
-export interface TransactionStatusTexts {
+export interface TransactionProgressTexts {
     pending: string;
     completed: string;
     failed: string;
 }
 
-export interface TransactionStatusRenderProps extends TransactionStatusContextValue {
-    texts: TransactionStatusTexts;
+export interface TransactionProgressRenderProps extends TransactionProgressContextValue {
+    texts: TransactionProgressTexts;
 }
 
-export interface TransactionStatusProps extends Omit<ComponentProps<'div'>, 'children'> {
+export interface TransactionProgressProps extends Omit<ComponentProps<'div'>, 'children'> {
     /** BOC of the transaction to strictly track status */
     boc: string;
     /** Render props function for full control over rendering */
-    children?: (props: TransactionStatusRenderProps) => ReactNode;
+    children?: (props: TransactionProgressRenderProps) => ReactNode;
     /** Allows targeting specific internal elements for styling */
     classNames?: {
         container?: string;
@@ -39,13 +39,13 @@ export interface TransactionStatusProps extends Omit<ComponentProps<'div'>, 'chi
     };
 }
 
-export const TransactionStatusContent: FC<Omit<TransactionStatusProps, 'boc'>> = ({
+export const TransactionProgressContent: FC<Omit<TransactionProgressProps, 'boc'>> = ({
     children,
     className,
     classNames = {},
     ...props
 }) => {
-    const context = useTransactionStatusContext();
+    const context = useTransactionProgressContext();
     const { status, onchainMessages, totalMessages, error } = context;
     const { t } = useI18n();
 
@@ -78,7 +78,7 @@ export const TransactionStatusContent: FC<Omit<TransactionStatusProps, 'boc'>> =
     return (
         <div className={clsx(styles.container, className, classNames.container)} {...props}>
             <div className={clsx(styles.iconContainer, classNames.icon)}>
-                <TransactionStatusIcon status={status} isError={!!error} />
+                <TransactionProgressIcon status={status} isError={!!error} />
             </div>
 
             <div className={clsx(styles.message, classNames.message)}>
@@ -88,10 +88,10 @@ export const TransactionStatusContent: FC<Omit<TransactionStatusProps, 'boc'>> =
     );
 };
 
-export const TransactionStatus: FC<TransactionStatusProps> = ({ boc, ...rest }) => {
+export const TransactionProgress: FC<TransactionProgressProps> = ({ boc, ...rest }) => {
     return (
-        <TransactionStatusProvider boc={boc}>
-            <TransactionStatusContent {...rest} />
-        </TransactionStatusProvider>
+        <TransactionProgressProvider boc={boc}>
+            <TransactionProgressContent {...rest} />
+        </TransactionProgressProvider>
     );
 };
