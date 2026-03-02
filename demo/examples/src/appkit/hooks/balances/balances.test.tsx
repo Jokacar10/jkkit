@@ -26,6 +26,11 @@ describe('use-balance-by-address', () => {
 
         mockGetBalance = vi.fn();
 
+        const mockWallet = {
+            getAddress: () => 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+            getNetwork: () => 'mainnet',
+        };
+
         mockAppKit = {
             getDefaultNetwork: vi.fn(),
             connectors: [],
@@ -33,6 +38,9 @@ describe('use-balance-by-address', () => {
                 getClient: vi.fn().mockReturnValue({
                     getBalance: mockGetBalance,
                 }),
+            },
+            walletsManager: {
+                selectedWallet: mockWallet,
             },
             emitter: {
                 on: vi.fn().mockReturnValue(() => {}),
@@ -98,6 +106,7 @@ describe('use-balance', () => {
 
         const mockWallet = {
             getAddress: () => 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+            getNetwork: () => 'mainnet',
         };
 
         mockAppKit = {
