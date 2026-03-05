@@ -14,6 +14,7 @@ import type { OmnistonReferrerOptions } from './OmnistonReferrerOptions';
 export interface OmnistonSwapProviderConfig extends OmnistonReferrerOptions {
     /**
      * Optional URL for the Omniston API
+     * @format url
      */
     apiUrl?: string;
 

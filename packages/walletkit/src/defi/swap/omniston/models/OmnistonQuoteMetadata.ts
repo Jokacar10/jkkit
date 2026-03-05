@@ -14,8 +14,7 @@ import type { Quote } from '@ston-fi/omniston-sdk';
 export interface OmnistonQuoteMetadata {
     /**
      * The actual omniston quote object
-     * @format unknown
-     * @frozen
+     * @format frozen
      */
     omnistonQuote: Quote;
 }
