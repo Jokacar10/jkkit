@@ -280,6 +280,16 @@ return (
 );
 ```
 
+### `useBlockNumber`
+
+Hook to get the current masterchain block number.
+
+```tsx
+const { data: blockNumber } = useBlockNumber();
+
+return <div>Current block number: {blockNumber}</div>;
+```
+
 ## NFT
 
 ### `useNft`

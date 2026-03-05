@@ -14,6 +14,7 @@ import type { WalletInterface } from '@ton/appkit';
 import { getNetworkExample } from './get-network';
 import { getNetworksExample } from './get-networks';
 import { watchNetworksExample } from './watch-networks';
+import { getBlockNumberExample } from './get-block-number';
 
 describe('Network Actions Examples', () => {
     let appKit: AppKit;
@@ -90,6 +91,21 @@ describe('Network Actions Examples', () => {
             expect(typeof unsubscribe).toBe('function');
 
             unsubscribe();
+        });
+    });
+
+    describe('getBlockNumberExample', () => {
+        it('should log the current block number', async () => {
+            const mockBlockNumber = 12345678;
+
+            // Mock the API client's getMasterchainInfo
+            // @ts-expect-error - internal access
+            vi.spyOn(appKit.networkManager, 'getClient').mockReturnValue({
+                getMasterchainInfo: vi.fn().mockResolvedValue({ seqno: mockBlockNumber }),
+            });
+            await getBlockNumberExample(appKit);
+
+            expect(consoleSpy).toHaveBeenCalledWith('Current block number:', mockBlockNumber);
         });
     });
 });

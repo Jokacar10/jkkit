@@ -268,6 +268,16 @@ const unsubscribe = watchNetworks(appKit, {
 // Later: unsubscribe();
 ```
 
+### `getBlockNumber`
+
+Get the current masterchain block number.
+
+```ts
+const blockNumber = await getBlockNumber(appKit);
+
+console.log('Current block number:', blockNumber);
+```
+
 ## NFTs
 
 ### `getNfts`

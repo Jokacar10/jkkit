@@ -128,6 +128,12 @@ Watch configured networks.
 
 %%demo/examples/src/appkit/actions/network#WATCH_NETWORKS%%
 
+### `getBlockNumber`
+
+Get the current masterchain block number.
+
+%%demo/examples/src/appkit/actions/network#GET_BLOCK_NUMBER%%
+
 ## NFTs
 
 ### `getNfts`

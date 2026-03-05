@@ -57,6 +57,7 @@ import type {
     TransactionsResponse,
     UserFriendlyAddress,
     UserNFTsRequest,
+    MasterchainInfo,
 } from '../api/models';
 import { Network } from '../api/models';
 import { asAddressFriendly } from '../utils/address';
@@ -540,6 +541,18 @@ export class ApiClientToncenter implements ApiClient {
             out.events.push(toEvent(trace, account, addressBook));
         }
         return out;
+    }
+
+    async getMasterchainInfo(): Promise<MasterchainInfo> {
+        const raw = await this.getJson<{ last: TonBlockIdExt; first: TonBlockIdExt }>('/api/v3/masterchainInfo');
+
+        return {
+            workchain: raw.last.workchain,
+            seqno: raw.last.seqno,
+            shard: raw.last.shard,
+            fileHash: raw.last.file_hash,
+            rootHash: raw.last.root_hash,
+        };
     }
 }
 
