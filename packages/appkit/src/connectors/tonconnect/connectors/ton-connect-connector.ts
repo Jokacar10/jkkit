@@ -10,10 +10,9 @@ import { TonConnectUI } from '@tonconnect/ui';
 import type { TonConnectUiCreateOptions } from '@tonconnect/ui';
 
 import { TonConnectWalletAdapter } from '../adapters/ton-connect-wallet-adapter';
-import { CONNECTOR_EVENTS } from '../../../core/app-kit';
+import { CONNECTOR_EVENTS, NETWORKS_EVENTS } from '../../../core/app-kit';
 import type { Connector, ConnectorMetadata } from '../../../types/connector';
 import type { WalletInterface } from '../../../types/wallet';
-import type { AppKitEmitter } from '../../../core/app-kit';
 import { TONCONNECT_DEFAULT_CONNECTOR_ID } from '../constants/id';
 import { createConnector } from '../../../types/connector';
 
@@ -30,7 +29,7 @@ export type TonConnectConnector = Connector & {
 };
 
 export const tonConnect = (config: TonConnectConnectorConfig) => {
-    return createConnector(({ emitter, ssr }: { emitter: AppKitEmitter; ssr?: boolean }): TonConnectConnector => {
+    return createConnector(({ emitter, networkManager, ssr }): TonConnectConnector => {
         let originalTonConnectUI: TonConnectUI | null = null;
         let unsubscribeTonConnect: (() => void) | null = null;
 
@@ -92,6 +91,14 @@ export const tonConnect = (config: TonConnectConnectorConfig) => {
                     emitter.emit(CONNECTOR_EVENTS.CONNECTED, { wallets, connectorId: id }, id);
                 } else {
                     emitter.emit(CONNECTOR_EVENTS.DISCONNECTED, { connectorId: id }, id);
+                }
+            });
+
+            // Set default network and subscribe to changes
+            originalTonConnectUI.setConnectionNetwork(networkManager.getDefaultNetwork()?.chainId);
+            emitter.on(NETWORKS_EVENTS.DEFAULT_CHANGED, ({ payload }) => {
+                if (originalTonConnectUI) {
+                    originalTonConnectUI.setConnectionNetwork(payload.network?.chainId);
                 }
             });
         }

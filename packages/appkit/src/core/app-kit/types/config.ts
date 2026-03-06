@@ -10,6 +10,7 @@ import type { NetworkAdapters } from '@ton/walletkit';
 
 import type { CreateConnectorFn } from '../../../types/connector';
 import type { Provider } from '../../../types/provider';
+import type { Network } from '../../../types/network';
 
 /**
  * Configuration for AppKit
@@ -30,8 +31,12 @@ export interface AppKitConfig {
     connectors?: CreateConnectorFn[];
 
     /**
-     * Wallet providers
+     * Default network for wallet connections.
+     * If set, connectors (e.g. TonConnect) will enforce this network when connecting.
+     * Set to `undefined` to allow any network.
      */
+    defaultNetwork?: Network;
+
     providers?: Provider[];
 
     /**

@@ -8,6 +8,8 @@
 
 import type { WalletInterface } from './wallet';
 import type { AppKitEmitter } from '../core/app-kit';
+import type { AppKitNetworkManager } from '../core/network';
+import type { Network } from './network';
 
 /**
  * Interface for wallet connectors
@@ -25,7 +27,7 @@ export interface Connector {
     destroy(): void;
 
     /** Connect a wallet */
-    connectWallet(): Promise<void>;
+    connectWallet(network?: Network): Promise<void>;
 
     /** Disconnect a wallet */
     disconnectWallet(): Promise<void>;
@@ -39,7 +41,11 @@ export interface ConnectorMetadata {
     iconUrl?: string;
 }
 
-export type CreateConnectorFn = (config: { emitter: AppKitEmitter; ssr?: boolean }) => Connector;
+export type CreateConnectorFn = (config: {
+    emitter: AppKitEmitter;
+    networkManager: AppKitNetworkManager;
+    ssr?: boolean;
+}) => Connector;
 
 export function createConnector(createConnectorFn: CreateConnectorFn): CreateConnectorFn {
     return createConnectorFn;
