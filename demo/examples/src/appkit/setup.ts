@@ -6,7 +6,7 @@
  *
  */
 
-import { AppKit, Network, tonConnect } from '@ton/appkit';
+import { AppKit, Network, createTonConnectConnector } from '@ton/appkit';
 
 export const setupAppKitExample = () => {
     // SAMPLE_START: APPKIT_INIT
@@ -28,7 +28,7 @@ export const setupAppKitExample = () => {
             // },
         },
         connectors: [
-            tonConnect({
+            createTonConnectConnector({
                 tonConnectOptions: {
                     manifestUrl: 'https://tonconnect-sdk-demo-dapp.vercel.app/tonconnect-manifest.json',
                 },

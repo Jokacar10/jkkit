@@ -27,7 +27,7 @@ export type { TonConnectWalletAdapterConfig } from './adapters/ton-connect-walle
 
 // Connector exports
 export {
-    tonConnect,
+    createTonConnectConnector,
     type TonConnectConnectorConfig,
     type TonConnectConnector,
 } from './connectors/ton-connect-connector';

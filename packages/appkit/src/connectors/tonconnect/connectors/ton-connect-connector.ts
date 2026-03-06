@@ -28,7 +28,7 @@ export type TonConnectConnector = Connector & {
     tonConnectUI: TonConnectUI | null;
 };
 
-export const tonConnect = (config: TonConnectConnectorConfig) => {
+export const createTonConnectConnector = (config: TonConnectConnectorConfig) => {
     return createConnector(({ emitter, networkManager, ssr }): TonConnectConnector => {
         let originalTonConnectUI: TonConnectUI | null = null;
         let unsubscribeTonConnect: (() => void) | null = null;

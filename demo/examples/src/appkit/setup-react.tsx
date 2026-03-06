@@ -10,7 +10,7 @@
 
 // SAMPLE_START: APPKIT_REACT_INIT
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AppKit, Network, tonConnect } from '@ton/appkit';
+import { AppKit, Network, createTonConnectConnector } from '@ton/appkit';
 import { AppKitProvider } from '@ton/appkit-react';
 import type { FC } from 'react';
 
@@ -44,7 +44,7 @@ const appKit = new AppKit({
         // },
     },
     connectors: [
-        tonConnect({
+        createTonConnectConnector({
             tonConnectOptions: {
                 manifestUrl: 'https://tonconnect-sdk-demo-dapp.vercel.app/tonconnect-manifest.json',
             },

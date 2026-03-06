@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "clean": "rm -rf .next node_modules"
+    "clean": "rm -rf .next dist .turbo node_modules"
   },
   "dependencies": {
     "@tanstack/react-query": "catalog:",
