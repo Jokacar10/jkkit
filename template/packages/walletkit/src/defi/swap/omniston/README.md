@@ -10,16 +10,7 @@ For detailed information about Omniston features and capabilities, see the [offi
 
 ## Quick Start
 
-```typescript
-import { OmnistonSwapProvider } from '@ton/walletkit/swap/omniston';
-
-const provider = new OmnistonSwapProvider({
-    defaultSlippageBps: 100, // 1%
-    quoteTimeoutMs: 10000,
-});
-
-kit.swap.registerProvider(provider);
-```
+%%demo/examples/src/appkit/swap#OMNISTON_QUICK_START%%
 
 ## Configuration Options
 
@@ -34,8 +25,8 @@ interface OmnistonSwapProviderConfig {
 }
 
 interface SwapQuoteParams {
-    fromToken: string;
-    toToken: string;
+    from: SwapToken;
+    to: SwapToken;
     amount: string;
     network: Network;
     slippageBps?: number;
@@ -48,73 +39,19 @@ interface SwapQuoteParams {
 
 ### Usage Example
 
-```typescript
-import { getMaxOutgoingMessages } from '@ton/walletkit';
-
-// Extract maxOutgoingMessages from wallet features
-const features = wallet.getSupportedFeatures();
-const maxOutgoingMessages = getMaxOutgoingMessages(features);
-
-const quote = await kit.swap.getQuote({
-    fromToken: 'TON',
-    toToken: 'USDT',
-    amount: '1000000000',
-    network: Network.mainnet(),
-    maxOutgoingMessages, // Pass wallet's capability
-});
-```
+%%demo/examples/src/appkit/swap#OMNISTON_USAGE_EXAMPLE%%
 
 ## Referral Fees
 
 Pass referral options via `providerOptions` to earn fees on swaps:
 
-```typescript
-import type { OmnistonProviderOptions } from '@ton/walletkit/swap/omniston';
-
-const quote = await kit.swap.getQuote({
-    fromToken: 'TON',
-    toToken: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
-    amount: '1000000000',
-    network: Network.mainnet(),
-    providerOptions: {
-        referrerAddress: 'EQ...',
-        referrerFeeBps: 10, // 0.1%
-    } as OmnistonProviderOptions,
-});
-```
+%%demo/examples/src/appkit/swap#OMNISTON_REFERRAL_FEES%%
 
 ### Overriding Referral Settings
 
 You can set a global referrer in provider config and override it for specific requests:
 
-```typescript
-// Global referrer in config
-const provider = new OmnistonSwapProvider({
-    referrerAddress: 'EQ...global',
-    referrerFeeBps: 10,
-});
-
-// Override for specific quote
-const quote = await kit.swap.getQuote({
-    fromToken: 'TON',
-    toToken: 'USDT',
-    amount: '1000000000',
-    network: Network.mainnet(),
-    providerOptions: {
-        referrerAddress: 'EQ...different', // Uses this instead of global
-        referrerFeeBps: 20,
-    } as OmnistonProviderOptions,
-});
-
-// Or use global settings by omitting providerOptions
-const quote2 = await kit.swap.getQuote({
-    fromToken: 'TON',
-    toToken: 'USDT',
-    amount: '1000000000',
-    network: Network.mainnet(),
-    // Uses global referrer from config
-});
-```
+%%demo/examples/src/appkit/swap#OMNISTON_OVERRIDING_REFERRAL%%
 
 ## Resources
 

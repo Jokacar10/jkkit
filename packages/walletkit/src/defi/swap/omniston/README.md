@@ -12,15 +12,12 @@ For detailed information about Omniston features and capabilities, see the [offi
 
 ## Quick Start
 
-```typescript
-import { OmnistonSwapProvider } from '@ton/walletkit/swap/omniston';
-
+```ts
 const provider = new OmnistonSwapProvider({
     defaultSlippageBps: 100, // 1%
     quoteTimeoutMs: 10000,
 });
-
-kit.swap.registerProvider(provider);
+kit.registerProvider(provider);
 ```
 
 ## Configuration Options
@@ -36,8 +33,8 @@ interface OmnistonSwapProviderConfig {
 }
 
 interface SwapQuoteParams {
-    fromToken: string;
-    toToken: string;
+    from: SwapToken;
+    to: SwapToken;
     amount: string;
     network: Network;
     slippageBps?: number;
@@ -50,19 +47,19 @@ interface SwapQuoteParams {
 
 ### Usage Example
 
-```typescript
-import { getMaxOutgoingMessages } from '@ton/walletkit';
+```ts
+const TON = { address: 'ton', decimals: 9 };
+const USDT = {
+    address: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
+    decimals: 6,
+};
 
-// Extract maxOutgoingMessages from wallet features
-const features = wallet.getSupportedFeatures();
-const maxOutgoingMessages = getMaxOutgoingMessages(features);
-
-const quote = await kit.swap.getQuote({
-    fromToken: 'TON',
-    toToken: 'USDT',
-    amount: '1000000000',
+const quote = await getSwapQuote(appKit, {
+    from: TON,
+    to: USDT,
+    amount: '0.1',
     network: Network.mainnet(),
-    maxOutgoingMessages, // Pass wallet's capability
+    maxOutgoingMessages: 1,
 });
 ```
 
@@ -70,13 +67,17 @@ const quote = await kit.swap.getQuote({
 
 Pass referral options via `providerOptions` to earn fees on swaps:
 
-```typescript
-import type { OmnistonProviderOptions } from '@ton/walletkit/swap/omniston';
+```ts
+const TON = { address: 'ton', decimals: 9 };
+const USDT = {
+    address: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
+    decimals: 6,
+};
 
-const quote = await kit.swap.getQuote({
-    fromToken: 'TON',
-    toToken: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
-    amount: '1000000000',
+const quote = await getSwapQuote(appKit, {
+    from: TON,
+    to: USDT,
+    amount: '0.1',
     network: Network.mainnet(),
     providerOptions: {
         referrerAddress: 'EQ...',
@@ -89,17 +90,24 @@ const quote = await kit.swap.getQuote({
 
 You can set a global referrer in provider config and override it for specific requests:
 
-```typescript
+```ts
+const TON = { address: 'ton', decimals: 9 };
+const USDT = {
+    address: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
+    decimals: 6,
+};
+
 // Global referrer in config
 const provider = new OmnistonSwapProvider({
     referrerAddress: 'EQ...global',
     referrerFeeBps: 10,
 });
+appKit.registerProvider(provider);
 
 // Override for specific quote
-const quote = await kit.swap.getQuote({
-    fromToken: 'TON',
-    toToken: 'USDT',
+const quote = await getSwapQuote(appKit, {
+    from: TON,
+    to: USDT,
     amount: '1000000000',
     network: Network.mainnet(),
     providerOptions: {
@@ -109,10 +117,10 @@ const quote = await kit.swap.getQuote({
 });
 
 // Or use global settings by omitting providerOptions
-const quote2 = await kit.swap.getQuote({
-    fromToken: 'TON',
-    toToken: 'USDT',
-    amount: '1000000000',
+const quote2 = await getSwapQuote(appKit, {
+    from: TON,
+    to: USDT,
+    amount: '0.1',
     network: Network.mainnet(),
     // Uses global referrer from config
 });
