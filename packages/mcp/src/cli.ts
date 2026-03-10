@@ -54,6 +54,7 @@ import {
     ConfigBackedAgenticSetupSessionStore,
 } from './services/AgenticSetupSessionManager.js';
 import { createApiClient } from './utils/ton-client.js';
+import { UINT_256_MAX } from './utils/math.js';
 
 const SERVER_NAME = 'ton-mcp';
 
@@ -93,8 +94,6 @@ function parseArgs() {
 
     return { mode: 'http' as const, port, host };
 }
-
-const UINT_256_MAX = 1n << 256n;
 
 function parseOptionalBigInt(input?: string): bigint | undefined {
     if (!input) {

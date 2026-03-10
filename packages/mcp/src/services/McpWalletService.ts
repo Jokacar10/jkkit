@@ -44,8 +44,8 @@ import type { IContactResolver } from '../types/contacts.js';
 import type { NetworkType } from '../types/config.js';
 import { AgenticWalletCodeCell } from '../contracts/agentic_wallet/AgenticWallet.source.js';
 import { createApiClient } from '../utils/ton-client.js';
+import { UINT_256_MAX } from '../utils/math.js';
 
-const UINT_256_MAX = 1n << 256n;
 const OP_DEPLOY_WALLET = 0x0609e47b;
 const AGENTIC_DEFAULT_VALID_UNTIL = 600;
 const TEP64_ONCHAIN_CONTENT_PREFIX = 0x00;
