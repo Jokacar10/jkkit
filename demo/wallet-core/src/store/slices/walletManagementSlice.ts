@@ -738,11 +738,18 @@ export const createWalletManagementSlice =
                                     }
                                 }
                             }
+                            const extNorm = externalHash ? Base64NormalizeUrl(externalHash) : undefined;
                             const p = s.walletManagement.pendingTransactions.find(
-                                (t) => t.traceId === traceId || t.traceIdFromFirstTx === traceIdFromFirstTx,
+                                (t) =>
+                                    t.traceId === traceId ||
+                                    (traceIdFromFirstTx && t.traceIdFromFirstTx === traceIdFromFirstTx) ||
+                                    (extNorm && t.externalHash && Base64NormalizeUrl(t.externalHash) === extNorm),
                             );
                             if (p) {
+                                log.info(`WebSocket: received ${finality} for existing pending (was: ${p.finality})`);
                                 p.finality = finality;
+                            } else {
+                                log.info(`WebSocket: received ${finality} for trace (no pending entry)`);
                             }
                         });
                         void get()
