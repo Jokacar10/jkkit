@@ -11,6 +11,7 @@ import type { Action } from '@ton/walletkit';
 
 import { formatTonForDisplay, sameAddress } from '../../utils';
 import { TransactionCard } from './TransactionCard';
+import type { TxFinality } from './TransactionCard';
 
 interface ActionCardProps {
     action: Action;
@@ -19,6 +20,8 @@ interface ActionCardProps {
     traceLink: string;
     /** When true, renders as pending (spinner icon, "Pending" status) */
     isPending?: boolean;
+    /** Finality: pending, confirmed, finalized, or done (default from isPending) */
+    finality?: TxFinality;
     /** Debug ID for DOM inspection (data-debug-id) */
     debugId?: string;
 }
@@ -45,12 +48,13 @@ function isOutgoingFromAction(action: Action, myAddress: string): boolean {
 }
 
 export const ActionCard: React.FC<ActionCardProps> = memo(
-    ({ action, myAddress, timestamp, traceLink, isPending = false, debugId }) => {
+    ({ action, myAddress, timestamp, traceLink, isPending = false, finality: finalityProp, debugId }) => {
         const { simplePreview, status } = action;
         const { description, value, valueImage } = simplePreview;
 
         const isOutgoing = isOutgoingFromAction(action, myAddress);
         const txStatus = isPending ? 'pending' : status === 'failure' ? 'failure' : 'success';
+        const finality: TxFinality = finalityProp ?? (isPending ? 'pending' : status === 'failure' ? 'done' : 'done');
 
         const { description: displayDesc, value: displayValue } = useMemo(() => {
             const descMatch = description?.match(TON_TRANSFER_DESC);
@@ -86,6 +90,7 @@ export const ActionCard: React.FC<ActionCardProps> = memo(
                 timestamp={timestamp}
                 traceLink={traceLink}
                 status={txStatus}
+                finality={finality}
                 isOutgoing={isOutgoing}
                 debugId={debugId}
             />

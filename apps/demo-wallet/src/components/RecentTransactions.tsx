@@ -226,6 +226,7 @@ export const RecentTransactions: React.FC<RecentTransactionsProps> = memo(({ emb
                                 const preview = p.preview;
                                 const isPending = p.finality !== 'confirmed' && p.finality !== 'finalized';
 
+                                const finality = p.finality ?? 'pending';
                                 if (p.action) {
                                     return (
                                         <ActionCard
@@ -235,6 +236,7 @@ export const RecentTransactions: React.FC<RecentTransactionsProps> = memo(({ emb
                                             timestamp={preview?.timestamp ?? Math.floor(Date.now() / 1000)}
                                             traceLink={`/wallet/trace/${p.traceId}${p.externalHash ? ':' + p.externalHash : ''}`}
                                             isPending={isPending}
+                                            finality={finality}
                                             debugId={`pending-${p.traceId.slice(0, 12)}`}
                                         />
                                     );
@@ -289,6 +291,7 @@ export const RecentTransactions: React.FC<RecentTransactionsProps> = memo(({ emb
                                         timestamp={preview?.timestamp ?? Math.floor(Date.now() / 1000)}
                                         traceLink={`/wallet/trace/${p.traceId}${p.externalHash ? ':' + p.externalHash : ''}`}
                                         isPending={isPending}
+                                        finality={finality}
                                         debugId={`pending-${p.traceId.slice(0, 12)}`}
                                     />
                                 );
@@ -338,6 +341,7 @@ export const RecentTransactions: React.FC<RecentTransactionsProps> = memo(({ emb
                                     myAddress={address || ''}
                                     timestamp={ev.timestamp}
                                     traceLink={`/wallet/trace/${traceId}`}
+                                    finality="done"
                                     debugId={`event-${traceId.slice(0, 12)}`}
                                 />
                             );
