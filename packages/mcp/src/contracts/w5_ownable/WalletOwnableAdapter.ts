@@ -344,7 +344,7 @@ export class WalletOwnableAdapter implements WalletAdapter {
         options: { validUntil: number | undefined; fakeSignature: boolean },
     ) {
         const Opcodes = {
-            auth_signed: 0x7369676e,
+            auth_signed: 0xbf235204,
         };
 
         const expireAt = options.validUntil ?? Math.floor(Date.now() / 1000) + 300;

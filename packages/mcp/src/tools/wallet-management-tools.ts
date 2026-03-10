@@ -79,7 +79,7 @@ const listAgenticWalletsByOwnerSchema = z.object({
     network: z.enum(['mainnet', 'testnet']).optional().describe('Network to query (default: mainnet)'),
 });
 
-const addAgentWalletSchema = z.object({
+const importAgenticWalletSchema = z.object({
     address: z.string().min(1).describe('Agentic wallet address'),
     network: z.enum(['mainnet', 'testnet']).optional().describe('Network to validate against (default: mainnet)'),
     name: z.string().optional().describe('Optional wallet display name'),
@@ -206,20 +206,6 @@ export function createMcpWalletManagementTools(registry: WalletRegistryService) 
             },
         },
 
-        preflight_validate_agentic_wallet: {
-            description:
-                'Preflight-check an agentic wallet against network, collection, and optional owner expectations.',
-            inputSchema: validateAgenticWalletSchema,
-            handler: async (args: z.infer<typeof validateAgenticWalletSchema>): Promise<ToolResponse> => {
-                try {
-                    const wallet = await registry.preflightValidateAgenticWallet(args);
-                    return successResponse({ wallet });
-                } catch (error) {
-                    return errorResponse(error);
-                }
-            },
-        },
-
         list_agentic_wallets_by_owner: {
             description: 'List agentic wallets owned by a given main wallet address.',
             inputSchema: listAgenticWalletsByOwnerSchema,
@@ -238,13 +224,13 @@ export function createMcpWalletManagementTools(registry: WalletRegistryService) 
             },
         },
 
-        add_agent_wallet: {
+        import_agentic_wallet: {
             description:
                 'Import an existing agentic wallet into the local TON config registry. Recovers a matching pending key draft when available; otherwise import is read-only until agentic_rotate_operator_key is completed.',
-            inputSchema: addAgentWalletSchema,
-            handler: async (args: z.infer<typeof addAgentWalletSchema>): Promise<ToolResponse> => {
+            inputSchema: importAgenticWalletSchema,
+            handler: async (args: z.infer<typeof importAgenticWalletSchema>): Promise<ToolResponse> => {
                 try {
-                    const result = await registry.addAgentWallet(args);
+                    const result = await registry.importAgenticWallet(args);
                     return successResponse({
                         ...result,
                         wallet: sanitizeWallet(result.wallet),

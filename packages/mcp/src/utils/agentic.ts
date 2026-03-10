@@ -63,7 +63,7 @@ export class AgenticWalletValidationError extends Error {
     }
 }
 
-export interface AgenticWalletPreflightResult {
+interface AgenticWalletContractCheckResult {
     address: string;
     network: TonNetwork;
     accountStatus: FullAccountState['status'];
@@ -98,11 +98,11 @@ function getAccountCodeHash(accountState: FullAccountState): string | undefined 
     return Cell.fromBase64(accountState.code).hash().toString('hex');
 }
 
-function assertAgenticWalletPreflight(input: {
+function assertAgenticWalletContract(input: {
     accountState: FullAccountState;
     address: string;
     network: TonNetwork;
-}): AgenticWalletPreflightResult {
+}): AgenticWalletContractCheckResult {
     const codeHash = getAccountCodeHash(input.accountState);
 
     if (input.accountState.status !== 'active' || !input.accountState.code) {
@@ -282,7 +282,7 @@ async function getAgenticWalletSnapshot(input: {
     network: TonNetwork;
 }): Promise<{ state: AgenticWalletState; balanceNano: string; balanceTon: string }> {
     const accountState = await withAgenticLookupRetry(() => input.client.getAccountState(input.address));
-    assertAgenticWalletPreflight({
+    assertAgenticWalletContract({
         accountState,
         address: input.address,
         network: input.network,
@@ -437,17 +437,4 @@ export async function validateAgenticWalletAddress(input: {
         deployedByUser: state.deployedByUser,
         name: extractMetadataText(state.nftItemContent),
     };
-}
-
-export async function preflightValidateAgenticWalletAddress(input: {
-    client: ApiClient;
-    address: string;
-    network: TonNetwork;
-}): Promise<AgenticWalletPreflightResult> {
-    const accountState = await withAgenticLookupRetry(() => input.client.getAccountState(input.address));
-    return assertAgenticWalletPreflight({
-        accountState,
-        address: input.address,
-        network: input.network,
-    });
 }

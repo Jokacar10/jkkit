@@ -103,7 +103,7 @@ HTTP mode keeps a separate MCP session/transport per client session id, so multi
 | `WALLET_VERSION` | `v5r1` | Wallet version to use in single-wallet mode (`v5r1`, `v4r2`, or `agentic`) |
 | `AGENTIC_WALLET_ADDRESS` |  | Agentic wallet address (required for `WALLET_VERSION=agentic`, unless derived from init params) |
 | `AGENTIC_WALLET_NFT_INDEX` |  | Agentic wallet NFT index / subwallet id (`uint256`, optional) |
-| `AGENTIC_COLLECTION_ADDRESS` | `EQAcIXCxCd_gAqQ8RK0UA9vvlVA7wWjV41l2URKVxaMVLaD6` | Agentic collection address override for single-wallet mode |
+| `AGENTIC_COLLECTION_ADDRESS` | `EQByQ19qvWxW7VibSbGEgZiYMqilHY5y1a_eeSL2VaXhfy07` | Agentic collection address override for single-wallet mode |
 | `TONCENTER_API_KEY` |  | API key for Toncenter (optional, for higher rate limits) |
 | `TON_CONFIG_PATH` | `~/.config/ton/config.json` | Config path for registry mode |
 | `AGENTIC_CALLBACK_BASE_URL` |  | Optional public base URL for agentic onboarding callbacks |
@@ -306,25 +306,8 @@ Get Toncenter and agentic collection settings for a network.
 **Parameters:**
 - `network` (required): `mainnet` or `testnet`
 
-#### `set_network_config` (registry mode only)
-Update Toncenter or agentic collection settings for a network.
-
-**Parameters:**
-- `network` (required): `mainnet` or `testnet`
-- `toncenterApiKey` (optional): Toncenter API key for this network
-- `agenticCollectionAddress` (optional): Agentic collection address override
-
 #### `agentic_validate_wallet` (registry mode only)
 Validate an existing agentic wallet address against the expected network and collection.
-
-**Parameters:**
-- `address` (required): Agentic wallet address
-- `network` (optional): Network to validate against
-- `collectionAddress` (optional): Collection address override
-- `ownerAddress` (optional): Expected owner address
-
-#### `agentic_preflight_validate_wallet` (registry mode only)
-Preflight-check an existing agentic wallet address against the expected network and collection.
 
 **Parameters:**
 - `address` (required): Agentic wallet address
@@ -339,7 +322,7 @@ List agentic wallets owned by a given main wallet address.
 - `ownerAddress` (required): Owner wallet address
 - `network` (optional): Network to query
 
-#### `agentic_add_wallet` (registry mode only)
+#### `agentic_import_wallet` (registry mode only)
 Import an existing agentic wallet into the local TON config registry, recovering a matching pending key draft when available. Otherwise the wallet is imported read-only until `agentic_rotate_operator_key` is completed.
 
 **Parameters:**

@@ -132,28 +132,6 @@ describe('WalletRegistryService', () => {
         });
     });
 
-    it('runs full agentic wallet validation through the preflight alias', async () => {
-        const registry = new WalletRegistryService();
-
-        const result = await registry.preflightValidateAgenticWallet({
-            address: agentAddress,
-            network: 'testnet',
-        });
-
-        expect(mocks.validateAgenticWalletAddress).toHaveBeenCalledWith({
-            client: { kind: 'api-client' },
-            address: agentAddress,
-            collectionAddress: expect.any(String),
-            network: 'testnet',
-            ownerAddress: undefined,
-        });
-        expect(result).toMatchObject({
-            address: agentAddress,
-            ownerAddress,
-            collectionAddress: DEFAULT_AGENTIC_COLLECTION_ADDRESS,
-        });
-    });
-
     it('creates a wallet service for the selected wallet and passes the network api key', async () => {
         const standard = createStandardWalletRecord({
             name: 'Primary wallet',
@@ -293,7 +271,7 @@ describe('WalletRegistryService', () => {
         });
 
         const registry = new WalletRegistryService();
-        const result = await registry.addAgentWallet({
+        const result = await registry.importAgenticWallet({
             address: agentAddress,
             network: 'mainnet',
         });

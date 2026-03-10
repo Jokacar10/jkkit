@@ -66,9 +66,9 @@ export const Opcodes = {
     action_extended_remove_extension: 0x03,
     action_extended_set_signature_auth_allowed: 0x04,
     // Auth/message types
-    auth_extension: 0x6578746e,
-    auth_signed: 0x7369676e,
-    auth_signed_internal: 0x73696e74,
+    auth_extension: 0xed84cbf0,
+    auth_signed: 0xbf235204,
+    auth_signed_internal: 0x4a3ca895,
     // Owner messages
     internal_request_from_owner: 0x7361234e,
     // NFT transfer messages

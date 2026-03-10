@@ -334,7 +334,7 @@ export class AgenticWalletAdapter implements WalletAdapter {
         outActions: Cell | null,
         options: { validUntil: number | undefined; fakeSignature: boolean },
     ): Promise<Cell> {
-        const authSigned = 0x7369676e;
+        const authSigned = 0xbf235204;
         const expireAt = options.validUntil ?? Math.floor(Date.now() / 1000) + 300;
 
         const payload = beginCell()

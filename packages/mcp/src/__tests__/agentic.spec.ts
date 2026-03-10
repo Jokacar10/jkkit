@@ -9,10 +9,8 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-    AgenticWalletValidationError,
     buildAgenticCreateDeepLink,
     buildAgenticDashboardLink,
-    preflightValidateAgenticWalletAddress,
 } from '../utils/agentic.js';
 
 describe('mcp agentic helpers', () => {
@@ -42,52 +40,4 @@ describe('mcp agentic helpers', () => {
         expect(url.pathname).toBe('/agent/kQAgent');
     });
 
-    it('fails preflight for a non-agentic active contract before storage parsing', async () => {
-        const client = {
-            getAccountState: async () => ({
-                status: 'active',
-                balance: '0',
-                extraCurrencies: {},
-                code: 'te6ccgEBAQEAAgAAAA==',
-                data: 'te6ccgEBAQEAAgAAAA==',
-                lastTransaction: null,
-            }),
-        } as never;
-
-        await expect(
-            preflightValidateAgenticWalletAddress({
-                client,
-                address: 'EQNotAgentic',
-                network: 'mainnet',
-            }),
-        ).rejects.toThrow(/not an agentic wallet contract/i);
-    });
-
-    it('classifies inactive addresses as invalid agentic wallets in preflight', async () => {
-        const client = {
-            getAccountState: async () => ({
-                status: 'uninitialized',
-                balance: '0',
-                extraCurrencies: {},
-                code: null,
-                data: null,
-                lastTransaction: null,
-            }),
-        } as never;
-
-        await expect(
-            preflightValidateAgenticWalletAddress({
-                client,
-                address: 'EQInactive',
-                network: 'testnet',
-            }),
-        ).rejects.toBeInstanceOf(AgenticWalletValidationError);
-        await expect(
-            preflightValidateAgenticWalletAddress({
-                client,
-                address: 'EQInactive',
-                network: 'testnet',
-            }),
-        ).rejects.toThrow(/not an active agentic wallet contract/i);
-    });
 });

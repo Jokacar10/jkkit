@@ -21,7 +21,7 @@ describe('AgenticOnboardingService', () => {
         operator_public_key: '0xfeed',
         name: 'Agent Alpha',
         source: 'MCP flow',
-        collection_address: 'EQAcIXCxCd_gAqQ8RK0UA9vvlVA7wWjV41l2URKVxaMVLaD6',
+        collection_address: 'EQByQ19qvWxW7VibSbGEgZiYMqilHY5y1a_eeSL2VaXhfy07',
         created_at: '2026-03-10T00:00:00.000Z',
         updated_at: '2026-03-10T00:00:00.000Z',
     };
@@ -36,7 +36,7 @@ describe('AgenticOnboardingService', () => {
         operator_private_key: '0xpriv',
         operator_public_key: '0xfeed',
         source: 'MCP flow',
-        collection_address: 'EQAcIXCxCd_gAqQ8RK0UA9vvlVA7wWjV41l2URKVxaMVLaD6',
+        collection_address: 'EQByQ19qvWxW7VibSbGEgZiYMqilHY5y1a_eeSL2VaXhfy07',
         created_at: '2026-03-10T00:00:00.000Z',
         updated_at: '2026-03-10T00:00:00.000Z',
     };

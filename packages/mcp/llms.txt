@@ -99,13 +99,6 @@ Parameters:
 - network (required): mainnet or testnet
 Returns: sanitized network config
 
-### set_network_config
-Registry mode only. Update Toncenter/API and agentic collection settings for a network.
-Parameters:
-- network (required): mainnet or testnet
-- toncenterApiKey (optional): Toncenter API key
-- agenticCollectionAddress (optional): collection address override
-
 ### send_ton
 Send TON to an address.
 Parameters:
@@ -191,21 +184,13 @@ Parameters:
 - collectionAddress (optional): collection override
 - ownerAddress (optional): expected owner address
 
-### agentic_preflight_validate_wallet
-Registry mode only. Preflight-check an agentic wallet against network/collection and optional owner.
-Parameters:
-- address (required): agentic wallet address
-- network (optional): mainnet or testnet
-- collectionAddress (optional): collection override
-- ownerAddress (optional): expected owner address
-
 ### agentic_list_wallets_by_owner
 Registry mode only. Find agentic wallets owned by a main wallet.
 Parameters:
 - ownerAddress (required): owner wallet address
 - network (optional): mainnet or testnet
 
-### agentic_add_wallet
+### agentic_import_wallet
 Registry mode only. Import an existing agentic wallet into the local registry. If no matching pending draft exists, the wallet remains read-only until agentic_rotate_operator_key is completed.
 Parameters:
 - address (required): agentic wallet address
@@ -268,16 +253,15 @@ Parameters:
 
 ### Importing an Existing Agentic Wallet
 1. agentic_validate_wallet if the wallet only exists as an address
-2. agentic_preflight_validate_wallet if you want the lightweight preflight wording
-3. agentic_add_wallet to import it into the local registry
-4. If the wallet needs write access and no pending draft was recovered, use agentic_rotate_operator_key and then agentic_complete_rotate_operator_key
-5. Only then use write tools for that wallet
+2. agentic_import_wallet to import it into the local registry
+3. If the wallet needs write access and no pending draft was recovered, use agentic_rotate_operator_key and then agentic_complete_rotate_operator_key
+4. Only then use write tools for that wallet
 
 ### Setting Up the First Agentic Root Wallet
 1. agentic_start_root_wallet_setup
 2. Tell the user to open the returned dashboard URL and create the wallet from their main wallet
 3. Inspect agentic_get_root_wallet_setup or agentic_list_pending_root_wallet_setups
-4. If completion is manual, use agentic_validate_wallet or agentic_preflight_validate_wallet
+4. If completion is manual, use agentic_validate_wallet
 5. agentic_complete_root_wallet_setup when callback data is available or when the user provides the created wallet address
 
 ## Important Notes

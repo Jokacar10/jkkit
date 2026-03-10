@@ -72,8 +72,8 @@ describe('createTonWalletMCP registry mode', () => {
 
             expect(names).toContain('list_wallets');
             expect(names).toContain('get_current_wallet');
+            expect(names).not.toContain('set_network_config');
             expect(names).toContain('agentic_start_root_wallet_setup');
-            expect(names).toContain('agentic_preflight_validate_wallet');
             expect(names).toContain('agentic_rotate_operator_key');
             expect(names).toContain('agentic_complete_rotate_operator_key');
             expect(names).not.toContain('reset_wallet_config');
@@ -203,24 +203,6 @@ describe('createTonWalletMCP registry mode', () => {
         await client.connect(clientTransport);
 
         try {
-            const networkConfig = parseToolResult(
-                await client.callTool({
-                    name: 'set_network_config',
-                    arguments: {
-                        network: 'mainnet',
-                        toncenterApiKey: 'main-key',
-                    },
-                }),
-            );
-            expect(networkConfig).toMatchObject({
-                success: true,
-                network: 'mainnet',
-                config: {
-                    has_toncenter_api_key: true,
-                },
-            });
-            expect(networkConfig.config).not.toHaveProperty('toncenter_api_key');
-
             const started = parseToolResult(
                 await client.callTool({
                     name: 'agentic_start_root_wallet_setup',

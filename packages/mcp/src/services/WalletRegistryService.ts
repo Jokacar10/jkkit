@@ -216,15 +216,6 @@ export class WalletRegistryService {
         });
     }
 
-    async preflightValidateAgenticWallet(input: {
-        address: string;
-        network?: string;
-        collectionAddress?: string;
-        ownerAddress?: string;
-    }): Promise<AgenticImportCandidate> {
-        return this.validateAgenticWallet(input);
-    }
-
     async listAgenticWalletsByOwner(input: {
         ownerAddress: string;
         network?: string;
@@ -245,7 +236,7 @@ export class WalletRegistryService {
         });
     }
 
-    async addAgentWallet(input: { address: string; network?: string; name?: string }): Promise<{
+    async importAgenticWallet(input: { address: string; network?: string; name?: string }): Promise<{
         wallet: StoredAgenticWallet;
         recoveredPendingKeyDraft: boolean;
         updatedExisting: boolean;

@@ -140,7 +140,7 @@ export class ConfigError extends Error {}
 
 const DEFAULT_CONFIG_FILE = join(homedir(), '.config', 'ton', 'config.json');
 const ENV_CONFIG_PATH = 'TON_CONFIG_PATH';
-export const DEFAULT_AGENTIC_COLLECTION_ADDRESS = 'EQAcIXCxCd_gAqQ8RK0UA9vvlVA7wWjV41l2URKVxaMVLaD6';
+export const DEFAULT_AGENTIC_COLLECTION_ADDRESS = 'EQByQ19qvWxW7VibSbGEgZiYMqilHY5y1a_eeSL2VaXhfy07';
 
 function nowIso(): string {
     return new Date().toISOString();

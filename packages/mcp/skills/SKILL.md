@@ -35,13 +35,11 @@ Use this skill when the user wants to:
 - `set_active_wallet` - Switch active wallet by id, name, or address
 - `remove_wallet` - Soft-delete a stored wallet from the registry
 - `get_network_config` - Read Toncenter/API and agentic collection settings for a network
-- `set_network_config` - Update Toncenter/API and agentic collection settings for a network
 
 ### Agentic Wallet Management
-- `agentic_preflight_validate_wallet` - Preflight-check an agentic wallet against network/collection and optional owner
 - `agentic_validate_wallet` - Validate an agentic wallet against network/collection and optional owner
 - `agentic_list_wallets_by_owner` - Find agentic wallets owned by a given main wallet
-- `agentic_add_wallet` - Import an existing agentic wallet into the registry
+- `agentic_import_wallet` - Import an existing agentic wallet into the registry
 - `agentic_rotate_operator_key` - Start operator-key rotation for an imported agentic wallet
 - `agentic_complete_rotate_operator_key` - Finalize operator-key rotation after the on-chain change lands
 ### Agentic Onboarding
@@ -103,16 +101,15 @@ Use this skill when the user wants to:
 
 ### Import Existing Agentic Wallet
 1. Call `agentic_validate_wallet` if the user only has an address and you need full validation
-2. Call `agentic_preflight_validate_wallet` if you want the lightweight preflight wording
-3. Call `agentic_add_wallet` to import it into the registry
-4. If the wallet must sign and no pending draft was recovered, call `agentic_rotate_operator_key` and then `agentic_complete_rotate_operator_key`
-5. Only after that use write tools such as `send_ton`, `send_nft`, or `agentic_deploy_subwallet`
+2. Call `agentic_import_wallet` to import it into the registry
+3. If the wallet must sign and no pending draft was recovered, call `agentic_rotate_operator_key` and then `agentic_complete_rotate_operator_key`
+4. Only after that use write tools such as `send_ton`, `send_nft`, or `agentic_deploy_subwallet`
 
 ### Set Up First Agentic Root Wallet
 1. Call `agentic_start_root_wallet_setup`
 2. Tell the user to open the returned dashboard URL and create the wallet from their main wallet
 3. Poll `agentic_get_root_wallet_setup` or inspect `agentic_list_pending_root_wallet_setups`
-4. If completion is manual, use `agentic_validate_wallet` or `agentic_preflight_validate_wallet`
+4. If completion is manual, use `agentic_validate_wallet`
 5. Call `agentic_complete_root_wallet_setup` when callback data is available or when the user provides the created wallet address
 6. Confirm the imported wallet with `get_current_wallet` or `list_wallets`
 
