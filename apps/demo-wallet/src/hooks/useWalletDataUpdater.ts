@@ -7,12 +7,20 @@
  */
 
 import { useEffect } from 'react';
-import { useJettons, useNfts, useWallet } from '@demo/wallet-core';
+import { useAuth, useJettons, useNfts, useWallet } from '@demo/wallet-core';
 
 export const useWalletDataUpdater = () => {
-    const { address, updateBalance } = useWallet();
+    const { address, updateBalance, hasWallet, currentWallet, loadAllWallets } = useWallet();
+    const { isUnlocked } = useAuth();
     const { loadUserJettons, clearJettons } = useJettons();
     const { loadUserNfts, clearNfts, refreshNfts } = useNfts();
+
+    // Load wallets when hasWallet but currentWallet missing (e.g. refresh on /send before rehydration)
+    useEffect(() => {
+        if (hasWallet && isUnlocked && !currentWallet) {
+            void loadAllWallets();
+        }
+    }, [hasWallet, isUnlocked, currentWallet, loadAllWallets]);
 
     // Update on address change
     useEffect(() => {

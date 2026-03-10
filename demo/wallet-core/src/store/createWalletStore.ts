@@ -235,6 +235,15 @@ export function createWalletStore(options: CreateWalletStoreOptions = {}) {
                                 state.clearExpiredRequests();
                             }
 
+                            // Load wallets after rehydration (fixes refresh on /send when loadSavedWalletsIntoKit ran before rehydration)
+                            if (
+                                state.walletCore.walletKit &&
+                                state.auth.currentPassword &&
+                                (state.walletManagement.savedWallets?.length ?? 0) > 0
+                            ) {
+                                void state.loadAllWallets();
+                            }
+
                             // Resume processing if there are queued requests
                             // if (
                             //     state.tonConnect.requestQueue.items.length > 0 &&
