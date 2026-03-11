@@ -12,7 +12,7 @@ import type {
     StakeParams,
     UnstakeParams,
     StakingBalance,
-    StakingInfo,
+    StakingProviderInfo,
     StakingProviderInterface,
     StakingQuoteParams,
     StakingQuote,
@@ -54,7 +54,7 @@ export class StakingManager extends DefiManager<StakingProviderInterface> implem
     async stake(params: StakeParams, providerId?: string): Promise<TransactionRequest> {
         log.debug('Building staking transaction', params);
         try {
-            return await this.getProvider(providerId).stake(params);
+            return await this.getProvider(providerId).buildStakeTransaction(params);
         } catch (error) {
             throw this.createError('Failed to build staking transaction', StakingErrorCode.InvalidParams, {
                 error,
@@ -71,7 +71,7 @@ export class StakingManager extends DefiManager<StakingProviderInterface> implem
     async unstake(params: UnstakeParams, providerId?: string): Promise<TransactionRequest> {
         log.debug('Building unstaking transaction', params);
         try {
-            return await this.getProvider(providerId).unstake(params);
+            return await this.getProvider(providerId).buildUnstakeTransaction(params);
         } catch (error) {
             throw this.createError('Failed to build unstaking transaction', StakingErrorCode.InvalidParams, {
                 error,
@@ -98,7 +98,7 @@ export class StakingManager extends DefiManager<StakingProviderInterface> implem
         });
 
         try {
-            return await this.getProvider(providerId).getBalance(userAddress, network);
+            return await this.getProvider(providerId).getStakedBalance(userAddress, network);
         } catch (error) {
             throw this.createError('Failed to get staking balance', StakingErrorCode.InvalidParams, {
                 error,
@@ -113,14 +113,14 @@ export class StakingManager extends DefiManager<StakingProviderInterface> implem
      * @param network - Network to query
      * @param providerId - Optional provider id to use
      */
-    async getStakingInfo(network?: Network, providerId?: string): Promise<StakingInfo> {
+    async getStakingProviderInfo(network?: Network, providerId?: string): Promise<StakingProviderInfo> {
         log.debug('Getting staking info', {
             network,
             provider: providerId || this.defaultProviderId,
         });
 
         try {
-            return await this.getProvider(providerId).getStakingInfo(network);
+            return await this.getProvider(providerId).getStakingProviderInfo(network);
         } catch (error) {
             throw this.createError('Failed to get staking info', StakingErrorCode.InvalidParams, { error, network });
         }

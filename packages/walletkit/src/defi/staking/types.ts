@@ -97,7 +97,7 @@ export interface StakingBalance {
 /**
  * Staking information for a provider
  */
-export interface StakingInfo {
+export interface StakingProviderInfo {
     apy: number;
     instantUnstakeAvailable?: TokenAmount;
     providerId: string;
@@ -111,7 +111,7 @@ export interface StakingAPI {
     stake(params: StakeParams, providerId?: string): Promise<TransactionRequest>;
     unstake(params: UnstakeParams, providerId?: string): Promise<TransactionRequest>;
     getBalance(userAddress: UserFriendlyAddress, network?: Network, providerId?: string): Promise<StakingBalance>;
-    getStakingInfo(network?: Network, providerId?: string): Promise<StakingInfo>;
+    getStakingProviderInfo(network?: Network, providerId?: string): Promise<StakingProviderInfo>;
 }
 
 /**
@@ -119,10 +119,10 @@ export interface StakingAPI {
  */
 export interface StakingProviderInterface extends DefiProvider {
     getQuote(params: StakingQuoteParams): Promise<StakingQuote>;
-    stake(params: StakeParams): Promise<TransactionRequest>;
-    unstake(params: UnstakeParams): Promise<TransactionRequest>;
-    getBalance(userAddress: UserFriendlyAddress, network?: Network): Promise<StakingBalance>;
-    getStakingInfo(network?: Network): Promise<StakingInfo>;
+    buildStakeTransaction(params: StakeParams): Promise<TransactionRequest>;
+    buildUnstakeTransaction(params: UnstakeParams): Promise<TransactionRequest>;
+    getStakedBalance(userAddress: UserFriendlyAddress, network?: Network): Promise<StakingBalance>;
+    getStakingProviderInfo(network?: Network): Promise<StakingProviderInfo>;
 }
 
 /**

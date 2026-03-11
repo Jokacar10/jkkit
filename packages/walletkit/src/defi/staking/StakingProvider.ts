@@ -9,12 +9,11 @@
 import type { ApiClient } from '../../types/toncenter/ApiClient';
 import type { Network, TransactionRequest, UserFriendlyAddress } from '../../api/models';
 import type { NetworkManager } from '../../core/NetworkManager';
-import type { EventEmitter } from '../../core/EventEmitter';
 import type {
     StakeParams,
     UnstakeParams,
     StakingBalance,
-    StakingInfo,
+    StakingProviderInfo,
     StakingProviderInterface,
     StakingQuoteParams,
     StakingQuote,
@@ -31,12 +30,10 @@ export abstract class StakingProvider implements StakingProviderInterface {
     readonly providerId: string;
 
     protected networkManager: NetworkManager;
-    protected eventEmitter: EventEmitter;
 
-    constructor(providerId: string, networkManager: NetworkManager, eventEmitter: EventEmitter) {
+    constructor(providerId: string, networkManager: NetworkManager) {
         this.providerId = providerId;
         this.networkManager = networkManager;
-        this.eventEmitter = eventEmitter;
     }
 
     /**
@@ -50,27 +47,27 @@ export abstract class StakingProvider implements StakingProviderInterface {
      * @param params - Staking parameters including amount and user address
      * @returns Promise resolving to transaction request ready to be signed
      */
-    abstract stake(params: StakeParams): Promise<TransactionRequest>;
+    abstract buildStakeTransaction(params: StakeParams): Promise<TransactionRequest>;
 
     /**
      * Build a transaction for unstaking
      * @param params - Unstaking parameters including amount and user address
      * @returns Promise resolving to transaction request ready to be signed
      */
-    abstract unstake(params: UnstakeParams): Promise<TransactionRequest>;
+    abstract buildUnstakeTransaction(params: UnstakeParams): Promise<TransactionRequest>;
 
     /**
-     * Get staking balance for a user
+     * Get staked balance for a user
      * @param userAddress - User address to fetch balance for
      * @param network - Optional network to use for balance query
      */
-    abstract getBalance(userAddress: UserFriendlyAddress, network?: Network): Promise<StakingBalance>;
+    abstract getStakedBalance(userAddress: UserFriendlyAddress, network?: Network): Promise<StakingBalance>;
 
     /**
      * Get staking information for a network
      * @param network - Optional network to fetch info for
      */
-    abstract getStakingInfo(network?: Network): Promise<StakingInfo>;
+    abstract getStakingProviderInfo(network?: Network): Promise<StakingProviderInfo>;
 
     /**
      * Get API client for a specific network
@@ -79,14 +76,5 @@ export abstract class StakingProvider implements StakingProviderInterface {
      */
     protected getApiClient(network: Network): ApiClient {
         return this.networkManager.getClient(network);
-    }
-
-    /**
-     * Emit an event through the event emitter
-     * @param event - Event name
-     * @param data - Event data
-     */
-    protected emitEvent(event: string, data: unknown): void {
-        this.eventEmitter.emit(event, data);
     }
 }

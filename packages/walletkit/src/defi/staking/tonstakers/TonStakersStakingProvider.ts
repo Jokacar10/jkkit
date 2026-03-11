@@ -10,13 +10,12 @@ import type { TransactionRequest, UserFriendlyAddress } from '../../../api/model
 import { Network } from '../../../api/models';
 import { globalLogger } from '../../../core/Logger';
 import type { NetworkManager } from '../../../core/NetworkManager';
-import type { EventEmitter } from '../../../core/EventEmitter';
 import { StakingProvider } from '../StakingProvider';
 import type {
     StakeParams,
     UnstakeParams,
     StakingBalance,
-    StakingInfo,
+    StakingProviderInfo,
     StakingQuoteParams,
     StakingQuote,
     RoundInfo,
@@ -52,7 +51,7 @@ const log = globalLogger.createChild('TonStakersStakingProvider');
  * stakingManager.registerProvider('tonstakers', provider);
  *
  * // Get staking info with APY
- * const info = await stakingManager.getStakingInfo(Network.mainnet());
+ * const info = await stakingManager.getStakingProviderInfo(Network.mainnet());
  *
  * // Stake TON
  * const stakeTx = await stakingManager.stake({
@@ -78,11 +77,10 @@ export class TonStakersStakingProvider extends StakingProvider {
      * Create a new TonStakersStakingProvider instance.
      *
      * @param networkManager - Network manager for API client access
-     * @param eventEmitter - Event emitter for staking events
      * @param config - Optional configuration with custom contract addresses per network
      */
-    constructor(networkManager: NetworkManager, eventEmitter: EventEmitter, config: TonStakersProviderConfig = {}) {
-        super('tonstakers', networkManager, eventEmitter);
+    constructor(networkManager: NetworkManager, config: TonStakersProviderConfig = {}) {
+        super('tonstakers', networkManager);
         this.config = {
             [Network.mainnet().chainId]: {
                 contractAddress: CONTRACT.STAKING_CONTRACT_ADDRESS,
@@ -94,28 +92,6 @@ export class TonStakersStakingProvider extends StakingProvider {
         };
         this.cache = new StakingCache();
         log.info('TonStakersStakingProvider initialized');
-    }
-
-    private getStakingContractAddress(network?: Network): string {
-        const targetNetwork = network ?? Network.mainnet();
-        const networkConfig = this.config[targetNetwork.chainId];
-
-        if (!networkConfig || !networkConfig.contractAddress) {
-            throw new StakingError(
-                'Staking contract address is not configured for the selected network',
-                StakingErrorCode.InvalidParams,
-                { network: targetNetwork },
-            );
-        }
-
-        return networkConfig.contractAddress;
-    }
-
-    private getContract(network?: Network): PoolContract {
-        const targetNetwork = network ?? Network.mainnet();
-        const apiClient = this.getApiClient(targetNetwork);
-        const contractAddress = this.getStakingContractAddress(targetNetwork);
-        return new PoolContract(contractAddress, apiClient);
     }
 
     /**
@@ -131,7 +107,7 @@ export class TonStakersStakingProvider extends StakingProvider {
             userAddress: params.userAddress,
         });
 
-        const stakingInfo = await this.getStakingInfo(params.network);
+        const stakingInfo = await this.getStakingProviderInfo(params.network);
 
         if (params.direction === StakingQuoteDirection.Stake) {
             return {
@@ -163,7 +139,7 @@ export class TonStakersStakingProvider extends StakingProvider {
      * @param params - Stake parameters including amount and user address
      * @returns Transaction request ready to be signed and sent
      */
-    async stake(params: StakeParams): Promise<TransactionRequest> {
+    async buildStakeTransaction(params: StakeParams): Promise<TransactionRequest> {
         log.debug('TonStakers stake requested', { params });
 
         const network = params.network;
@@ -198,7 +174,7 @@ export class TonStakersStakingProvider extends StakingProvider {
      * @param params - Unstake parameters including amount, user address, and optional mode
      * @returns Transaction request ready to be signed and sent
      */
-    async unstake(params: UnstakeParams): Promise<TransactionRequest> {
+    async buildUnstakeTransaction(params: UnstakeParams): Promise<TransactionRequest> {
         log.debug('TonStakers unstake requested', { amount: params.amount, userAddress: params.userAddress });
 
         const network = params.network;
@@ -251,7 +227,7 @@ export class TonStakersStakingProvider extends StakingProvider {
      * @param network - Network to query (defaults to mainnet)
      * @returns Balance information including staked and available amounts
      */
-    async getBalance(userAddress: UserFriendlyAddress, network?: Network): Promise<StakingBalance> {
+    async getStakedBalance(userAddress: UserFriendlyAddress, network?: Network): Promise<StakingBalance> {
         log.debug('TonStakers balance requested', { userAddress, network });
 
         try {
@@ -307,7 +283,7 @@ export class TonStakersStakingProvider extends StakingProvider {
      * @param network - Network to query (defaults to mainnet)
      * @returns Staking info with APY and available instant liquidity
      */
-    async getStakingInfo(network?: Network): Promise<StakingInfo> {
+    async getStakingProviderInfo(network?: Network): Promise<StakingProviderInfo> {
         log.debug('TonStakers info requested', { network });
 
         const targetNetwork = network ?? Network.mainnet();
@@ -401,5 +377,27 @@ export class TonStakersStakingProvider extends StakingProvider {
      */
     clearCache(): void {
         this.cache.clear();
+    }
+
+    private getStakingContractAddress(network?: Network): string {
+        const targetNetwork = network ?? Network.mainnet();
+        const networkConfig = this.config[targetNetwork.chainId];
+
+        if (!networkConfig || !networkConfig.contractAddress) {
+            throw new StakingError(
+                'Staking contract address is not configured for the selected network',
+                StakingErrorCode.InvalidParams,
+                { network: targetNetwork },
+            );
+        }
+
+        return networkConfig.contractAddress;
+    }
+
+    private getContract(network?: Network): PoolContract {
+        const targetNetwork = network ?? Network.mainnet();
+        const apiClient = this.getApiClient(targetNetwork);
+        const contractAddress = this.getStakingContractAddress(targetNetwork);
+        return new PoolContract(contractAddress, apiClient);
     }
 }

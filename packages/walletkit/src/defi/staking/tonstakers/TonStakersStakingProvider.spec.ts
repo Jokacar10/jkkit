@@ -118,7 +118,7 @@ describe('TonStakersStakingProvider', () => {
     describe('stake', () => {
         it('should build correct transaction with stake payload', async () => {
             const amount = '1000000000';
-            const tx = await provider.stake({
+            const tx = await provider.buildStakeTransaction({
                 amount,
                 userAddress: testUserAddress,
                 network: Network.mainnet(),
@@ -141,7 +141,7 @@ describe('TonStakersStakingProvider', () => {
 
     describe('unstake', () => {
         it('should build correct transaction for Delayed mode', async () => {
-            const tx = await provider.unstake({
+            const tx = await provider.buildUnstakeTransaction({
                 amount: '1000000000',
                 userAddress: testUserAddress,
                 network: Network.mainnet(),
@@ -162,7 +162,7 @@ describe('TonStakersStakingProvider', () => {
         });
 
         it('should build correct transaction for Instant mode', async () => {
-            await provider.unstake({
+            await provider.buildUnstakeTransaction({
                 amount: '1000000000',
                 userAddress: testUserAddress,
                 network: Network.mainnet(),
@@ -178,7 +178,7 @@ describe('TonStakersStakingProvider', () => {
         });
 
         it('should build correct transaction for BestRate mode', async () => {
-            await provider.unstake({
+            await provider.buildUnstakeTransaction({
                 amount: '1000000000',
                 userAddress: testUserAddress,
                 network: Network.mainnet(),
@@ -194,7 +194,7 @@ describe('TonStakersStakingProvider', () => {
         });
 
         it('should default to Delayed mode when unstakeMode not specified', async () => {
-            await provider.unstake({
+            await provider.buildUnstakeTransaction({
                 amount: '1000000000',
                 userAddress: testUserAddress,
                 network: Network.mainnet(),
@@ -215,7 +215,7 @@ describe('TonStakersStakingProvider', () => {
             { mode: UnstakeMode.Instant, waitTillRoundEnd: false, fillOrKill: true },
             { mode: UnstakeMode.BestRate, waitTillRoundEnd: true, fillOrKill: false },
         ])('should set correct flags for $mode mode', async ({ mode, waitTillRoundEnd, fillOrKill }) => {
-            await provider.unstake({
+            await provider.buildUnstakeTransaction({
                 amount: '1000000000',
                 userAddress: testUserAddress,
                 network: Network.mainnet(),
