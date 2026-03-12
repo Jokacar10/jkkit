@@ -7,7 +7,7 @@
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
-  "bin": "./dist/cli.js",
+  "bin": "./bin/mcp.js",
   "exports": {
     ".": {
       "import": {
@@ -34,6 +34,7 @@
     "access": "public"
   },
   "files": [
+    "bin",
     "dist",
     "skills",
     "llms.txt",
