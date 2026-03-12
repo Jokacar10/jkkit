@@ -196,17 +196,20 @@ export function buildAgenticCreateDeepLink(input: {
     tonDeposit?: string;
 }): string {
     const url = new URL('/create', AGENTIC_DASHBOARD_BASE_URL);
-    url.searchParams.set('operatorPublicKey', input.operatorPublicKey);
-    url.searchParams.set('callbackUrl', input.callbackUrl);
+    const payload: Record<string, string> = {
+        originOperatorPublicKey: input.operatorPublicKey,
+        callbackUrl: input.callbackUrl,
+    };
     if (input.agentName?.trim()) {
-        url.searchParams.set('agentName', input.agentName.trim());
+        payload.agentName = input.agentName.trim();
     }
     if (input.source?.trim()) {
-        url.searchParams.set('source', input.source.trim());
+        payload.source = input.source.trim();
     }
     if (input.tonDeposit?.trim()) {
-        url.searchParams.set('tonDeposit', input.tonDeposit.trim());
+        payload.tonDeposit = input.tonDeposit.trim();
     }
+    url.searchParams.set('data', Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url'));
     return url.toString();
 }
 
