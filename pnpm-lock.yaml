@@ -782,8 +782,8 @@ importers:
         specifier: ^2.0.1
         version: 2.0.1
       '@tonconnect/bridge-sdk':
-        specifier: https://github.com/ton-connect/bridge-sdk/releases/download/v0.2.6/tonconnect-bridge-sdk-0.2.6.tgz
-        version: https://github.com/ton-connect/bridge-sdk/releases/download/v0.2.6/tonconnect-bridge-sdk-0.2.6.tgz
+        specifier: ^0.2.8
+        version: 0.2.8
       '@tonconnect/protocol':
         specifier: 'catalog:'
         version: 2.4.0
@@ -3786,9 +3786,8 @@ packages:
   '@tonconnect/bridge-sdk@0.2.4':
     resolution: {integrity: sha512-W7fDoo8aT9FYnGPPLqh4Giiu1M5FP3GW4A+AeDB/xfTzM9XsO9aoWoSfrR1+QuNl2OmvtvneCFv4MnowM9+feg==}
 
-  '@tonconnect/bridge-sdk@https://github.com/ton-connect/bridge-sdk/releases/download/v0.2.6/tonconnect-bridge-sdk-0.2.6.tgz':
-    resolution: {tarball: https://github.com/ton-connect/bridge-sdk/releases/download/v0.2.6/tonconnect-bridge-sdk-0.2.6.tgz}
-    version: 0.2.6
+  '@tonconnect/bridge-sdk@0.2.8':
+    resolution: {integrity: sha512-bii7xs8+jeoBCXQM/VTA83EWGVnDhURrxI9YPGR3RQdSoA+EcxEiX2AGW6god3Ar8mk989eMXRCxcAVLGGHeLw==}
 
   '@tonconnect/isomorphic-eventsource@0.0.2':
     resolution: {integrity: sha512-B4UoIjPi0QkvIzZH5fV3BQLWrqSYABdrzZQSI9sJA9aA+iC0ohOzFwVVGXanlxeDAy1bcvPbb29f6sVUk0UnnQ==}
@@ -13733,7 +13732,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@tonconnect/bridge-sdk@https://github.com/ton-connect/bridge-sdk/releases/download/v0.2.6/tonconnect-bridge-sdk-0.2.6.tgz':
+  '@tonconnect/bridge-sdk@0.2.8':
     dependencies:
       '@tonconnect/isomorphic-eventsource': 0.0.2
       '@tonconnect/isomorphic-fetch': 0.0.3
