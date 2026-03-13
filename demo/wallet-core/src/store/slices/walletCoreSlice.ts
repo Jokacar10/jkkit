@@ -9,7 +9,7 @@
 import { TonWalletKit, Network, createDeviceInfo, createWalletManifest, ApiClientTonApi } from '@ton/walletkit';
 import type { ITonWalletKit } from '@ton/walletkit';
 import { OmnistonSwapProvider } from '@ton/walletkit/swap/omniston';
-import { TonStakersStakingProvider } from '@ton/walletkit';
+import { TonStakersStakingProvider } from '@ton/walletkit/staking/tonstakers';
 
 import { createComponentLogger } from '../../utils/logger';
 import { isExtension } from '../../utils/isExtension';
