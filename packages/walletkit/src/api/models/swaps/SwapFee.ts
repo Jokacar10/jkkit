@@ -16,7 +16,7 @@ export interface SwapFee {
     /**
      * Amount of the fee
      */
-    amount: TokenAmount;
+    amount: string;
 
     /**
      * Token in which the fee is paid

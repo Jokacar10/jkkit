@@ -17,7 +17,7 @@ export interface SwapQuoteParams<TProviderOptions = unknown> {
     /**
      * Amount of tokens to swap (incoming or outgoing depending on isReverseSwap)
      */
-    amount: TokenAmount;
+    amount: string;
 
     /**
      * Token to swap from
