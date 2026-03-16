@@ -19,11 +19,4 @@
 - ❌ No `codeHash`, `dataHash` for items and collections
 
 ## Not implemented
-- `sendBoc`
 - `fetchEmulation`
-- `getAccountTransactions`
-- `getTransactionsByHash`
-- `getPendingTransactions`
-- `getTrace`
-- `getPendingTrace`
-- `getEvents`
