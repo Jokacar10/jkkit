@@ -50,6 +50,7 @@ export interface WalletKitBridgeInitConfig {
             url?: string;
             key?: string;
         };
+        apiClientType?: 'default' | 'toncenter' | 'tonapi' | 'custom';
     }>;
 }
 
