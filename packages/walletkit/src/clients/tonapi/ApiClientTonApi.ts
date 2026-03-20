@@ -348,7 +348,6 @@ export class ApiClientTonApi extends BaseApiClient implements ApiClient {
     }
 
     protected appendAuthHeaders(headers: Headers): void {
-        headers.set('Accept-Language', 'en');
         if (this.apiKey) {
             headers.set('Authorization', `Bearer ${this.apiKey}`);
         }
