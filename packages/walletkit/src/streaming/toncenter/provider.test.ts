@@ -7,6 +7,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+
 import { TonCenterStreamingProvider } from './provider';
 import type { StreamingProviderListener } from '../StreamingProvider';
 
@@ -21,7 +22,7 @@ class MockWebSocket {
     send = vi.fn();
     close = vi.fn();
     onopen: (() => void) | null = null;
-    onmessage: ((event: any) => void) | null = null;
+    onmessage: ((event: MessageEvent) => void) | null = null;
     onclose: (() => void) | null = null;
 
     constructor(public url: string) {
@@ -37,7 +38,7 @@ class MockWebSocket {
 }
 
 // Mock global WebSocket
-(global as any).WebSocket = MockWebSocket;
+(global as unknown as { WebSocket: unknown }).WebSocket = MockWebSocket;
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -73,7 +74,7 @@ describe('TonCenterStreamingProvider', () => {
         const provider = new TonCenterStreamingProvider({
             listener,
             getWatchers: () => watchers,
-            apiKey: 'test-api-key'
+            apiKey: 'test-api-key',
         });
 
         provider.watchBalance(ADDR_A);
@@ -101,8 +102,8 @@ describe('TonCenterStreamingProvider', () => {
 
         // We might get up to 2 subscribe messages: one from onopen, one from requestSync debounce.
         // Both are acceptable as they are both monolithic.
-        const sentMessages = MockWebSocket.lastInstance?.send.mock.calls.map(call => JSON.parse(call[0]));
-        const subscribeMsgs = sentMessages?.filter(m => m.operation === 'subscribe');
+        const sentMessages = MockWebSocket.lastInstance?.send.mock.calls.map((call) => JSON.parse(call[0]));
+        const subscribeMsgs = sentMessages?.filter((m) => m.operation === 'subscribe');
 
         expect(subscribeMsgs!.length).toBeGreaterThanOrEqual(1);
         const lastMsg = subscribeMsgs![subscribeMsgs!.length - 1];
@@ -121,17 +122,17 @@ describe('TonCenterStreamingProvider', () => {
         watchers.set('balance', new Set([ADDR_A, ADDR_B]));
         provider.watchBalance(ADDR_A);
         provider.watchBalance(ADDR_B);
-        vi.advanceTimersByTime(200); 
+        vi.advanceTimersByTime(200);
 
         // 2. Remove ADDR_A but keep ADDR_B
         watchers.set('balance', new Set([ADDR_B]));
         provider.unwatchBalance(ADDR_A);
-        vi.advanceTimersByTime(200); 
+        vi.advanceTimersByTime(200);
 
-        const sentMessages = MockWebSocket.lastInstance?.send.mock.calls.map(call => JSON.parse(call[0]));
+        const sentMessages = MockWebSocket.lastInstance?.send.mock.calls.map((call) => JSON.parse(call[0]));
         // Since we still have active subscriptions (ADDR_B), the monolithic sync will send a new 'subscribe' with only ADDR_B.
         // TonCenter v2 replaces the subscription, so we don't need 'unsubscribe' message unless we want to clear everything.
-        const lastSubscribe = sentMessages?.filter(m => m.operation === 'subscribe').pop();
+        const lastSubscribe = sentMessages?.filter((m) => m.operation === 'subscribe').pop();
 
         expect(lastSubscribe.addresses).not.toContain(ADDR_A);
         expect(lastSubscribe.addresses).toContain(ADDR_B);
@@ -152,7 +153,7 @@ describe('TonCenterStreamingProvider', () => {
 
         watchers.clear();
         provider.unwatchBalance(ADDR_A);
-        
+
         expect(ws.close).toHaveBeenCalled();
     });
 
@@ -171,14 +172,14 @@ describe('TonCenterStreamingProvider', () => {
             account: ADDR_A,
             state: {
                 balance: '1000000000',
-                last_transaction_id: { lt: '123', hash: 'abc' }
-            }
+                last_transaction_id: { lt: '123', hash: 'abc' },
+            },
         };
 
         ws.onmessage!({ data: JSON.stringify(notification) } as MessageEvent);
 
         expect(listener.onBalanceUpdate).toHaveBeenCalled();
-        const update = (listener.onBalanceUpdate as any).mock.calls[0][0];
+        const update = vi.mocked(listener.onBalanceUpdate).mock.calls[0][0];
         expect(update.balance).toBe('1000000000');
     });
 });

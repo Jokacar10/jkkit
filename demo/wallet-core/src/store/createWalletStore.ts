@@ -165,7 +165,6 @@ export function createWalletStore(options: CreateWalletStoreOptions = {}) {
                                 hasWallet: state.walletManagement.hasWallet,
                                 savedWallets: state.walletManagement.savedWallets,
                                 activeWalletId: state.walletManagement.activeWalletId,
-                                localSeqnoByAddress: state.walletManagement.localSeqnoByAddress,
                             },
                             tonConnect: {
                                 requestQueue: {

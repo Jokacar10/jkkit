@@ -191,10 +191,7 @@ export const TransactionCard: React.FC<TransactionCardProps> = memo(
 
         if (!traceLink) {
             return (
-                <div
-                    className="block py-2 -mx-1 px-1 rounded"
-                    {...(debugId && { 'data-debug-id': debugId })}
-                >
+                <div className="block py-2 -mx-1 px-1 rounded" {...(debugId && { 'data-debug-id': debugId })}>
                     {inner}
                 </div>
             );

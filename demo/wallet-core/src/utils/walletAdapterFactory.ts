@@ -215,7 +215,6 @@ export function transformTransaction(tx: Transaction): PreviewTransaction {
     };
 }
 
-
 /**
  * Generates a unique wallet ID
  */
