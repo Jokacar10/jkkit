@@ -9,7 +9,7 @@
 import { asAddressFriendly } from '../../../utils';
 import { formatUnits } from '../../../utils/units';
 import type { JettonUpdate } from '../../../api/models';
-import type { StreamingV2JettonsNotification } from '../models';
+import type { StreamingV2JettonsNotification } from '../types';
 
 export function mapJettons(notification: StreamingV2JettonsNotification): JettonUpdate {
     const { address, owner, jetton: masterJetton, balance } = notification.jetton;

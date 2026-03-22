@@ -40,8 +40,10 @@ export interface StreamingProvider {
     close(): void;
 }
 
-export type StreamingProviderFactory = (options: {
+export interface StreamingProviderContext {
     network: Network;
     listener: StreamingProviderListener;
     getWatchers: () => Map<StreamingWatchType, Set<string>>;
-}) => StreamingProvider;
+}
+
+export type StreamingProviderFactory = (context: StreamingProviderContext) => StreamingProvider;

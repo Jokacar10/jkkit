@@ -6,4 +6,7 @@
  *
  */
 
+/**
+ * Defines the types of blockchain events that can be subscribed to via a streaming provider.
+ */
 export type StreamingWatchType = 'balance' | 'transactions' | 'jettons';

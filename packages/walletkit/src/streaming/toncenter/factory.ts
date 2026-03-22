@@ -8,15 +8,12 @@
 
 import type { StreamingProviderFactory } from '../../api/interfaces';
 import { TonCenterStreamingProvider } from './provider';
-import type { TonCenterStreamingProviderConfig } from './provider';
+import type { TonCenterStreamingProviderConfig } from './models';
 
-export type TonCenterStreamingFactoryConfig = Omit<
-    TonCenterStreamingProviderConfig,
-    'network' | 'listener' | 'getWatchers'
->;
+export type TonCenterStreamingFactoryConfig = TonCenterStreamingProviderConfig;
 
 export const createTonCenterStreamingProviderFactory =
     (config?: TonCenterStreamingFactoryConfig): StreamingProviderFactory =>
-    ({ network, listener, getWatchers }) => {
-        return new TonCenterStreamingProvider({ network, listener, getWatchers, ...config });
+    (context) => {
+        return new TonCenterStreamingProvider(context, config);
     };

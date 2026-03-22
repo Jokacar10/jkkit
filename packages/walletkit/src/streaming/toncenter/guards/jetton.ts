@@ -6,7 +6,7 @@
  *
  */
 
-import type { StreamingV2JettonsNotification } from '../models';
+import type { StreamingV2JettonsNotification } from '../types';
 
 export function isJettonsNotification(msg: unknown): msg is StreamingV2JettonsNotification {
     const m = msg as Record<string, unknown>;

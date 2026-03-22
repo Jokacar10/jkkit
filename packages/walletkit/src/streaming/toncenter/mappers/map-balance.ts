@@ -8,7 +8,7 @@
 
 import { asAddressFriendly } from '../../../utils';
 import type { BalanceUpdate } from '../../../api/models';
-import type { StreamingV2AccountStateNotification } from '../models';
+import type { StreamingV2AccountStateNotification } from '../types';
 
 /**
  * Maps Toncenter account state change notification to a BalanceUpdate.

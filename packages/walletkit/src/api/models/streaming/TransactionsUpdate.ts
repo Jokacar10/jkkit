@@ -9,7 +9,7 @@
 import type { Transaction } from '../transactions/Transaction';
 import type { TransactionAddressMetadata } from '../transactions/TransactionMetadata';
 import type { UserFriendlyAddress } from '../core/Primitives';
-import type { AddressBookRowV3 } from '../../../types/toncenter/v3/AddressBookRowV3';
+import type { AddressBook } from '../core/AddressBook';
 import type { StreamingFinality } from './StreamingFinality';
 import type { StreamingBaseUpdate } from './StreamingBaseUpdate';
 
@@ -23,7 +23,7 @@ export interface TransactionsUpdate extends StreamingBaseUpdate {
     /** The finality of the update */
     finality?: StreamingFinality;
     /** Address book from streaming v2 notification */
-    addressBook?: Record<string, AddressBookRowV3>;
+    addressBook?: AddressBook;
     /** Metadata from streaming v2 notification */
     metadata?: TransactionAddressMetadata;
 }

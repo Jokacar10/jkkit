@@ -7,7 +7,8 @@
  */
 
 import { globalLogger } from '../core/Logger';
-import type { StreamingProvider, StreamingProviderListener } from '../api/interfaces/StreamingProvider';
+import type { StreamingProvider, StreamingProviderListener, StreamingProviderContext } from '../api/interfaces';
+import type { StreamingWatchType } from '../api/models';
 import { asAddressFriendly } from '../utils';
 
 const log = globalLogger.createChild('WebsocketStreamingProvider');
@@ -16,7 +17,7 @@ export abstract class WebsocketStreamingProvider implements StreamingProvider {
     protected ws: WebSocket | null = null;
     protected isConnected = false;
     protected listener: StreamingProviderListener;
-    protected getWatchers: () => Map<string, Set<string>>;
+    protected getWatchers: () => Map<StreamingWatchType, Set<string>>;
 
     private reconnectAttempts = 0;
     private maxReconnectAttempts = 50;
@@ -24,7 +25,7 @@ export abstract class WebsocketStreamingProvider implements StreamingProvider {
     private pingInterval: ReturnType<typeof setInterval> | null = null;
     private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
 
-    constructor(listener: StreamingProviderListener, getWatchers: () => Map<string, Set<string>>) {
+    constructor({ listener, getWatchers }: StreamingProviderContext) {
         this.listener = listener;
         this.getWatchers = getWatchers;
     }
@@ -33,8 +34,8 @@ export abstract class WebsocketStreamingProvider implements StreamingProvider {
     protected abstract getUrl(): string;
     protected abstract onMessage(event: MessageEvent): void;
     protected abstract fullResync(): void;
-    protected abstract onWatch(type: string, id: string): void;
-    protected abstract onUnwatch(type: string, id: string): void;
+    protected abstract onWatch(type: StreamingWatchType, id: string): void;
+    protected abstract onUnwatch(type: StreamingWatchType, id: string): void;
 
     protected hasActiveSubscriptions(): boolean {
         const watched = this.getWatchers();

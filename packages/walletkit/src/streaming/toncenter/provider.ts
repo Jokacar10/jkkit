@@ -8,8 +8,8 @@
 
 import { Network } from '../../api/models';
 import { globalLogger } from '../../core/Logger';
-import type { StreamingProviderListener } from '../../api/interfaces';
-import type { StreamingV2SubscriptionRequest, StreamingV2EventType } from './models';
+import type { StreamingProviderContext } from '../../api/interfaces';
+import type { StreamingV2SubscriptionRequest, StreamingV2EventType } from './types';
 import { isAccountStateNotification } from './guards/account';
 import { isJettonsNotification } from './guards/jetton';
 import { isTransactionsNotification } from './guards/transaction';
@@ -18,18 +18,11 @@ import { mapBalance } from './mappers/map-balance';
 import { mapTransactions } from './mappers/map-transactions';
 import { mapJettons } from './mappers/map-jettons';
 import { WebsocketStreamingProvider } from '../WebsocketStreamingProvider';
+import type { TonCenterStreamingProviderConfig } from './models';
 
 const log = globalLogger.createChild('TonCenterStreamingProvider');
 
 const WS_PATH = '/api/streaming/v2/ws';
-
-export interface TonCenterStreamingProviderConfig {
-    endpoint?: string;
-    apiKey?: string;
-    network?: Network;
-    listener: StreamingProviderListener;
-    getWatchers: () => Map<string, Set<string>>;
-}
 
 /**
  * Toncenter-specific implementation of StreamingProvider.
@@ -38,20 +31,19 @@ export interface TonCenterStreamingProviderConfig {
 export class TonCenterStreamingProvider extends WebsocketStreamingProvider {
     private baseUrl: string;
     private apiKey?: string;
-    private network?: Network;
+    private network: Network;
 
     private requestId = 0;
     private lastAddresses: Set<string> = new Set();
     private syncTimer: ReturnType<typeof setTimeout> | null = null;
 
-    constructor(config: TonCenterStreamingProviderConfig) {
-        super(config.listener, config.getWatchers);
-
-        this.network = config.network;
-        this.apiKey = config.apiKey;
+    constructor(context: StreamingProviderContext, config?: TonCenterStreamingProviderConfig) {
+        super(context);
+        this.network = context.network;
+        this.apiKey = config?.apiKey;
 
         const base =
-            config.endpoint ??
+            config?.endpoint ??
             (this.network?.chainId === Network.mainnet().chainId
                 ? 'wss://toncenter.com'
                 : 'wss://testnet.toncenter.com');

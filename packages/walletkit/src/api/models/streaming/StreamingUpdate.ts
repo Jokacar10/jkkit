@@ -10,4 +10,7 @@ import type { BalanceUpdate } from './BalanceUpdate';
 import type { TransactionsUpdate } from './TransactionsUpdate';
 import type { JettonUpdate } from './JettonUpdate';
 
+/**
+ * A union type representing all possible data updates from a streaming provider.
+ */
 export type StreamingUpdate = BalanceUpdate | TransactionsUpdate | JettonUpdate;

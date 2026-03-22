@@ -9,6 +9,7 @@
 import type { UserFriendlyAddress } from '../core/Primitives';
 import type { StreamingFinality } from './StreamingFinality';
 import type { StreamingBaseUpdate } from './StreamingBaseUpdate';
+import type { TokenAmount } from '../core/TokenAmount';
 
 export interface JettonUpdate extends StreamingBaseUpdate {
     /** The update type field */
@@ -20,8 +21,11 @@ export interface JettonUpdate extends StreamingBaseUpdate {
     /** The owner of the jetton wallet */
     ownerAddress: UserFriendlyAddress;
     /** Balance in raw smallest units (e.g. nano) */
-    balance: string;
-    /** Decimals mapped from metadata if available */
+    balance: TokenAmount;
+    /**
+     * Decimals mapped from metadata if available
+     * @format: int
+     */
     decimals?: number;
     /** Human readable formatted balance if decimals are known */
     formattedBalance?: string;

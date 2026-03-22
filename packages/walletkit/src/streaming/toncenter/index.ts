@@ -6,5 +6,7 @@
  *
  */
 
-export * from './provider';
-export * from './factory';
+export { TonCenterStreamingProvider } from './provider';
+export { createTonCenterStreamingProviderFactory } from './factory';
+
+export type { TonCenterStreamingProviderConfig } from './models';

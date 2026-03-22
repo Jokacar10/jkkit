@@ -9,6 +9,7 @@
 import type { UserFriendlyAddress } from '../core/Primitives';
 import type { StreamingFinality } from './StreamingFinality';
 import type { StreamingBaseUpdate } from './StreamingBaseUpdate';
+import type { TokenAmount } from '../core/TokenAmount';
 
 export interface BalanceUpdate extends StreamingBaseUpdate {
     /** The update type field */
@@ -16,7 +17,7 @@ export interface BalanceUpdate extends StreamingBaseUpdate {
     /** The account address */
     address: UserFriendlyAddress;
     /** The account balance in nano units */
-    balance: string;
+    balance: TokenAmount;
     /** The finality of the update */
     finality?: StreamingFinality;
 }

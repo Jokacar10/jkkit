@@ -6,7 +6,7 @@
  *
  */
 
-import type { StreamingV2AccountStateNotification } from '../models';
+import type { StreamingV2AccountStateNotification } from '../types';
 
 export function isAccountStateNotification(msg: unknown): msg is StreamingV2AccountStateNotification {
     const m = msg as Record<string, unknown>;

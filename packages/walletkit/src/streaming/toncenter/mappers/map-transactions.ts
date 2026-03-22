@@ -8,7 +8,8 @@
 
 import { asAddressFriendly, compareAddress } from '../../../utils';
 import type { TransactionsUpdate } from '../../../api/models';
-import type { StreamingV2TransactionsNotification } from '../models';
+import type { StreamingV2TransactionsNotification } from '../types';
+import { toAddressBook } from '../../../types/toncenter/v3/AddressBookRowV3';
 import { toStreamingTransaction } from './map-transaction';
 
 export function mapTransactions(
@@ -21,7 +22,7 @@ export function mapTransactions(
         transactions: notification.transactions
             .filter((tx) => compareAddress(tx.account, account))
             .map((tx) => toStreamingTransaction(tx, notification.trace_external_hash_norm)),
-        addressBook: notification.address_book,
+        addressBook: notification.address_book ? toAddressBook(notification.address_book) : undefined,
         metadata: notification.metadata,
         finality: notification.finality,
     };

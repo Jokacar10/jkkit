@@ -6,4 +6,7 @@
  *
  */
 
+/**
+ * Represents the finality level of a streaming notification.
+ */
 export type StreamingFinality = 'pending' | 'confirmed' | 'finalized';

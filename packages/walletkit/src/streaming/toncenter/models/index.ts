@@ -6,7 +6,4 @@
  *
  */
 
-export * from './account';
-export * from './core';
-export * from './jetton';
-export * from './transaction';
+export type { TonCenterStreamingProviderConfig } from './TonCenterStreamingProviderConfig';

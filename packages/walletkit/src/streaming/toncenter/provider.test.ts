@@ -9,7 +9,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import { TonCenterStreamingProvider } from './provider';
-import type { StreamingProviderListener } from '../../api/interfaces/';
+import type { StreamingProviderListener, StreamingProviderContext } from '../../api/interfaces/';
+import { Network } from '../../api/models';
+import type { StreamingWatchType } from '../../api/models';
 
 // ─── Mocks ──────────────────────────────────────────────────────────────────
 
@@ -55,7 +57,7 @@ function makeMockListener(): StreamingProviderListener {
 
 describe('TonCenterStreamingProvider', () => {
     let listener: StreamingProviderListener;
-    let watchers: Map<string, Set<string>>;
+    let watchers: Map<StreamingWatchType, Set<string>>;
 
     beforeEach(() => {
         vi.useFakeTimers();
@@ -70,9 +72,12 @@ describe('TonCenterStreamingProvider', () => {
     });
 
     it('connects to the correct URL', () => {
-        const provider = new TonCenterStreamingProvider({
+        const context = {
+            network: Network.testnet(),
             listener,
             getWatchers: () => watchers,
+        };
+        const provider = new TonCenterStreamingProvider(context, {
             apiKey: 'test-api-key',
         });
 
@@ -82,10 +87,12 @@ describe('TonCenterStreamingProvider', () => {
     });
 
     it('debounces multiple watch calls and sends monolithic subscriptions', async () => {
-        const provider = new TonCenterStreamingProvider({
+        const context = {
+            network: Network.testnet(),
             listener,
             getWatchers: () => watchers,
-        });
+        };
+        const provider = new TonCenterStreamingProvider(context);
 
         // Setup watchers state
         watchers.set('balance', new Set([ADDR_A]));
@@ -112,10 +119,12 @@ describe('TonCenterStreamingProvider', () => {
     });
 
     it('sends unsubscribe when some (but not all) watchers are removed', async () => {
-        const provider = new TonCenterStreamingProvider({
+        const context = {
+            network: Network.testnet(),
             listener,
             getWatchers: () => watchers,
-        });
+        };
+        const provider = new TonCenterStreamingProvider(context);
 
         // 1. Subscribe to ADDR_A and ADDR_B
         watchers.set('balance', new Set([ADDR_A, ADDR_B]));
@@ -138,29 +147,33 @@ describe('TonCenterStreamingProvider', () => {
     });
 
     it('closes connection when all watchers are removed', async () => {
-        const provider = new TonCenterStreamingProvider({
+        const context: StreamingProviderContext = {
+            network: Network.testnet(),
             listener,
-            getWatchers: () => watchers,
-        });
-
-        watchers.set('balance', new Set([ADDR_A]));
+            getWatchers: () =>
+                Object.assign(() => new Map<StreamingWatchType, Set<string>>(), {
+                    get: (type: StreamingWatchType) => (type === 'balance' ? new Set([ADDR_A]) : new Set<string>()),
+                })(),
+        };
+        const provider = new TonCenterStreamingProvider(context);
         provider.watchBalance(ADDR_A);
         vi.advanceTimersByTime(200);
 
         const ws = MockWebSocket.lastInstance!;
         expect(ws.close).not.toHaveBeenCalled();
 
-        watchers.clear();
         provider.unwatchBalance(ADDR_A);
 
         expect(ws.close).toHaveBeenCalled();
     });
 
     it('handles incoming account state notifications', async () => {
-        const provider = new TonCenterStreamingProvider({
+        const context = {
+            network: Network.testnet(),
             listener,
             getWatchers: () => watchers,
-        });
+        };
+        const provider = new TonCenterStreamingProvider(context);
 
         provider.watchBalance(ADDR_A);
         vi.advanceTimersByTime(200);
