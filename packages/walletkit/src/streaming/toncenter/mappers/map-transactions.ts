@@ -7,8 +7,8 @@
  */
 
 import { asAddressFriendly, compareAddress } from '../../../utils';
-import type { TransactionsUpdate } from '../../types';
-import type { StreamingV2TransactionsNotification } from '../types/transaction';
+import type { TransactionsUpdate } from '../../../api/models';
+import type { StreamingV2TransactionsNotification } from '../models';
 import { toStreamingTransaction } from './map-transaction';
 
 export function mapTransactions(
@@ -16,6 +16,7 @@ export function mapTransactions(
     notification: StreamingV2TransactionsNotification,
 ): TransactionsUpdate {
     return {
+        type: 'transactions',
         address: asAddressFriendly(account),
         transactions: notification.transactions
             .filter((tx) => compareAddress(tx.account, account))

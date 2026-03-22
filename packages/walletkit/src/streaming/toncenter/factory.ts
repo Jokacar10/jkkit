@@ -6,7 +6,7 @@
  *
  */
 
-import type { StreamingProviderFactory } from '../types';
+import type { StreamingProviderFactory } from '../../api/interfaces';
 import { TonCenterStreamingProvider } from './provider';
 import type { TonCenterStreamingProviderConfig } from './provider';
 

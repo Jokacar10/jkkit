@@ -7,8 +7,8 @@
  */
 
 import { asAddressFriendly } from '../../../utils';
-import type { BalanceUpdate } from '../../types';
-import type { StreamingV2AccountStateNotification } from '../types/account';
+import type { BalanceUpdate } from '../../../api/models';
+import type { StreamingV2AccountStateNotification } from '../models';
 
 /**
  * Maps Toncenter account state change notification to a BalanceUpdate.
@@ -17,6 +17,7 @@ import type { StreamingV2AccountStateNotification } from '../types/account';
  */
 export function mapBalance(notification: StreamingV2AccountStateNotification): BalanceUpdate {
     return {
+        type: 'balance',
         address: asAddressFriendly(notification.account),
         balance: notification.state.balance,
         finality: notification.finality,

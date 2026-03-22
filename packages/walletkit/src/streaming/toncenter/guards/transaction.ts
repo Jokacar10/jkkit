@@ -6,7 +6,7 @@
  *
  */
 
-import type { StreamingV2TransactionsNotification } from '../types/transaction';
+import type { StreamingV2TransactionsNotification } from '../models';
 
 export function isTransactionsNotification(msg: unknown): msg is StreamingV2TransactionsNotification {
     const m = msg as Record<string, unknown>;

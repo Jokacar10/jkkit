@@ -8,8 +8,8 @@
 
 import { asAddressFriendly } from '../../../utils';
 import { formatUnits } from '../../../utils/units';
-import type { JettonUpdate } from '../../types';
-import type { StreamingV2JettonsNotification } from '../types/jetton';
+import type { JettonUpdate } from '../../../api/models';
+import type { StreamingV2JettonsNotification } from '../models';
 
 export function mapJettons(notification: StreamingV2JettonsNotification): JettonUpdate {
     const { address, owner, jetton: masterJetton, balance } = notification.jetton;
@@ -24,6 +24,7 @@ export function mapJettons(notification: StreamingV2JettonsNotification): Jetton
     }
 
     return {
+        type: 'jettons',
         masterAddress: asAddressFriendly(masterJetton),
         walletAddress: asAddressFriendly(address),
         ownerAddress: asAddressFriendly(owner),

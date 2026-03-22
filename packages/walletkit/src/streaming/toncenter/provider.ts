@@ -8,8 +8,8 @@
 
 import { Network } from '../../api/models';
 import { globalLogger } from '../../core/Logger';
-import type { StreamingProviderListener } from '../StreamingProvider';
-import type { StreamingV2SubscriptionRequest, StreamingV2EventType } from './types/core';
+import type { StreamingProviderListener } from '../../api/interfaces';
+import type { StreamingV2SubscriptionRequest, StreamingV2EventType } from './models';
 import { isAccountStateNotification } from './guards/account';
 import { isJettonsNotification } from './guards/jetton';
 import { isTransactionsNotification } from './guards/transaction';

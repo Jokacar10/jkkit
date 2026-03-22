@@ -1,0 +1,22 @@
+/**
+ * Copyright (c) TonTech.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+import type { UserFriendlyAddress } from '../core/Primitives';
+import type { StreamingFinality } from './StreamingFinality';
+import type { StreamingBaseUpdate } from './StreamingBaseUpdate';
+
+export interface BalanceUpdate extends StreamingBaseUpdate {
+    /** The update type field */
+    type: 'balance';
+    /** The account address */
+    address: UserFriendlyAddress;
+    /** The account balance in nano units */
+    balance: string;
+    /** The finality of the update */
+    finality?: StreamingFinality;
+}

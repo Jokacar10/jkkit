@@ -169,9 +169,6 @@ export { StreamingManager } from './streaming';
 export type {
     StreamingProvider,
     StreamingProviderListener,
-    BalanceUpdate,
-    TransactionsUpdate,
-    JettonUpdate,
-    TraceUpdate,
-    StreamingFinality,
-} from './streaming';
+    StreamingProviderFactory,
+} from './api/interfaces/StreamingProvider';
+export type { StreamingAPI } from './api/interfaces/StreamingAPI';

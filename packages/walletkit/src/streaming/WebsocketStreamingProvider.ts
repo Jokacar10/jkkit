@@ -7,7 +7,7 @@
  */
 
 import { globalLogger } from '../core/Logger';
-import type { StreamingProvider, StreamingProviderListener } from './StreamingProvider';
+import type { StreamingProvider, StreamingProviderListener } from '../api/interfaces/StreamingProvider';
 import { asAddressFriendly } from '../utils';
 
 const log = globalLogger.createChild('WebsocketStreamingProvider');

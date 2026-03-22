@@ -6,5 +6,4 @@
  *
  */
 
-export * from './WebsocketStreamingProvider';
-export * from './StreamingManager';
+export type StreamingWatchType = 'balance' | 'transactions' | 'jettons';

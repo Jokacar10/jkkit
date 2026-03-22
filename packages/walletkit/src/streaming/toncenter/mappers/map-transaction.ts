@@ -17,8 +17,7 @@ import type {
 } from '../../../api/models';
 import { Base64ToHex } from '../../..';
 import { asAddressFriendly, asMaybeAddressFriendly } from '../../../utils/address';
-import type { StreamingV2AccountState } from '../types/account';
-import type { StreamingV2TransactionRaw, StreamingV2TransactionDescription } from '../types/transaction';
+import type { StreamingV2AccountState, StreamingV2TransactionRaw, StreamingV2TransactionDescription } from '../models';
 import type { EmulationBlockRef, EmulationMessage } from '../../../types/toncenter/emulation';
 
 function toAccountStatus(status: string | null | undefined): AccountStatus | undefined {

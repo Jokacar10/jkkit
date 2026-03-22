@@ -9,7 +9,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import { TonCenterStreamingProvider } from './provider';
-import type { StreamingProviderListener } from '../StreamingProvider';
+import type { StreamingProviderListener } from '../../api/interfaces/';
 
 // ─── Mocks ──────────────────────────────────────────────────────────────────
 
@@ -50,7 +50,6 @@ function makeMockListener(): StreamingProviderListener {
         onBalanceUpdate: vi.fn(),
         onTransactions: vi.fn(),
         onJettonsUpdate: vi.fn(),
-        onTraceUpdate: vi.fn(),
     };
 }
 

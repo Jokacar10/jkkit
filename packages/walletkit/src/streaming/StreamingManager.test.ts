@@ -10,11 +10,9 @@ import type { Mock } from 'vitest';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import { StreamingManager } from './StreamingManager';
-import type { StreamingWatchType } from './StreamingManager';
-import type { Network } from '../api/models';
-import type { StreamingProvider } from './StreamingProvider';
+import type { StreamingProvider, StreamingProviderFactory } from '../api/interfaces';
+import type { Network, StreamingWatchType } from '../api/models';
 import type { WalletKitEventEmitter } from '../types/emitter';
-import type { StreamingProviderFactory } from './types';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 

@@ -6,7 +6,8 @@
  *
  */
 
-import type { BalanceUpdate, TransactionsUpdate, JettonUpdate } from './types';
+import type { Network } from '../models/core/Network';
+import type { BalanceUpdate, TransactionsUpdate, JettonUpdate, StreamingWatchType } from '../models';
 
 export interface StreamingProviderListener {
     onBalanceUpdate: (update: BalanceUpdate) => void;
@@ -38,3 +39,9 @@ export interface StreamingProvider {
      */
     close(): void;
 }
+
+export type StreamingProviderFactory = (options: {
+    network: Network;
+    listener: StreamingProviderListener;
+    getWatchers: () => Map<StreamingWatchType, Set<string>>;
+}) => StreamingProvider;

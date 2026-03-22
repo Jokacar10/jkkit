@@ -8,14 +8,14 @@
 
 import type { Network } from '../api/models';
 import type { WalletKitEventEmitter } from '../types/emitter';
-import type { StreamingProvider } from './StreamingProvider';
+import type { StreamingProvider, StreamingProviderFactory, StreamingAPI } from '../api/interfaces';
 import type {
     JettonUpdate,
     BalanceUpdate,
     TransactionsUpdate,
     StreamingUpdate,
-    StreamingProviderFactory,
-} from './types';
+    StreamingWatchType,
+} from '../api/models';
 import { globalLogger } from '../core/Logger';
 import { asAddressFriendly, compareAddress } from '../utils';
 
@@ -24,12 +24,11 @@ const log = globalLogger.createChild('StreamingManager');
 /**
  * Orchestrates streaming providers and synchronizes them with the global EventEmitter.
  */
-export type StreamingWatchType = 'balance' | 'transactions' | 'jettons';
 
 /**
  * Orchestrates streaming providers and synchronizes them with the global EventEmitter.
  */
-export class StreamingManager {
+export class StreamingManager implements StreamingAPI {
     private providers: Map<string, StreamingProvider> = new Map();
     private watchCounts: Map<string, Map<string, number>> = new Map(); // network -> address -> count
     private providerFactories: Map<string, StreamingProviderFactory> = new Map();

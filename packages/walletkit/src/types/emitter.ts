@@ -9,7 +9,7 @@
 import type { TransactionEmulatedTrace } from '../api/models';
 import type { RawBridgeEventRestoreConnection, RawBridgeEventTransaction } from './internal';
 import type { EventEmitter } from '../core/EventEmitter';
-import type { BalanceUpdate, TransactionsUpdate, JettonUpdate, TraceUpdate } from '../streaming';
+import type { BalanceUpdate, TransactionsUpdate, JettonUpdate } from '../api/models';
 
 /**
  * Definition of all events emitted by the TonWalletKit.
@@ -24,7 +24,6 @@ export interface KitEvents {
     balanceUpdate: BalanceUpdate;
     transactions: TransactionsUpdate;
     jettonsUpdate: JettonUpdate;
-    trace: TraceUpdate;
 }
 
 export type WalletKitEventEmitter = EventEmitter<KitEvents>;
