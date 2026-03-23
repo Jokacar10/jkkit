@@ -367,8 +367,11 @@ export function loadConfig(): TonConfig | null {
     }
 
     let raw: unknown;
+    let isProtected: boolean;
     try {
-        raw = JSON.parse(readFileSync(configPath, 'utf-8'));
+        const readResult = readFileSync(configPath);
+        raw = JSON.parse(readResult.content);
+        isProtected = readResult.isProtected;
     } catch (error) {
         throw new ConfigError(
             `Failed to read config at ${configPath}: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -386,7 +389,11 @@ export function loadConfig(): TonConfig | null {
         throw new ConfigError(`Unsupported config version ${String(version)} at ${configPath}.`);
     }
 
-    return normalizeConfig(raw as TonConfig);
+    const normalized = normalizeConfig(raw as TonConfig);
+    if (!isProtected) {
+        saveConfig(normalized);
+    }
+    return normalized;
 }
 
 export async function loadConfigWithMigration(): Promise<TonConfig | null> {
@@ -396,8 +403,11 @@ export async function loadConfigWithMigration(): Promise<TonConfig | null> {
     }
 
     let raw: unknown;
+    let isProtected: boolean;
     try {
-        raw = JSON.parse(readFileSync(configPath, 'utf-8'));
+        const readResult = readFileSync(configPath);
+        raw = JSON.parse(readResult.content);
+        isProtected = readResult.isProtected;
     } catch (error) {
         throw new ConfigError(
             `Failed to read config at ${configPath}: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -419,7 +429,11 @@ export async function loadConfigWithMigration(): Promise<TonConfig | null> {
         throw new ConfigError(`Unsupported config version ${String(version)} at ${configPath}.`);
     }
 
-    return normalizeConfig(raw as TonConfig);
+    const normalized = normalizeConfig(raw as TonConfig);
+    if (!isProtected) {
+        saveConfig(normalized);
+    }
+    return normalized;
 }
 
 export function saveConfig(config: TonConfig): void {

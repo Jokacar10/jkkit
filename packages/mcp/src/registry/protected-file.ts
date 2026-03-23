@@ -22,6 +22,8 @@ type ProtectedFileWriteOptions = WriteFileOptions & {
     flag?: string;
 };
 
+type ProtectedFileReadResult = { content: string; isProtected: boolean };
+
 function encodeProtectedText(value: string): Buffer {
     const key = randomBytes(ENCRYPTION_KEY_BYTES);
     const iv = randomBytes(ENCRYPTION_IV_BYTES);
@@ -32,12 +34,12 @@ function encodeProtectedText(value: string): Buffer {
     return Buffer.concat([PROTECTED_FILE_MAGIC, key, iv, authTag, encrypted]);
 }
 
-function decodeProtectedText(value: Buffer): string {
+function decodeProtectedText(value: Buffer): ProtectedFileReadResult {
     if (
         value.length < PROTECTED_FILE_MAGIC.length ||
         !value.subarray(0, PROTECTED_FILE_MAGIC.length).equals(PROTECTED_FILE_MAGIC)
     ) {
-        return value.toString('utf-8');
+        return { content: value.toString('utf-8'), isProtected: false };
     }
 
     if (value.length < HEADER_LENGTH) {
@@ -56,10 +58,13 @@ function decodeProtectedText(value: Buffer): string {
     const decipher = createDecipheriv(ENCRYPTION_ALGORITHM, key, iv);
     decipher.setAuthTag(authTag);
 
-    return Buffer.concat([decipher.update(encrypted), decipher.final()]).toString('utf-8');
+    return {
+        content: Buffer.concat([decipher.update(encrypted), decipher.final()]).toString('utf-8'),
+        isProtected: true,
+    };
 }
 
-export function readFileSync(path: PathOrFileDescriptor, _encoding?: BufferEncoding): string {
+export function readFileSync(path: PathOrFileDescriptor): ProtectedFileReadResult {
     const raw = nodeReadFileSync(path);
     return decodeProtectedText(raw);
 }
