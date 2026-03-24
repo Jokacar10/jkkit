@@ -25,14 +25,18 @@ interface SelectedToken {
 export const TokensCard: FC<ComponentProps<'div'>> = (props) => {
     const [selectedToken, setSelectedToken] = useState<SelectedToken | null>(null);
 
-    const { data: balance, isLoading: isBalanceLoading, isError: isBalanceError } = useBalance();
+    const {
+        data: balance,
+        isLoading: isBalanceLoading,
+        isError: isBalanceError,
+    } = useBalance({ query: { refetchInterval: 20000 } });
 
     const {
         data: jettonsResponse,
         isLoading: isJettonsLoading,
         isError: isJettonsError,
         refetch: onRefresh,
-    } = useJettons();
+    } = useJettons({ query: { refetchInterval: 20000 } });
 
     const jettons = useMemo(() => jettonsResponse?.jettons ?? [], [jettonsResponse?.jettons]);
 

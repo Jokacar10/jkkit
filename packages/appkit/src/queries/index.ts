@@ -9,7 +9,7 @@
 // Balances
 export {
     getBalanceByAddressQueryOptions,
-    getBalanceByAddressQueryKey,
+    handleBalanceUpdate,
     type GetBalanceByAddressData,
     type GetBalanceErrorType,
     type GetBalanceByAddressQueryConfig,
@@ -52,14 +52,14 @@ export {
 } from './jettons/get-jetton-wallet-address';
 export {
     getJettonBalanceByAddressQueryOptions,
-    getJettonBalanceByAddressQueryKey,
+    handleJettonBalanceUpdate,
     type GetJettonBalanceByAddressQueryConfig,
     type GetJettonBalanceByAddressData,
     type GetJettonBalanceErrorType,
 } from './jettons/get-jetton-balance-by-address';
 export {
     getJettonsByAddressQueryOptions,
-    getJettonsByAddressQueryKey,
+    handleJettonsUpdate,
     type GetJettonsByAddressData,
     type GetJettonsErrorType,
     type GetJettonsByAddressQueryConfig,

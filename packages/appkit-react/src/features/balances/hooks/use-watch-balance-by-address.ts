@@ -8,9 +8,9 @@
 
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { watchBalanceByAddress, hasStreamingProvider, resolveNetwork, sleep } from '@ton/appkit';
+import { watchBalanceByAddress, hasStreamingProvider, resolveNetwork } from '@ton/appkit';
 import type { WatchBalanceByAddressOptions } from '@ton/appkit';
-import { getBalanceByAddressQueryKey } from '@ton/appkit/queries';
+import { handleBalanceUpdate } from '@ton/appkit/queries';
 
 import { useAppKit } from '../../../hooks/use-app-kit';
 
@@ -40,18 +40,14 @@ export const useWatchBalanceByAddress = (parameters: UseWatchBalanceByAddressPar
             return;
         }
 
-        const queryKey = getBalanceByAddressQueryKey({ address, network: resolvedNetwork });
+        const addressString = address.toString();
 
         return watchBalanceByAddress(appKit, {
             address,
             network: resolvedNetwork,
             onChange: (balance) => {
                 onChange?.(balance);
-
-                if (balance.finality === 'finalized') {
-                    queryClient.setQueryData(queryKey, balance.balance);
-                    sleep(5000).then(() => queryClient.invalidateQueries({ queryKey: queryKey }));
-                }
+                handleBalanceUpdate(queryClient, { address: addressString, network: resolvedNetwork }, balance);
             },
         });
     }, [address, network, appKit, queryClient, onChange]);
