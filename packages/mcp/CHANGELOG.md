@@ -1,5 +1,13 @@
 # @ton/mcp
 
+## 0.1.15-alpha.9
+
+### Patch Changes
+
+- 494250e: Added option to pass settlement options to Omniston provider. Added escrow settlement for mcp
+- Updated dependencies [494250e]
+    - @ton/walletkit@0.0.12-alpha.0
+
 ## 0.1.15-alpha.8
 
 ### Patch Changes
