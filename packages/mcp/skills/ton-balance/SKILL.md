@@ -45,4 +45,4 @@ Read-only queries for wallet balances, token holdings, and transaction history o
 
 - All tools are read-only — no confirmation needed
 - In registry mode, pass `walletSelector` to query a specific wallet instead of the active one
-- Amounts are returned in human-readable format (e.g., "1.5" = 1.5 TON)
+- All balance responses include both `amountRaw` (raw integer string) and `amount` (human-readable decimal string, e.g. `"1.5"` for 1.5 TON). Use `amount` for display; use `amountRaw` only when a raw integer is required.
