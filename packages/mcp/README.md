@@ -28,7 +28,7 @@ Self-custody wallets for autonomous agents. Your AI agent gets TON wallet capabi
 
 Key storage in this mode: wallet secrets are persisted inside the local config registry at `TON_CONFIG_PATH` or `~/.config/ton/config.json`. The config directory is created with `0700` permissions and the config file with `0600` permissions. The file is not stored as plain text, but the current protected-file format is only obfuscation-in-file, not real cryptographic protection with an external secret or password.
 
-**Learn more about [Agentic Wallets](https://agentic-wallets-dashboard.vercel.app/).**
+**Learn more about [Agentic Wallets](https://agents.ton.org/).**
 
 Agentic Wallets mode is the default mode that allows you to manage agentic wallets. To create your first agentic wallet, ask your agent to `create agentic wallet` and follow the instructions.
 
