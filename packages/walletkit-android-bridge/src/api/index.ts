@@ -96,6 +96,9 @@ export const api: WalletKitBridgeApi = {
     createOmnistonSwapProvider: swap.createOmnistonSwapProvider,
     createDeDustSwapProvider: swap.createDeDustSwapProvider,
     registerSwapProvider: swap.registerSwapProvider,
+    setDefaultSwapProvider: swap.setDefaultSwapProvider,
+    getRegisteredSwapProviders: swap.getRegisteredSwapProviders,
+    hasSwapProvider: swap.hasSwapProvider,
     getSwapQuote: swap.getSwapQuote,
     buildSwapTransaction: swap.buildSwapTransaction,
 } as unknown as WalletKitBridgeApi;

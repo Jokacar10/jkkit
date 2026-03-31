@@ -48,6 +48,20 @@ export async function registerSwapProvider(args: { providerId: string }): Promis
     (await getSwap()).registerProvider(get(args.providerId) as SwapProviderInterface);
 }
 
+export async function setDefaultSwapProvider(args: { providerId: string }): Promise<void> {
+    (await getSwap()).setDefaultProvider(args.providerId);
+}
+
+export async function getRegisteredSwapProviders(): Promise<{ providerIds: string[] }> {
+    const providerIds = (await getSwap()).getRegisteredProviders();
+    return { providerIds };
+}
+
+export async function hasSwapProvider(args: { providerId: string }): Promise<{ result: boolean }> {
+    const result = (await getSwap()).hasProvider(args.providerId);
+    return { result };
+}
+
 export async function getSwapQuote(args: { params: SwapQuoteParams; providerId?: string }): Promise<SwapQuote> {
     return (await getSwap()).getQuote(args.params, args.providerId);
 }

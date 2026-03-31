@@ -282,6 +282,14 @@ export interface GetSwapQuoteArgs {
     providerId?: string;
 }
 
+export interface SetDefaultSwapProviderArgs {
+    providerId: string;
+}
+
+export interface HasSwapProviderArgs {
+    providerId: string;
+}
+
 export interface BuildSwapTransactionArgs {
     params: Record<string, unknown>;
 }
@@ -343,6 +351,9 @@ export interface WalletKitBridgeApi {
     createOmnistonSwapProvider(args: CreateOmnistonSwapProviderArgs): PromiseOrValue<{ providerId: string }>;
     createDeDustSwapProvider(args: CreateDeDustSwapProviderArgs): PromiseOrValue<{ providerId: string }>;
     registerSwapProvider(args: RegisterSwapProviderArgs): PromiseOrValue<void>;
+    setDefaultSwapProvider(args: SetDefaultSwapProviderArgs): PromiseOrValue<void>;
+    getRegisteredSwapProviders(): PromiseOrValue<{ providerIds: string[] }>;
+    hasSwapProvider(args: HasSwapProviderArgs): PromiseOrValue<{ result: boolean }>;
     getSwapQuote(args: GetSwapQuoteArgs): PromiseOrValue<unknown>;
     buildSwapTransaction(args: BuildSwapTransactionArgs): PromiseOrValue<unknown>;
 }
