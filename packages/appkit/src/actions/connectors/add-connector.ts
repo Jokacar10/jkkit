@@ -7,9 +7,9 @@
  */
 
 import type { AppKit } from '../../core/app-kit';
-import type { CreateConnectorFn } from '../../types/connector';
+import type { ConnectorInput } from '../../types/connector';
 
-export type AddConnectorParameters = CreateConnectorFn;
+export type AddConnectorParameters = ConnectorInput;
 
 export type AddConnectorReturnType = () => void;
 

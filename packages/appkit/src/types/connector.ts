@@ -41,12 +41,22 @@ export interface ConnectorMetadata {
     iconUrl?: string;
 }
 
-export type CreateConnectorFn = (config: {
-    emitter: AppKitEmitter;
+/**
+ * Context passed to connector factory functions.
+ */
+export interface ConnectorFactoryContext {
     networkManager: AppKitNetworkManager;
+    emitter: AppKitEmitter;
     ssr?: boolean;
-}) => Connector;
+}
 
-export function createConnector(createConnectorFn: CreateConnectorFn): CreateConnectorFn {
-    return createConnectorFn;
+/** Factory function that creates a connector from context */
+export type ConnectorFactory = (ctx: ConnectorFactoryContext) => Connector;
+
+/** A connector instance or a factory that creates one */
+export type ConnectorInput = Connector | ConnectorFactory;
+
+/** Helper for creating typed connector factories */
+export function createConnector(factory: ConnectorFactory): ConnectorFactory {
+    return factory;
 }

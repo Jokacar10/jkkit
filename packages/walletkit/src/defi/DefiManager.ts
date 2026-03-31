@@ -18,11 +18,6 @@ export abstract class DefiManager<T extends DefiProvider> implements DefiManager
 
     /**
      * Register a swap provider
-     * @param name - Unique name for the provider
-     * @param provider - Provider instance
-     */
-    /**
-     * Register a swap provider
      * @param provider - Provider instance
      */
     registerProvider(provider: T): void {

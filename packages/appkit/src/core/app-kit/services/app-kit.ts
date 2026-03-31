@@ -6,11 +6,11 @@
  *
  */
 
+import type { ProviderInput, SwapProviderInterface } from '@ton/walletkit';
 import { SwapManager } from '@ton/walletkit';
-import type { Provider } from 'src/types/provider';
 
 import type { AppKitConfig } from '../types/config';
-import type { Connector, CreateConnectorFn } from '../../../types/connector';
+import type { Connector, ConnectorFactoryContext, ConnectorInput } from '../../../types/connector';
 import { Emitter } from '../../emitter';
 import { CONNECTOR_EVENTS, WALLETS_EVENTS } from '../constants/events';
 import type { AppKitEmitter, AppKitEvents } from '../types/events';
@@ -49,27 +49,26 @@ export class AppKit {
         this.swapManager = new SwapManager();
 
         if (config.connectors) {
-            config.connectors.forEach((connector) => {
-                this.addConnector(connector);
+            config.connectors.forEach((input) => {
+                this.addConnector(input);
             });
         }
 
         if (config.providers) {
-            config.providers.forEach((provider) => {
-                this.registerProvider(provider);
+            config.providers.forEach((input) => {
+                this.registerProvider(input);
             });
         }
     }
 
+    createFactoryContext(): ConnectorFactoryContext {
+        return { emitter: this.emitter, networkManager: this.networkManager, ssr: this.config.ssr };
+    }
     /**
      * Add a wallet connector
      */
-    addConnector(createConnectorFn: CreateConnectorFn): () => void {
-        const connector = createConnectorFn({
-            emitter: this.emitter,
-            networkManager: this.networkManager,
-            ssr: this.config.ssr,
-        });
+    addConnector(input: ConnectorInput): () => void {
+        const connector = typeof input === 'function' ? input(this.createFactoryContext()) : input;
         const id = connector.id;
         const oldConnector = this.connectors.find((c) => c.id === id);
 
@@ -100,10 +99,11 @@ export class AppKit {
     /**
      * Add a provider
      */
-    registerProvider(provider: Provider): void {
+    registerProvider(input: ProviderInput): void {
+        const provider = typeof input === 'function' ? input(this.createFactoryContext()) : input;
         switch (provider.type) {
             case 'swap':
-                this.swapManager.registerProvider(provider);
+                this.swapManager.registerProvider(provider as SwapProviderInterface<unknown, unknown>);
                 break;
             default:
                 throw new Error('Unknown provider type');

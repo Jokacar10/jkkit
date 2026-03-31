@@ -6,10 +6,9 @@
  *
  */
 
-import type { NetworkAdapters } from '@ton/walletkit';
+import type { NetworkAdapters, ProviderInput } from '@ton/walletkit';
 
-import type { CreateConnectorFn } from '../../../types/connector';
-import type { Provider } from '../../../types/provider';
+import type { ConnectorInput } from '../../../types/connector';
 import type { Network } from '../../../types/network';
 
 /**
@@ -28,7 +27,7 @@ export interface AppKitConfig {
     /**
      * Wallet connectors
      */
-    connectors?: CreateConnectorFn[];
+    connectors?: ConnectorInput[];
 
     /**
      * Default network for wallet connections.
@@ -37,7 +36,7 @@ export interface AppKitConfig {
      */
     defaultNetwork?: Network;
 
-    providers?: Provider[];
+    providers?: ProviderInput[];
 
     /**
      * Enable server-side rendering support
