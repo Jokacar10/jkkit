@@ -27,7 +27,9 @@ import type {
     SendTransactionApprovalResponse,
     ConnectionApprovalResponse,
 } from '../api/models';
-import type { SwapAPI } from '../api/interfaces';
+import type { SwapAPI, StakingAPI } from '../api/interfaces';
+import type { NetworkManager } from '../core/NetworkManager';
+import type { ProviderFactoryContext } from './factory';
 
 /**
  * Main TonWalletKit interface
@@ -42,8 +44,14 @@ export interface ITonWalletKit {
      */
     getApiClient(network: Network): ApiClient;
 
+    /** Network manager for all configured API clients */
+    getNetworkManager(): NetworkManager;
+
     /** Get all configured networks */
     getConfiguredNetworks(): Network[];
+
+    /** Get factory context */
+    createFactoryContext(): ProviderFactoryContext;
 
     isReady(): boolean;
 
@@ -155,4 +163,7 @@ export interface ITonWalletKit {
 
     /** Jettons API access */
     swap: SwapAPI;
+
+    /** Staking API access */
+    staking: StakingAPI;
 }
