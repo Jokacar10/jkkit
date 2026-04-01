@@ -213,7 +213,35 @@ export class TonStakersStakingProvider extends StakingProvider {
         const amount = parseUnits(params.quote.amountIn, 9);
         const unstakeMode = params.quote.unstakeMode ?? UnstakeMode.INSTANT;
 
+        /* if(optimistic_deposit_withdrawals &
+                    request_immediate_withdrawal_if_possible &
+                    (state == state::NORMAL) &
+                    (available_funds > approximate_amount)) {
+                throw_unless(error::output_amount_is_zero, approximate_amount > 0);
+                total_balance -= approximate_amount;
+                supply -= jetton_amount;
+                raw_reserve(balance - msg_value - approximate_amount - sent_during_rotation, 0);
+                available_funds -= approximate_amount;
+                var msg = begin_cell()
+                        .store_msg_flags(msgflag::NON_BOUNCEABLE)
+                        .store_slice(from_address)
+                        .store_coins(0)
+                        .store_msgbody_prefix_slice()
+                        .store_body_header(pool::withdrawal, query_id);
+                send_raw_message(msg.end_cell(), sendmode::CARRY_ALL_BALANCE);
+            } else {
+                throw_if(105, fill_or_kill);
+                throw_unless(error::output_amount_is_zero, jetton_amount);
+                raw_reserve(balance - msg_value - sent_during_rotation, 0);
+                request_to_mint_withdrawal(from_address, jetton_amount, query_id);
+            }
+         */
+
+        // ~ request_immediate_withdrawal_if_possible
         let waitTillRoundEnd = false;
+
+        // Used once in TS contracts
+        // If contract does not have enough liquidity, it will throw an error
         let fillOrKill = false;
 
         switch (unstakeMode) {
