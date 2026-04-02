@@ -7,7 +7,7 @@
  */
 
 import type { Base64String, SendTransactionReturnType } from '@ton/appkit';
-import { TransactionAction } from '@ton/appkit-react';
+import { Send } from '@ton/appkit-react';
 import { beginCell } from '@ton/core';
 
 /* eslint-disable no-console */
@@ -15,7 +15,7 @@ import { beginCell } from '@ton/core';
 export const TransactionExample = () => {
     // SAMPLE_START: TRANSACTION
     return (
-        <TransactionAction
+        <Send
             request={{
                 messages: [
                     {

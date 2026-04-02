@@ -38,8 +38,8 @@ Watch the TON balance of the currently selected wallet in real-time.
 
 ```ts
 const unsubscribe = watchBalance(appKit, {
-    onChange: (balance) => {
-        console.log('Balance updated:', balance);
+    onChange: (update) => {
+        console.log('Balance updated:', update.balance);
     },
 });
 
@@ -53,8 +53,8 @@ Watch the TON balance of a specific address in real-time.
 ```ts
 const unsubscribe = watchBalanceByAddress(appKit, {
     address: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
-    onChange: (balance) => {
-        console.log('Balance by address updated:', balance);
+    onChange: (update) => {
+        console.log('Balance by address updated:', update.balance);
     },
 });
 

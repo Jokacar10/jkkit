@@ -41,6 +41,7 @@ const ADDR = '0:83dfd552e63729b472fcbcc8c44e6cc6691702558b68ecb527e1ba403a0f31a8
 
 class TestProvider extends WebsocketStreamingProvider {
     readonly providerId = 'test';
+    readonly network = { chainId: 1 } as never;
 
     protected getUrl() {
         return 'ws://test';

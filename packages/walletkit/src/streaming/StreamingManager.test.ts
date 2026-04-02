@@ -58,7 +58,7 @@ const makeMockProvider = (network: Network = makeMockNetwork()): MockProvider =>
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const makeFactoryCtx = () => vi.fn(() => ({ networkManager: {} as any, eventEmitter: {} as any }))();
 
-const makeManager = (network: Network, provider: MockProvider) => {
+const makeManager = (provider: MockProvider) => {
     const factory: StreamingProviderFactory = vi.fn(() => provider);
     const manager = new StreamingManager(() => makeFactoryCtx());
     manager.registerProvider(factory);
@@ -82,7 +82,7 @@ describe('StreamingManager subscriptions', () => {
         });
 
         it('returns true after registration', () => {
-            const { manager } = makeManager(network, provider);
+            const { manager } = makeManager(provider);
             expect(manager.hasProvider(network)).toBe(true);
         });
     });
@@ -96,39 +96,39 @@ describe('StreamingManager subscriptions', () => {
 
     describe('watch methods', () => {
         it('calls provider.watchBalance', () => {
-            const { manager } = makeManager(network, provider);
+            const { manager } = makeManager(provider);
             manager.watchBalance(network, ADDR_A, vi.fn());
             expect(provider.watchBalance).toHaveBeenCalledTimes(1);
         });
 
         it('calls provider.watchBalance for each consumer', () => {
-            const { manager } = makeManager(network, provider);
+            const { manager } = makeManager(provider);
             manager.watchBalance(network, ADDR_A, vi.fn());
             manager.watchBalance(network, ADDR_A, vi.fn());
             expect(provider.watchBalance).toHaveBeenCalledTimes(2);
         });
 
         it('calls provider.watchBalance for different addresses', () => {
-            const { manager } = makeManager(network, provider);
+            const { manager } = makeManager(provider);
             manager.watchBalance(network, ADDR_A, vi.fn());
             manager.watchBalance(network, ADDR_B, vi.fn());
             expect(provider.watchBalance).toHaveBeenCalledTimes(2);
         });
 
         it('calls provider.watchTransactions', () => {
-            const { manager } = makeManager(network, provider);
+            const { manager } = makeManager(provider);
             manager.watchTransactions(network, ADDR_A, vi.fn());
             expect(provider.watchTransactions).toHaveBeenCalledTimes(1);
         });
 
         it('calls provider.watchJettons', () => {
-            const { manager } = makeManager(network, provider);
+            const { manager } = makeManager(provider);
             manager.watchJettons(network, ADDR_A, vi.fn());
             expect(provider.watchJettons).toHaveBeenCalledTimes(1);
         });
 
         it('passes onChange callback directly to provider', () => {
-            const { manager } = makeManager(network, provider);
+            const { manager } = makeManager(provider);
             const cb = vi.fn();
             manager.watchBalance(network, ADDR_A, cb);
             const [, passedCb] = vi.mocked(provider.watchBalance).mock.calls[0];
@@ -138,14 +138,14 @@ describe('StreamingManager subscriptions', () => {
 
     describe('unwatch', () => {
         it('calls the provider unsubscribe fn when manager unwatch is called', () => {
-            const { manager } = makeManager(network, provider);
+            const { manager } = makeManager(provider);
             const unwatch = manager.watchBalance(network, ADDR_A, vi.fn());
             unwatch();
             expect(provider._unsubBalance).toHaveBeenCalledTimes(1);
         });
 
         it('calls provider unsubscribe for each consumer independently', () => {
-            const { manager } = makeManager(network, provider);
+            const { manager } = makeManager(provider);
             const unwatch1 = manager.watchBalance(network, ADDR_A, vi.fn());
             const unwatch2 = manager.watchBalance(network, ADDR_A, vi.fn());
 
@@ -157,7 +157,7 @@ describe('StreamingManager subscriptions', () => {
         });
 
         it('unwatch for one type does not affect another', () => {
-            const { manager } = makeManager(network, provider);
+            const { manager } = makeManager(provider);
             const unwatchBal = manager.watchBalance(network, ADDR_A, vi.fn());
             manager.watchTransactions(network, ADDR_A, vi.fn());
 
@@ -169,7 +169,7 @@ describe('StreamingManager subscriptions', () => {
 
     describe('bulk watch method', () => {
         it('subscribes to all specified types and unsubscribes when returned fn is called', () => {
-            const { manager } = makeManager(network, provider);
+            const { manager } = makeManager(provider);
             const unwatch = manager.watch(network, ADDR_A, ['balance', 'transactions'], vi.fn());
 
             expect(provider.watchBalance).toHaveBeenCalledTimes(1);
@@ -184,13 +184,13 @@ describe('StreamingManager subscriptions', () => {
 
     describe('disconnect', () => {
         it('calls disconnect() on all registered providers', () => {
-            const { manager } = makeManager(network, provider);
+            const { manager } = makeManager(provider);
             manager.disconnect();
             expect(provider.disconnect).toHaveBeenCalledTimes(1);
         });
 
         it('does not remove providers — same instance is reused after disconnect', () => {
-            const { manager, factory } = makeManager(network, provider);
+            const { manager, factory } = makeManager(provider);
             manager.watchBalance(network, ADDR_A, vi.fn());
             manager.disconnect();
             manager.watchBalance(network, ADDR_A, vi.fn());
@@ -200,13 +200,13 @@ describe('StreamingManager subscriptions', () => {
 
     describe('connect', () => {
         it('calls connect() on all registered providers', () => {
-            const { manager } = makeManager(network, provider);
+            const { manager } = makeManager(provider);
             manager.connect();
             expect(provider.connect).toHaveBeenCalledTimes(1);
         });
 
         it('reconnects after disconnect', () => {
-            const { manager } = makeManager(network, provider);
+            const { manager } = makeManager(provider);
             manager.watchBalance(network, ADDR_A, vi.fn());
             manager.disconnect();
             manager.connect();

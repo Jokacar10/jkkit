@@ -337,9 +337,6 @@ export const WalletDashboard: React.FC = () => {
                 {/* Disconnect Notifications */}
                 <DisconnectNotifications />
 
-                {/* Transaction History */}
-                <RecentTransactions />
-
                 {/* Development Test Section */}
                 <Card title="Development Tools" compact>
                     <div className="space-y-4">

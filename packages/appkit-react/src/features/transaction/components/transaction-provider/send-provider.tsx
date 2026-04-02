@@ -11,9 +11,9 @@ import type { FC, PropsWithChildren } from 'react';
 import type { SendTransactionReturnType } from '@ton/appkit';
 
 import { useSendTransaction } from '../../hooks/use-send-transaction';
-import type { TransactionActionRequest } from '../transaction/transaction-action';
+import type { SendRequest } from '../transaction/send';
 
-export interface TransactionActionContextType {
+export interface SendContextType {
     /** Function to submit the transaction */
     onSubmit: () => void;
     /** Whether the transaction is currently loading */
@@ -26,22 +26,22 @@ export interface TransactionActionContextType {
     disabled?: boolean;
 }
 
-export const TransactionActionContext = createContext<TransactionActionContextType>({
+export const SendContext = createContext<SendContextType>({
     onSubmit: () => {
         throw new Error('onSubmit is not defined');
     },
     isLoading: false,
 });
 
-export function useTransactionActionContext() {
-    const context = useContext(TransactionActionContext);
+export function useSendContext() {
+    const context = useContext(SendContext);
 
     return context;
 }
 
-export interface TransactionActionProviderProps extends PropsWithChildren {
+export interface SendProviderProps extends PropsWithChildren {
     /** The transaction request parameters */
-    request: TransactionActionRequest;
+    request: SendRequest;
     /** Callback when an error occurs */
     onError?: (error: Error) => void;
     /** Callback when the transaction is successful */
@@ -50,13 +50,7 @@ export interface TransactionActionProviderProps extends PropsWithChildren {
     disabled?: boolean;
 }
 
-export const TransactionActionProvider: FC<TransactionActionProviderProps> = ({
-    children,
-    request,
-    onError,
-    onSuccess,
-    disabled = false,
-}) => {
+export const SendProvider: FC<SendProviderProps> = ({ children, request, onError, onSuccess, disabled = false }) => {
     const [receipt, setReceipt] = useState<SendTransactionReturnType | null>(null);
     const [isPreparing, setIsPreparing] = useState(false);
 
@@ -110,5 +104,5 @@ export const TransactionActionProvider: FC<TransactionActionProviderProps> = ({
         [mutationError, isPreparing, isPending, handleSubmit, receipt, disabled],
     );
 
-    return <TransactionActionContext.Provider value={value}>{children}</TransactionActionContext.Provider>;
+    return <SendContext.Provider value={value}>{children}</SendContext.Provider>;
 };

@@ -8,7 +8,7 @@
 
 import { globalLogger } from '../core/Logger';
 import type { StreamingProvider } from '../api/interfaces/StreamingProvider';
-import type { BalanceUpdate, TransactionsUpdate, JettonUpdate } from '../api/models';
+import type { BalanceUpdate, TransactionsUpdate, JettonUpdate, Network } from '../api/models';
 import type { StreamingWatchType } from '../api/models/streaming/StreamingWatchType';
 import { asAddressFriendly } from '../utils/address';
 
@@ -17,6 +17,7 @@ const log = globalLogger.createChild('WebsocketStreamingProvider');
 export abstract class WebsocketStreamingProvider implements StreamingProvider {
     readonly type = 'streaming' as const;
     abstract readonly providerId: string;
+    abstract readonly network: Network;
 
     protected ws: WebSocket | null = null;
     protected isConnected = false;

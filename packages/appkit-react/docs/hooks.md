@@ -292,7 +292,7 @@ return (
         <ul>
             {jettons?.jettons.map((j) => (
                 <li key={j.walletAddress}>
-                    {j.jetton.name}: {j.balance}
+                    {j.info.name}: {j.balance}
                 </li>
             ))}
         </ul>
@@ -316,7 +316,7 @@ return (
         <ul>
             {jettons?.jettons.map((j) => (
                 <li key={j.walletAddress}>
-                    {j.jetton.name}: {j.balance}
+                    {j.info.name}: {j.balance}
                 </li>
             ))}
         </ul>

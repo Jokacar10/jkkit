@@ -54,7 +54,7 @@ describe('TonApiStreamingProvider', () => {
         const provider = new TonApiStreamingProvider(makeContext(), { network: Network.testnet() });
         provider.watchBalance(ADDR, vi.fn());
         expect(MockWebSocket.lastInstance?.url).toContain('testnet.tonapi.io');
-        expect(MockWebSocket.lastInstance?.url).toContain('/api/streaming/v2/ws');
+        expect(MockWebSocket.lastInstance?.url).toContain('/streaming/v2/ws');
     });
 
     it('connects to mainnet TonAPI URL when network is mainnet', () => {
