@@ -12,7 +12,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { TonCenterStreamingProvider } from './provider';
 import type { ProviderFactoryContext } from '../../types/factory';
 import { Network } from '../../api/models';
-import { asAddressFriendly } from '../../utils';
+import { asAddressFriendly } from '../../utils/address';
 
 // ─── Mocks ──────────────────────────────────────────────────────────────────
 

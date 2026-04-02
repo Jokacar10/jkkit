@@ -6,7 +6,7 @@
  *
  */
 
-import { Base64ToHex } from '../..';
+import { Base64ToHex } from '../../utils/base64';
 import type {
     AccountState,
     AccountStatus,

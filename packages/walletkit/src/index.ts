@@ -167,6 +167,8 @@ export * from './api/models';
 
 export { TonCenterStreamingProvider, createTonCenterStreamingProvider } from './streaming/toncenter';
 export type { TonCenterStreamingProviderConfig } from './streaming/toncenter';
+export { TonApiStreamingProvider, createTonApiStreamingProvider } from './streaming/tonapi';
+export type { TonApiStreamingProviderConfig } from './streaming/tonapi';
 export { StreamingManager } from './streaming';
 export type { StreamingProvider, StreamingProviderFactory } from './api/interfaces/StreamingProvider';
 export type { StreamingAPI } from './api/interfaces/StreamingAPI';

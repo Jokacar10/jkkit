@@ -15,7 +15,7 @@ import type {
     TransactionBlockRef,
     TransactionComputePhase,
 } from '../../../api/models';
-import { Base64ToHex } from '../../..';
+import { Base64ToHex } from '../../../utils/base64';
 import { asAddressFriendly, asMaybeAddressFriendly } from '../../../utils/address';
 import type { StreamingV2AccountState, StreamingV2TransactionRaw, StreamingV2TransactionDescription } from '../types';
 import type { EmulationBlockRef, EmulationMessage } from '../../../types/toncenter/emulation';

@@ -6,13 +6,20 @@
  *
  */
 
-export { StreamingManager, TonCenterStreamingProvider, createTonCenterStreamingProvider } from '@ton/walletkit';
+export {
+    StreamingManager,
+    TonCenterStreamingProvider,
+    createTonCenterStreamingProvider,
+    TonApiStreamingProvider,
+    createTonApiStreamingProvider,
+} from '@ton/walletkit';
 
 export type {
     StreamingProvider,
     StreamingProviderFactory,
     StreamingAPI,
     TonCenterStreamingProviderConfig,
+    TonApiStreamingProviderConfig,
     BalanceUpdate,
     TransactionsUpdate,
     Transaction,
