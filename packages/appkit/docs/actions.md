@@ -32,6 +32,35 @@ const balanceByAddress = await getBalanceByAddress(appKit, {
 console.log('Balance by address:', balanceByAddress.toString());
 ```
 
+### `watchBalance`
+
+Watch the TON balance of the currently selected wallet in real-time.
+
+```ts
+const unsubscribe = watchBalance(appKit, {
+    onChange: (update) => {
+        console.log('Balance updated:', update.balance);
+    },
+});
+
+// Later: unsubscribe();
+```
+
+### `watchBalanceByAddress`
+
+Watch the TON balance of a specific address in real-time.
+
+```ts
+const unsubscribe = watchBalanceByAddress(appKit, {
+    address: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+    onChange: (update) => {
+        console.log('Balance by address updated:', update.balance);
+    },
+});
+
+// Later: unsubscribe();
+```
+
 ## Connectors
 
 ### `connect`
@@ -286,6 +315,15 @@ const unsubscribe = watchNetworks(appKit, {
 // Later: unsubscribe();
 ```
 
+### `hasStreamingProvider`
+
+Check if a real-time streaming provider is registered for a specific network.
+
+```ts
+const isSupported = hasStreamingProvider(appKit, Network.mainnet());
+console.log('Mainnet streaming support:', isSupported);
+```
+
 ### `getBlockNumber`
 
 Get the current masterchain block number.
@@ -404,7 +442,7 @@ console.log('NFT Transfer Result:', result);
 
 ### `registerProvider`
 
-Register a custom token swap provider in AppKit (e.g., Omniston).
+Register a custom provider in AppKit (e.g., Swap or Streaming).
 
 ```ts
 const omnistonProvider = new OmnistonSwapProvider({

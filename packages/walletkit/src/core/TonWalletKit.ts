@@ -43,6 +43,8 @@ import type { StorageEventProcessor } from './EventProcessor';
 import type { BridgeManager } from './BridgeManager';
 import type { BridgeEventMessageInfo, InjectedToExtensionBridgeRequestPayload } from '../types/jsBridge';
 import type { ApiClient } from '../types/toncenter/ApiClient';
+import { StreamingManager } from '../streaming/StreamingManager';
+import type { WalletKitEvents, WalletKitEventEmitter } from '../types/emitter';
 import { AnalyticsManager } from '../analytics';
 import { getDeviceInfoForWallet } from '../utils/getDefaultWalletConfig';
 import { WalletKitError, ERROR_CODES } from '../errors';
@@ -50,7 +52,7 @@ import { CallForSuccess } from '../utils/retry';
 import type { NetworkManager } from './NetworkManager';
 import { KitNetworkManager } from './NetworkManager';
 import type { WalletId } from '../utils/walletId';
-import type { Wallet, WalletAdapter } from '../api/interfaces';
+import type { StreamingAPI, Wallet, WalletAdapter } from '../api/interfaces';
 import type {
     Network,
     TransactionRequest,
@@ -91,6 +93,7 @@ export class TonWalletKit implements ITonWalletKit {
     private networkManager: NetworkManager;
     private jettonsManager!: JettonsManager;
     private swapManager: SwapManager;
+    private streamingManager: StreamingManager;
     private stakingManager: StakingManager;
     private initializer: Initializer;
     private eventProcessor!: StorageEventProcessor;
@@ -99,7 +102,7 @@ export class TonWalletKit implements ITonWalletKit {
     private config: TonWalletKitOptions;
 
     // Event emitter for this kit instance
-    private eventEmitter: EventEmitter;
+    private eventEmitter: WalletKitEventEmitter;
 
     // State
     private isInitialized = false;
@@ -123,8 +126,10 @@ export class TonWalletKit implements ITonWalletKit {
         // Initialize NetworkManager for multi-network support
         this.networkManager = new KitNetworkManager(options);
 
-        this.eventEmitter = new EventEmitter();
+        this.eventEmitter = new EventEmitter<WalletKitEvents>();
+        this.streamingManager = new StreamingManager(() => this.createFactoryContext());
         this.initializer = new Initializer(options, this.eventEmitter, this.analyticsManager);
+
         // Auto-initialize (lazy)
         this.initializationPromise = this.initialize();
 
@@ -136,12 +141,11 @@ export class TonWalletKit implements ITonWalletKit {
         // Initialize StakingManager
         this.stakingManager = new StakingManager(() => this.createFactoryContext());
 
-        this.eventEmitter.on('restoreConnection', async (event: RawBridgeEventRestoreConnection) => {
+        this.eventEmitter.on('restoreConnection', async ({ payload: event }) => {
             if (!event.domain) {
                 log.error('Domain is required for restore connection');
                 return this.sendErrorConnectResponse(event);
             }
-
             // We are passing isJsBridge true because restoreConnection is only performed
             // in an code that injected into web view or browser extension (e.g. injected bridge)
             const sessions = await this.sessionManager.getSessions({
@@ -201,9 +205,10 @@ export class TonWalletKit implements ITonWalletKit {
         });
     }
 
-    createFactoryContext(): ProviderFactoryContext {
+    createFactoryContext(): ProviderFactoryContext<WalletKitEvents> {
         return {
             networkManager: this.networkManager,
+            eventEmitter: this.eventEmitter,
             ssr: false,
         };
     }
@@ -822,6 +827,13 @@ export class TonWalletKit implements ITonWalletKit {
     }
 
     /**
+     * Streaming API access
+     */
+    get streaming(): StreamingAPI {
+        return this.streamingManager;
+    }
+
+    /**
      * Staking API access
      */
     get staking(): StakingManager {
@@ -832,7 +844,7 @@ export class TonWalletKit implements ITonWalletKit {
      * Get the event emitter for this kit instance
      * Allows external components to listen to and emit events
      */
-    getEventEmitter(): EventEmitter {
+    getEventEmitter(): WalletKitEventEmitter {
         return this.eventEmitter;
     }
 

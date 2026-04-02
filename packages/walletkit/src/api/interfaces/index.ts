@@ -17,3 +17,7 @@ export type { SwapAPI, SwapProviderInterface } from './SwapAPI';
 export type { StakingAPI, StakingProviderInterface } from './StakingAPI';
 
 export type { TONConnectSessionManager } from './TONConnectSessionManager';
+
+// Streaming interfaces
+export type { StreamingProvider, StreamingProviderFactory } from './StreamingProvider';
+export type { StreamingAPI } from './StreamingAPI';

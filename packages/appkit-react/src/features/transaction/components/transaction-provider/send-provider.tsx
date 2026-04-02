@@ -11,9 +11,9 @@ import type { FC, PropsWithChildren } from 'react';
 import type { SendTransactionReturnType } from '@ton/appkit';
 
 import { useSendTransaction } from '../../hooks/use-send-transaction';
-import type { TransactionRequest } from '../transaction/transaction';
+import type { SendRequest } from '../transaction/send';
 
-export interface TransactionContextType {
+export interface SendContextType {
     /** Function to submit the transaction */
     onSubmit: () => void;
     /** Whether the transaction is currently loading */
@@ -26,22 +26,22 @@ export interface TransactionContextType {
     disabled?: boolean;
 }
 
-export const TransactionContext = createContext<TransactionContextType>({
+export const SendContext = createContext<SendContextType>({
     onSubmit: () => {
         throw new Error('onSubmit is not defined');
     },
     isLoading: false,
 });
 
-export function useTransactionContext() {
-    const context = useContext(TransactionContext);
+export function useSendContext() {
+    const context = useContext(SendContext);
 
     return context;
 }
 
-export interface TransactionProviderProps extends PropsWithChildren {
+export interface SendProviderProps extends PropsWithChildren {
     /** The transaction request parameters */
-    request: TransactionRequest;
+    request: SendRequest;
     /** Callback when an error occurs */
     onError?: (error: Error) => void;
     /** Callback when the transaction is successful */
@@ -50,13 +50,7 @@ export interface TransactionProviderProps extends PropsWithChildren {
     disabled?: boolean;
 }
 
-export const TransactionProvider: FC<TransactionProviderProps> = ({
-    children,
-    request,
-    onError,
-    onSuccess,
-    disabled = false,
-}) => {
+export const SendProvider: FC<SendProviderProps> = ({ children, request, onError, onSuccess, disabled = false }) => {
     const [receipt, setReceipt] = useState<SendTransactionReturnType | null>(null);
     const [isPreparing, setIsPreparing] = useState(false);
 
@@ -110,5 +104,5 @@ export const TransactionProvider: FC<TransactionProviderProps> = ({
         [mutationError, isPreparing, isPending, handleSubmit, receipt, disabled],
     );
 
-    return <TransactionContext.Provider value={value}>{children}</TransactionContext.Provider>;
+    return <SendContext.Provider value={value}>{children}</SendContext.Provider>;
 };

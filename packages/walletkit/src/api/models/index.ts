@@ -10,6 +10,7 @@
 export type { MasterchainInfo } from './blockchain/MasterchainInfo';
 
 // Core models
+export type { BaseProvider } from './core/BaseProvider';
 export type { AddressBook, AddressBookEntry } from './core/AddressBook';
 export { AssetType } from './core/AssetType';
 export type { DAppInfo } from './core/DAppInfo';
@@ -108,3 +109,13 @@ export type {
 
 // RPC models
 export type { GetMethodResult } from './rpc/GetMethodResult';
+
+// Streaming models
+export type { StreamingBaseUpdate } from './streaming/StreamingBaseUpdate';
+export type { StreamingUpdateStatus } from './streaming/StreamingUpdateStatus';
+export type { StreamingWatchType } from './streaming/StreamingWatchType';
+export type { BalanceUpdate } from './streaming/BalanceUpdate';
+export type { TransactionsUpdate } from './streaming/TransactionsUpdate';
+export type { JettonUpdate } from './streaming/JettonUpdate';
+export type { StreamingUpdate } from './streaming/StreamingUpdate';
+export type { StreamingEvents } from './streaming/StreamingEvents';

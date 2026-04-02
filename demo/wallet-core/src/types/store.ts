@@ -12,6 +12,7 @@ import type {
     JettonTransfer,
     JettonInfo,
     ITonWalletKit,
+    TransactionsUpdate,
     NFT,
     Jetton,
     ConnectionRequestEvent,
@@ -29,6 +30,7 @@ import type {
     UnstakeModes,
 } from '@ton/walletkit';
 
+import type { PendingTransaction } from './streaming';
 import type {
     AuthState,
     SavedWallet,
@@ -47,6 +49,7 @@ export interface AuthSlice extends AuthState {
     reset: () => void;
     setPersistPassword: (persist: boolean) => void;
     setHoldToSign: (enabled: boolean) => void;
+    setShowFastSend: (enabled: boolean) => void;
     setUseWalletInterfaceType: (interfaceType: 'signer' | 'mnemonic' | 'ledger') => void;
     setLedgerAccountNumber: (accountNumber: number) => void;
 }
@@ -62,6 +65,9 @@ export interface WalletCoreSlice {
     initializeWalletKit: (network?: NetworkType) => Promise<void>;
 }
 
+/** Local seqno + timestamp for fast send (prevents duplicate seqno on rapid clicks) */
+export type LocalSeqnoEntry = { seqno: number; timestamp: number };
+
 // Wallet Management slice - Wallet CRUD and data
 export interface WalletManagementSlice {
     walletManagement: {
@@ -75,9 +81,20 @@ export interface WalletManagementSlice {
         events: unknown[];
         hasNextEvents: boolean;
 
+        /** Pending transactions from WebSocket streaming */
+        pendingTransactions: PendingTransaction[];
+
+        /** Trace IDs (trace_id) we've received as confirmed - never mix with trace_external_hash */
+        confirmedTraceIds: string[];
+        /** External hashes (trace_external_hash_norm) confirmed - never mix with trace_id */
+        confirmedExternalHashes: string[];
+
         currentWallet?: Wallet;
         hasWallet: boolean;
         isAuthenticated: boolean;
+
+        // WebSocket streaming state
+        isStreamingConnected: boolean;
     };
 
     // Multi-wallet actions
@@ -107,6 +124,13 @@ export interface WalletManagementSlice {
     // Wallet state actions
     clearWallet: () => void;
     updateBalance: () => Promise<void>;
+
+    // WebSocket streaming actions
+    startWebSocketStreaming: () => Promise<void>;
+    stopWebSocketStreaming: () => Promise<void>;
+    updateWebSocketSubscription: () => Promise<void>;
+    handleStreamingTransactions: (update: TransactionsUpdate) => void;
+
     // Events-based history
     // addEvent: (event: unknown) => void;
     loadEvents: (limit?: number, offset?: number) => Promise<void>;
@@ -139,7 +163,7 @@ export interface TonConnectSlice {
 
     // Transaction request actions
     showTransactionRequest: (request: SendTransactionRequestEvent) => void;
-    approveTransactionRequest: () => Promise<void>;
+    approveTransactionRequest: () => Promise<{ signedBoc: string } | undefined>;
     rejectTransactionRequest: (reason?: string) => Promise<void>;
     closeTransactionModal: () => void;
 
@@ -183,6 +207,7 @@ export interface JettonsSlice {
 
     loadUserJettons: (userAddress?: string) => Promise<void>;
     refreshJettons: (userAddress?: string) => Promise<void>;
+    updateJettonBalanceFromStream: (walletAddress: string, balance: string, decimals?: number) => void;
     validateJettonAddress: (address: string) => boolean;
     clearJettons: () => void;
     getJettonByAddress: (jettonAddress: string) => Jetton | undefined;

@@ -6,7 +6,14 @@
  *
  */
 
-import { TonWalletKit, Network, createDeviceInfo, createWalletManifest, ApiClientTonApi } from '@ton/walletkit';
+import {
+    TonWalletKit,
+    Network,
+    createDeviceInfo,
+    createWalletManifest,
+    ApiClientTonApi,
+    createTonCenterStreamingProvider,
+} from '@ton/walletkit';
 import type { ITonWalletKit } from '@ton/walletkit';
 import { OmnistonSwapProvider } from '@ton/walletkit/swap/omniston';
 import { createTonstakersProvider } from '@ton/walletkit/staking/tonstakers';
@@ -75,6 +82,12 @@ function createWalletKitInstance(walletKitConfig?: WalletKitConfig): ITonWalletK
 
     walletKit.swap.registerProvider(new OmnistonSwapProvider());
 
+    walletKit.streaming.registerProvider(
+        createTonCenterStreamingProvider({ network: Network.mainnet(), apiKey: walletKitConfig?.tonApiKeyMainnet }),
+    );
+    walletKit.streaming.registerProvider(
+        createTonCenterStreamingProvider({ network: Network.testnet(), apiKey: walletKitConfig?.tonApiKeyTestnet }),
+    );
     walletKit.staking.registerProvider(createTonstakersProvider());
 
     log.info(`WalletKit initialized with network: ${isExtension() ? 'extension' : 'web'}`);

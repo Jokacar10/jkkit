@@ -11,6 +11,7 @@ React components and hooks for AppKit.
 - [Initialization](#initialization)
 - [Basic Usage](#basic-usage)
 - [Swap](#swap)
+- [Staking](#staking)
 - [Creating a Swap Provider](./docs/creating-swap-provider.md): Implement your own swap provider for any DEX or protocol.
 - [Hooks](./docs/hooks.md): React hooks for wallet connection, state, and data fetching.
 - [Components](./docs/components.md): UI components for AppKit.
@@ -99,6 +100,14 @@ export const Balance = () => {
 ```
 
 > See [Hooks Documentation](./docs/hooks.md) for all available hooks and [Components Documentation](./docs/components.md) for UI components.
+
+## Send Transaction
+
+Use the `Send` component to trigger a transaction from a button. It handles the entire send flow.
+
+%%demo/examples/src/appkit/components/transaction#TRANSACTION%%
+
+For a custom UI, use `SendProvider` with `useSendContext` — see [Components Documentation](./docs/components.md#sendprovider).
 
 ## Swap
 

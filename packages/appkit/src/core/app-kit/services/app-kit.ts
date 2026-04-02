@@ -6,18 +6,19 @@
  *
  */
 
-import type { SwapProviderInterface, ProviderInput, StakingProviderInterface } from '@ton/walletkit';
-import { SwapManager, StakingManager } from '@ton/walletkit';
+import { SwapManager, StreamingManager } from '@ton/walletkit';
+import type { ProviderInput, SwapProviderInterface, StakingProviderInterface } from '@ton/walletkit';
 
-import type { AppKitConfig } from '../types/config';
+import { StakingManager } from '../../../staking';
 import type { Connector, ConnectorFactoryContext, ConnectorInput } from '../../../types/connector';
-import { Emitter } from '../../emitter';
+import { EventEmitter } from '../../emitter';
 import { CONNECTOR_EVENTS, WALLETS_EVENTS } from '../constants/events';
 import type { AppKitEmitter, AppKitEvents } from '../types/events';
 import type { WalletInterface } from '../../../types/wallet';
 import { WalletsManager } from '../../wallets-manager';
 import { AppKitNetworkManager } from '../../network';
 import { Network } from '../../../types/network';
+import type { AppKitConfig } from '../types/config';
 
 /**
  * Central hub for wallet management.
@@ -31,12 +32,13 @@ export class AppKit {
     readonly stakingManager: StakingManager;
 
     readonly networkManager: AppKitNetworkManager;
+    readonly streamingManager: StreamingManager;
     readonly config: AppKitConfig;
 
     constructor(config: AppKitConfig) {
         this.config = config;
 
-        this.emitter = new Emitter<AppKitEvents>();
+        this.emitter = new EventEmitter<AppKitEvents>();
         this.emitter.on(CONNECTOR_EVENTS.CONNECTED, this.updateWalletsFromConnectors.bind(this));
         this.emitter.on(CONNECTOR_EVENTS.DISCONNECTED, this.updateWalletsFromConnectors.bind(this));
 
@@ -47,8 +49,10 @@ export class AppKit {
 
         this.networkManager = new AppKitNetworkManager({ networks }, this.emitter);
         this.walletsManager = new WalletsManager(this.emitter);
+
         this.swapManager = new SwapManager(() => this.createFactoryContext());
         this.stakingManager = new StakingManager(() => this.createFactoryContext());
+        this.streamingManager = new StreamingManager(() => this.createFactoryContext());
 
         if (config.connectors) {
             config.connectors.forEach((input) => {
@@ -64,8 +68,9 @@ export class AppKit {
     }
 
     createFactoryContext(): ConnectorFactoryContext {
-        return { emitter: this?.emitter, networkManager: this?.networkManager, ssr: this?.config?.ssr };
+        return { eventEmitter: this.emitter, networkManager: this.networkManager, ssr: this.config?.ssr };
     }
+
     /**
      * Add a wallet connector
      */

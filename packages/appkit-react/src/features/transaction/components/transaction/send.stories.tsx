@@ -11,7 +11,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { Button } from '../../../../components/button';
 
 // Create a preview component that doesn't depend on context
-const TransactionButtonPreview = ({
+const SendPreview = ({
     text = 'Send Transaction',
     isLoading = false,
     disabled = false,
@@ -23,9 +23,9 @@ const TransactionButtonPreview = ({
     return <Button disabled={disabled || isLoading}>{isLoading ? 'Processing...' : text}</Button>;
 };
 
-const meta: Meta<typeof TransactionButtonPreview> = {
-    title: 'Public/Features/Transaction/Transaction',
-    component: TransactionButtonPreview,
+const meta: Meta<typeof SendPreview> = {
+    title: 'Public/Features/Transaction/Send',
+    component: SendPreview,
     tags: ['autodocs'],
     parameters: {
         layout: 'centered',
@@ -34,7 +34,7 @@ const meta: Meta<typeof TransactionButtonPreview> = {
 
 export default meta;
 
-type Story = StoryObj<typeof TransactionButtonPreview>;
+type Story = StoryObj<typeof SendPreview>;
 
 export const Default: Story = {
     args: {

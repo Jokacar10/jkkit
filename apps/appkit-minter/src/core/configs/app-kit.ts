@@ -6,7 +6,14 @@
  *
  */
 
-import { AppKit, Network, createTonConnectConnector, ApiClientTonApi, ApiClientToncenter } from '@ton/appkit';
+import {
+    AppKit,
+    Network,
+    createTonConnectConnector,
+    ApiClientTonApi,
+    ApiClientToncenter,
+    createTonCenterStreamingProvider,
+} from '@ton/appkit';
 import { DeDustSwapProvider } from '@ton/appkit/swap/dedust';
 import { OmnistonSwapProvider } from '@ton/appkit/swap/omniston';
 import { createTonstakersProvider } from '@ton/appkit/staking/tonstakers';
@@ -43,3 +50,12 @@ export const appKit = new AppKit({
     ],
     providers: [new DeDustSwapProvider(), new OmnistonSwapProvider(), createTonstakersProvider({})],
 });
+
+// TODO: replace in normal config
+appKit.streamingManager.registerProvider(
+    createTonCenterStreamingProvider({ network: Network.mainnet(), apiKey: ENV_TON_API_KEY_MAINNET }),
+);
+
+appKit.streamingManager.registerProvider(
+    createTonCenterStreamingProvider({ network: Network.testnet(), apiKey: ENV_TON_API_KEY_TESTNET }),
+);
