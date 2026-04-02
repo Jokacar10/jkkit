@@ -150,6 +150,7 @@ export abstract class TonStreamingV2BaseProvider extends WebsocketStreamingProvi
                 if (watchedBalance.has(update.address)) {
                     this.emitBalance(update.address, update);
                 }
+                return;
             }
 
             if (isTraceInvalidatedNotification(msg)) {
@@ -206,6 +207,7 @@ export abstract class TonStreamingV2BaseProvider extends WebsocketStreamingProvi
                         this.emitTransactions(friendly, mapTransactions(tx.account, msg));
                     }
                 });
+                return;
             }
 
             if (isJettonsNotification(msg)) {
@@ -214,6 +216,7 @@ export abstract class TonStreamingV2BaseProvider extends WebsocketStreamingProvi
                 if (watchedJettons.has(update.ownerAddress)) {
                     this.emitJettons(update.ownerAddress, update);
                 }
+                return;
             }
         } catch (err) {
             log.warn('Failed to parse WebSocket message', { error: err });
