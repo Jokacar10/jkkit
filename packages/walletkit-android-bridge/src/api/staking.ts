@@ -31,40 +31,16 @@ export async function setDefaultStakingProvider(args: { providerId: string }) {
     instance.staking.setDefaultProvider(args.providerId);
 }
 
-export async function getStakingQuote(args: {
-    direction: string;
-    amount: string;
-    userAddress?: string;
-    network?: { chainId: string };
-    unstakeMode?: string;
-    providerOptions?: unknown;
-    providerId?: string;
-}) {
+export async function getStakingQuote(args: StakingQuoteParams & { providerId?: string }) {
+    const { providerId, ...params } = args;
     const instance = await getKit();
-    const params: StakingQuoteParams = {
-        direction: args.direction as StakingQuoteParams['direction'],
-        amount: args.amount,
-        userAddress: args.userAddress as StakingQuoteParams['userAddress'],
-        network: args.network as StakingQuoteParams['network'],
-        unstakeMode: args.unstakeMode as StakingQuoteParams['unstakeMode'],
-        providerOptions: args.providerOptions,
-    };
-    return instance.staking.getQuote(params, args.providerId);
+    return instance.staking.getQuote(params, providerId);
 }
 
-export async function buildStakeTransaction(args: {
-    quote: StakeParams['quote'];
-    userAddress: string;
-    providerOptions?: unknown;
-    providerId?: string;
-}) {
+export async function buildStakeTransaction(args: StakeParams & { providerId?: string }) {
+    const { providerId, ...params } = args;
     const instance = await getKit();
-    const params: StakeParams = {
-        quote: args.quote,
-        userAddress: args.userAddress as StakeParams['userAddress'],
-        providerOptions: args.providerOptions,
-    };
-    return instance.staking.buildStakeTransaction(params, args.providerId);
+    return instance.staking.buildStakeTransaction(params, providerId);
 }
 
 export async function getStakedBalance(args: {
