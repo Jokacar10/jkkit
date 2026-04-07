@@ -12,26 +12,8 @@ import type { TonStakersProviderConfig } from '@ton/walletkit/staking/tonstakers
 import { getKit } from '../utils/bridge';
 import { retain, get } from '../utils/registry';
 
-type KitWithStaking = {
-    staking: {
-        register(provider: StakingProviderInterface): void;
-        setDefaultProvider(providerId: string): void;
-        getQuote(params: StakingQuoteParams, providerId?: string): Promise<unknown>;
-        buildStakeTransaction(params: StakeParams, providerId?: string): Promise<unknown>;
-        getStakedBalance(userAddress: string, network?: unknown, providerId?: string): Promise<unknown>;
-        getStakingProviderInfo(network?: unknown, providerId?: string): Promise<unknown>;
-        getSupportedUnstakeModes(providerId?: string): Promise<string[]>;
-    };
-    createFactoryContext(): Parameters<typeof TonStakersStakingProvider.createFromContext>[0];
-};
-
-async function getKitWithStaking(): Promise<KitWithStaking> {
-    const instance = await getKit();
-    return instance as unknown as KitWithStaking;
-}
-
 export async function createTonStakersStakingProvider(args?: { config?: TonStakersProviderConfig }) {
-    const instance = await getKitWithStaking();
+    const instance = await getKit();
     const provider = TonStakersStakingProvider.createFromContext(instance.createFactoryContext(), args?.config ?? {});
     const providerId = retain('stakingProvider', provider);
     return { providerId };
@@ -40,15 +22,13 @@ export async function createTonStakersStakingProvider(args?: { config?: TonStake
 export async function registerStakingProvider(args: { providerId: string }) {
     const provider = get<StakingProviderInterface>(args.providerId);
     if (!provider) throw new Error(`Staking provider not found: ${args.providerId}`);
-    const instance = await getKitWithStaking();
-    instance.staking.register(provider);
-    return { ok: true };
+    const instance = await getKit();
+    instance.staking.registerProvider(provider);
 }
 
 export async function setDefaultStakingProvider(args: { providerId: string }) {
-    const instance = await getKitWithStaking();
+    const instance = await getKit();
     instance.staking.setDefaultProvider(args.providerId);
-    return { ok: true };
 }
 
 export async function getStakingQuote(args: {
@@ -60,7 +40,7 @@ export async function getStakingQuote(args: {
     providerOptions?: unknown;
     providerId?: string;
 }) {
-    const instance = await getKitWithStaking();
+    const instance = await getKit();
     const params: StakingQuoteParams = {
         direction: args.direction as StakingQuoteParams['direction'],
         amount: args.amount,
@@ -78,7 +58,7 @@ export async function buildStakeTransaction(args: {
     providerOptions?: unknown;
     providerId?: string;
 }) {
-    const instance = await getKitWithStaking();
+    const instance = await getKit();
     const params: StakeParams = {
         quote: args.quote,
         userAddress: args.userAddress as StakeParams['userAddress'],
@@ -92,7 +72,7 @@ export async function getStakedBalance(args: {
     network?: { chainId: string };
     providerId?: string;
 }) {
-    const instance = await getKitWithStaking();
+    const instance = await getKit();
     return instance.staking.getStakedBalance(args.userAddress, args.network, args.providerId);
 }
 
@@ -100,11 +80,11 @@ export async function getStakingProviderInfo(args: {
     network?: { chainId: string };
     providerId?: string;
 }) {
-    const instance = await getKitWithStaking();
+    const instance = await getKit();
     return instance.staking.getStakingProviderInfo(args.network, args.providerId);
 }
 
 export async function getSupportedUnstakeModes(args: { providerId?: string }) {
-    const instance = await getKitWithStaking();
+    const instance = await getKit();
     return instance.staking.getSupportedUnstakeModes(args.providerId);
 }

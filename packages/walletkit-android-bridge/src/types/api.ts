@@ -123,7 +123,7 @@ export interface CreateTransferMultiTonTransactionArgs {
 
 export interface TransactionContentArgs {
     walletId: string;
-    transactionContent: TransactionRequest | string; // Can be object (from Kotlin) or string (legacy)
+    transactionContent: TransactionRequest;
 }
 
 export interface TonConnectRequestEvent extends BridgeEvent {
@@ -383,8 +383,8 @@ export interface WalletKitBridgeApi {
     emitBrowserError(args: EmitBrowserErrorArgs): PromiseOrValue<{ success: boolean }>;
     emitBrowserBridgeRequest(args: EmitBrowserBridgeRequestArgs): PromiseOrValue<{ success: boolean }>;
     createTonStakersStakingProvider(args?: CreateTonStakersStakingProviderArgs): PromiseOrValue<{ providerId: string }>;
-    registerStakingProvider(args: RegisterStakingProviderArgs): PromiseOrValue<{ ok: boolean }>;
-    setDefaultStakingProvider(args: SetDefaultStakingProviderArgs): PromiseOrValue<{ ok: boolean }>;
+    registerStakingProvider(args: RegisterStakingProviderArgs): PromiseOrValue<void>;
+    setDefaultStakingProvider(args: SetDefaultStakingProviderArgs): PromiseOrValue<void>;
     getStakingQuote(args: GetStakingQuoteArgs): PromiseOrValue<StakingQuoteResponse>;
     buildStakeTransaction(args: BuildStakeTransactionArgs): PromiseOrValue<unknown>;
     getStakedBalance(args: GetStakedBalanceArgs): PromiseOrValue<{ stakedBalance: string; instantUnstakeAvailable: string; providerId: string }>;
