@@ -359,7 +359,7 @@ export interface WalletKitBridgeApi {
     createTransferTonTransaction(args: CreateTransferTonTransactionArgs): PromiseOrValue<TransactionRequest>;
     createTransferMultiTonTransaction(args: CreateTransferMultiTonTransactionArgs): PromiseOrValue<TransactionRequest>;
     getTransactionPreview(args: TransactionContentArgs): PromiseOrValue<TransactionEmulatedPreview>;
-    handleNewTransaction(args: TransactionContentArgs): PromiseOrValue<{ success: boolean }>;
+    handleNewTransaction(args: TransactionContentArgs): PromiseOrValue<void>;
     sendTransaction(args: TransactionContentArgs): PromiseOrValue<SendTransactionResponse>;
     approveConnectRequest(args: ApproveConnectRequestArgs): PromiseOrValue<void>;
     rejectConnectRequest(args: RejectConnectRequestArgs): PromiseOrValue<{ success: boolean }>;

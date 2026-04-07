@@ -23,6 +23,5 @@ export const getRecentTransactions = (args: { walletId: string }) => clientCall(
 export async function handleNewTransaction(args: { walletId: string; transactionContent: TransactionRequest }) {
     const k = await getKit();
     const w = await getWallet(args.walletId);
-    await k.handleNewTransaction(w, args.transactionContent);
-    return { success: true };
+    return k.handleNewTransaction(w, args.transactionContent);
 }
