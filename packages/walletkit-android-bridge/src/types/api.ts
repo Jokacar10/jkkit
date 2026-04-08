@@ -350,7 +350,9 @@ export interface WalletKitBridgeApi {
     emitBrowserPageFinished(args: EmitBrowserPageArgs): PromiseOrValue<{ success: boolean }>;
     emitBrowserError(args: EmitBrowserErrorArgs): PromiseOrValue<{ success: boolean }>;
     emitBrowserBridgeRequest(args: EmitBrowserBridgeRequestArgs): PromiseOrValue<{ success: boolean }>;
-    createTonCenterStreamingProvider(args: CreateTonCenterStreamingProviderArgs): PromiseOrValue<{ providerId: string }>;
+    createTonCenterStreamingProvider(
+        args: CreateTonCenterStreamingProviderArgs,
+    ): PromiseOrValue<{ providerId: string }>;
     createTonApiStreamingProvider(args: CreateTonApiStreamingProviderArgs): PromiseOrValue<{ providerId: string }>;
     registerStreamingProvider(args: RegisterStreamingProviderArgs): PromiseOrValue<void>;
     streamingHasProvider(args: StreamingHasProviderArgs): PromiseOrValue<{ hasProvider: boolean }>;
@@ -358,5 +360,7 @@ export interface WalletKitBridgeApi {
     streamingUnwatch(args: StreamingUnwatchArgs): PromiseOrValue<void>;
     streamingConnect(): PromiseOrValue<void>;
     streamingDisconnect(): PromiseOrValue<void>;
-    streamingWatchConnectionChange(args: StreamingWatchConnectionChangeArgs): PromiseOrValue<{ subscriptionId: string }>;
+    streamingWatchConnectionChange(
+        args: StreamingWatchConnectionChangeArgs,
+    ): PromiseOrValue<{ subscriptionId: string }>;
 }

@@ -15,11 +15,13 @@ import type {
     DisconnectionEvent,
     InjectedToExtensionBridgeRequestPayload,
     Network,
+    ProviderFactoryContext,
     RequestErrorEvent,
     SendTransactionApprovalResponse,
     SendTransactionRequestEvent,
     SignDataApprovalResponse,
     SignDataRequestEvent,
+    StreamingAPI,
     TONConnectSession,
     TransactionRequest,
     Wallet,
@@ -68,6 +70,8 @@ export type WalletKitSigner = WalletSigner;
 
 export interface WalletKitInstance {
     ensureInitialized?: () => Promise<void>;
+    createFactoryContext(): ProviderFactoryContext;
+    streaming: StreamingAPI;
     getWallets: () => Wallet[];
     getWallet(walletId: string): Wallet | undefined;
     getNetwork?: () => string;

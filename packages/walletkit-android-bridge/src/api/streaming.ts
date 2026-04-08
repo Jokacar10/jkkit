@@ -7,54 +7,53 @@
  */
 
 import type {
-    TonCenterStreamingProviderConfig,
-    TonApiStreamingProviderConfig,
     StreamingProvider,
-    StreamingWatchType,
     StreamingUpdate,
+    StreamingWatchType,
+    TonApiStreamingProviderConfig,
+    TonCenterStreamingProviderConfig,
 } from '@ton/walletkit';
+import { TonApiStreamingProvider, TonCenterStreamingProvider } from '@ton/walletkit';
 
-import { TonCenterStreamingProvider, TonApiStreamingProvider } from '@ton/walletkit';
-
-import { getKit } from '../utils/bridge';
 import { emit } from '../transport/messaging';
-import { retain, get, release } from '../utils/registry';
+import { getKit } from '../utils/bridge';
+import { get, release, retain } from '../utils/registry';
 
 export async function createTonCenterStreamingProvider(args: { config: TonCenterStreamingProviderConfig }) {
     const instance = await getKit();
-    const ctx = (instance as any).createFactoryContext();
-    const provider = new TonCenterStreamingProvider(ctx, args.config);
-    const providerId = retain('streamingProvider', provider);
-    return { providerId };
+    const provider = new TonCenterStreamingProvider(instance.createFactoryContext(), args.config);
+    return { providerId: retain('streamingProvider', provider) };
 }
 
 export async function createTonApiStreamingProvider(args: { config: TonApiStreamingProviderConfig }) {
     const instance = await getKit();
-    const ctx = (instance as any).createFactoryContext();
-    const provider = new TonApiStreamingProvider(ctx, args.config);
-    const providerId = retain('streamingProvider', provider);
-    return { providerId };
+    const provider = new TonApiStreamingProvider(instance.createFactoryContext(), args.config);
+    return { providerId: retain('streamingProvider', provider) };
 }
 
 export async function registerStreamingProvider(args: { providerId: string }) {
     const instance = await getKit();
     const provider = get<StreamingProvider>(args.providerId);
     if (!provider) throw new Error(`Streaming provider not found: ${args.providerId}`);
-    (instance as any).streaming.registerProvider(() => provider);
+    instance.streaming.registerProvider(() => provider);
 }
 
 export async function streamingHasProvider(args: { network: { chainId: string } }) {
     const instance = await getKit();
-    return { hasProvider: (instance as any).streaming.hasProvider(args.network) as boolean };
+    return { hasProvider: instance.streaming.hasProvider(args.network) };
 }
 
-export async function streamingWatch(args: { network: { chainId: string }; address: string; types: StreamingWatchType[] }) {
+export async function streamingWatch(args: {
+    network: { chainId: string };
+    address: string;
+    types: StreamingWatchType[];
+}) {
     const instance = await getKit();
     let subscriptionId: string;
-    const unwatch = (instance as any).streaming.watch(
+    const unwatch = instance.streaming.watch(
         args.network,
         args.address,
-        args.types,
+        args.types as Exclude<StreamingWatchType, 'trace'>[],
         (_type: StreamingWatchType, update: StreamingUpdate) => {
             emit('streamingUpdate', { subscriptionId, update });
         },
@@ -73,18 +72,18 @@ export async function streamingUnwatch(args: { subscriptionId: string }) {
 
 export async function streamingConnect() {
     const instance = await getKit();
-    (instance as any).streaming.connect();
+    instance.streaming.connect();
 }
 
 export async function streamingDisconnect() {
     const instance = await getKit();
-    (instance as any).streaming.disconnect();
+    instance.streaming.disconnect();
 }
 
 export async function streamingWatchConnectionChange(args: { network: { chainId: string } }) {
     const instance = await getKit();
     let subscriptionId: string;
-    const unwatch = (instance as any).streaming.onConnectionChange(args.network, (connected: boolean) => {
+    const unwatch = instance.streaming.onConnectionChange(args.network, (connected: boolean) => {
         emit('streamingConnectionChange', { subscriptionId, connected });
     });
     subscriptionId = retain('streamingSub', unwatch);
