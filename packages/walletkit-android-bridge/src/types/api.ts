@@ -56,14 +56,10 @@ export interface CreateTonMnemonicArgs {
 export interface CreateSignerFromMnemonicArgs {
     mnemonic: string[];
     mnemonicType?: string;
-    /** Optional signature domain for L2 chains (e.g. Tetra). */
-    domain?: { type: 'l2'; globalId: number } | { type: 'empty' };
 }
 
 export interface CreateSignerFromPrivateKeyArgs {
     secretKey: string;
-    /** Optional signature domain for L2 chains (e.g. Tetra). */
-    domain?: { type: 'l2'; globalId: number } | { type: 'empty' };
 }
 
 export interface CreateSignerFromCustomArgs {
@@ -76,6 +72,8 @@ export interface CreateWalletAdapterArgs {
     network: { chainId: string };
     workchain?: number;
     walletId?: number;
+    /** Optional signature domain for L2 chains (e.g. Tetra). */
+    domain?: { type: 'l2'; globalId: number } | { type: 'empty' };
 }
 
 export interface AddWalletArgs {
