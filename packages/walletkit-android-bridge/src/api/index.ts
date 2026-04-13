@@ -15,8 +15,10 @@ import * as requests from './requests';
 import * as tonconnect from './tonconnect';
 import * as nft from './nft';
 import * as jettons from './jettons';
+import * as staking from './staking';
 import * as browser from './browser';
 import * as streaming from './streaming';
+import * as swap from './swap';
 import { eventListeners } from './eventListeners';
 
 export { eventListeners };
@@ -93,4 +95,22 @@ export const api = {
     streamingWatchJettons: streaming.streamingWatchJettons,
     registerKotlinStreamingProvider: streaming.registerKotlinStreamingProvider,
     kotlinProviderDispatch: streaming.kotlinProviderDispatch,
+
+    createTonStakersStakingProvider: staking.createTonStakersStakingProvider,
+    registerStakingProvider: staking.registerStakingProvider,
+    setDefaultStakingProvider: staking.setDefaultStakingProvider,
+    getStakingQuote: staking.getStakingQuote,
+    buildStakeTransaction: staking.buildStakeTransaction,
+    getStakedBalance: staking.getStakedBalance,
+    getStakingProviderInfo: staking.getStakingProviderInfo,
+    getSupportedUnstakeModes: staking.getSupportedUnstakeModes,
+
+    createOmnistonSwapProvider: swap.createOmnistonSwapProvider,
+    createDeDustSwapProvider: swap.createDeDustSwapProvider,
+    registerSwapProvider: swap.registerSwapProvider,
+    setDefaultSwapProvider: swap.setDefaultSwapProvider,
+    getRegisteredSwapProviders: swap.getRegisteredSwapProviders,
+    hasSwapProvider: swap.hasSwapProvider,
+    getSwapQuote: swap.getSwapQuote,
+    buildSwapTransaction: swap.buildSwapTransaction,
 } as unknown as WalletKitBridgeApi;
