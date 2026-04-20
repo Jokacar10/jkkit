@@ -60,6 +60,16 @@
         "types": "./dist/cjs/staking/tonstakers/index.d.ts",
         "default": "./dist/cjs/staking/tonstakers/index.js"
       }
+    },
+    "./gasless/tonapi": {
+      "import": {
+        "types": "./dist/esm/gasless/tonapi/index.d.ts",
+        "default": "./dist/esm/gasless/tonapi/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/gasless/tonapi/index.d.ts",
+        "default": "./dist/cjs/gasless/tonapi/index.js"
+      }
     }
   },
   "typesVersions": {
@@ -75,6 +85,9 @@
       ],
       "staking/tonstakers": [
         "./dist/esm/staking/tonstakers/index.d.ts"
+      ],
+      "gasless/tonapi": [
+        "./dist/esm/gasless/tonapi/index.d.ts"
       ]
     }
   },
@@ -104,6 +117,9 @@
       "optional": true
     },
     "@ston-fi/omniston-sdk": {
+      "optional": true
+    },
+    "@ton-api/client": {
       "optional": true
     },
     "@tanstack/query-core": {

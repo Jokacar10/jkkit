@@ -7,7 +7,18 @@
  */
 
 import { TonConnectButton, useAddress } from '@ton/appkit-react';
-import { ArrowLeftRight, BookOpen, Coins, ExternalLink, Github, ImageIcon, Sparkles, Wallet } from 'lucide-react';
+import {
+    ArrowLeftRight,
+    BookOpen,
+    Coins,
+    ExternalLink,
+    Github,
+    ImageIcon,
+    PenLine,
+    Sparkles,
+    Wallet,
+    Zap,
+} from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom';
 import type { ComponentType, FC, ReactNode } from 'react';
 
@@ -56,6 +67,13 @@ const NAV_GROUPS: readonly { label?: string; links: readonly NavGroupLink[] }[] 
         links: [
             { to: '/swap', label: 'Swap', icon: ArrowLeftRight },
             { to: '/staking', label: 'Staking', icon: Coins },
+        ],
+    },
+    {
+        label: 'Wallet',
+        links: [
+            { to: '/sign', label: 'Sign Message', icon: PenLine },
+            { to: '/gasless', label: 'Gasless', icon: Zap },
         ],
     },
 ];
