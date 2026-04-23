@@ -42,35 +42,35 @@ class ProxyStakingProvider implements StakingProviderInterface {
     ) {}
 
     async getQuote(params: StakingQuoteParams): Promise<StakingQuote> {
-        const resultJson = await bridgeRequest<string>('kotlinStakingProviderGetQuote', {
+        const resultJson = (await bridgeRequest('kotlinStakingProviderGetQuote', {
             providerId: this.providerId,
             params: JSON.stringify(params),
-        });
+        })) as string;
         return JSON.parse(resultJson) as StakingQuote;
     }
 
     async buildStakeTransaction(params: StakeParams): Promise<TransactionRequest> {
-        const resultJson = await bridgeRequest<string>('kotlinStakingProviderBuildStakeTransaction', {
+        const resultJson = (await bridgeRequest('kotlinStakingProviderBuildStakeTransaction', {
             providerId: this.providerId,
             params: JSON.stringify(params),
-        });
+        })) as string;
         return JSON.parse(resultJson) as TransactionRequest;
     }
 
     async getStakedBalance(userAddress: UserFriendlyAddress, network?: Network): Promise<StakingBalance> {
-        const resultJson = await bridgeRequest<string>('kotlinStakingProviderGetStakedBalance', {
+        const resultJson = (await bridgeRequest('kotlinStakingProviderGetStakedBalance', {
             providerId: this.providerId,
             userAddress,
             networkChainId: network?.chainId ?? null,
-        });
+        })) as string;
         return JSON.parse(resultJson) as StakingBalance;
     }
 
     async getStakingProviderInfo(network?: Network): Promise<StakingProviderInfo> {
-        const resultJson = await bridgeRequest<string>('kotlinStakingProviderGetStakingProviderInfo', {
+        const resultJson = (await bridgeRequest('kotlinStakingProviderGetStakingProviderInfo', {
             providerId: this.providerId,
             networkChainId: network?.chainId ?? null,
-        });
+        })) as string;
         return JSON.parse(resultJson) as StakingProviderInfo;
     }
 

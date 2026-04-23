@@ -34,18 +34,18 @@ class ProxySwapProvider implements SwapProviderInterface {
     constructor(readonly providerId: string) {}
 
     async getQuote(params: SwapQuoteParams): Promise<SwapQuote> {
-        const resultJson = await bridgeRequest<string>('kotlinSwapProviderQuote', {
+        const resultJson = (await bridgeRequest('kotlinSwapProviderQuote', {
             providerId: this.providerId,
             params: JSON.stringify(params),
-        });
+        })) as string;
         return JSON.parse(resultJson) as SwapQuote;
     }
 
     async buildSwapTransaction(params: SwapParams): Promise<TransactionRequest> {
-        const resultJson = await bridgeRequest<string>('kotlinSwapProviderBuildSwapTransaction', {
+        const resultJson = (await bridgeRequest('kotlinSwapProviderBuildSwapTransaction', {
             providerId: this.providerId,
             params: JSON.stringify(params),
-        });
+        })) as string;
         return JSON.parse(resultJson) as TransactionRequest;
     }
 }
