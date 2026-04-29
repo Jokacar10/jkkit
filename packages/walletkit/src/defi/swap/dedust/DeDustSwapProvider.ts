@@ -29,7 +29,7 @@ const log = globalLogger.createChild('DeDustSwapProvider');
 /**
  * Default API URL for DeDust Router
  */
-const DEFAULT_API_URL = 'https://api-mainnet.dedust.io';
+const DEFAULT_API_URL = 'https://mainnet.api.dedust.io';
 
 /**
  * Default protocols to use for routing
@@ -131,7 +131,7 @@ export class DeDustSwapProvider extends SwapProvider<DeDustProviderOptions, DeDu
                 exclude_volatile_pools: params.providerOptions?.excludeVolatilePools,
             };
 
-            const response = await fetch(`${this.apiUrl}/v1/router/quote`, {
+            const response = await fetch(`${this.apiUrl}/v4/router/quote`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -232,7 +232,7 @@ export class DeDustSwapProvider extends SwapProvider<DeDustProviderOptions, DeDu
                 referral_fee: referralFeeBps,
             };
 
-            const response = await fetch(`${this.apiUrl}/v1/router/swap`, {
+            const response = await fetch(`${this.apiUrl}/v4/router/swap`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

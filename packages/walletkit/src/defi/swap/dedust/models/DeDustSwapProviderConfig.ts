@@ -26,7 +26,7 @@ export interface DeDustSwapProviderConfig extends DeDustReferralOptions {
 
     /**
      * API base URL
-     * @default 'https://api-mainnet.dedust.io'
+     * @default 'https://mainnet.api.dedust.io'
      * @format url
      */
     apiUrl?: string;
