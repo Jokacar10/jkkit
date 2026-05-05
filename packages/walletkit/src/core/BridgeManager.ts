@@ -98,7 +98,7 @@ export class BridgeManager {
         this.walletKitConfig = walletKitConfig;
         this.jsBridgeTransport = config?.jsBridgeTransport;
 
-        if (this.config.bridgeUrl) {
+        if (this.config.bridgeUrl && !this.config.disableHttpConnection) {
             this.bridgeProvider = new BridgeProvider<WalletConsumer>(
                 this.config.bridgeUrl,
                 this.queueBridgeEvent.bind(this),
