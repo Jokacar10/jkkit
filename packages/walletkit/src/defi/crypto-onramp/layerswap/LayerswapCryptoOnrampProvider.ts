@@ -29,6 +29,7 @@ import {
     TON_USDT_ADDRESS,
     formatBaseUnits,
     isErrorResponse,
+    isEvmAddress,
     mapStatus,
     parseBaseUnits,
 } from './utils';
@@ -60,6 +61,8 @@ export interface LayerswapQuoteMetadata {
     depositAddress: string;
     sourceAmountBaseUnits: string;
     targetAmountBaseUnits: string;
+    /** Source EVM address used when the swap was created, if any. */
+    sourceAddress?: string;
 }
 
 /**
@@ -76,7 +79,12 @@ export class LayerswapCryptoOnrampProvider extends CryptoOnrampProvider<undefine
     }
 
     getMetadata() {
-        return { name: 'Layerswap', url: 'https://layerswap.io', isReversedAmountSupported: false };
+        return {
+            name: 'Layerswap',
+            url: 'https://layerswap.io',
+            isReversedAmountSupported: false,
+            refundAddressMode: 'optional' as const,
+        };
     }
 
     private readonly apiKey: string | undefined;
@@ -119,6 +127,13 @@ export class LayerswapCryptoOnrampProvider extends CryptoOnrampProvider<undefine
             );
         }
 
+        if (params.refundAddress !== undefined && params.refundAddress !== '' && !isEvmAddress(params.refundAddress)) {
+            throw new CryptoOnrampError(
+                'Layerswap: refundAddress must be a valid EVM address (got "' + params.refundAddress + '")',
+                CryptoOnrampError.INVALID_REFUND_ADDRESS,
+            );
+        }
+
         const amountDecimal = formatBaseUnits(params.amount, SOURCE_TOKEN_DECIMALS);
 
         const body = {
@@ -128,6 +143,7 @@ export class LayerswapCryptoOnrampProvider extends CryptoOnrampProvider<undefine
             source_token: LAYERSWAP_SOURCE_TOKEN,
             destination_token: LAYERSWAP_DESTINATION_TOKEN,
             destination_address: recipient,
+            ...(params.refundAddress ? { source_address: params.refundAddress } : {}),
             refuel: false,
             use_deposit_address: true,
         };
@@ -182,6 +198,7 @@ export class LayerswapCryptoOnrampProvider extends CryptoOnrampProvider<undefine
             depositAddress: depositAction.to_address,
             sourceAmountBaseUnits: depositAction.amount_in_base_units,
             targetAmountBaseUnits,
+            sourceAddress: params.refundAddress || undefined,
         };
 
         return {
@@ -204,6 +221,34 @@ export class LayerswapCryptoOnrampProvider extends CryptoOnrampProvider<undefine
                 'Layerswap: quote metadata is missing — quote must be obtained from this provider',
                 CryptoOnrampError.INVALID_PARAMS,
             );
+        }
+
+        const requestedAddress = params.refundAddress || undefined;
+        if (requestedAddress !== metadata.sourceAddress) {
+            const newQuote = await this.getQuote({
+                amount: metadata.sourceAmountBaseUnits,
+                sourceCurrencyAddress: params.quote.sourceCurrencyAddress,
+                sourceChain: params.quote.sourceChain,
+                targetCurrencyAddress: params.quote.targetCurrencyAddress,
+                recipientAddress: params.quote.recipientAddress,
+                refundAddress: requestedAddress,
+                isSourceAmount: true,
+            });
+            const newMetadata = newQuote.metadata;
+            if (!newMetadata) {
+                throw new CryptoOnrampError(
+                    'Layerswap: quote metadata is missing — quote must be obtained from this provider',
+                    CryptoOnrampError.INVALID_PARAMS,
+                );
+            }
+            return {
+                depositId: newMetadata.swapId,
+                address: newMetadata.depositAddress,
+                amount: newMetadata.sourceAmountBaseUnits,
+                sourceCurrencyAddress: params.quote.sourceCurrencyAddress,
+                sourceChain: params.quote.sourceChain,
+                providerId: this.providerId,
+            };
         }
 
         return {

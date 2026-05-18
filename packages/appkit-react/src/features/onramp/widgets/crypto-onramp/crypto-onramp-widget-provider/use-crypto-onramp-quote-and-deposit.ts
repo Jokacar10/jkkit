@@ -6,7 +6,7 @@
  *
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { formatUnits, parseUnits } from '@ton/appkit';
 import { keepPreviousData } from '@tanstack/react-query';
 
@@ -38,7 +38,6 @@ export const useCryptoOnrampQuoteAndDeposit = ({
     userAddress,
     providerId,
 }: UseCryptoOnrampQuoteAndDepositOptions) => {
-    const [refundAddress, setRefundAddress] = useState('');
     const [amountDebounced] = useDebounceValue(amount, QUOTE_DEBOUNCE_MS);
 
     const requestAmountDecimals =
@@ -71,7 +70,7 @@ export const useCryptoOnrampQuoteAndDeposit = ({
 
     const selectedProvider = useCryptoOnrampProviderById({ id: providerId });
     const selectedProviderMetadata = selectedProvider?.getMetadata();
-    const isRefundAddressRequired = selectedProviderMetadata?.isRefundAddressRequired ?? false;
+    const refundAddressMode = selectedProviderMetadata?.refundAddressMode ?? 'off';
     const isReversedAmountSupported = selectedProviderMetadata?.isReversedAmountSupported ?? true;
 
     const createDepositMutation = useCreateCryptoOnrampDeposit();
@@ -98,39 +97,31 @@ export const useCryptoOnrampQuoteAndDeposit = ({
         return amount;
     }, [createDepositMutation.data, amount, selectedMethod]);
 
-    const createDeposit = useCallback(() => {
-        if (!quoteQuery.data || !userAddress) return;
-        if (isRefundAddressRequired && !refundAddress) return;
+    const createDeposit = useCallback(
+        (refundAddress?: string) => {
+            if (!quoteQuery.data || !userAddress) return;
+            if (refundAddressMode === 'required' && !refundAddress) return;
 
-        createDepositMutation.mutate({
-            quote: quoteQuery.data,
-            providerId: quoteQuery.data.providerId,
-            refundAddress,
-        });
-    }, [quoteQuery.data, userAddress, createDepositMutation, refundAddress, isRefundAddressRequired]);
+            createDepositMutation.mutate({
+                quote: quoteQuery.data,
+                providerId: quoteQuery.data.providerId,
+                refundAddress: refundAddress ?? '',
+            });
+        },
+        [quoteQuery.data, userAddress, createDepositMutation, refundAddressMode],
+    );
 
     const onReset = useCallback(() => {
         createDepositMutation.reset();
         quoteQuery.refetch();
-        setRefundAddress('');
     }, [createDepositMutation, quoteQuery]);
-
-    const handleSetRefundAddress = useCallback(
-        (address: string) => {
-            setRefundAddress(address);
-            if (createDepositMutation.isError) {
-                createDepositMutation.reset();
-            }
-        },
-        [createDepositMutation],
-    );
 
     return {
         amountDebounced,
         quote: quoteQuery.data ?? null,
         quoteError: quoteQuery.error,
         isQuoteFetching: quoteQuery.isFetching,
-        isRefundAddressRequired,
+        refundAddressMode,
         isReversedAmountSupported,
         deposit: createDepositMutation.data ?? null,
         depositError: createDepositMutation.error,
@@ -138,8 +129,6 @@ export const useCryptoOnrampQuoteAndDeposit = ({
         depositStatus: depositStatus ?? null,
         convertedAmount,
         depositAmount,
-        refundAddress,
-        setRefundAddress: handleSetRefundAddress,
         createDeposit,
         onReset,
     };

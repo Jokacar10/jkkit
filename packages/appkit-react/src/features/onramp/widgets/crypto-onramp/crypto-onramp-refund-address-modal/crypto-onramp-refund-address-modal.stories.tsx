@@ -21,25 +21,15 @@ type Story = StoryObj<typeof CryptoOnrampRefundAddressModal>;
 export const Default: Story = {
     args: {
         open: true,
-        value: '',
         isLoading: false,
         onClose: () => {},
-        onChange: () => {},
         onConfirm: () => {},
-    },
-};
-
-export const WithValue: Story = {
-    args: {
-        ...Default.args,
-        value: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
     },
 };
 
 export const WithError: Story = {
     args: {
         ...Default.args,
-        value: '0xinvalid',
         error: 'Invalid refund address',
     },
 };
@@ -47,7 +37,13 @@ export const WithError: Story = {
 export const Loading: Story = {
     args: {
         ...Default.args,
-        value: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
         isLoading: true,
+    },
+};
+
+export const Optional: Story = {
+    args: {
+        ...Default.args,
+        onSkip: () => {},
     },
 };

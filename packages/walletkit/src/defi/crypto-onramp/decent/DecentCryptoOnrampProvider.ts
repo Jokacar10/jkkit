@@ -79,7 +79,7 @@ export class DecentCryptoOnrampProvider extends CryptoOnrampProvider<DecentQuote
     }
 
     getMetadata() {
-        return { name: 'Decent', url: 'https://decent.xyz', isRefundAddressRequired: true };
+        return { name: 'Decent', url: 'https://decent.xyz', refundAddressMode: 'required' as const };
     }
 
     private readonly apiKey: string;

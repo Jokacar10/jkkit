@@ -60,10 +60,8 @@ export const CryptoOnrampWidgetUI: FC<CryptoOnrampWidgetRenderProps> = ({
     canContinue,
     onReset,
     depositStatus,
-    isRefundAddressRequired,
+    refundAddressMode,
     isReversedAmountSupported,
-    refundAddress,
-    setRefundAddress,
     quoteError,
     depositError,
     targetBalance,
@@ -80,14 +78,21 @@ export const CryptoOnrampWidgetUI: FC<CryptoOnrampWidgetRenderProps> = ({
     const { t } = useI18n();
 
     const handleContinue = useCallback(() => {
-        if (!isRefundAddressRequired) {
+        if (refundAddressMode === 'off') {
             createDeposit();
             return;
         }
         setIsRefundAddressOpen(true);
-    }, [isRefundAddressRequired, createDeposit]);
+    }, [refundAddressMode, createDeposit]);
 
-    const handleConfirmRefundAddress = useCallback(() => {
+    const handleConfirmRefundAddress = useCallback(
+        (address: string) => {
+            createDeposit(address);
+        },
+        [createDeposit],
+    );
+
+    const handleSkipRefundAddress = useCallback(() => {
         createDeposit();
     }, [createDeposit]);
 
@@ -250,9 +255,8 @@ export const CryptoOnrampWidgetUI: FC<CryptoOnrampWidgetRenderProps> = ({
             <CryptoOnrampRefundAddressModal
                 open={isRefundAddressOpen}
                 onClose={handleRefundAddressClose}
-                value={refundAddress}
-                onChange={setRefundAddress}
                 onConfirm={handleConfirmRefundAddress}
+                onSkip={refundAddressMode === 'optional' ? handleSkipRefundAddress : undefined}
                 isLoading={isCreatingDeposit}
                 error={depositError ? t(depositError) : null}
             />

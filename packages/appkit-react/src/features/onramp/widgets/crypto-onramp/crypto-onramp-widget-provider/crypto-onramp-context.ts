@@ -75,18 +75,19 @@ export interface CryptoOnrampContextType {
     depositError: string | null;
     /** Formatted deposit amount */
     depositAmount: string;
-    /** Function to trigger deposit creation */
-    createDeposit: () => void;
+    /** Function to trigger deposit creation, optionally with a refund address */
+    createDeposit: (refundAddress?: string) => void;
     /** Deposit status */
     depositStatus: CryptoOnrampStatus | null;
 
-    /** Whether the current quote provider requires a refund address */
-    isRefundAddressRequired: boolean;
+    /**
+     * Refund-address collection mode for the current provider:
+     * `'off'` — skip the address modal; `'optional'` — show modal with a Skip button;
+     * `'required'` — show modal, address mandatory.
+     */
+    refundAddressMode: 'off' | 'optional' | 'required';
     /** Whether the current quote provider supports reversed (target-amount) input */
     isReversedAmountSupported: boolean;
-    /** Refund address */
-    refundAddress: string;
-    setRefundAddress: (address: string) => void;
 
     /** User's balance of the selected target token (formatted, token units) */
     targetBalance: string;
@@ -134,10 +135,8 @@ const defaultContext: CryptoOnrampContextType = {
     createDeposit: () => {},
     depositStatus: null,
 
-    isRefundAddressRequired: false,
+    refundAddressMode: 'off',
     isReversedAmountSupported: true,
-    refundAddress: '',
-    setRefundAddress: () => {},
 
     targetBalance: '',
     isLoadingTargetBalance: false,
