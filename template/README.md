@@ -1,3 +1,7 @@
+---
+target: README.md
+---
+
 # AppKit, WalletKit and AgentKit monorepo
 
 This is a TON developer toolkit monorepo for building dApps, wallets, and agent integrations around TON.
@@ -44,10 +48,3 @@ pnpm --filter @ton/mcp build
 ## License
 
 This repository is licensed under the [MIT License](https://github.com/ton-connect/kit/blob/main/LICENSE).
-
-<!--
-This file is auto-generated. Do not edit manually.
-Changes will be overwritten when running the docs update script.
-Source template: template/README.md
--->
-
