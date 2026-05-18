@@ -212,7 +212,7 @@ export class ConnectHandler
         };
     }
 
-    private static readonly MANIFEST_PROXY_URL = 'https://walletbot.me/tonconnect-proxy/';
+    // private static readonly MANIFEST_PROXY_URL = 'https://walletbot.me/tonconnect-proxy/';
 
     /**
      * Fetch manifest from URL
@@ -247,10 +247,15 @@ export class ConnectHandler
             return directResult;
         }
 
+        return {
+            manifest: null,
+            manifestFetchErrorCode: CONNECT_EVENT_ERROR_CODES.MANIFEST_CONTENT_ERROR,
+        };
+
         // If direct fetch failed, try via proxy
-        log.info('Direct manifest fetch failed, trying proxy', { manifestUrl });
-        const proxyUrl = `${ConnectHandler.MANIFEST_PROXY_URL}${manifestUrl}`;
-        return this.tryFetchManifest(proxyUrl);
+        // log.info('Direct manifest fetch failed, trying proxy', { manifestUrl });
+        // const proxyUrl = `${ConnectHandler.MANIFEST_PROXY_URL}${manifestUrl}`;
+        // return this.tryFetchManifest(proxyUrl);
     }
 
     private async tryFetchManifest(url: string): Promise<{
