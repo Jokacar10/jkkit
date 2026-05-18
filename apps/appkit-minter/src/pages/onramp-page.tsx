@@ -10,7 +10,7 @@ import type React from 'react';
 import { CryptoOnrampWidget } from '@ton/appkit-react';
 import type { CryptoOnrampToken, CryptoPaymentMethod } from '@ton/appkit-react';
 
-import { Card, Layout } from '@/core/components';
+import { Layout } from '@/core/components';
 
 const TOKENS: CryptoOnrampToken[] = [
     // {
@@ -65,17 +65,17 @@ const PAYMENT_METHODS: CryptoPaymentMethod[] = [
     },
 ];
 
-export const OnrampPage: React.FC = () => {
+export const CryptoOnrampPage: React.FC = () => {
     return (
-        <Layout title="Buy">
-            <Card className="w-full max-w-[422px] mx-auto">
+        <Layout title="Crypto Onramp">
+            <div className="w-full max-w-[434px] mx-auto flex justify-center items-center">
                 <CryptoOnrampWidget
                     tokens={TOKENS}
                     defaultTokenId="usdt-ton"
                     paymentMethods={PAYMENT_METHODS}
                     defaultMethodId="usdc-base"
                 />
-            </Card>
+            </div>
         </Layout>
     );
 };
