@@ -1,9 +1,3 @@
-<!--
-This file is auto-generated. Do not edit manually.
-Changes will be overwritten when running the docs update script.
-Source template: template/packages/appkit/docs/actions.md
--->
-
 # Actions
 
 AppKit provides a set of actions to interact with the blockchain and wallets.
@@ -751,3 +745,10 @@ const unsubscribe = watchSelectedWallet(appKit, {
 
 // Later: unsubscribe();
 ```
+
+<!--
+This file is auto-generated. Do not edit manually.
+Changes will be overwritten when running the docs update script.
+Source template: template/packages/appkit/docs/actions.md
+-->
+
