@@ -6,4 +6,4 @@
  *
  */
 
-export * from '@ton/walletkit/crypto-onramp/swaps-xyz';
+export * from '@ton/walletkit/crypto-onramp/decent';

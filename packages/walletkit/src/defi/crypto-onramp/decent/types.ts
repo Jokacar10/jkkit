@@ -7,16 +7,16 @@
  */
 
 /**
- * VM type identifier returned by swaps.xyz. Matches `vmId` from /getChainList.
+ * VM type identifier returned by the Decent API. Matches `vmId` from /getChainList.
  */
-export type SwapsXyzVmId = 'evm' | 'solana' | 'alt-vm' | 'hypercore';
+export type DecentVmId = 'evm' | 'solana' | 'alt-vm' | 'hypercore';
 
-export type SwapsXyzSwapDirection = 'exact-amount-in' | 'exact-amount-out';
+export type DecentSwapDirection = 'exact-amount-in' | 'exact-amount-out';
 
 /**
- * Token / amount entry as returned by swaps.xyz (Payment object).
+ * Token / amount entry as returned by the Decent API (Payment object).
  */
-export interface SwapsXyzPayment {
+export interface DecentPayment {
     chainId: number;
     address: string;
     name: string;
@@ -29,7 +29,7 @@ export interface SwapsXyzPayment {
     swapsXyzCode: string;
 }
 
-export interface SwapsXyzEvmTx {
+export interface DecentEvmTx {
     to: string;
     toExtra: string | null;
     value: string;
@@ -37,7 +37,7 @@ export interface SwapsXyzEvmTx {
     chainKey: string;
 }
 
-export interface SwapsXyzBridgeRouteStep {
+export interface DecentBridgeRouteStep {
     srcChainId: number;
     dstChainId: number;
     srcBridgeToken: string;
@@ -51,19 +51,19 @@ export interface SwapsXyzBridgeRouteStep {
  * Non-exhaustive — only the fields we consume. `allRoutes` is an array of the
  * same shape and is not typed here.
  */
-export interface SwapsXyzGetActionResponse {
-    tx: SwapsXyzEvmTx;
+export interface DecentGetActionResponse {
+    tx: DecentEvmTx;
     txId: string;
-    vmId: SwapsXyzVmId;
-    amountIn: SwapsXyzPayment;
-    amountInMax: SwapsXyzPayment;
-    amountOut: SwapsXyzPayment;
-    amountOutMin: SwapsXyzPayment;
-    protocolFee: SwapsXyzPayment;
-    applicationFee: SwapsXyzPayment;
-    bridgeFee: SwapsXyzPayment;
+    vmId: DecentVmId;
+    amountIn: DecentPayment;
+    amountInMax: DecentPayment;
+    amountOut: DecentPayment;
+    amountOutMin: DecentPayment;
+    protocolFee: DecentPayment;
+    applicationFee: DecentPayment;
+    bridgeFee: DecentPayment;
     bridgeIds: string[];
-    bridgeRoute: SwapsXyzBridgeRouteStep[];
+    bridgeRoute: DecentBridgeRouteStep[];
     exchangeRate: number;
     estimatedTxTime: number;
     estimatedPriceImpact: number;
@@ -71,7 +71,7 @@ export interface SwapsXyzGetActionResponse {
     executionsType: 'DEFAULT' | 'GASLESS';
 }
 
-export interface SwapsXyzErrorResponse {
+export interface DecentErrorResponse {
     success: false;
     error: {
         code: string;

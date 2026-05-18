@@ -11,7 +11,7 @@
  */
 export interface CryptoOnrampProviderMetadata {
     /**
-     * Human-readable provider name (e.g. 'Swaps.xyz')
+     * Human-readable provider name (e.g. 'Decent')
      */
     name: string;
 

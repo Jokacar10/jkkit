@@ -1,29 +1,29 @@
 ---
-target: packages/walletkit/src/defi/crypto-onramp/swaps-xyz/README.md
+target: packages/walletkit/src/defi/crypto-onramp/decent/README.md
 ---
 
-# Swaps.xyz Crypto Onramp Provider
+# Decent Crypto Onramp Provider
 
-Swaps.xyz is a multi-chain bridge aggregator that routes crypto from a wide range of source networks and tokens into TON assets.
+Decent (formerly Swaps.xyz) is a multi-chain bridge aggregator that routes crypto from a wide range of source networks and tokens into TON assets.
 
 For more information about supported chains and tokens, see the [official documentation](https://docs.swaps.xyz).
 
 ## Quick Start
 
 ```typescript
-import { createSwapsXyzProvider } from '@ton/walletkit/crypto-onramp/swaps-xyz';
+import { createDecentProvider } from '@ton/walletkit/crypto-onramp/decent';
 
 kit.cryptoOnramp.registerProvider(
-    createSwapsXyzProvider({ apiKey: 'your-api-key' }),
+    createDecentProvider({ apiKey: 'your-api-key' }),
 );
-kit.cryptoOnramp.setDefaultProvider('swaps-xyz');
+kit.cryptoOnramp.setDefaultProvider('decent');
 ```
 
 ## Configuration
 
 ```typescript
-interface SwapsXyzProviderConfig {
-    apiKey: string;          // API key issued by swaps.xyz
+interface DecentProviderConfig {
+    apiKey: string;          // API key issued by Decent
     apiUrl?: string;         // Default: 'https://api-v2.swaps.xyz/api'
     defaultSender?: string;  // Default EVM sender address used at quote time
 }
@@ -32,7 +32,7 @@ interface SwapsXyzProviderConfig {
 ## Quote Options
 
 ```typescript
-interface SwapsXyzQuoteOptions {
+interface DecentQuoteOptions {
     slippageBps?: number;    // Slippage tolerance in basis points (default: 100 = 1%)
 }
 ```
@@ -42,9 +42,9 @@ See [Crypto Onramp README](../README.md) for base `CryptoOnrampQuoteParams`.
 ## Usage Example
 
 ```typescript
-import type { SwapsXyzQuoteOptions } from '@ton/walletkit/crypto-onramp/swaps-xyz';
+import type { DecentQuoteOptions } from '@ton/walletkit/crypto-onramp/decent';
 
-const quote = await kit.cryptoOnramp.getQuote<SwapsXyzQuoteOptions>({
+const quote = await kit.cryptoOnramp.getQuote<DecentQuoteOptions>({
     sourceCurrencyAddress: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9', // USDT on Arbitrum
     sourceNetwork: '42161',
     targetCurrencyAddress: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs', // USDT on TON
@@ -66,6 +66,6 @@ const deposit = await kit.cryptoOnramp.createDeposit({
 
 ## How It Works
 
-1. **`getQuote`** — calls the swaps.xyz `getAction` endpoint. The raw response is stored in `quote.metadata` so that `createDeposit` can avoid a second network round-trip when `refundAddress` matches the address used at quote time.
+1. **`getQuote`** — calls the Decent `getAction` endpoint. The raw response is stored in `quote.metadata` so that `createDeposit` can avoid a second network round-trip when `refundAddress` matches the address used at quote time.
 2. **`createDeposit`** — if `refundAddress` differs from the address used at quote time (or if a placeholder was used), a fresh `getAction` call is made with the correct sender before returning the deposit details.
 3. **`getStatus`** — polls `getStatus` by `txId` and maps the provider status to the canonical `'pending' | 'success' | 'failed'` enum.

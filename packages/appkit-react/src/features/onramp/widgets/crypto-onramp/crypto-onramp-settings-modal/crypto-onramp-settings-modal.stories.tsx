@@ -18,7 +18,7 @@ const makeProvider = (id: string, name: string): CryptoOnrampProvider =>
         getMetadata: () => ({ name }),
     }) as unknown as CryptoOnrampProvider;
 
-const swapsXyz = makeProvider('swaps-xyz', 'Swaps.xyz');
+const decent = makeProvider('decent', 'Decent');
 const layerswap = makeProvider('layerswap', 'Layerswap');
 
 const meta: Meta<typeof CryptoOnrampSettingsModal> = {
@@ -32,8 +32,8 @@ type Story = StoryObj<typeof CryptoOnrampSettingsModal>;
 export const Default: Story = {
     args: {
         open: true,
-        provider: swapsXyz,
-        providers: [swapsXyz, layerswap],
+        provider: decent,
+        providers: [decent, layerswap],
         onClose: () => {},
         onProviderChange: () => {},
     },
@@ -42,8 +42,8 @@ export const Default: Story = {
 export const SingleProvider: Story = {
     args: {
         open: true,
-        provider: swapsXyz,
-        providers: [swapsXyz],
+        provider: decent,
+        providers: [decent],
         onClose: () => {},
         onProviderChange: () => {},
     },

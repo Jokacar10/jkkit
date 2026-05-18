@@ -18,17 +18,18 @@ import { Network } from '../../../api/models';
 import { CryptoOnrampProvider } from '../CryptoOnrampProvider';
 import { CryptoOnrampError } from '../errors';
 import { createProvider } from '../../../types/factory';
-import type { SwapsXyzGetActionResponse, SwapsXyzSwapDirection } from './types';
+import type { DecentGetActionResponse, DecentSwapDirection } from './types';
 import { evmChainIdToCaip2, isErrorResponse, isEvmAddress, mapStatus, parseEvmChainIdFromCaip2 } from './utils';
 
-const SWAPS_XYZ_API_URL = 'https://api-v2.swaps.xyz/api';
+// Decent (formerly Swaps.xyz) — they rebranded but kept the existing API endpoints.
+const DECENT_API_URL = 'https://api-v2.swaps.xyz/api';
 const TON_CHAIN_ID = 999000337;
 const DEFAULT_SLIPPAGE_BPS = 100;
 const DEFAULT_SENDER = '0x0000000000000000000000000000000000000000';
 
-export interface SwapsXyzProviderConfig {
+export interface DecentProviderConfig {
     /**
-     * API key issued by swaps.xyz (passed as `x-api-key`)
+     * API key issued by Decent (passed as `x-api-key`)
      */
     apiKey: string;
 
@@ -45,7 +46,7 @@ export interface SwapsXyzProviderConfig {
     defaultSender?: string;
 }
 
-export interface SwapsXyzQuoteOptions {
+export interface DecentQuoteOptions {
     /**
      * Slippage tolerance in basis points (0-10000). Defaults to 100 (1%).
      */
@@ -58,60 +59,60 @@ export interface SwapsXyzQuoteOptions {
  * The raw getAction response is kept here so that createDeposit can build a
  * CryptoOnrampDeposit without an extra network round-trip.
  */
-export interface SwapsXyzQuoteMetadata {
+export interface DecentQuoteMetadata {
     sender: string;
-    response: SwapsXyzGetActionResponse;
+    response: DecentGetActionResponse;
 }
 
 /**
- * Provider implementation that routes crypto onramps through swaps.xyz.
+ * Provider implementation that routes crypto onramps through Decent.
  *
  * Supports EVM source chains only — quotes where the source chain's `vmId`
  * is not `evm` are rejected (non-EVM chains require a separate registerTxs
  * flow that we do not implement yet).
  */
-export class SwapsXyzCryptoOnrampProvider extends CryptoOnrampProvider<SwapsXyzQuoteOptions, SwapsXyzQuoteMetadata> {
-    readonly providerId = 'swaps-xyz';
+export class DecentCryptoOnrampProvider extends CryptoOnrampProvider<DecentQuoteOptions, DecentQuoteMetadata> {
+    readonly providerId = 'decent';
 
     getSupportedNetworks(): Network[] {
         return [Network.mainnet()];
     }
 
     getMetadata() {
-        return { name: 'Swaps.xyz', url: 'https://swaps.xyz', isRefundAddressRequired: true };
+        return { name: 'Decent', url: 'https://decent.xyz', isRefundAddressRequired: true };
     }
 
     private readonly apiKey: string;
     private readonly apiUrl: string;
     private readonly defaultSender: string;
 
-    constructor(config: SwapsXyzProviderConfig) {
+    constructor(config: DecentProviderConfig) {
         super();
         this.apiKey = config.apiKey;
-        this.apiUrl = config.apiUrl ?? SWAPS_XYZ_API_URL;
+        this.apiUrl = config.apiUrl ?? DECENT_API_URL;
         this.defaultSender = config.defaultSender ?? DEFAULT_SENDER;
     }
 
     async getQuote(
-        params: CryptoOnrampQuoteParams<SwapsXyzQuoteOptions>,
-    ): Promise<CryptoOnrampQuote<SwapsXyzQuoteMetadata>> {
+        params: CryptoOnrampQuoteParams<DecentQuoteOptions>,
+    ): Promise<CryptoOnrampQuote<DecentQuoteMetadata>> {
         const sender = params.refundAddress ?? this.defaultSender;
         const recipient = params.recipientAddress;
 
         const srcChainId = parseEvmChainIdFromCaip2(params.sourceChain);
         if (srcChainId === undefined) {
             throw new CryptoOnrampError(
-                `SwapsXyz: sourceChain must be a CAIP-2 EVM chain (e.g. "eip155:1"), got "${params.sourceChain}"`,
+                `Decent: sourceChain must be a CAIP-2 EVM chain (e.g. "eip155:1"), got "${params.sourceChain}"`,
                 CryptoOnrampError.INVALID_PARAMS,
             );
         }
 
-        const swapDirection: SwapsXyzSwapDirection =
+        const swapDirection: DecentSwapDirection =
             params.isSourceAmount === false ? 'exact-amount-out' : 'exact-amount-in';
 
         if (!isEvmAddress(sender)) {
             throw new CryptoOnrampError(
-                'SwapsXyz: senderAddress must be a valid EVM address (got "' + sender + '")',
+                'Decent: senderAddress must be a valid EVM address (got "' + sender + '")',
                 CryptoOnrampError.INVALID_REFUND_ADDRESS,
             );
         }
@@ -137,18 +138,18 @@ export class SwapsXyzCryptoOnrampProvider extends CryptoOnrampProvider<SwapsXyzQ
             });
         } catch (error) {
             throw new CryptoOnrampError(
-                'SwapsXyz: network error while calling getAction',
+                'Decent: network error while calling getAction',
                 CryptoOnrampError.QUOTE_FAILED,
                 error,
             );
         }
 
-        const body = (await response.json().catch(() => undefined)) as SwapsXyzGetActionResponse;
+        const body = (await response.json().catch(() => undefined)) as DecentGetActionResponse;
 
         if (!response.ok || isErrorResponse(body)) {
             const err = isErrorResponse(body) ? body.error : undefined;
             throw new CryptoOnrampError(
-                err?.message ?? `SwapsXyz getAction failed (HTTP ${response.status})`,
+                err?.message ?? `Decent getAction failed (HTTP ${response.status})`,
                 err?.code ?? CryptoOnrampError.QUOTE_FAILED,
                 err ?? { status: response.status },
             );
@@ -156,13 +157,13 @@ export class SwapsXyzCryptoOnrampProvider extends CryptoOnrampProvider<SwapsXyzQ
 
         if (body.vmId !== 'evm') {
             throw new CryptoOnrampError(
-                `SwapsXyz: only EVM source chains are supported (got vmId="${body.vmId}")`,
+                `Decent: only EVM source chains are supported (got vmId="${body.vmId}")`,
                 CryptoOnrampError.INVALID_PARAMS,
                 { vmId: body.vmId, srcChainId },
             );
         }
 
-        const metadata: SwapsXyzQuoteMetadata = { sender, response: body };
+        const metadata: DecentQuoteMetadata = { sender, response: body };
 
         return {
             sourceCurrencyAddress: params.sourceCurrencyAddress,
@@ -177,11 +178,11 @@ export class SwapsXyzCryptoOnrampProvider extends CryptoOnrampProvider<SwapsXyzQ
         };
     }
 
-    async createDeposit(params: CryptoOnrampDepositParams<SwapsXyzQuoteMetadata>): Promise<CryptoOnrampDeposit> {
+    async createDeposit(params: CryptoOnrampDepositParams<DecentQuoteMetadata>): Promise<CryptoOnrampDeposit> {
         const metadata = params.quote.metadata;
         if (!metadata?.response?.tx?.to) {
             throw new CryptoOnrampError(
-                'SwapsXyz: quote metadata is missing — quote must be obtained from this provider',
+                'Decent: quote metadata is missing — quote must be obtained from this provider',
                 CryptoOnrampError.INVALID_PARAMS,
             );
         }
@@ -195,14 +196,14 @@ export class SwapsXyzCryptoOnrampProvider extends CryptoOnrampProvider<SwapsXyzQ
         if (needsRefetch) {
             if (!params.refundAddress) {
                 throw new CryptoOnrampError(
-                    'SwapsXyz: a refund address is required to create a deposit',
+                    'Decent: a refund address is required to create a deposit',
                     CryptoOnrampError.REFUND_ADDRESS_REQUIRED,
                 );
             }
 
             if (!isEvmAddress(params.refundAddress)) {
                 throw new CryptoOnrampError(
-                    'SwapsXyz: senderAddress must be a valid EVM address (got "' + params.refundAddress + '")',
+                    'Decent: senderAddress must be a valid EVM address (got "' + params.refundAddress + '")',
                     CryptoOnrampError.INVALID_REFUND_ADDRESS,
                 );
             }
@@ -220,7 +221,7 @@ export class SwapsXyzCryptoOnrampProvider extends CryptoOnrampProvider<SwapsXyzQ
 
             if (!newMetadata) {
                 throw new CryptoOnrampError(
-                    'SwapsXyz: quote metadata is missing — quote must be obtained from this provider',
+                    'Decent: quote metadata is missing — quote must be obtained from this provider',
                     CryptoOnrampError.INVALID_PARAMS,
                 );
             }
@@ -257,7 +258,7 @@ export class SwapsXyzCryptoOnrampProvider extends CryptoOnrampProvider<SwapsXyzQ
             });
         } catch (error) {
             throw new CryptoOnrampError(
-                'SwapsXyz: network error while fetching status',
+                'Decent: network error while fetching status',
                 CryptoOnrampError.PROVIDER_ERROR,
                 error,
             );
@@ -273,7 +274,7 @@ export class SwapsXyzCryptoOnrampProvider extends CryptoOnrampProvider<SwapsXyzQ
             }
 
             throw new CryptoOnrampError(
-                err?.message ?? `SwapsXyz getStatus failed (HTTP ${response.status})`,
+                err?.message ?? `Decent getStatus failed (HTTP ${response.status})`,
                 err?.code ?? CryptoOnrampError.PROVIDER_ERROR,
                 err ?? { status: response.status },
             );
@@ -284,8 +285,8 @@ export class SwapsXyzCryptoOnrampProvider extends CryptoOnrampProvider<SwapsXyzQ
 }
 
 /**
- * Returns a `ProviderFactory` for `SwapsXyzCryptoOnrampProvider`.
- * Pass to `providers: [createSwapsXyzProvider(config)]`.
+ * Returns a `ProviderFactory` for `DecentCryptoOnrampProvider`.
+ * Pass to `providers: [createDecentProvider(config)]`.
  */
-export const createSwapsXyzProvider = (config: SwapsXyzProviderConfig) =>
-    createProvider(() => new SwapsXyzCryptoOnrampProvider(config));
+export const createDecentProvider = (config: DecentProviderConfig) =>
+    createProvider(() => new DecentCryptoOnrampProvider(config));

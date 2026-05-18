@@ -8,7 +8,7 @@
 
 import type { CryptoOnrampStatus } from '../../../api/models';
 import { parseCaip2 } from '../caip2';
-import type { SwapsXyzErrorResponse } from './types';
+import type { DecentErrorResponse } from './types';
 
 const EVM_ADDRESS_REGEX = /^(0x)?[0-9a-fA-F]{40}$/;
 
@@ -28,7 +28,7 @@ export const parseEvmChainIdFromCaip2 = (value: string): number | undefined => {
  */
 export const evmChainIdToCaip2 = (chainId: number | string): string => `eip155:${chainId}`;
 
-export const isErrorResponse = (body: unknown): body is SwapsXyzErrorResponse => {
+export const isErrorResponse = (body: unknown): body is DecentErrorResponse => {
     return (
         typeof body === 'object' &&
         body !== null &&
