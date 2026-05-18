@@ -19,7 +19,9 @@
   "changesets": [
     "afraid-canyons-yell",
     "bright-poets-jog",
+    "chilly-eggs-taste",
     "cli-help-flag",
+    "codegen-features-on-main",
     "fix-jetton-balance-exit-code",
     "fix-jetton-param-naming",
     "fruity-doors-create",
@@ -29,6 +31,7 @@
     "move-domain-from-signer-to-wallets",
     "old-dragons-hear",
     "polite-maps-melt",
+    "rename-account-state",
     "rename-transaction-action-to-send",
     "short-kings-flow",
     "smart-toys-remain",
