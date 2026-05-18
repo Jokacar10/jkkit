@@ -1,5 +1,26 @@
 # @ton/walletkit
 
+## 1.0.0-alpha.1
+
+### Minor Changes
+
+- 8704846: Added `ApiClient.getAccountStates(addresses)` — batched fetch for up to 100 accounts, uniform `non-existing` for missing addresses across providers.
+
+    Breaking changes to `AccountState` (was `FullAccountState`):
+    - Renamed and moved to `api/models/blockchain/`.
+    - New required `address` field, `balance` split into `rawBalance` (nanotons) + `balance` (formatted TON).
+    - `code`, `data`, `lastTransaction` are now optional instead of `| null`.
+    - `status` uses the unified `AccountStatus` string union (`'active' | 'uninitialized' | 'frozen' | 'non-existing'`); the discriminated `TransactionAccountStatus` and `EmulationAccountStatus` have been removed.
+
+    Also fixed a bug in `BaseApiClient.buildUrl` where array query params were silently truncated to their last value.
+
+### Patch Changes
+
+- f301c66: - `@ton/appkit`: reworked connector events — replaced `CONNECTED`/`DISCONNECTED` with a single `WALLETS_UPDATED` event; TonConnect connector now cleans up the default-network subscription on `destroy` and guards `getTonConnectUI` after destroy
+    - `@ton/appkit-react`: removed `BalanceBadge` component and its re-export from `features/balances`
+    - `@ton/appkit-react`: fixed decimals handling in `SendJettonButton`
+    - `@ton/walletkit`, `@ton/appkit`, `@ton/appkit-react`: unified provider error API — added `DefiErrorCode` and `SwapErrorCode` enums and re-exported them from the package roots; `map-swap-error` and `map-defi-error` updated to use the codes
+
 ## 1.0.0-alpha.0
 
 ### Major Changes

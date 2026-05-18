@@ -1,8 +1,6 @@
 ---
 '@ton/walletkit': minor
 '@ton/mcp': patch
-'@ton/walletkit-android-bridge': patch
-'@ton/walletkit-ios-bridge': patch
 ---
 
 Added `ApiClient.getAccountStates(addresses)` — batched fetch for up to 100 accounts, uniform `non-existing` for missing addresses across providers.
