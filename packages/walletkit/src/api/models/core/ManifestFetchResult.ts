@@ -6,7 +6,7 @@
  *
  */
 
-export declare enum CONNECT_EVENT_ERROR_CODES {
+export enum CONNECT_EVENT_ERROR_CODES {
     UNKNOWN_ERROR = 0,
     BAD_REQUEST_ERROR = 1,
     MANIFEST_NOT_FOUND_ERROR = 2,
