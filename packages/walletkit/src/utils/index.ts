@@ -31,3 +31,4 @@ export * from './messageBuilders';
 export * from './assetHelpers';
 export * from './toncenter';
 export * from './getNormalizedExtMessageHash';
+export * from './manifest';
