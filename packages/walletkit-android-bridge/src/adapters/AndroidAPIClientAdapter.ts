@@ -48,7 +48,17 @@ type AndroidAPIClientBridge = {
         stackJson: string | null,
         seqno: number,
     ) => string;
+    apiGetBalance: (networkJson: string, address: string, seqno: number) => string;
     apiGetMasterchainInfo: (networkJson: string) => string;
+    apiNftItemsByAddress: (networkJson: string, requestJson: string) => string;
+    apiNftItemsByOwner: (networkJson: string, requestJson: string) => string;
+    // ignoreSignature: -1 = missing, 0 = false, 1 = true
+    apiFetchEmulation: (networkJson: string, messageBoc: string, ignoreSignature: number) => string;
+    // seqno: -1 represents a missing optional
+    apiAccountState: (networkJson: string, address: string, seqno: number) => string;
+    apiAccountStates: (networkJson: string, addressesJson: string) => string;
+    apiResolveDnsWallet: (networkJson: string, domain: string) => string | undefined;
+    apiBackResolveDnsWallet: (networkJson: string, address: string) => string | undefined;
 };
 
 type AndroidWindow = Window & {
@@ -132,33 +142,75 @@ export class AndroidAPIClientAdapter implements ApiClient {
         }
     }
 
-    // Methods not implemented - will throw if called
-    // These are optional for mobile usage
-
-    async nftItemsByAddress(_request: NFTsRequest): Promise<NFTsResponse> {
-        throw new Error('nftItemsByAddress is not implemented yet');
+    async nftItemsByAddress(request: NFTsRequest): Promise<NFTsResponse> {
+        try {
+            const networkJson = JSON.stringify(this.network);
+            const result = this.androidBridge.apiNftItemsByAddress(networkJson, JSON.stringify(request));
+            return JSON.parse(result) as NFTsResponse;
+        } catch (err) {
+            error('[AndroidAPIClientAdapter] nftItemsByAddress failed:', err);
+            throw err;
+        }
     }
 
-    async nftItemsByOwner(_request: UserNFTsRequest): Promise<NFTsResponse> {
-        throw new Error('nftItemsByOwner is not implemented yet');
+    async nftItemsByOwner(request: UserNFTsRequest): Promise<NFTsResponse> {
+        try {
+            const networkJson = JSON.stringify(this.network);
+            const result = this.androidBridge.apiNftItemsByOwner(networkJson, JSON.stringify(request));
+            return JSON.parse(result) as NFTsResponse;
+        } catch (err) {
+            error('[AndroidAPIClientAdapter] nftItemsByOwner failed:', err);
+            throw err;
+        }
     }
 
-    async fetchEmulation(_messageBoc: Base64String, _ignoreSignature?: boolean): Promise<EmulationResult> {
-        throw new Error('fetchEmulation is not implemented yet');
+    async fetchEmulation(messageBoc: Base64String, ignoreSignature?: boolean): Promise<EmulationResult> {
+        try {
+            const networkJson = JSON.stringify(this.network);
+            // -1 = missing, 0 = false, 1 = true (boolean can't cross JavascriptInterface cleanly).
+            const flag = ignoreSignature === undefined ? -1 : ignoreSignature ? 1 : 0;
+            const result = this.androidBridge.apiFetchEmulation(networkJson, messageBoc, flag);
+            return JSON.parse(result) as EmulationResult;
+        } catch (err) {
+            error('[AndroidAPIClientAdapter] fetchEmulation failed:', err);
+            throw err;
+        }
     }
 
-    async getAccountState(_address: UserFriendlyAddress, _seqno?: number): Promise<AccountState> {
-        throw new Error('getAccountState is not implemented yet');
+    async getAccountState(address: UserFriendlyAddress, seqno?: number): Promise<AccountState> {
+        try {
+            const networkJson = JSON.stringify(this.network);
+            const seqnoArg = seqno ?? -1;
+            const result = this.androidBridge.apiAccountState(networkJson, address, seqnoArg);
+            return JSON.parse(result) as AccountState;
+        } catch (err) {
+            error('[AndroidAPIClientAdapter] getAccountState failed:', err);
+            throw err;
+        }
     }
 
-    async getAccountStates(_addresses: UserFriendlyAddress[]): Promise<AccountStates> {
-        throw new Error('getAccountStates is not implemented yet');
+    async getAccountStates(addresses: UserFriendlyAddress[]): Promise<AccountStates> {
+        try {
+            const networkJson = JSON.stringify(this.network);
+            const result = this.androidBridge.apiAccountStates(networkJson, JSON.stringify(addresses));
+            return JSON.parse(result) as AccountStates;
+        } catch (err) {
+            error('[AndroidAPIClientAdapter] getAccountStates failed:', err);
+            throw err;
+        }
     }
 
-    async getBalance(_address: UserFriendlyAddress, _seqno?: number): Promise<TokenAmount> {
-        // Mirrors iOS: TONAPIClient public protocol does not expose balance lookup.
-        // User-supplied native clients only provide send / runGetMethod / masterchainInfo.
-        throw new Error('getBalance is not supported on user-supplied native API clients');
+    async getBalance(address: UserFriendlyAddress, seqno?: number): Promise<TokenAmount> {
+        try {
+            const networkJson = JSON.stringify(this.network);
+            // -1 represents a missing optional seqno (JS bridge can't pass `null` cleanly).
+            const seqnoArg = seqno ?? -1;
+            const result = this.androidBridge.apiGetBalance(networkJson, address, seqnoArg);
+            return result;
+        } catch (err) {
+            error('[AndroidAPIClientAdapter] getBalance failed:', err);
+            throw err;
+        }
     }
 
     async getAccountTransactions(_request: TransactionsByAddressRequest): Promise<TransactionsResponse> {
@@ -181,12 +233,24 @@ export class AndroidAPIClientAdapter implements ApiClient {
         throw new Error('getPendingTrace is not implemented yet');
     }
 
-    async resolveDnsWallet(_domain: string): Promise<string | undefined> {
-        throw new Error('resolveDnsWallet is not implemented yet');
+    async resolveDnsWallet(domain: string): Promise<string | undefined> {
+        try {
+            const networkJson = JSON.stringify(this.network);
+            return this.androidBridge.apiResolveDnsWallet(networkJson, domain) ?? undefined;
+        } catch (err) {
+            error('[AndroidAPIClientAdapter] resolveDnsWallet failed:', err);
+            throw err;
+        }
     }
 
-    async backResolveDnsWallet(_address: UserFriendlyAddress): Promise<string | undefined> {
-        throw new Error('backResolveDnsWallet is not implemented yet');
+    async backResolveDnsWallet(address: UserFriendlyAddress): Promise<string | undefined> {
+        try {
+            const networkJson = JSON.stringify(this.network);
+            return this.androidBridge.apiBackResolveDnsWallet(networkJson, address) ?? undefined;
+        } catch (err) {
+            error('[AndroidAPIClientAdapter] backResolveDnsWallet failed:', err);
+            throw err;
+        }
     }
 
     async jettonsByAddress(_request: GetJettonsByAddressRequest): Promise<ToncenterResponseJettonMasters> {
