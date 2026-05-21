@@ -14,6 +14,7 @@ import { ButtonWithConnect } from '../../../../../components/shared/button-with-
 import { OnrampTokenSelectors } from '../../../components/onramp-token-selectors';
 import { CenteredAmountInput } from '../../../../../components/ui/centered-amount-input';
 import { AmountPresets } from '../../../../../components/shared/amount-presets';
+import { Skeleton } from '../../../../../components/ui/skeleton';
 import { TokenSelectModal } from '../../../../../components/shared/token-select-modal';
 import { AmountReversed } from '../../../../../components/ui/amount-reversed';
 import { SettingsButton } from '../../../../../components/shared/settings-button';
@@ -38,6 +39,7 @@ export const CryptoOnrampWidgetUI: FC<CryptoOnrampWidgetRenderProps> = ({
     paymentMethods,
     selectedMethod,
     setSelectedMethod,
+    isLoadingSupportedCurrencies,
     chains,
     amount,
     setAmount,
@@ -126,34 +128,47 @@ export const CryptoOnrampWidgetUI: FC<CryptoOnrampWidgetRenderProps> = ({
         }
     }, [deposit]);
 
+    const isSelectionIncomplete = !selectedToken || !selectedMethod;
+
     return (
         <div className={clsx(styles.widget, className)} {...props}>
             <OnrampTokenSelectors
                 className={styles.selectors}
-                from={{ title: selectedToken?.symbol ?? '', logoSrc: selectedToken?.logo }}
+                from={{
+                    title: selectedToken?.symbol ?? '',
+                    logoSrc: selectedToken?.logo,
+                    loading: !selectedToken && isLoadingSupportedCurrencies,
+                    placeholder: t('cryptoOnramp.tokenToBuy'),
+                }}
                 to={{
                     title: selectedMethod?.symbol ?? '',
                     logoSrc: selectedMethod?.logo,
                     networkLogoSrc: selectedMethod ? getChainInfo(selectedMethod.chain, chains).logo : undefined,
+                    loading: !selectedMethod && isLoadingSupportedCurrencies,
+                    placeholder: t('cryptoOnramp.method'),
                 }}
                 onFromClick={() => setIsTokenSelectOpen(true)}
                 onToClick={() => setIsMethodSelectOpen(true)}
             />
 
             <div className={styles.inputSection}>
-                <CenteredAmountInput
-                    className={styles.input}
-                    value={amount}
-                    onValueChange={setAmount}
-                    disabled={!isWalletConnected}
-                    ticker={amountInputMode === 'token' ? selectedToken?.symbol : selectedMethod?.symbol}
-                />
+                {isSelectionIncomplete && isLoadingSupportedCurrencies ? (
+                    <Skeleton width={120} height={48} />
+                ) : (
+                    <CenteredAmountInput
+                        className={styles.input}
+                        value={amount}
+                        onValueChange={setAmount}
+                        disabled={!isWalletConnected || isSelectionIncomplete}
+                        ticker={amountInputMode === 'token' ? selectedToken?.symbol : selectedMethod?.symbol}
+                    />
+                )}
 
                 <AmountReversed
                     className={styles.converted}
                     value={convertedAmount}
                     onChangeDirection={
-                        isReversedAmountSupported
+                        isReversedAmountSupported && !isSelectionIncomplete
                             ? () => setAmountInputMode(amountInputMode === 'token' ? 'method' : 'token')
                             : undefined
                     }
@@ -161,10 +176,16 @@ export const CryptoOnrampWidgetUI: FC<CryptoOnrampWidgetRenderProps> = ({
                     decimals={
                         amountInputMode === 'token' ? (selectedMethod?.decimals ?? 0) : (selectedToken?.decimals ?? 0)
                     }
+                    isLoading={isSelectionIncomplete && isLoadingSupportedCurrencies}
                 />
             </div>
 
-            <AmountPresets className={styles.presets} presets={presetAmounts} onPresetSelect={setAmount} />
+            <AmountPresets
+                className={styles.presets}
+                presets={presetAmounts}
+                onPresetSelect={setAmount}
+                disabled={isSelectionIncomplete}
+            />
 
             <div className={styles.actions}>
                 <ButtonWithConnect
@@ -184,9 +205,9 @@ export const CryptoOnrampWidgetUI: FC<CryptoOnrampWidgetRenderProps> = ({
                 <InfoBlock.Row>
                     <InfoBlock.Label>{t('cryptoOnramp.youGet')}</InfoBlock.Label>
 
-                    {isLoadingQuote ? (
-                        <InfoBlock.ValueSkeleton />
-                    ) : (
+                    {isLoadingQuote && <InfoBlock.ValueSkeleton />}
+                    {!isLoadingQuote && isSelectionIncomplete && <InfoBlock.Value>—</InfoBlock.Value>}
+                    {!isLoadingQuote && !isSelectionIncomplete && (
                         <InfoBlock.Value>
                             {formatOnrampAmount(
                                 amountInputMode === 'token' ? amount : convertedAmount,
@@ -197,30 +218,16 @@ export const CryptoOnrampWidgetUI: FC<CryptoOnrampWidgetRenderProps> = ({
                     )}
                 </InfoBlock.Row>
 
-                {/*<InfoBlock.Row>
-                    <InfoBlock.Label>{t('cryptoOnramp.exchangeRate')}</InfoBlock.Label>
-
-                    {isLoadingQuote ? (
-                        <InfoBlock.ValueSkeleton />
-                    ) : (
-                        <InfoBlock.Value>
-                            1 {selectedToken?.symbol} ={' '}
-                            {formatOnrampAmount(quote ? (1 / parseFloat(quote.rate)).toString() : '0', 2)}{' '}
-                            {selectedMethod.symbol}
-                        </InfoBlock.Value>
-                    )}
-                </InfoBlock.Row>*/}
-
                 {isWalletConnected && (
                     <InfoBlock.Row>
                         <InfoBlock.Label>{t('cryptoOnramp.yourBalance')}</InfoBlock.Label>
 
-                        {isLoadingTargetBalance ? (
-                            <InfoBlock.ValueSkeleton />
-                        ) : (
+                        {isLoadingTargetBalance && <InfoBlock.ValueSkeleton />}
+                        {!isLoadingTargetBalance && !selectedToken && <InfoBlock.Value>—</InfoBlock.Value>}
+                        {!isLoadingTargetBalance && selectedToken && (
                             <InfoBlock.Value>
-                                {formatOnrampAmount(targetBalance || '0', selectedToken?.decimals)}{' '}
-                                {selectedToken?.symbol}
+                                {formatOnrampAmount(targetBalance || '0', selectedToken.decimals)}{' '}
+                                {selectedToken.symbol}
                             </InfoBlock.Value>
                         )}
                     </InfoBlock.Row>
@@ -241,7 +248,7 @@ export const CryptoOnrampWidgetUI: FC<CryptoOnrampWidgetRenderProps> = ({
                 onClose={() => setIsTokenSelectOpen(false)}
                 tokens={tokensForSelect}
                 onSelect={setSelectedToken}
-                title={t('onramp.selectToken')}
+                title={t('cryptoOnramp.tokenToBuy')}
                 searchPlaceholder={t('onramp.searchToken')}
             />
 

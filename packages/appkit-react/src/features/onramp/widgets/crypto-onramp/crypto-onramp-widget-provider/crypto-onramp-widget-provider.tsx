@@ -18,7 +18,6 @@ import { DEFAULT_ONRAMP_PRESETS } from '../../../constants';
 import type { ChainInfo } from '../utils/chains';
 import { DEFAULT_CHAINS } from '../utils/chains';
 import { CryptoOnrampContext } from './crypto-onramp-context';
-import { DEFAULT_DESTINATION_CURRENCY, DEFAULT_SOURCE_CURRENCY } from './defaults';
 import { useCryptoOnrampBalance } from './use-crypto-onramp-balance';
 import { useCryptoOnrampProvidersWithMetadata } from './use-crypto-onramp-providers-with-metadata';
 import { useCryptoOnrampQuoteAndDeposit } from './use-crypto-onramp-quote-and-deposit';
@@ -33,15 +32,15 @@ export interface CryptoOnrampProviderProps extends PropsWithChildren {
      */
     chains?: Record<string, ChainInfo>;
     /**
-     * Initial destination (TON-side) currency. Rendered immediately on first paint, so the
-     * full object — including `symbol`, `decimals`, and `logo` — must be provided. Defaults
-     * to USDT on TON when omitted.
+     * Optional initial destination (TON-side) currency. When provided, the widget seeds the
+     * selector immediately; when omitted, the UI shows a skeleton while currencies are
+     * loading and a "Token to buy" placeholder pill after. Must be a complete object
+     * (`address`, `symbol`, `decimals`, `logo`).
      */
     defaultDestination?: CryptoOnrampDestinationCurrency;
     /**
-     * Initial source currency. Rendered immediately on first paint, so the full object —
-     * including `chain`, `symbol`, `decimals`, and `logo` — must be provided. Defaults to
-     * USDT0 on Arbitrum when omitted.
+     * Optional initial source currency. Same behaviour as {@link defaultDestination} — when
+     * omitted, the UI falls back to skeleton/"Method" placeholder.
      */
     defaultSource?: CryptoOnrampSourceCurrency;
 }
@@ -49,24 +48,9 @@ export interface CryptoOnrampProviderProps extends PropsWithChildren {
 export const CryptoOnrampWidgetProvider: FC<CryptoOnrampProviderProps> = ({
     children,
     chains: chainsOverride,
-    defaultDestination = DEFAULT_DESTINATION_CURRENCY,
-    defaultSource = DEFAULT_SOURCE_CURRENCY,
+    defaultDestination,
+    defaultSource,
 }) => {
-    // 2. Queries and external readers
-    const userAddress = useAddress();
-    const [provider, setProviderId] = useCryptoOnrampProvider();
-    const providers = useCryptoOnrampProviders();
-    const { metadataByProviderId: providersMetadata, isLoading: isProvidersMetadataLoading } =
-        useCryptoOnrampProvidersWithMetadata();
-
-    const { data: supportedCurrencies } = useCryptoOnrampSupportedCurrencies({
-        providerId: provider?.providerId,
-        query: { enabled: !!provider },
-    });
-
-    const tokens = useMemo(() => supportedCurrencies?.destination ?? [], [supportedCurrencies]);
-    const paymentMethods = useMemo(() => supportedCurrencies?.source ?? [], [supportedCurrencies]);
-
     // 1. Local state
     const {
         selectedToken,
@@ -79,7 +63,24 @@ export const CryptoOnrampWidgetProvider: FC<CryptoOnrampProviderProps> = ({
         setAmountInputMode,
     } = useCryptoOnrampTokenState({ defaultDestination, defaultSource });
 
+    // 2. Queries and external readers
+    const userAddress = useAddress();
+    const [provider, setProviderId] = useCryptoOnrampProvider();
+    const providers = useCryptoOnrampProviders();
+    const { metadataByProviderId: providersMetadata, isLoading: isProvidersMetadataLoading } =
+        useCryptoOnrampProvidersWithMetadata();
+
+    const { data: supportedCurrencies, isLoading: isLoadingSupportedCurrencies } = useCryptoOnrampSupportedCurrencies({
+        providerId: provider?.providerId,
+        query: { enabled: !!provider },
+    });
+
     const { targetBalance, isLoadingTargetBalance } = useCryptoOnrampBalance({ selectedToken, userAddress });
+
+    // 3. Derivations (pre-mutation)
+    const tokens = useMemo(() => supportedCurrencies?.destination ?? [], [supportedCurrencies]);
+    const paymentMethods = useMemo(() => supportedCurrencies?.source ?? [], [supportedCurrencies]);
+    const chains = useMemo(() => ({ ...DEFAULT_CHAINS, ...(chainsOverride ?? {}) }), [chainsOverride]);
 
     // 4. Mutations (quote query + deposit mutation + status query coordinated together)
     const {
@@ -106,7 +107,7 @@ export const CryptoOnrampWidgetProvider: FC<CryptoOnrampProviderProps> = ({
         providerId: provider?.providerId,
     });
 
-    // 3. Derivations
+    // 3. Derivations (post-mutation)
     const {
         quoteError: validationQuoteError,
         depositError: validationDepositError,
@@ -125,13 +126,26 @@ export const CryptoOnrampWidgetProvider: FC<CryptoOnrampProviderProps> = ({
     const isLoadingQuote = isQuoteFetching || amount !== amountDebounced;
     const canContinue = canSubmit && !isQuoteFetching && amount === amountDebounced && !!userAddress;
 
-    const chains = useMemo(() => ({ ...DEFAULT_CHAINS, ...(chainsOverride ?? {}) }), [chainsOverride]);
-
+    // 6. Effects
     useEffect(() => {
         if (!isReversedAmountSupported && amountInputMode === 'token') {
             setAmountInputMode('method');
         }
     }, [isReversedAmountSupported, amountInputMode, setAmountInputMode]);
+
+    // Auto-pick the first available token/method once `supportedCurrencies` resolves,
+    // but only when the consumer hasn't seeded the selection via defaults. Fires once
+    // per side — after the user picks (or the consumer-supplied default seeded state),
+    // `selectedX` is non-null and the effect short-circuits.
+    useEffect(() => {
+        const first = tokens[0];
+        if (!selectedToken && first) setSelectedToken(first);
+    }, [tokens, selectedToken, setSelectedToken]);
+
+    useEffect(() => {
+        const first = paymentMethods[0];
+        if (!selectedMethod && first) setSelectedMethod(first);
+    }, [paymentMethods, selectedMethod, setSelectedMethod]);
 
     const value = useMemo(
         () => ({
@@ -141,6 +155,7 @@ export const CryptoOnrampWidgetProvider: FC<CryptoOnrampProviderProps> = ({
             paymentMethods,
             selectedMethod,
             setSelectedMethod,
+            isLoadingSupportedCurrencies,
             chains,
             amount,
             setAmount,
@@ -177,6 +192,7 @@ export const CryptoOnrampWidgetProvider: FC<CryptoOnrampProviderProps> = ({
             paymentMethods,
             selectedMethod,
             setSelectedMethod,
+            isLoadingSupportedCurrencies,
             chains,
             amount,
             setAmount,

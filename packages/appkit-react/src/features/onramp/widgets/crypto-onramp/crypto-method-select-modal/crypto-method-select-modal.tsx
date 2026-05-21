@@ -89,7 +89,7 @@ export const CryptoMethodSelectModal: FC<CryptoMethodSelectModalProps> = ({
     };
 
     return (
-        <CurrencySelect.Modal open={open} onOpenChange={handleOpenChange} title={t('cryptoOnramp.methodOfPurchase')}>
+        <CurrencySelect.Modal open={open} onOpenChange={handleOpenChange} title={t('cryptoOnramp.method')}>
             <CurrencySelect.Search
                 searchValue={search}
                 onSearchChange={setSearch}

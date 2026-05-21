@@ -13,16 +13,19 @@ import type { CryptoOnrampDestinationCurrency, CryptoOnrampSourceCurrency } from
 import type { CryptoAmountInputMode } from './crypto-onramp-context';
 
 interface UseCryptoOnrampTokenStateOptions {
-    defaultDestination: CryptoOnrampDestinationCurrency;
-    defaultSource: CryptoOnrampSourceCurrency;
+    defaultDestination?: CryptoOnrampDestinationCurrency;
+    defaultSource?: CryptoOnrampSourceCurrency;
 }
 
 export const useCryptoOnrampTokenState = ({ defaultDestination, defaultSource }: UseCryptoOnrampTokenStateOptions) => {
-    // Seed with the full default object so the input row shows symbol + logo immediately.
-    // Selection isn't validated against the live list — if the pair isn't supported, the
-    // quote request surfaces the provider's error verbatim.
-    const [selectedToken, setSelectedToken] = useState<CryptoOnrampDestinationCurrency>(defaultDestination);
-    const [selectedMethod, setSelectedMethod] = useState<CryptoOnrampSourceCurrency>(defaultSource);
+    // Seed from consumer-supplied defaults when given; otherwise leave empty so the UI can
+    // show skeletons/placeholders until the user picks. Selection isn't validated against
+    // the live list — if the pair isn't supported, the quote request surfaces the
+    // provider's error verbatim.
+    const [selectedToken, setSelectedToken] = useState<CryptoOnrampDestinationCurrency | null>(
+        defaultDestination ?? null,
+    );
+    const [selectedMethod, setSelectedMethod] = useState<CryptoOnrampSourceCurrency | null>(defaultSource ?? null);
     const [amount, setAmountRaw] = useState('');
     const [amountInputMode, setAmountInputMode] = useState<CryptoAmountInputMode>('method');
 

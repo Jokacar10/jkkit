@@ -106,6 +106,8 @@ export default {
         deposit: 'Deposit',
         continue: 'Continue',
         methodOfPurchase: 'Method of purchase',
+        tokenToBuy: 'Token to buy',
+        method: 'Method',
         allNetworks: 'All networks',
         selectMethod: 'Select payment method',
         searchMethod: 'Search',

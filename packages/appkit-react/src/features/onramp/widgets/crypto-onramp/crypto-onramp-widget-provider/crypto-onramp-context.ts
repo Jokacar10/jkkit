@@ -36,6 +36,8 @@ export interface CryptoOnrampContextType {
     /** Currently selected payment method */
     selectedMethod: CryptoOnrampSourceCurrency | null;
     setSelectedMethod: (method: CryptoOnrampSourceCurrency) => void;
+    /** True while the provider's `/supportedCurrencies` is in its first load. */
+    isLoadingSupportedCurrencies: boolean;
     /** CAIP-2 → chain display info map (defaults merged with consumer overrides) */
     chains: Record<string, ChainInfo>;
 
@@ -110,6 +112,7 @@ const defaultContext: CryptoOnrampContextType = {
     paymentMethods: [],
     selectedMethod: null,
     setSelectedMethod: () => {},
+    isLoadingSupportedCurrencies: false,
     chains: DEFAULT_CHAINS,
     amount: '',
     setAmount: () => {},
