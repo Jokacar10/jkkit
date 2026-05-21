@@ -43,6 +43,13 @@ export const WithMemo: Story = {
     },
 };
 
+export const WithRefundAddress: Story = {
+    args: {
+        ...Default.args,
+        refundAddress: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
+    },
+};
+
 export const WithChainWarning: Story = {
     args: {
         ...Default.args,

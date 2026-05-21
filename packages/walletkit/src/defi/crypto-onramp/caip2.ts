@@ -16,23 +16,23 @@ export interface Caip2 {
     reference: string;
 }
 
-const CAIP2_REGEX = /^([-a-z0-9]{3,8}):([-_a-zA-Z0-9]{1,32})$/;
-
 /**
- * Parse a CAIP-2 string. Returns `undefined` if the value does not match the
- * `<namespace>:<reference>` shape.
+ * CAIP-2 identifiers for networks our crypto-onramp providers care about.
+ * Single source of truth — providers reference these by name instead of
+ * repeating raw `'eip155:1'` strings in each `supportedChains` config.
  *
- * @example parseCaip2('eip155:1') // { namespace: 'eip155', reference: '1' }
+ * Key naming follows the `<NETWORK>_<ENV>` convention (e.g. `ETHEREUM_MAINNET`)
+ * so the entries leave room for testnet additions later.
  */
-export const parseCaip2 = (value: string): Caip2 | undefined => {
-    const match = CAIP2_REGEX.exec(value);
-    if (!match) return undefined;
-    return { namespace: match[1]!, reference: match[2]! };
-};
-
-/**
- * Build a CAIP-2 string from namespace and reference.
- */
-export const formatCaip2 = (namespace: string, reference: string | number): string => {
-    return `${namespace}:${reference}`;
-};
+export const Caip2ByNetwork = {
+    EthereumMainnet: 'eip155:1',
+    OptimismMainnet: 'eip155:10',
+    BscMainnet: 'eip155:56',
+    PolygonMainnet: 'eip155:137',
+    BaseMainnet: 'eip155:8453',
+    ArbitrumMainnet: 'eip155:42161',
+    AvalancheMainnet: 'eip155:43114',
+    SolanaMainnet: 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
+    BitcoinMainnet: 'bip122:000000000019d6689c085ae165831e93',
+    TronMainnet: 'tron:mainnet',
+} as const;

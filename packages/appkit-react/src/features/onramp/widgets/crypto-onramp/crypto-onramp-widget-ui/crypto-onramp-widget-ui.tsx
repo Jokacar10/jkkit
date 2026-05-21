@@ -74,6 +74,7 @@ export const CryptoOnrampWidgetUI: FC<CryptoOnrampWidgetRenderProps> = ({
     const [isRefundAddressOpen, setIsRefundAddressOpen] = useState(false);
     const [isDepositOpen, setIsDepositOpen] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [submittedRefundAddress, setSubmittedRefundAddress] = useState<string | undefined>(undefined);
 
     const { t } = useI18n();
 
@@ -96,17 +97,20 @@ export const CryptoOnrampWidgetUI: FC<CryptoOnrampWidgetRenderProps> = ({
 
     const handleConfirmRefundAddress = useCallback(
         (address: string) => {
+            setSubmittedRefundAddress(address);
             createDeposit(address);
         },
         [createDeposit],
     );
 
     const handleSkipRefundAddress = useCallback(() => {
+        setSubmittedRefundAddress(undefined);
         createDeposit();
     }, [createDeposit]);
 
     const handleDepositClose = useCallback(() => {
         setIsDepositOpen(false);
+        setSubmittedRefundAddress(undefined);
         onReset();
     }, [onReset]);
 
@@ -256,6 +260,7 @@ export const CryptoOnrampWidgetUI: FC<CryptoOnrampWidgetRenderProps> = ({
                 amount={depositAmount}
                 symbol={selectedMethod?.symbol ?? ''}
                 memo={deposit?.memo}
+                refundAddress={submittedRefundAddress}
                 tokenLogo={selectedMethod?.logo}
                 chainWarning={deposit?.chainWarning}
                 depositStatus={depositStatus}

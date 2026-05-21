@@ -6,6 +6,8 @@
  *
  */
 
+import { Caip2ByNetwork } from '@ton/appkit';
+
 /**
  * Display info for a CAIP-2 chain — used by the crypto onramp widget to
  * render chain names and logos.
@@ -23,41 +25,45 @@ export interface ChainInfo {
  * @see https://chainagnostic.org/CAIPs/caip-2
  */
 export const DEFAULT_CHAINS: Record<string, ChainInfo> = {
-    'eip155:1': {
+    [Caip2ByNetwork.EthereumMainnet]: {
         name: 'Ethereum',
         logo: 'https://cdn.layerswap.io/layerswap/networks/ethereum_mainnet.png',
     },
-    'eip155:10': {
+    [Caip2ByNetwork.OptimismMainnet]: {
         name: 'Optimism',
         logo: 'https://cdn.layerswap.io/layerswap/networks/optimism_mainnet.png',
     },
-    'eip155:56': {
+    [Caip2ByNetwork.BscMainnet]: {
         name: 'BSC',
         logo: 'https://cdn.layerswap.io/layerswap/networks/bsc_mainnet.png',
     },
-    'eip155:137': {
+    [Caip2ByNetwork.PolygonMainnet]: {
         name: 'Polygon',
         logo: 'https://cdn.layerswap.io/layerswap/networks/polygon_mainnet.png',
     },
-    'eip155:8453': {
+    [Caip2ByNetwork.BaseMainnet]: {
         name: 'Base',
         logo: 'https://cdn.layerswap.io/layerswap/networks/base_mainnet.png',
     },
-    'eip155:42161': {
+    [Caip2ByNetwork.ArbitrumMainnet]: {
         name: 'Arbitrum One',
         logo: 'https://cdn.layerswap.io/layerswap/networks/arbitrum_mainnet.png',
     },
-    'eip155:43114': {
+    [Caip2ByNetwork.AvalancheMainnet]: {
         name: 'Avalanche',
         logo: 'https://cdn.layerswap.io/layerswap/networks/avax_mainnet.png',
     },
-    'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp': {
+    [Caip2ByNetwork.SolanaMainnet]: {
         name: 'Solana',
         logo: 'https://cdn.layerswap.io/layerswap/networks/solana_mainnet.png',
     },
-    'bip122:000000000019d6689c085ae165831e93': {
+    [Caip2ByNetwork.BitcoinMainnet]: {
         name: 'Bitcoin',
         logo: 'https://cdn.layerswap.io/layerswap/networks/bitcoin_mainnet.png',
+    },
+    [Caip2ByNetwork.TronMainnet]: {
+        name: 'Tron',
+        logo: 'https://cdn.layerswap.io/layerswap/networks/tron_mainnet.png',
     },
 };
 

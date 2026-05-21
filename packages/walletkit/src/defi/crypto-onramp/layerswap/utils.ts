@@ -6,60 +6,65 @@
  *
  */
 
-import type { CryptoOnrampStatus, CryptoOnrampSupportedCurrencies } from '../../../api/models';
+import type { CryptoOnrampDestinationCurrency, CryptoOnrampStatus } from '../../../api/models';
+import { Caip2ByNetwork } from '../caip2';
 import { CryptoOnrampError } from '../errors';
 import type { LayerswapErrorResponse, LayerswapSwapStatus } from './types';
-
-const EVM_ADDRESS_REGEX = /^(0x)?[0-9a-fA-F]{40}$/;
 
 export const LAYERSWAP_DESTINATION_NETWORK = 'TON_MAINNET';
 
 /**
- * Default mapping of CAIP-2 source chains to Layerswap network slugs.
+ * Per-source-chain configuration for Layerswap.
+ */
+export interface LayerswapChainConfig {
+    /** Layerswap network slug, e.g. `'ETHEREUM_MAINNET'`. */
+    slug: string;
+    /**
+     * Source-format regex (string form) used to validate the optional `refundAddress`
+     * supplied for this chain. Stored as a string so overrides stay easy to serialize.
+     * Format-only — checksums are not verified here; Layerswap's API does that.
+     */
+    addressRegex: string;
+}
+
+const EVM_ADDRESS_REGEX = '^0x[0-9a-fA-F]{40}$';
+const SOLANA_ADDRESS_REGEX = '^[1-9A-HJ-NP-Za-km-z]{32,44}$';
+const BITCOIN_ADDRESS_REGEX = '^([13][1-9A-HJ-NP-Za-km-z]{25,34}|bc1[02-9ac-hj-np-z]{6,87})$';
+const TRON_ADDRESS_REGEX = '^T[1-9A-HJ-NP-Za-km-z]{33}$';
+
+/**
+ * Default mapping of CAIP-2 source chains to Layerswap network configs.
  * Used by `LayerswapCryptoOnrampProvider` when no override is passed via config.
  * Exported so consumers can spread/extend it rather than redefining from scratch.
  */
-export const DEFAULT_LAYERSWAP_SUPPORTED_CHAINS: Record<string, string> = {
-    'eip155:1': 'ETHEREUM_MAINNET', // Ethereum
-    'eip155:10': 'OPTIMISM_MAINNET', // Optimism
-    'eip155:56': 'BSC_MAINNET', // BSC
-    'eip155:137': 'POLYGON_MAINNET', // Polygon
-    'eip155:8453': 'BASE_MAINNET', // Base
-    'eip155:42161': 'ARBITRUM_MAINNET', // Arbitrum One
-    'eip155:43114': 'AVALANCHE_MAINNET', // Avalanche
-    'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp': 'SOLANA_MAINNET', // Solana
-    'bip122:000000000019d6689c085ae165831e93': 'BITCOIN_MAINNET', // Bitcoin
+export const DEFAULT_LAYERSWAP_SUPPORTED_CHAINS: Record<string, LayerswapChainConfig> = {
+    [Caip2ByNetwork.EthereumMainnet]: { slug: 'ETHEREUM_MAINNET', addressRegex: EVM_ADDRESS_REGEX },
+    [Caip2ByNetwork.OptimismMainnet]: { slug: 'OPTIMISM_MAINNET', addressRegex: EVM_ADDRESS_REGEX },
+    [Caip2ByNetwork.BscMainnet]: { slug: 'BSC_MAINNET', addressRegex: EVM_ADDRESS_REGEX },
+    [Caip2ByNetwork.PolygonMainnet]: { slug: 'POLYGON_MAINNET', addressRegex: EVM_ADDRESS_REGEX },
+    [Caip2ByNetwork.BaseMainnet]: { slug: 'BASE_MAINNET', addressRegex: EVM_ADDRESS_REGEX },
+    [Caip2ByNetwork.ArbitrumMainnet]: { slug: 'ARBITRUM_MAINNET', addressRegex: EVM_ADDRESS_REGEX },
+    [Caip2ByNetwork.AvalancheMainnet]: { slug: 'AVALANCHE_MAINNET', addressRegex: EVM_ADDRESS_REGEX },
+    [Caip2ByNetwork.SolanaMainnet]: { slug: 'SOLANA_MAINNET', addressRegex: SOLANA_ADDRESS_REGEX },
+    [Caip2ByNetwork.BitcoinMainnet]: { slug: 'BITCOIN_MAINNET', addressRegex: BITCOIN_ADDRESS_REGEX },
+    [Caip2ByNetwork.TronMainnet]: { slug: 'TRON_MAINNET', addressRegex: TRON_ADDRESS_REGEX },
 };
 
 /**
- * Default supported-currencies list returned by {@link LayerswapCryptoOnrampProvider.getDefaultSupportedCurrencies}.
- * Used as `placeholderData` by the appkit-react hook while live discovery resolves.
+ * Default set of TON-side destination tokens queried via `/sources`. Drives which
+ * source (chain, token) pairs the provider discovers — Layerswap is asked for each
+ * destination token in turn, and the union is returned from `getSupportedCurrencies`.
+ * Exported so consumers can spread/extend it.
  */
-export const DEFAULT_LAYERSWAP_SUPPORTED_CURRENCIES: CryptoOnrampSupportedCurrencies = {
-    source: [
-        {
-            chain: 'eip155:42161',
-            address: '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9',
-            symbol: 'USDT0',
-            name: 'Tether USD0',
-            decimals: 6,
-            logo: 'https://cdn.layerswap.io/layerswap/currencies/usdt0.png',
-        },
-    ],
-    destination: [
-        {
-            address: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
-            symbol: 'USDT',
-            name: 'Tether',
-            decimals: 6,
-            logo: 'https://cdn.layerswap.io/layerswap/currencies/usdt.png',
-        },
-    ],
-};
-
-export const isEvmAddress = (address: string): boolean => {
-    return EVM_ADDRESS_REGEX.test(address);
-};
+export const LAYERSWAP_DESTINATION_TOKENS: CryptoOnrampDestinationCurrency[] = [
+    {
+        address: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
+        symbol: 'USDT',
+        name: 'Tether',
+        decimals: 6,
+        logo: 'https://cdn.layerswap.io/layerswap/currencies/usdt.png',
+    },
+];
 
 export const isErrorResponse = (body: unknown): body is LayerswapErrorResponse => {
     return (

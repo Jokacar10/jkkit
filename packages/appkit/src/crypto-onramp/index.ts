@@ -6,7 +6,7 @@
  *
  */
 
-export { CryptoOnrampProvider, CryptoOnrampManager, CryptoOnrampError } from '@ton/walletkit';
+export { CryptoOnrampProvider, CryptoOnrampManager, CryptoOnrampError, Caip2ByNetwork } from '@ton/walletkit';
 
 export type {
     CryptoOnrampAPI,

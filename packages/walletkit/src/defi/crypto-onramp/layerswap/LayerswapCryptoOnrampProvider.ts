@@ -9,6 +9,7 @@
 import type {
     CryptoOnrampDeposit,
     CryptoOnrampDepositParams,
+    CryptoOnrampDestinationCurrency,
     CryptoOnrampQuote,
     CryptoOnrampQuoteParams,
     CryptoOnrampSourceCurrency,
@@ -23,15 +24,15 @@ import { createProvider } from '../../../types/factory';
 import type { LayerswapCreateSwapResponse, LayerswapGetSwapResponse, LayerswapNetwork, LayerswapToken } from './types';
 import {
     DEFAULT_LAYERSWAP_SUPPORTED_CHAINS,
-    DEFAULT_LAYERSWAP_SUPPORTED_CURRENCIES,
     LAYERSWAP_DESTINATION_NETWORK,
+    LAYERSWAP_DESTINATION_TOKENS,
     formatBaseUnits,
     isErrorResponse,
-    isEvmAddress,
     mapLayerswapErrorCode,
     mapStatus,
     parseBaseUnits,
 } from './utils';
+import type { LayerswapChainConfig } from './utils';
 
 const LAYERSWAP_API_URL = 'https://api.layerswap.io/api/v2';
 
@@ -47,12 +48,20 @@ export interface LayerswapProviderConfig {
     apiUrl?: string;
 
     /**
-     * Mapping of CAIP-2 source chain identifiers to Layerswap network slugs
-     * (e.g. `'eip155:42161' → 'ARBITRUM_MAINNET'`). When omitted, defaults to
+     * Mapping of CAIP-2 source chain identifiers to Layerswap network configs
+     * (slug + refund-address regex). When omitted, defaults to
      * {@link DEFAULT_LAYERSWAP_SUPPORTED_CHAINS}. Pass a full map (not a partial)
      * — the override replaces the default. Spread the default to extend it.
      */
-    supportedChains?: Record<string, string>;
+    supportedChains?: Record<string, LayerswapChainConfig>;
+
+    /**
+     * TON-side destination tokens that the provider asks Layerswap to route into.
+     * Drives the `/sources` discovery used by `getSupportedCurrencies`. When omitted,
+     * defaults to {@link LAYERSWAP_DESTINATION_TOKENS}. Pass a full list (not a partial)
+     * — the override replaces the default. Spread the default to extend it.
+     */
+    destinationTokens?: CryptoOnrampDestinationCurrency[];
 }
 
 /**
@@ -66,7 +75,7 @@ export interface LayerswapQuoteMetadata {
     depositAddress: string;
     sourceAmountBaseUnits: string;
     targetAmountBaseUnits: string;
-    /** Source EVM address used when the swap was created, if any. */
+    /** Source address used when the swap was created, if any. */
     sourceAddress?: string;
 }
 
@@ -95,20 +104,22 @@ export class LayerswapCryptoOnrampProvider extends CryptoOnrampProvider<undefine
 
     private readonly apiKey: string | undefined;
     private readonly apiUrl: string;
-    private readonly supportedChains: Record<string, string>;
+    private readonly supportedChains: Record<string, LayerswapChainConfig>;
+    private readonly destinationTokens: CryptoOnrampDestinationCurrency[];
 
     constructor(config: LayerswapProviderConfig = {}) {
         super();
         this.apiKey = config.apiKey;
         this.apiUrl = config.apiUrl ?? LAYERSWAP_API_URL;
         this.supportedChains = config.supportedChains ?? DEFAULT_LAYERSWAP_SUPPORTED_CHAINS;
+        this.destinationTokens = config.destinationTokens ?? LAYERSWAP_DESTINATION_TOKENS;
     }
 
     async getQuote(params: CryptoOnrampQuoteParams<undefined>): Promise<CryptoOnrampQuote<LayerswapQuoteMetadata>> {
         const { sourceCurrency, targetCurrency, recipientAddress, refundAddress } = params;
 
-        const sourceNetworkSlug = this.supportedChains[sourceCurrency.chain];
-        if (!sourceNetworkSlug) {
+        const chainConfig = this.supportedChains[sourceCurrency.chain];
+        if (!chainConfig) {
             throw new CryptoOnrampError(
                 `Layerswap: unsupported source chain "${sourceCurrency.chain}"`,
                 CryptoOnrampError.UNSUPPORTED_SOURCE_CHAIN,
@@ -123,9 +134,13 @@ export class LayerswapCryptoOnrampProvider extends CryptoOnrampProvider<undefine
             );
         }
 
-        if (refundAddress !== undefined && refundAddress !== '' && !isEvmAddress(refundAddress)) {
+        if (
+            refundAddress !== undefined &&
+            refundAddress !== '' &&
+            !new RegExp(chainConfig.addressRegex).test(refundAddress)
+        ) {
             throw new CryptoOnrampError(
-                'Layerswap: refundAddress must be a valid EVM address (got "' + refundAddress + '")',
+                'Layerswap: refundAddress is not in the expected format (got "' + refundAddress + '")',
                 CryptoOnrampError.INVALID_REFUND_ADDRESS,
             );
         }
@@ -134,7 +149,7 @@ export class LayerswapCryptoOnrampProvider extends CryptoOnrampProvider<undefine
 
         const body = {
             amount: amountDecimal,
-            source_network: sourceNetworkSlug,
+            source_network: chainConfig.slug,
             destination_network: LAYERSWAP_DESTINATION_NETWORK,
             source_token: sourceCurrency.symbol,
             destination_token: targetCurrency.symbol,
@@ -298,7 +313,7 @@ export class LayerswapCryptoOnrampProvider extends CryptoOnrampProvider<undefine
      */
     async getSupportedCurrencies(): Promise<CryptoOnrampSupportedCurrencies> {
         const slugToCaip2 = buildSlugToCaip2Map(this.supportedChains);
-        const destination = DEFAULT_LAYERSWAP_SUPPORTED_CURRENCIES.destination;
+        const destination = this.destinationTokens;
 
         const results = await Promise.allSettled(
             destination.map((dest) => this.fetchSources(LAYERSWAP_DESTINATION_NETWORK, dest.symbol)),
@@ -376,9 +391,9 @@ interface LayerswapNetworkWithTokens extends LayerswapNetwork {
     >;
 }
 
-const buildSlugToCaip2Map = (caip2ToSlug: Record<string, string>): Record<string, string> => {
+const buildSlugToCaip2Map = (caip2ToConfig: Record<string, LayerswapChainConfig>): Record<string, string> => {
     const reversed: Record<string, string> = {};
-    for (const [caip2, slug] of Object.entries(caip2ToSlug)) reversed[slug] = caip2;
+    for (const [caip2, config] of Object.entries(caip2ToConfig)) reversed[config.slug] = caip2;
     return reversed;
 };
 

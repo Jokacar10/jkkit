@@ -27,6 +27,7 @@ import {
     isEvmAddress,
     mapStatus,
 } from './utils';
+import type { DecentChainConfig } from './utils';
 
 // Decent (formerly Swaps.xyz) — they rebranded but kept the existing API endpoints.
 const DECENT_API_URL = 'https://api-v2.swaps.xyz/api';
@@ -53,12 +54,13 @@ export interface DecentProviderConfig {
     defaultSender?: string;
 
     /**
-     * Mapping of CAIP-2 source chain identifiers to Decent chain identifiers
-     * (numeric chain id for EVM). When omitted, defaults to
+     * Mapping of CAIP-2 source chain identifiers to Decent network configs
+     * (currently just the Decent chain id; address-format regex will be added
+     * once non-EVM source chains are supported). When omitted, defaults to
      * {@link DEFAULT_DECENT_SUPPORTED_CHAINS}. Pass a full map (not a partial)
      * — the override replaces the default. Spread the default to extend it.
      */
-    supportedChains?: Record<string, string>;
+    supportedChains?: Record<string, DecentChainConfig>;
 
     /**
      * Curated supported-currencies list. Decent's API has no enumeration endpoint,
@@ -107,7 +109,7 @@ export class DecentCryptoOnrampProvider extends CryptoOnrampProvider<DecentQuote
     private readonly apiKey: string;
     private readonly apiUrl: string;
     private readonly defaultSender: string;
-    private readonly supportedChains: Record<string, string>;
+    private readonly supportedChains: Record<string, DecentChainConfig>;
     private readonly supportedCurrencies: CryptoOnrampSupportedCurrencies;
 
     constructor(config: DecentProviderConfig) {
@@ -125,14 +127,15 @@ export class DecentCryptoOnrampProvider extends CryptoOnrampProvider<DecentQuote
         const { sourceCurrency, targetCurrency, recipientAddress } = params;
         const sender = params.refundAddress ?? this.defaultSender;
 
-        const srcChainId = this.supportedChains[sourceCurrency.chain];
-        if (!srcChainId) {
+        const chainConfig = this.supportedChains[sourceCurrency.chain];
+        if (!chainConfig) {
             throw new CryptoOnrampError(
                 `Decent: unsupported source chain "${sourceCurrency.chain}"`,
                 CryptoOnrampError.UNSUPPORTED_SOURCE_CHAIN,
                 { supportedChains: Object.keys(this.supportedChains) },
             );
         }
+        const srcChainId = chainConfig.slug;
 
         const swapDirection: DecentSwapDirection =
             params.isSourceAmount === false ? 'exact-amount-out' : 'exact-amount-in';
