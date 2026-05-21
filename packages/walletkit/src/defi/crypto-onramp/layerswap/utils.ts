@@ -8,7 +8,7 @@
 
 import type { CryptoOnrampDestinationCurrency, CryptoOnrampStatus } from '../../../api/models';
 import { Caip2ByNetwork } from '../caip2';
-import { CryptoOnrampError } from '../errors';
+import { CryptoOnrampErrorCode } from '../errors';
 import type { LayerswapErrorResponse, LayerswapSwapStatus } from './types';
 
 export const LAYERSWAP_DESTINATION_NETWORK = 'TON_MAINNET';
@@ -79,12 +79,15 @@ export const isErrorResponse = (body: unknown): body is LayerswapErrorResponse =
  * Translate a Layerswap-specific API error code into a provider-agnostic CryptoOnrampError code.
  * Falls back to the original code when there is no known mapping.
  */
-export const mapLayerswapErrorCode = (apiCode: string | undefined, fallback: string): string => {
+export const mapLayerswapErrorCode = (
+    apiCode: string | undefined,
+    fallback: CryptoOnrampErrorCode,
+): CryptoOnrampErrorCode => {
     switch (apiCode) {
         case 'ROUTE_NOT_FOUND_ERROR':
-            return CryptoOnrampError.ROUTE_NOT_FOUND;
+            return CryptoOnrampErrorCode.RouteNotFound;
         default:
-            return apiCode ?? fallback;
+            return (apiCode as CryptoOnrampErrorCode) ?? fallback;
     }
 };
 

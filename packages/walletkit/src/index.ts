@@ -19,11 +19,17 @@ export { EventRouter } from './core/EventRouter';
 export { RequestProcessor } from './core/RequestProcessor';
 export { Initializer } from './core/Initializer';
 export { JettonsManager } from './core/JettonsManager';
-export { DefiError } from './defi/errors';
-export { SwapManager, SwapProvider, SwapError } from './defi/swap';
+export { DefiError, DefiErrorCode } from './defi/errors';
+export { SwapManager, SwapProvider, SwapError, SwapErrorCode } from './defi/swap';
 export { StakingManager, StakingProvider, StakingError, StakingErrorCode } from './defi/staking';
 export { OnrampManager, OnrampProvider, OnrampError } from './defi/onramp';
-export { CryptoOnrampManager, CryptoOnrampProvider, CryptoOnrampError, Caip2ByNetwork } from './defi/crypto-onramp';
+export {
+    CryptoOnrampManager,
+    CryptoOnrampProvider,
+    CryptoOnrampError,
+    CryptoOnrampErrorCode,
+    Caip2ByNetwork,
+} from './defi/crypto-onramp';
 export { EventEmitter } from './core/EventEmitter';
 export type { EventListener, EventPayload, KitEvent } from './core/EventEmitter';
 export type { SharedKitEvents } from './types/emitter';
@@ -112,7 +118,7 @@ export { RESTORE_CONNECTION_TIMEOUT, DEFAULT_REQUEST_TIMEOUT } from './bridge/ut
 export { CreateTonProofMessageBytes } from './utils/tonProof';
 export type { AnalyticsAppInfo, AnalyticsManagerOptions } from './analytics';
 
-export type { FullAccountState } from './types/toncenter/api';
+export type { AccountState, AccountStates, TransactionId } from './api/models';
 export type { ToncenterResponseJettonMasters } from './types/toncenter/emulation';
 export { asHex } from './utils/hex';
 export {
@@ -149,6 +155,7 @@ export {
 } from './utils/assetHelpers';
 
 export { formatUnits, parseUnits } from './utils/units';
+export { fetchManifest } from './utils/manifest';
 
 // API Interfaces
 export type * from './api/interfaces';

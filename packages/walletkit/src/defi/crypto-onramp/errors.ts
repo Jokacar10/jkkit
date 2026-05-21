@@ -8,20 +8,26 @@
 
 import { DefiError } from '../errors';
 
-export class CryptoOnrampError extends DefiError {
-    static readonly PROVIDER_ERROR = 'PROVIDER_ERROR';
-    static readonly QUOTE_FAILED = 'QUOTE_FAILED';
-    static readonly DEPOSIT_FAILED = 'DEPOSIT_FAILED';
-    static readonly REFUND_ADDRESS_REQUIRED = 'REFUND_ADDRESS_REQUIRED';
-    static readonly INVALID_REFUND_ADDRESS = 'INVALID_REFUND_ADDRESS';
-    static readonly REVERSED_AMOUNT_NOT_SUPPORTED = 'REVERSED_AMOUNT_NOT_SUPPORTED';
-    static readonly UNSUPPORTED_SOURCE_CHAIN = 'UNSUPPORTED_SOURCE_CHAIN';
-    static readonly UNSUPPORTED_SOURCE_TOKEN = 'UNSUPPORTED_SOURCE_TOKEN';
-    static readonly UNSUPPORTED_DESTINATION_TOKEN = 'UNSUPPORTED_DESTINATION_TOKEN';
-    static readonly ROUTE_NOT_FOUND = 'ROUTE_NOT_FOUND';
+export enum CryptoOnrampErrorCode {
+    ProviderError = 'PROVIDER_ERROR',
+    QuoteFailed = 'QUOTE_FAILED',
+    DepositFailed = 'DEPOSIT_FAILED',
+    RefundAddressRequired = 'REFUND_ADDRESS_REQUIRED',
+    InvalidRefundAddress = 'INVALID_REFUND_ADDRESS',
+    ReversedAmountNotSupported = 'REVERSED_AMOUNT_NOT_SUPPORTED',
+    UnsupportedSourceChain = 'UNSUPPORTED_SOURCE_CHAIN',
+    UnsupportedSourceToken = 'UNSUPPORTED_SOURCE_TOKEN',
+    UnsupportedDestinationToken = 'UNSUPPORTED_DESTINATION_TOKEN',
+    RouteNotFound = 'ROUTE_NOT_FOUND',
+    InvalidParams = 'INVALID_PARAMS',
+}
 
-    constructor(message: string, code: string, details?: unknown) {
+export class CryptoOnrampError extends DefiError {
+    public readonly code: CryptoOnrampErrorCode;
+
+    constructor(message: string, code: CryptoOnrampErrorCode, details?: unknown) {
         super(message, code, details);
         this.name = 'CryptoOnrampError';
+        this.code = code;
     }
 }

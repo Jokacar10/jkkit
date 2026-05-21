@@ -17,6 +17,7 @@ import type {
     CryptoOnrampStatusParams,
     CryptoOnrampSupportedCurrencies,
 } from '../../api/models';
+import type { CryptoOnrampErrorCode } from './errors';
 import { CryptoOnrampError } from './errors';
 import { globalLogger } from '../../core/Logger';
 import { DefiManager } from '../DefiManager';
@@ -160,7 +161,7 @@ export class CryptoOnrampManager extends DefiManager<CryptoOnrampProviderInterfa
         }
     }
 
-    protected createError(message: string, code: string, details?: unknown): CryptoOnrampError {
+    protected createError(message: string, code: CryptoOnrampErrorCode, details?: unknown): CryptoOnrampError {
         return new CryptoOnrampError(message, code, details);
     }
 }

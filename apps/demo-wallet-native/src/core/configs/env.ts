@@ -25,7 +25,7 @@ type EnvConfig = z.infer<typeof envSchema>;
 
 const envObj: EnvConfig = {
     bridge: {
-        url: (process.env.EXPO_PUBLIC_BRIDGE_URL as string).trim() || 'https://walletbot.me/tonconnect-bridge/bridge',
+        url: (process.env.EXPO_PUBLIC_BRIDGE_URL as string).trim() || 'https://connect.ton.org/bridge',
     },
     tonApi: {
         mainnetApiKey:

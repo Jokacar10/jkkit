@@ -6,4 +6,4 @@
  *
  */
 
-export { BalanceBadge } from './balance-badge';
+export type AccountStatus = 'uninitialized' | 'frozen' | 'active' | 'non-existing';

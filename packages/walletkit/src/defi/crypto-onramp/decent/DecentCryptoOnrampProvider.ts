@@ -17,7 +17,7 @@ import type {
 } from '../../../api/models';
 import { Network } from '../../../api/models';
 import { CryptoOnrampProvider } from '../CryptoOnrampProvider';
-import { CryptoOnrampError } from '../errors';
+import { CryptoOnrampError, CryptoOnrampErrorCode } from '../errors';
 import { createProvider } from '../../../types/factory';
 import type { DecentGetActionResponse, DecentSwapDirection } from './types';
 import {
@@ -131,7 +131,7 @@ export class DecentCryptoOnrampProvider extends CryptoOnrampProvider<DecentQuote
         if (!chainConfig) {
             throw new CryptoOnrampError(
                 `Decent: unsupported source chain "${sourceCurrency.chain}"`,
-                CryptoOnrampError.UNSUPPORTED_SOURCE_CHAIN,
+                CryptoOnrampErrorCode.UnsupportedSourceChain,
                 { supportedChains: Object.keys(this.supportedChains) },
             );
         }
@@ -143,7 +143,7 @@ export class DecentCryptoOnrampProvider extends CryptoOnrampProvider<DecentQuote
         if (!isEvmAddress(sender)) {
             throw new CryptoOnrampError(
                 'Decent: senderAddress must be a valid EVM address (got "' + sender + '")',
-                CryptoOnrampError.INVALID_REFUND_ADDRESS,
+                CryptoOnrampErrorCode.InvalidRefundAddress,
             );
         }
 
@@ -169,7 +169,7 @@ export class DecentCryptoOnrampProvider extends CryptoOnrampProvider<DecentQuote
         } catch (error) {
             throw new CryptoOnrampError(
                 'Decent: network error while calling getAction',
-                CryptoOnrampError.QUOTE_FAILED,
+                CryptoOnrampErrorCode.QuoteFailed,
                 error,
             );
         }
@@ -180,7 +180,7 @@ export class DecentCryptoOnrampProvider extends CryptoOnrampProvider<DecentQuote
             const err = isErrorResponse(body) ? body.error : undefined;
             throw new CryptoOnrampError(
                 err?.message ?? `Decent getAction failed (HTTP ${response.status})`,
-                err?.code ?? CryptoOnrampError.QUOTE_FAILED,
+                (err?.code as CryptoOnrampErrorCode) ?? CryptoOnrampErrorCode.QuoteFailed,
                 err ?? { status: response.status },
             );
         }
@@ -188,7 +188,7 @@ export class DecentCryptoOnrampProvider extends CryptoOnrampProvider<DecentQuote
         if (body.vmId !== 'evm') {
             throw new CryptoOnrampError(
                 `Decent: only EVM source chains are supported (got vmId="${body.vmId}")`,
-                CryptoOnrampError.INVALID_PARAMS,
+                CryptoOnrampErrorCode.InvalidParams,
                 { vmId: body.vmId, srcChainId },
             );
         }
@@ -212,7 +212,7 @@ export class DecentCryptoOnrampProvider extends CryptoOnrampProvider<DecentQuote
         if (!metadata?.response?.tx?.to) {
             throw new CryptoOnrampError(
                 'Decent: quote metadata is missing — quote must be obtained from this provider',
-                CryptoOnrampError.INVALID_PARAMS,
+                CryptoOnrampErrorCode.InvalidParams,
             );
         }
 
@@ -226,14 +226,14 @@ export class DecentCryptoOnrampProvider extends CryptoOnrampProvider<DecentQuote
             if (!params.refundAddress) {
                 throw new CryptoOnrampError(
                     'Decent: a refund address is required to create a deposit',
-                    CryptoOnrampError.REFUND_ADDRESS_REQUIRED,
+                    CryptoOnrampErrorCode.RefundAddressRequired,
                 );
             }
 
             if (!isEvmAddress(params.refundAddress)) {
                 throw new CryptoOnrampError(
                     'Decent: senderAddress must be a valid EVM address (got "' + params.refundAddress + '")',
-                    CryptoOnrampError.INVALID_REFUND_ADDRESS,
+                    CryptoOnrampErrorCode.InvalidRefundAddress,
                 );
             }
 
@@ -250,7 +250,7 @@ export class DecentCryptoOnrampProvider extends CryptoOnrampProvider<DecentQuote
             if (!newMetadata) {
                 throw new CryptoOnrampError(
                     'Decent: quote metadata is missing — quote must be obtained from this provider',
-                    CryptoOnrampError.INVALID_PARAMS,
+                    CryptoOnrampErrorCode.InvalidParams,
                 );
             }
 
@@ -285,7 +285,7 @@ export class DecentCryptoOnrampProvider extends CryptoOnrampProvider<DecentQuote
         } catch (error) {
             throw new CryptoOnrampError(
                 'Decent: network error while fetching status',
-                CryptoOnrampError.PROVIDER_ERROR,
+                CryptoOnrampErrorCode.ProviderError,
                 error,
             );
         }
@@ -301,7 +301,7 @@ export class DecentCryptoOnrampProvider extends CryptoOnrampProvider<DecentQuote
 
             throw new CryptoOnrampError(
                 err?.message ?? `Decent getStatus failed (HTTP ${response.status})`,
-                err?.code ?? CryptoOnrampError.PROVIDER_ERROR,
+                (err?.code as CryptoOnrampErrorCode) ?? CryptoOnrampErrorCode.ProviderError,
                 err ?? { status: response.status },
             );
         }
