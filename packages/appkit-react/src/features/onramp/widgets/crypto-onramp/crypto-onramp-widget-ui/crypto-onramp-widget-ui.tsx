@@ -11,6 +11,7 @@ import type { ComponentProps, FC } from 'react';
 import clsx from 'clsx';
 
 import { ButtonWithConnect } from '../../../../../components/shared/button-with-connect';
+import { useConnect, useConnectors } from '../../../../wallets';
 import { OnrampTokenSelectors } from '../../../components/onramp-token-selectors';
 import { CenteredAmountInput } from '../../../../../components/ui/centered-amount-input';
 import { AmountPresets } from '../../../../../components/shared/amount-presets';
@@ -80,6 +81,9 @@ export const CryptoOnrampWidgetUI: FC<CryptoOnrampWidgetRenderProps> = ({
 
     const { t } = useI18n();
 
+    const connectors = useConnectors();
+    const { mutate: connect } = useConnect();
+
     // TokenSelectModal generic requires `id` + non-optional `name`; supplement with
     // address-derived id and a name fallback so walletkit currencies satisfy the shared type.
     const tokensForSelect = useMemo(
@@ -88,6 +92,10 @@ export const CryptoOnrampWidgetUI: FC<CryptoOnrampWidgetRenderProps> = ({
     );
 
     const providerName = provider ? providersMetadata[provider.providerId]?.name : undefined;
+
+    const handleConnect = useCallback(() => {
+        if (connectors[0]) connect({ connectorId: connectors[0].id });
+    }, [connectors, connect]);
 
     const handleContinue = useCallback(() => {
         if (refundAddressMode === 'off') {
@@ -159,8 +167,9 @@ export const CryptoOnrampWidgetUI: FC<CryptoOnrampWidgetRenderProps> = ({
                         className={styles.input}
                         value={amount}
                         onValueChange={setAmount}
-                        disabled={isSelectionIncomplete}
+                        disabled={!isWalletConnected || isSelectionIncomplete}
                         ticker={amountInputMode === 'token' ? selectedToken?.symbol : selectedMethod?.symbol}
+                        onClick={!isWalletConnected ? handleConnect : undefined}
                     />
                 )}
 
