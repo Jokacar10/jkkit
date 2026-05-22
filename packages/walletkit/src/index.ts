@@ -147,6 +147,7 @@ export {
 } from './utils/assetHelpers';
 
 export { formatUnits, parseUnits } from './utils/units';
+export { fetchManifest } from './utils/manifest';
 
 // API Interfaces
 export type * from './api/interfaces';
