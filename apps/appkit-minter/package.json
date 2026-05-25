@@ -9,6 +9,7 @@
     "build": "pnpm typecheck && vite build",
     "build:analyze": "ANALYZE=true vite build",
     "preview": "vite preview",
+    "lint": "eslint .",
     "clean": "git clean -xdf .cache .turbo dist node_modules",
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
