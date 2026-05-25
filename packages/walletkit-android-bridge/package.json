@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@ton/walletkit": "workspace:*",
-    "@tonconnect/bridge-sdk": "^0.2.4",
+    "@tonconnect/bridge-sdk": "catalog:",
     "@tonconnect/protocol": "catalog:",
     "buffer": "^6.0.3",
     "uuid": "^14.0.0"
@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "@ton/core": "catalog:",
-    "typescript": "^5.9.3",
+    "typescript": "~5.9.3",
     "vite": "^8.0.8"
   }
 }

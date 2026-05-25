@@ -44,7 +44,7 @@
   },
   "dependencies": {
     "@ton/appkit": "workspace:*",
-    "clsx": "2.1.1",
+    "clsx": "^2.1.1",
     "radix-ui": "^1.4.3",
     "rosetta": "1.1.0"
   },
@@ -61,7 +61,7 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "storybook": "10.4.1",
-    "typescript": "^5.9.3",
+    "typescript": "~5.9.3",
     "vite": "^8.0.8",
     "vite-plugin-node-polyfills": "^0.28.0"
   },
