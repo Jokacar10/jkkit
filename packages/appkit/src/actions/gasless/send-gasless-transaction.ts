@@ -6,7 +6,7 @@
  *
  */
 
-import type { GaslessEstimateResult, TokenAmount } from '@ton/walletkit';
+import type { GaslessQuote, TokenAmount } from '@ton/walletkit';
 
 import { GaslessError, GaslessErrorCode } from '../../gasless';
 import type { Base64String } from '../../types/primitives';
@@ -14,8 +14,8 @@ import type { AppKit } from '../../core/app-kit';
 import { getSelectedWallet } from '../wallets/get-selected-wallet';
 
 export interface SendGaslessTransactionParameters {
-    /** Pre-computed estimate obtained via `getGaslessEstimate` */
-    estimate: GaslessEstimateResult;
+    /** Pre-computed quote obtained via `getGaslessQuote` */
+    quote: GaslessQuote;
     /** Gasless provider id. Uses the default provider when omitted. */
     providerId?: string;
 }
@@ -23,31 +23,31 @@ export interface SendGaslessTransactionParameters {
 export interface SendGaslessTransactionReturnType {
     /** Signed internal BoC that was submitted to the relayer */
     internalBoc: Base64String;
-    /** Relayer fee in fee-jetton nanounits (mirrors the estimate) */
+    /** Relayer fee in fee-jetton nanounits (mirrors the quote) */
     fee: TokenAmount;
 }
 
 export type SendGaslessTransactionErrorType = Error;
 
 /**
- * Sign a previously computed gasless estimate and submit the resulting BoC
+ * Sign a previously computed gasless quote and submit the resulting BoC
  * to the relayer.
  *
- * Estimate freshness is owned by the query layer (`getGaslessEstimateQueryOptions`
+ * Quote freshness is owned by the query layer (`getGaslessQuoteQueryOptions`
  * sets a 2-minute `staleTime` matching the relayer `validUntil` window). If a
- * stale estimate is submitted anyway, the relayer rejects it and the error
- * surfaces through `gaslessManager.send`.
+ * stale quote is submitted anyway, the relayer rejects it and the error
+ * surfaces through `gaslessManager.sendTransaction`.
  *
  * @throws GaslessError(SIGN_MESSAGE_NOT_SUPPORTED) when the wallet does not
  *         advertise the `SignMessage` feature.
- * @throws GaslessError(TOO_MANY_MESSAGES) when the estimate carries more
+ * @throws GaslessError(TOO_MANY_MESSAGES) when the quote carries more
  *         messages than the wallet's advertised `maxMessages` cap.
  */
 export const sendGaslessTransaction = async (
     appKit: AppKit,
     parameters: SendGaslessTransactionParameters,
 ): Promise<SendGaslessTransactionReturnType> => {
-    const { estimate, providerId } = parameters;
+    const { quote, providerId } = parameters;
 
     const wallet = getSelectedWallet(appKit);
 
@@ -65,21 +65,21 @@ export const sendGaslessTransaction = async (
             );
         }
         const { maxMessages } = signMessageFeature as { maxMessages: number };
-        if (estimate.messages.length > maxMessages) {
+        if (quote.messages.length > maxMessages) {
             throw new GaslessError(
-                `Estimate has ${estimate.messages.length} messages but the wallet only supports up to ${maxMessages}.`,
+                `Quote has ${quote.messages.length} messages but the wallet only supports up to ${maxMessages}.`,
                 GaslessErrorCode.TooManyMessages,
-                { messages: estimate.messages.length, maxMessages },
+                { messages: quote.messages.length, maxMessages },
             );
         }
     }
 
     const { internalBoc } = await wallet.signMessage({
-        messages: estimate.messages,
-        validUntil: estimate.validUntil,
+        messages: quote.messages,
+        validUntil: quote.validUntil,
     });
 
-    await appKit.gaslessManager.send(
+    await appKit.gaslessManager.sendTransaction(
         {
             walletPublicKey: wallet.getPublicKey(),
             internalBoc,
@@ -89,6 +89,6 @@ export const sendGaslessTransaction = async (
 
     return {
         internalBoc,
-        fee: estimate.fee,
+        fee: quote.fee,
     };
 };

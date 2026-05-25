@@ -146,7 +146,7 @@ describe('TonApiGaslessProvider.getConfig', () => {
     });
 });
 
-describe('TonApiGaslessProvider.estimate', () => {
+describe('TonApiGaslessProvider.getQuote', () => {
     let fetchApi: ReturnType<typeof makeFetch>;
     let provider: TonApiGaslessProvider;
 
@@ -155,7 +155,7 @@ describe('TonApiGaslessProvider.estimate', () => {
         provider = makeProvider(fetchApi);
     });
 
-    const makeRawEstimate = (overrides: Record<string, unknown> = {}) => ({
+    const makeRawQuote = (overrides: Record<string, unknown> = {}) => ({
         messages: [
             {
                 address: Address.parse(TEST_ADDRESS).toRawString(),
@@ -170,10 +170,10 @@ describe('TonApiGaslessProvider.estimate', () => {
         ...overrides,
     });
 
-    it('maps relayer response to GaslessEstimateResult', async () => {
-        fetchApi.mockResolvedValueOnce(jsonResponse(makeRawEstimate()));
+    it('maps relayer response to GaslessQuote', async () => {
+        fetchApi.mockResolvedValueOnce(jsonResponse(makeRawQuote()));
 
-        const result = await provider.estimate({
+        const result = await provider.getQuote({
             feeJettonMaster: TEST_ADDRESS,
             walletAddress: TEST_ADDRESS,
             walletPublicKey: TEST_PUBKEY,
@@ -189,9 +189,9 @@ describe('TonApiGaslessProvider.estimate', () => {
     });
 
     it('strips 0x prefix from walletPublicKey and serializes BoCs as hex', async () => {
-        fetchApi.mockResolvedValueOnce(jsonResponse(makeRawEstimate({ messages: [], commission: '0', validUntil: 0 })));
+        fetchApi.mockResolvedValueOnce(jsonResponse(makeRawQuote({ messages: [], commission: '0', valid_until: 0 })));
 
-        await provider.estimate({
+        await provider.getQuote({
             feeJettonMaster: TEST_ADDRESS,
             walletAddress: TEST_ADDRESS,
             walletPublicKey: TEST_PUBKEY,
@@ -207,11 +207,9 @@ describe('TonApiGaslessProvider.estimate', () => {
     });
 
     it('posts to /v2/gasless/estimate/{master_id}', async () => {
-        fetchApi.mockResolvedValueOnce(
-            jsonResponse(makeRawEstimate({ messages: [], commission: '0', valid_until: 0 })),
-        );
+        fetchApi.mockResolvedValueOnce(jsonResponse(makeRawQuote({ messages: [], commission: '0', valid_until: 0 })));
 
-        await provider.estimate({
+        await provider.getQuote({
             feeJettonMaster: TEST_ADDRESS,
             walletAddress: TEST_ADDRESS,
             walletPublicKey: TEST_PUBKEY,
@@ -224,11 +222,11 @@ describe('TonApiGaslessProvider.estimate', () => {
         expect(init.method).toBe('POST');
     });
 
-    it('wraps fetch errors in GaslessError(ESTIMATE_FAILED)', async () => {
+    it('wraps fetch errors in GaslessError(QUOTE_FAILED)', async () => {
         fetchApi.mockResolvedValueOnce(new Response('relayer down', { status: 502 }));
 
         await expect(
-            provider.estimate({
+            provider.getQuote({
                 feeJettonMaster: TEST_ADDRESS,
                 walletAddress: TEST_ADDRESS,
                 walletPublicKey: TEST_PUBKEY,
@@ -236,18 +234,18 @@ describe('TonApiGaslessProvider.estimate', () => {
             }),
         ).rejects.toMatchObject({
             name: 'GaslessError',
-            code: GaslessErrorCode.EstimateFailed,
+            code: GaslessErrorCode.QuoteFailed,
         });
     });
 });
 
-describe('TonApiGaslessProvider.send', () => {
+describe('TonApiGaslessProvider.sendTransaction', () => {
     it('forwards a parsed external BoC (hex) to the relayer', async () => {
         const fetchApi = makeFetch();
         const provider = makeProvider(fetchApi);
         fetchApi.mockResolvedValueOnce(jsonResponse({}));
 
-        await provider.send({ walletPublicKey: TEST_PUBKEY, internalBoc: buildSignedInternalBoc() });
+        await provider.sendTransaction({ walletPublicKey: TEST_PUBKEY, internalBoc: buildSignedInternalBoc() });
 
         expect(fetchApi).toHaveBeenCalledTimes(1);
         const init = fetchApi.mock.calls[0][1] as RequestInit;
@@ -265,7 +263,7 @@ describe('TonApiGaslessProvider.send', () => {
             .mockResolvedValueOnce(new Response('transient', { status: 500 }))
             .mockResolvedValueOnce(jsonResponse({}));
 
-        await provider.send({ walletPublicKey: TEST_PUBKEY, internalBoc: buildSignedInternalBoc() });
+        await provider.sendTransaction({ walletPublicKey: TEST_PUBKEY, internalBoc: buildSignedInternalBoc() });
 
         expect(fetchApi).toHaveBeenCalledTimes(3);
     });
@@ -276,7 +274,7 @@ describe('TonApiGaslessProvider.send', () => {
         fetchApi.mockResolvedValue(new Response('boom', { status: 500 }));
 
         await expect(
-            provider.send({ walletPublicKey: TEST_PUBKEY, internalBoc: buildSignedInternalBoc() }),
+            provider.sendTransaction({ walletPublicKey: TEST_PUBKEY, internalBoc: buildSignedInternalBoc() }),
         ).rejects.toMatchObject({
             name: 'GaslessError',
             code: GaslessErrorCode.SendFailed,

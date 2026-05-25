@@ -20,7 +20,7 @@ describe('Gasless Actions Examples', () => {
     let appKit: AppKit;
     let consoleSpy: ReturnType<typeof vi.spyOn>;
     let mockGetConfig: ReturnType<typeof vi.fn>;
-    let mockEstimate: ReturnType<typeof vi.fn>;
+    let mockGetQuote: ReturnType<typeof vi.fn>;
     let mockSend: ReturnType<typeof vi.fn>;
     let mockSignMessage: ReturnType<typeof vi.fn>;
 
@@ -38,7 +38,7 @@ describe('Gasless Actions Examples', () => {
             relayAddress: TEST_ADDRESS,
             supportedGasJettons: [{ jettonMaster: TEST_ADDRESS }],
         });
-        mockEstimate = vi.fn().mockResolvedValue({
+        mockGetQuote = vi.fn().mockResolvedValue({
             messages: [{ address: TEST_ADDRESS, amount: '60000000' }],
             fee: '1234',
             validUntil: Math.floor(Date.now() / 1000) + 120,
@@ -56,9 +56,9 @@ describe('Gasless Actions Examples', () => {
         // @ts-expect-error - internal mock access
         vi.spyOn(appKit.gaslessManager, 'getConfig').mockImplementation(mockGetConfig);
         // @ts-expect-error - internal mock access
-        vi.spyOn(appKit.gaslessManager, 'estimate').mockImplementation(mockEstimate);
+        vi.spyOn(appKit.gaslessManager, 'getQuote').mockImplementation(mockGetQuote);
         // @ts-expect-error - internal mock access
-        vi.spyOn(appKit.gaslessManager, 'send').mockImplementation(mockSend);
+        vi.spyOn(appKit.gaslessManager, 'sendTransaction').mockImplementation(mockSend);
         vi.spyOn(appKit.gaslessManager, 'setDefaultProvider').mockImplementation(() => {});
     });
 
@@ -89,7 +89,7 @@ describe('Gasless Actions Examples', () => {
         await gaslessExample(appKit);
 
         expect(mockGetConfig).toHaveBeenCalled();
-        expect(mockEstimate).toHaveBeenCalled();
+        expect(mockGetQuote).toHaveBeenCalled();
         expect(mockSignMessage).toHaveBeenCalled();
         expect(mockSend).toHaveBeenCalled();
     });

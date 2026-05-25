@@ -8,12 +8,7 @@
 
 import { Address } from '@ton/core';
 
-import type {
-    GaslessConfig,
-    GaslessEstimateParams,
-    GaslessEstimateResult,
-    GaslessSendParams,
-} from '../../../api/models';
+import type { GaslessConfig, GaslessQuote, GaslessQuoteParams, GaslessSendParams } from '../../../api/models';
 import { Network } from '../../../api/models';
 import { BaseApiClient } from '../../../clients/BaseApiClient';
 import { globalLogger } from '../../../core/Logger';
@@ -22,7 +17,7 @@ import { CallForSuccess } from '../../../utils/retry';
 import { GaslessError, GaslessErrorCode } from '../errors';
 import { GaslessProvider } from '../GaslessProvider';
 import { mapGaslessConfig } from './mappers/map-gasless-config';
-import { buildGaslessEstimateRequest, mapGaslessEstimate } from './mappers/map-gasless-estimate';
+import { buildGaslessQuoteRequest, mapGaslessQuote } from './mappers/map-gasless-quote';
 import { buildGaslessSendRequest } from './mappers/map-gasless-send';
 import type { TonApiGaslessConfig } from './types/config';
 import type { TonApiGaslessEstimateResponse } from './types/estimate';
@@ -135,27 +130,27 @@ export class TonApiGaslessProvider extends GaslessProvider {
         }
     }
 
-    async estimate(params: GaslessEstimateParams): Promise<GaslessEstimateResult> {
+    async getQuote(params: GaslessQuoteParams): Promise<GaslessQuote> {
         const masterId = Address.parse(params.feeJettonMaster).toRawString();
-        const body = buildGaslessEstimateRequest(params);
+        const body = buildGaslessQuoteRequest(params);
 
         try {
             const raw = await this.http.postJson<TonApiGaslessEstimateResponse>(
                 `/v2/gasless/estimate/${masterId}`,
                 body,
             );
-            return mapGaslessEstimate(raw);
+            return mapGaslessQuote(raw);
         } catch (error) {
-            log.error('Failed to estimate gasless transaction', { error, params });
+            log.error('Failed to quote gasless transaction', { error, params });
             throw new GaslessError(
-                error instanceof Error ? error.message : 'Failed to estimate gasless transaction',
-                GaslessErrorCode.EstimateFailed,
+                error instanceof Error ? error.message : 'Failed to quote gasless transaction',
+                GaslessErrorCode.QuoteFailed,
                 error,
             );
         }
     }
 
-    async send(params: GaslessSendParams): Promise<void> {
+    async sendTransaction(params: GaslessSendParams): Promise<void> {
         const body = buildGaslessSendRequest(params);
 
         try {

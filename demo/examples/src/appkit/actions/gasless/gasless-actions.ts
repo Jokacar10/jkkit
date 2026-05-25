@@ -9,10 +9,10 @@
 import type { AppKit } from '@ton/appkit';
 import {
     getGaslessConfig,
-    getGaslessEstimate,
     getGaslessManager,
     getGaslessProvider,
     getGaslessProviders,
+    getGaslessQuote,
     sendGaslessTransaction,
     setDefaultGaslessProvider,
     watchGaslessProviders,
@@ -52,8 +52,8 @@ export const gaslessExample = async (appKit: AppKit) => {
     console.log('Relay address:', config.relayAddress);
     // SAMPLE_END: GET_GASLESS_CONFIG
 
-    // SAMPLE_START: GET_GASLESS_ESTIMATE
-    const estimate = await getGaslessEstimate(appKit, {
+    // SAMPLE_START: GET_GASLESS_QUOTE
+    const quote = await getGaslessQuote(appKit, {
         feeJettonMaster: feeJetton,
         messages: [
             {
@@ -63,13 +63,13 @@ export const gaslessExample = async (appKit: AppKit) => {
             },
         ],
     });
-    console.log('Relayer fee:', estimate.fee, 'valid until:', estimate.validUntil);
-    // SAMPLE_END: GET_GASLESS_ESTIMATE
+    console.log('Relayer fee:', quote.fee, 'valid until:', quote.validUntil);
+    // SAMPLE_END: GET_GASLESS_QUOTE
 
     // SAMPLE_START: SEND_GASLESS_TRANSACTION
-    const { internalBoc, fee } = await sendGaslessTransaction(appKit, { estimate });
+    const { internalBoc, fee } = await sendGaslessTransaction(appKit, { quote });
     console.log('Submitted gasless transaction. Fee:', fee, 'BoC:', internalBoc);
     // SAMPLE_END: SEND_GASLESS_TRANSACTION
 
-    return { gaslessManager, provider, config, estimate };
+    return { gaslessManager, provider, config, quote };
 };

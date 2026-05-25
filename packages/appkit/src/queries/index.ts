@@ -173,15 +173,15 @@ export {
     type GetGaslessConfigErrorType,
 } from './gasless/get-gasless-config';
 export {
-    getGaslessEstimateQueryOptions,
-    getGaslessEstimateQueryKey,
-    GASLESS_ESTIMATE_STALE_TIME_MS,
-    type GetGaslessEstimateQueryConfig,
-    type GetGaslessEstimateData,
-    type GetGaslessEstimateErrorType,
-    type GetGaslessEstimateQueryKey,
-    type GetGaslessEstimateQueryOptions,
-} from './gasless/get-gasless-estimate';
+    getGaslessQuoteQueryOptions,
+    getGaslessQuoteQueryKey,
+    GASLESS_QUOTE_STALE_TIME_MS,
+    type GetGaslessQuoteQueryConfig,
+    type GetGaslessQuoteData,
+    type GetGaslessQuoteErrorType,
+    type GetGaslessQuoteQueryKey,
+    type GetGaslessQuoteQueryOptions,
+} from './gasless/get-gasless-quote';
 export {
     sendGaslessTransactionMutationOptions,
     type SendGaslessTransactionMutationConfig,

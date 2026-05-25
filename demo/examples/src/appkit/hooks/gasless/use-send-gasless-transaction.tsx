@@ -7,13 +7,13 @@
  */
 
 import type { Base64String } from '@ton/appkit';
-import { useGaslessEstimate, useSendGaslessTransaction } from '@ton/appkit-react';
+import { useGaslessQuote, useSendGaslessTransaction } from '@ton/appkit-react';
 
 /* eslint-disable no-console */
 
 export const UseSendGaslessTransactionExample = () => {
     // SAMPLE_START: USE_SEND_GASLESS_TRANSACTION
-    const { data: estimate } = useGaslessEstimate({
+    const { data: quote } = useGaslessQuote({
         feeJettonMaster: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
         messages: [
             {
@@ -26,9 +26,9 @@ export const UseSendGaslessTransactionExample = () => {
     const { mutateAsync: sendGasless, isPending } = useSendGaslessTransaction();
 
     const handleSend = async () => {
-        if (!estimate) return;
+        if (!quote) return;
         try {
-            const { internalBoc, fee } = await sendGasless({ estimate });
+            const { internalBoc, fee } = await sendGasless({ quote });
             console.log('Submitted. Fee:', fee, 'BoC:', internalBoc);
         } catch (e) {
             console.error(e);
@@ -36,7 +36,7 @@ export const UseSendGaslessTransactionExample = () => {
     };
 
     return (
-        <button onClick={handleSend} disabled={!estimate || isPending}>
+        <button onClick={handleSend} disabled={!quote || isPending}>
             {isPending ? 'Sending...' : 'Send Gasless'}
         </button>
     );

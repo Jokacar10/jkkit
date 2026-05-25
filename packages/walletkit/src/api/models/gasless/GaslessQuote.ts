@@ -11,13 +11,13 @@ import type { TokenAmount } from '../core/TokenAmount';
 import type { TransactionRequestMessage } from '../transactions/TransactionRequest';
 
 /**
- * Result of gasless estimation.
+ * Quote for a gasless transaction produced by `GaslessProvider.getQuote`.
  *
  * Contains relayer-wrapped messages that should be passed to `wallet.signMessage`
  * in place of the caller's original messages, together with the fee the relayer
- * will deduct and the timestamp after which the estimate expires.
+ * will deduct and the timestamp after which the bundle expires.
  */
-export interface GaslessEstimateResult {
+export interface GaslessQuote {
     /** Relayer-wrapped messages ready to be signed */
     messages: TransactionRequestMessage[];
     /** Relayer fee in fee-jetton nanounits */

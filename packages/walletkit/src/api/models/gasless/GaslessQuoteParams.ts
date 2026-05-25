@@ -10,12 +10,12 @@ import type { Hex, UserFriendlyAddress } from '../core/Primitives';
 import type { TransactionRequestMessage } from '../transactions/TransactionRequest';
 
 /**
- * Parameters to estimate a gasless transaction.
+ * Parameters to quote a gasless transaction.
  *
  * The relayer wraps the caller's messages with fee-collection logic and
  * returns a new set of messages that the wallet should sign via `signMessage`.
  */
-export interface GaslessEstimateParams {
+export interface GaslessQuoteParams {
     /** Master address of the jetton used to pay the relayer's fee */
     feeJettonMaster: UserFriendlyAddress;
     /** Sender wallet address */

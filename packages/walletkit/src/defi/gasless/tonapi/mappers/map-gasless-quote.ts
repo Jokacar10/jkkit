@@ -8,7 +8,7 @@
 
 import { Address } from '@ton/core';
 
-import type { GaslessEstimateParams, GaslessEstimateResult } from '../../../../api/models';
+import type { GaslessQuote, GaslessQuoteParams } from '../../../../api/models';
 import { asAddressFriendly } from '../../../../utils/address';
 import { HexToBase64 } from '../../../../utils/base64';
 import { asHex } from '../../../../utils/hex';
@@ -29,7 +29,7 @@ const hexBocToBase64 = (hex: string) => {
  *
  * Caller messages are encoded as hex BoCs of internal messages (TonAPI's wire format).
  */
-export const buildGaslessEstimateRequest = (params: GaslessEstimateParams): TonApiGaslessEstimateRequest => ({
+export const buildGaslessQuoteRequest = (params: GaslessQuoteParams): TonApiGaslessEstimateRequest => ({
     wallet_address: Address.parse(params.walletAddress).toRawString(),
     wallet_public_key: stripHexPrefix(params.walletPublicKey),
     messages: params.messages.map((message) => ({
@@ -38,11 +38,11 @@ export const buildGaslessEstimateRequest = (params: GaslessEstimateParams): TonA
 });
 
 /**
- * Wire → domain: map the TonAPI estimate response to `GaslessEstimateResult`.
+ * Wire → domain: map the TonAPI estimate response to `GaslessQuote`.
  *
  * Hex BoCs in `payload` / `state_init` are converted back to base64.
  */
-export const mapGaslessEstimate = (raw: TonApiGaslessEstimateResponse): GaslessEstimateResult => ({
+export const mapGaslessQuote = (raw: TonApiGaslessEstimateResponse): GaslessQuote => ({
     messages: raw.messages.map((message) => ({
         address: asAddressFriendly(message.address),
         amount: message.amount,

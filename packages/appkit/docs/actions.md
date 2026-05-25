@@ -638,7 +638,7 @@ Gasless lets a dApp submit on-chain transactions without the user holding TON fo
 
 The high-level flow is:
 1. `getGaslessConfig` – discover which jettons the relayer accepts as fee payment.
-2. `getGaslessEstimate` – ask the relayer for fee + wrapped messages (with a `validUntil`).
+2. `getGaslessQuote` – ask the relayer for fee + wrapped messages (with a `validUntil`).
 3. `sendGaslessTransaction` – sign the wrapped messages via the wallet and submit the signed BoC.
 
 ### `getGaslessManager`
@@ -671,7 +671,7 @@ console.log(
 
 ### `setDefaultGaslessProvider`
 
-Set the default gasless provider. Subsequent estimate and send calls will use this provider when none is specified.
+Set the default gasless provider. Subsequent quote and send calls will use this provider when none is specified.
 
 ```ts
 setDefaultGaslessProvider(appKit, { providerId: 'tonapi' });
@@ -697,14 +697,14 @@ const config = await getGaslessConfig(appKit);
 const feeJetton = config.supportedGasJettons[0].jettonMaster;
 ```
 
-### `getGaslessEstimate`
+### `getGaslessQuote`
 
-Ask the relayer to estimate a gasless transaction. Returns relayer-wrapped messages, the fee charged in the fee jetton, and the bundle validity window (`validUntil`).
+Ask the relayer for a gasless transaction quote. Returns relayer-wrapped messages, the fee charged in the fee jetton, and the bundle validity window (`validUntil`).
 
-The estimate is intended to be passed verbatim to `sendGaslessTransaction`, which validates `validUntil` before signing. Estimates are typically valid for ~2 minutes.
+The quote is intended to be passed verbatim to `sendGaslessTransaction`. Quotes are typically valid for ~2 minutes.
 
 ```ts
-const estimate = await getGaslessEstimate(appKit, {
+const quote = await getGaslessQuote(appKit, {
     feeJettonMaster: feeJetton,
     messages: [
         {
@@ -714,22 +714,22 @@ const estimate = await getGaslessEstimate(appKit, {
         },
     ],
 });
-console.log('Relayer fee:', estimate.fee);
-console.log('Valid until:', new Date(estimate.validUntil * 1000));
+console.log('Relayer fee:', quote.fee);
+console.log('Valid until:', new Date(quote.validUntil * 1000));
 ```
 
 ### `sendGaslessTransaction`
 
-Sign a previously computed gasless estimate and submit the resulting BoC to the relayer.
+Sign a previously computed gasless quote and submit the resulting BoC to the relayer.
 
-Estimate freshness is owned by the query layer: `useGaslessEstimate` uses a 2-minute `staleTime` matching the relayer `validUntil` window. If you submit a stale estimate anyway, the relayer rejects it and the error surfaces through `gaslessManager.send`.
+Quote freshness is owned by the query layer: `useGaslessQuote` uses a 2-minute `staleTime` matching the relayer `validUntil` window. If you submit a stale quote anyway, the relayer rejects it and the error surfaces through `gaslessManager.sendTransaction`.
 
 Throws:
 - `GaslessError(SIGN_MESSAGE_NOT_SUPPORTED)` if the connected wallet does not advertise the `SignMessage` feature.
-- `GaslessError(TOO_MANY_MESSAGES)` if the estimate carries more messages than the wallet's `maxMessages` cap.
+- `GaslessError(TOO_MANY_MESSAGES)` if the quote carries more messages than the wallet's `maxMessages` cap.
 
 ```ts
-const { internalBoc, fee } = await sendGaslessTransaction(appKit, { estimate });
+const { internalBoc, fee } = await sendGaslessTransaction(appKit, { quote });
 console.log('Submitted gasless transaction. Fee:', fee);
 ```
 

@@ -7,7 +7,7 @@
  */
 
 import type { GaslessAPI, GaslessProviderInterface } from '../../api/interfaces';
-import type { GaslessConfig, GaslessEstimateParams, GaslessEstimateResult, GaslessSendParams } from '../../api/models';
+import type { GaslessConfig, GaslessQuote, GaslessQuoteParams, GaslessSendParams } from '../../api/models';
 import { globalLogger } from '../../core/Logger';
 import type { ProviderFactoryContext } from '../../types/factory';
 import { DefiManager } from '../DefiManager';
@@ -42,10 +42,10 @@ export class GaslessManager extends DefiManager<GaslessProviderInterface> implem
     }
 
     /**
-     * Estimate fees and obtain relayer-wrapped messages for signing.
+     * Quote fees and obtain relayer-wrapped messages for signing.
      */
-    async estimate(params: GaslessEstimateParams, providerId?: string): Promise<GaslessEstimateResult> {
-        log.debug('Estimating gasless transaction', {
+    async getQuote(params: GaslessQuoteParams, providerId?: string): Promise<GaslessQuote> {
+        log.debug('Quoting gasless transaction', {
             walletAddress: params.walletAddress,
             feeJettonMaster: params.feeJettonMaster,
             messagesCount: params.messages.length,
@@ -53,9 +53,9 @@ export class GaslessManager extends DefiManager<GaslessProviderInterface> implem
         });
 
         try {
-            return await this.getProvider(providerId ?? this.defaultProviderId).estimate(params);
+            return await this.getProvider(providerId ?? this.defaultProviderId).getQuote(params);
         } catch (error) {
-            log.error('Failed to estimate gasless transaction', { error, params });
+            log.error('Failed to quote gasless transaction', { error, params });
             throw error;
         }
     }
@@ -63,11 +63,11 @@ export class GaslessManager extends DefiManager<GaslessProviderInterface> implem
     /**
      * Submit a signed transaction BoC to the relayer.
      */
-    async send(params: GaslessSendParams, providerId?: string): Promise<void> {
+    async sendTransaction(params: GaslessSendParams, providerId?: string): Promise<void> {
         log.debug('Sending gasless transaction', { providerId: providerId ?? this.defaultProviderId });
 
         try {
-            await this.getProvider(providerId ?? this.defaultProviderId).send(params);
+            await this.getProvider(providerId ?? this.defaultProviderId).sendTransaction(params);
         } catch (error) {
             log.error('Failed to send gasless transaction', { error });
             throw error;

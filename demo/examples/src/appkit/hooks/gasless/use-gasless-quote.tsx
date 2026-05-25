@@ -7,11 +7,11 @@
  */
 
 import type { Base64String } from '@ton/appkit';
-import { useGaslessEstimate } from '@ton/appkit-react';
+import { useGaslessQuote } from '@ton/appkit-react';
 
-export const UseGaslessEstimateExample = () => {
-    // SAMPLE_START: USE_GASLESS_ESTIMATE
-    const { data: estimate, isFetching } = useGaslessEstimate({
+export const UseGaslessQuoteExample = () => {
+    // SAMPLE_START: USE_GASLESS_QUOTE
+    const { data: quote, isFetching } = useGaslessQuote({
         feeJettonMaster: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs', // USDT
         messages: [
             {
@@ -24,14 +24,14 @@ export const UseGaslessEstimateExample = () => {
 
     return (
         <div>
-            {isFetching && <span>Estimating...</span>}
-            {estimate && (
+            {isFetching && <span>Quoting...</span>}
+            {quote && (
                 <>
-                    <div>Fee: {estimate.fee}</div>
-                    <div>Valid until: {new Date(estimate.validUntil * 1000).toISOString()}</div>
+                    <div>Fee: {quote.fee}</div>
+                    <div>Valid until: {new Date(quote.validUntil * 1000).toISOString()}</div>
                 </>
             )}
         </div>
     );
-    // SAMPLE_END: USE_GASLESS_ESTIMATE
+    // SAMPLE_END: USE_GASLESS_QUOTE
 };

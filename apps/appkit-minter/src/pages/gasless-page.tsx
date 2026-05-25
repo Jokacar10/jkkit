@@ -11,7 +11,7 @@ import type { FC } from 'react';
 import {
     useAddress,
     useGaslessConfig,
-    useGaslessEstimate,
+    useGaslessQuote,
     useJettonBalanceByAddress,
     useJettonWalletAddress,
     useSelectedWallet,
@@ -108,10 +108,10 @@ export const GaslessPage: FC = () => {
     }, [address, amount, recipient, usdtWalletAddress]);
 
     const {
-        data: estimate,
-        isFetching: isEstimating,
-        error: estimateError,
-    } = useGaslessEstimate({
+        data: quote,
+        isFetching: isQuoting,
+        error: quoteError,
+    } = useGaslessQuote({
         feeJettonMaster: feeJettonMaster ?? undefined,
         messages: messages ?? undefined,
         query: { enabled: Boolean(address && feeJettonMaster && messages) },
@@ -119,26 +119,26 @@ export const GaslessPage: FC = () => {
 
     const now = useNow();
     const validUntilText = useMemo(() => {
-        if (!estimate) return null;
+        if (!quote) return null;
         // `now` is in the dep array so the countdown ticks every second.
         void now;
-        return formatRelativeTimeFromNow(estimate.validUntil);
-    }, [estimate, now]);
+        return formatRelativeTimeFromNow(quote.validUntil);
+    }, [quote, now]);
 
     const formattedFee = useMemo(() => {
-        if (!estimate) return null;
-        const feeWhole = Number(estimate.fee) / 10 ** USDT_DECIMALS;
+        if (!quote) return null;
+        const feeWhole = Number(quote.fee) / 10 ** USDT_DECIMALS;
         return feeWhole.toFixed(USDT_DECIMALS);
-    }, [estimate]);
+    }, [quote]);
 
     const handleSend = async () => {
-        if (!estimate) {
-            toast.error('No estimate available yet');
+        if (!quote) {
+            toast.error('No quote available yet');
             return;
         }
 
         try {
-            const result = await sendGasless({ estimate });
+            const result = await sendGasless({ quote });
             const explorerUrl = `https://tonviewer.com/transaction/${result.internalBoc}`;
             toast.success('Gasless transaction submitted!', {
                 description: 'View internal BoC on explorer',
@@ -223,11 +223,9 @@ export const GaslessPage: FC = () => {
                             />
                         </div>
 
-                        {estimateError && (
-                            <div className="text-xs text-red-500">Estimate failed: {estimateError.message}</div>
-                        )}
+                        {quoteError && <div className="text-xs text-red-500">Quote failed: {quoteError.message}</div>}
 
-                        {estimate && (
+                        {quote && (
                             <div className="grid grid-cols-2 gap-2 text-xs">
                                 <div className="text-muted-foreground">Relayer fee</div>
                                 <div className="text-right font-mono">{formattedFee} USDT</div>
@@ -239,12 +237,12 @@ export const GaslessPage: FC = () => {
                         <button
                             className="w-full py-3 bg-primary text-primary-foreground rounded-xl font-semibold disabled:opacity-50"
                             onClick={handleSend}
-                            disabled={isSending || isEstimating || !estimate || !supportsSignMessage}
+                            disabled={isSending || isQuoting || !quote || !supportsSignMessage}
                         >
                             {isSending
                                 ? 'Sending…'
-                                : isEstimating
-                                  ? 'Estimating…'
+                                : isQuoting
+                                  ? 'Quoting…'
                                   : !supportsSignMessage
                                     ? 'SignMessage not supported'
                                     : 'Send Gasless'}

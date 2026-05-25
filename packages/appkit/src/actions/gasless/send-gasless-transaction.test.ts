@@ -8,7 +8,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GaslessErrorCode } from '@ton/walletkit';
-import type { Feature, GaslessEstimateResult } from '@ton/walletkit';
+import type { Feature, GaslessQuote } from '@ton/walletkit';
 
 import type { AppKit } from '../../core/app-kit';
 import type { Base64String } from '../../types/primitives';
@@ -18,7 +18,7 @@ import { sendGaslessTransaction } from './send-gasless-transaction';
 const TEST_ADDRESS = 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs';
 const FAKE_INTERNAL_BOC = 'te6cckEBAQEAAgAAAA==' as Base64String;
 
-const makeEstimate = (overrides: Partial<GaslessEstimateResult> = {}): GaslessEstimateResult => ({
+const makeQuote = (overrides: Partial<GaslessQuote> = {}): GaslessQuote => ({
     messages: [{ address: TEST_ADDRESS, amount: '60000000' }],
     fee: '1234',
     validUntil: Math.floor(Date.now() / 1000) + 60,
@@ -45,14 +45,14 @@ const makeWallet = (overrides: Partial<WalletInterface> = {}): WalletInterface =
 };
 
 const makeAppKit = (wallet: WalletInterface | null) => {
-    const send = vi.fn<() => Promise<void>>().mockResolvedValue(undefined);
+    const sendTransaction = vi.fn<() => Promise<void>>().mockResolvedValue(undefined);
 
     const appKit = {
         walletsManager: { selectedWallet: wallet },
-        gaslessManager: { send },
+        gaslessManager: { sendTransaction },
     } as unknown as AppKit;
 
-    return { appKit, send };
+    return { appKit, sendTransaction };
 };
 
 describe('sendGaslessTransaction', () => {
@@ -62,35 +62,36 @@ describe('sendGaslessTransaction', () => {
         wallet = makeWallet();
     });
 
-    it('signs the estimate and submits the resulting BoC to the relayer', async () => {
-        const { appKit, send } = makeAppKit(wallet);
-        const estimate = makeEstimate();
+    it('signs the quote and submits the resulting BoC to the relayer', async () => {
+        const { appKit, sendTransaction } = makeAppKit(wallet);
+        const quote = makeQuote();
 
-        const result = await sendGaslessTransaction(appKit, { estimate });
+        const result = await sendGaslessTransaction(appKit, { quote });
 
         expect(wallet.signMessage).toHaveBeenCalledWith({
-            messages: estimate.messages,
-            validUntil: estimate.validUntil,
+            messages: quote.messages,
+            validUntil: quote.validUntil,
         });
-        expect(send).toHaveBeenCalledWith({ walletPublicKey: '0xabc', internalBoc: FAKE_INTERNAL_BOC }, undefined);
+        expect(sendTransaction).toHaveBeenCalledWith(
+            { walletPublicKey: '0xabc', internalBoc: FAKE_INTERNAL_BOC },
+            undefined,
+        );
         expect(result.internalBoc).toBe(FAKE_INTERNAL_BOC);
-        expect(result.fee).toBe(estimate.fee);
+        expect(result.fee).toBe(quote.fee);
     });
 
-    it('forwards providerId to gaslessManager.send', async () => {
-        const { appKit, send } = makeAppKit(wallet);
+    it('forwards providerId to gaslessManager.sendTransaction', async () => {
+        const { appKit, sendTransaction } = makeAppKit(wallet);
 
-        await sendGaslessTransaction(appKit, { estimate: makeEstimate(), providerId: 'custom' });
+        await sendGaslessTransaction(appKit, { quote: makeQuote(), providerId: 'custom' });
 
-        expect(send).toHaveBeenCalledWith(expect.anything(), 'custom');
+        expect(sendTransaction).toHaveBeenCalledWith(expect.anything(), 'custom');
     });
 
     it('throws plain Error when no wallet is connected', async () => {
         const { appKit } = makeAppKit(null);
 
-        await expect(sendGaslessTransaction(appKit, { estimate: makeEstimate() })).rejects.toThrow(
-            'Wallet not connected',
-        );
+        await expect(sendGaslessTransaction(appKit, { quote: makeQuote() })).rejects.toThrow('Wallet not connected');
     });
 
     it('throws GaslessError(SIGN_MESSAGE_NOT_SUPPORTED) when wallet lacks SignMessage feature', async () => {
@@ -99,26 +100,26 @@ describe('sendGaslessTransaction', () => {
         });
         const { appKit } = makeAppKit(walletWithoutFeature);
 
-        await expect(sendGaslessTransaction(appKit, { estimate: makeEstimate() })).rejects.toMatchObject({
+        await expect(sendGaslessTransaction(appKit, { quote: makeQuote() })).rejects.toMatchObject({
             name: 'GaslessError',
             code: GaslessErrorCode.SignMessageNotSupported,
         });
         expect(walletWithoutFeature.signMessage).not.toHaveBeenCalled();
     });
 
-    it('throws GaslessError(TOO_MANY_MESSAGES) when estimate exceeds wallet maxMessages', async () => {
+    it('throws GaslessError(TOO_MANY_MESSAGES) when quote exceeds wallet maxMessages', async () => {
         const walletWithCap = makeWallet({
             getSupportedFeatures: () => [{ name: 'SignMessage', maxMessages: 1 }],
         });
         const { appKit } = makeAppKit(walletWithCap);
-        const estimate = makeEstimate({
+        const quote = makeQuote({
             messages: [
                 { address: TEST_ADDRESS, amount: '1' },
                 { address: TEST_ADDRESS, amount: '2' },
             ],
         });
 
-        await expect(sendGaslessTransaction(appKit, { estimate })).rejects.toMatchObject({
+        await expect(sendGaslessTransaction(appKit, { quote })).rejects.toMatchObject({
             name: 'GaslessError',
             code: GaslessErrorCode.TooManyMessages,
         });
@@ -127,18 +128,18 @@ describe('sendGaslessTransaction', () => {
 
     it('proceeds when wallet returns undefined features (unknown capabilities)', async () => {
         const walletWithUnknown = makeWallet({ getSupportedFeatures: () => undefined });
-        const { appKit, send } = makeAppKit(walletWithUnknown);
+        const { appKit, sendTransaction } = makeAppKit(walletWithUnknown);
 
-        await sendGaslessTransaction(appKit, { estimate: makeEstimate() });
+        await sendGaslessTransaction(appKit, { quote: makeQuote() });
 
         expect(walletWithUnknown.signMessage).toHaveBeenCalled();
-        expect(send).toHaveBeenCalled();
+        expect(sendTransaction).toHaveBeenCalled();
     });
 
-    it('propagates errors from gaslessManager.send', async () => {
-        const { appKit, send } = makeAppKit(wallet);
-        send.mockRejectedValueOnce(new Error('relayer offline'));
+    it('propagates errors from gaslessManager.sendTransaction', async () => {
+        const { appKit, sendTransaction } = makeAppKit(wallet);
+        sendTransaction.mockRejectedValueOnce(new Error('relayer offline'));
 
-        await expect(sendGaslessTransaction(appKit, { estimate: makeEstimate() })).rejects.toThrow('relayer offline');
+        await expect(sendGaslessTransaction(appKit, { quote: makeQuote() })).rejects.toThrow('relayer offline');
     });
 });

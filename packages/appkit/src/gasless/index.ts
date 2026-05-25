@@ -13,7 +13,7 @@ export type {
     GaslessProviderInterface,
     GaslessConfig,
     GaslessGasJetton,
-    GaslessEstimateParams,
-    GaslessEstimateResult,
+    GaslessQuoteParams,
+    GaslessQuote,
     GaslessSendParams,
 } from '@ton/walletkit';

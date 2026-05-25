@@ -5,9 +5,9 @@
 ## Flow
 
 1. **Configure** – fetch the relayer config (`getConfig`) to learn which jettons it accepts as fee payment and its relay address.
-2. **Estimate** – call `estimate` with your messages and chosen fee jetton. The relayer returns *wrapped* messages, a fee, and a `validUntil` window.
+2. **Quote** – call `getQuote` with your messages and chosen fee jetton. The relayer returns *wrapped* messages, a fee, and a `validUntil` window.
 3. **Sign** – pass the wrapped messages to `wallet.signMessage` (TonConnect `SignMessage` feature). The wallet returns a signed *internal-message* BoC.
-4. **Send** – submit the signed BoC via `send`; the relayer converts it to an external message, pays the gas, and broadcasts.
+4. **Send** – submit the signed BoC via `sendTransaction`; the relayer converts it to an external message, pays the gas, and broadcasts.
 
 ## Quick Start
 
@@ -42,7 +42,7 @@ import { Network } from '@ton/walletkit';
 const config = await kit.gasless.getConfig();
 const feeJetton = config.supportedGasJettons[0].jettonMaster;
 
-const estimate = await kit.gasless.estimate({
+const quote = await kit.gasless.getQuote({
     feeJettonMaster: feeJetton,
     walletAddress: wallet.getAddress(),
     walletPublicKey: wallet.getPublicKey(),
@@ -56,30 +56,30 @@ const estimate = await kit.gasless.estimate({
 });
 
 const { internalBoc } = await wallet.signMessage({
-    messages: estimate.messages,
-    validUntil: estimate.validUntil,
+    messages: quote.messages,
+    validUntil: quote.validUntil,
 });
 
-await kit.gasless.send({
+await kit.gasless.sendTransaction({
     walletPublicKey: wallet.getPublicKey(),
     internalBoc,
 });
 ```
 
-The `validUntil` timestamp is set by the relayer (typically ~2 minutes). In `@ton/appkit-react`, `useGaslessEstimate` already refreshes estimates automatically via a 2-minute `staleTime`; if you wire `estimate` manually, re-call it for long-running UIs before signing.
+The `validUntil` timestamp is set by the relayer (typically ~2 minutes). In `@ton/appkit-react`, `useGaslessQuote` already refreshes quotes automatically via a 2-minute `staleTime`; if you wire `getQuote` manually, re-call it for long-running UIs before signing.
 
 ## Error Codes
 
-`GaslessError` extends `DefiError`. The codes are exposed as both static constants on `GaslessError` and a `GaslessErrorCode` enum:
+`GaslessError` extends `DefiError`. The codes are exposed via the `GaslessErrorCode` enum:
 
 | Code | Meaning |
 |---|---|
 | `UNSUPPORTED_FEE_JETTON` | The relayer does not accept the chosen jetton as fee payment. |
-| `ESTIMATE_FAILED` | Relayer rejected the estimate (insufficient liquidity, malformed messages, …). |
+| `QUOTE_FAILED` | Relayer rejected the quote (insufficient liquidity, malformed messages, …). |
 | `SEND_FAILED` | Relayer rejected the signed BoC, or all retries were exhausted. |
 | `CONFIG_FAILED` | Relayer config endpoint failed. |
 | `SIGN_MESSAGE_NOT_SUPPORTED` | Connected wallet does not implement the `SignMessage` feature. Surfaced by the higher-level `sendGaslessTransaction` action in `@ton/appkit`. |
-| `TOO_MANY_MESSAGES` | The estimate carries more messages than the wallet's advertised `SignMessage.maxMessages` cap. Surfaced by `sendGaslessTransaction` in `@ton/appkit`. |
+| `TOO_MANY_MESSAGES` | The quote carries more messages than the wallet's advertised `SignMessage.maxMessages` cap. Surfaced by `sendGaslessTransaction` in `@ton/appkit`. |
 
 ## Creating a Custom Gasless Provider
 
@@ -89,8 +89,8 @@ To target a different relayer, extend `GaslessProvider`:
 import {
     GaslessProvider,
     type GaslessConfig,
-    type GaslessEstimateParams,
-    type GaslessEstimateResult,
+    type GaslessQuoteParams,
+    type GaslessQuote,
     type GaslessSendParams,
     type Network,
 } from '@ton/walletkit';
@@ -106,11 +106,11 @@ export class MyGaslessProvider extends GaslessProvider {
         // …
     }
 
-    async estimate(params: GaslessEstimateParams): Promise<GaslessEstimateResult> {
+    async getQuote(params: GaslessQuoteParams): Promise<GaslessQuote> {
         // …
     }
 
-    async send(params: GaslessSendParams): Promise<void> {
+    async sendTransaction(params: GaslessSendParams): Promise<void> {
         // …
     }
 }
@@ -127,10 +127,10 @@ export class MyGaslessProvider extends GaslessProvider {
 #### `getConfig(providerId?)`
 Fetch the relayer config (supported jettons, relay address).
 
-#### `estimate(params, providerId?)`
+#### `getQuote(params, providerId?)`
 Wrap caller's messages with relayer fee-collection logic. Returns wrapped messages, fee, and `validUntil`.
 
-#### `send(params, providerId?)`
+#### `sendTransaction(params, providerId?)`
 Submit a signed internal-message BoC to the relayer.
 
 #### `registerProvider(provider)` / `setDefaultProvider(providerId)`

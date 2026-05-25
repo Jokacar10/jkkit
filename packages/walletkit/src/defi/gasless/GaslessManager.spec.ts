@@ -9,7 +9,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import type { GaslessProviderInterface } from '../../api/interfaces';
-import type { GaslessConfig, GaslessEstimateParams, GaslessEstimateResult, GaslessSendParams } from '../../api/models';
+import type { GaslessConfig, GaslessQuote, GaslessQuoteParams, GaslessSendParams } from '../../api/models';
 import { Network } from '../../api/models';
 import { EventEmitter } from '../../core/EventEmitter';
 import type { ProviderFactoryContext } from '../../types/factory';
@@ -26,14 +26,14 @@ const makeProvider = (providerId: string): GaslessProviderInterface => ({
         relayAddress: TEST_ADDRESS,
         supportedGasJettons: [{ jettonMaster: TEST_ADDRESS }],
     }),
-    estimate: vi.fn<(p: GaslessEstimateParams) => Promise<GaslessEstimateResult>>().mockResolvedValue({
+    getQuote: vi.fn<(p: GaslessQuoteParams) => Promise<GaslessQuote>>().mockResolvedValue({
         messages: [],
         fee: '0',
         validUntil: 0,
         relayAddress: TEST_ADDRESS,
         from: TEST_ADDRESS,
     }),
-    send: vi.fn<(p: GaslessSendParams) => Promise<void>>().mockResolvedValue(undefined),
+    sendTransaction: vi.fn<(p: GaslessSendParams) => Promise<void>>().mockResolvedValue(undefined),
 });
 
 const makeManager = (): { manager: GaslessManager; emitter: EventEmitter<never> } => {
@@ -115,14 +115,14 @@ describe('GaslessManager delegation', () => {
         expect(provider.getConfig).toHaveBeenCalledTimes(1);
     });
 
-    it('forwards estimate to the named provider', async () => {
+    it('forwards getQuote to the named provider', async () => {
         const { manager } = makeManager();
         const a = makeProvider('a');
         const b = makeProvider('b');
         manager.registerProvider(a);
         manager.registerProvider(b);
 
-        await manager.estimate(
+        await manager.getQuote(
             {
                 feeJettonMaster: TEST_ADDRESS,
                 walletAddress: TEST_ADDRESS,
@@ -132,29 +132,29 @@ describe('GaslessManager delegation', () => {
             'b',
         );
 
-        expect(a.estimate).not.toHaveBeenCalled();
-        expect(b.estimate).toHaveBeenCalledTimes(1);
+        expect(a.getQuote).not.toHaveBeenCalled();
+        expect(b.getQuote).toHaveBeenCalledTimes(1);
     });
 
-    it('forwards send to the default provider', async () => {
+    it('forwards sendTransaction to the default provider', async () => {
         const { manager } = makeManager();
         const provider = makeProvider('one');
         manager.registerProvider(provider);
 
-        await manager.send({ walletPublicKey: '0xabc', internalBoc: 'AAA=' as never });
+        await manager.sendTransaction({ walletPublicKey: '0xabc', internalBoc: 'AAA=' as never });
 
-        expect(provider.send).toHaveBeenCalledTimes(1);
+        expect(provider.sendTransaction).toHaveBeenCalledTimes(1);
     });
 
-    it('rethrows provider errors from estimate without wrapping', async () => {
+    it('rethrows provider errors from getQuote without wrapping', async () => {
         const { manager } = makeManager();
         const provider = makeProvider('one');
-        const error = new GaslessError('relayer down', GaslessErrorCode.EstimateFailed);
-        (provider.estimate as ReturnType<typeof vi.fn>).mockRejectedValueOnce(error);
+        const error = new GaslessError('relayer down', GaslessErrorCode.QuoteFailed);
+        (provider.getQuote as ReturnType<typeof vi.fn>).mockRejectedValueOnce(error);
         manager.registerProvider(provider);
 
         await expect(
-            manager.estimate({
+            manager.getQuote({
                 feeJettonMaster: TEST_ADDRESS,
                 walletAddress: TEST_ADDRESS,
                 walletPublicKey: '0xabc',

@@ -133,11 +133,11 @@ export {
     type GetGaslessConfigErrorType,
 } from './gasless/get-gasless-config';
 export {
-    getGaslessEstimate,
-    type GetGaslessEstimateOptions,
-    type GetGaslessEstimateReturnType,
-    type GetGaslessEstimateErrorType,
-} from './gasless/get-gasless-estimate';
+    getGaslessQuote,
+    type GetGaslessQuoteOptions,
+    type GetGaslessQuoteReturnType,
+    type GetGaslessQuoteErrorType,
+} from './gasless/get-gasless-quote';
 export {
     sendGaslessTransaction,
     type SendGaslessTransactionParameters,

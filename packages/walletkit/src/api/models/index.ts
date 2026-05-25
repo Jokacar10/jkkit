@@ -140,8 +140,8 @@ export { UnstakeMode } from './staking/UnstakeMode';
 // Gasless models
 export type { GaslessConfig } from './gasless/GaslessConfig';
 export type { GaslessGasJetton } from './gasless/GaslessGasJetton';
-export type { GaslessEstimateParams } from './gasless/GaslessEstimateParams';
-export type { GaslessEstimateResult } from './gasless/GaslessEstimateResult';
+export type { GaslessQuoteParams } from './gasless/GaslessQuoteParams';
+export type { GaslessQuote } from './gasless/GaslessQuote';
 export type { GaslessSendParams } from './gasless/GaslessSendParams';
 
 // Transaction models

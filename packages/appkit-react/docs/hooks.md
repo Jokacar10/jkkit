@@ -858,12 +858,12 @@ return (
 );
 ```
 
-### `useGaslessEstimate`
+### `useGaslessQuote`
 
-Hook to fetch a gasless estimate. Auto-refetches as inputs change; cached results become stale after ~2 minutes (matches the relayer `validUntil` window).
+Hook to fetch a gasless quote. Auto-refetches as inputs change; cached results become stale after ~2 minutes (matches the relayer `validUntil` window).
 
 ```tsx
-const { data: estimate, isFetching } = useGaslessEstimate({
+const { data: quote, isFetching } = useGaslessQuote({
     feeJettonMaster: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs', // USDT
     messages: [
         {
@@ -876,11 +876,11 @@ const { data: estimate, isFetching } = useGaslessEstimate({
 
 return (
     <div>
-        {isFetching && <span>Estimating...</span>}
-        {estimate && (
+        {isFetching && <span>Quoting...</span>}
+        {quote && (
             <>
-                <div>Fee: {estimate.fee}</div>
-                <div>Valid until: {new Date(estimate.validUntil * 1000).toISOString()}</div>
+                <div>Fee: {quote.fee}</div>
+                <div>Valid until: {new Date(quote.validUntil * 1000).toISOString()}</div>
             </>
         )}
     </div>
@@ -889,24 +889,24 @@ return (
 
 ### `useSendGaslessTransaction`
 
-Hook to sign a previously computed estimate and submit the resulting BoC to the relayer.
+Hook to sign a previously computed quote and submit the resulting BoC to the relayer.
 
 Throws:
 - `GaslessError(SIGN_MESSAGE_NOT_SUPPORTED)` if the wallet does not advertise `SignMessage`.
-- `GaslessError(TOO_MANY_MESSAGES)` if the estimate carries more messages than the wallet's `maxMessages` cap.
+- `GaslessError(TOO_MANY_MESSAGES)` if the quote carries more messages than the wallet's `maxMessages` cap.
 
 ```tsx
-const { data: estimate } = useGaslessEstimate({ feeJettonMaster, messages });
+const { data: quote } = useGaslessQuote({ feeJettonMaster, messages });
 const { mutateAsync: sendGasless, isPending } = useSendGaslessTransaction();
 
 const handleSend = async () => {
-    if (!estimate) return;
-    const { internalBoc, fee } = await sendGasless({ estimate });
+    if (!quote) return;
+    const { internalBoc, fee } = await sendGasless({ quote });
     console.log('Submitted. Fee:', fee, 'BoC:', internalBoc);
 };
 
 return (
-    <button onClick={handleSend} disabled={!estimate || isPending}>
+    <button onClick={handleSend} disabled={!quote || isPending}>
         {isPending ? 'Sending...' : 'Send Gasless'}
     </button>
 );

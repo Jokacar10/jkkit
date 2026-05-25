@@ -6,7 +6,7 @@
  *
  */
 
-import type { GaslessConfig, GaslessEstimateParams, GaslessEstimateResult, GaslessSendParams } from '../models';
+import type { GaslessConfig, GaslessQuote, GaslessQuoteParams, GaslessSendParams } from '../models';
 import type { DefiManagerAPI } from './DefiManagerAPI';
 import type { DefiProvider } from './DefiProvider';
 
@@ -24,15 +24,15 @@ export interface GaslessAPI extends DefiManagerAPI<GaslessProviderInterface> {
     getConfig(providerId?: string): Promise<GaslessConfig>;
 
     /**
-     * Estimate fees and obtain relayer-wrapped messages for signing.
+     * Quote fees and obtain relayer-wrapped messages for signing.
      *
      * Pass the returned `messages` to `wallet.signMessage` to obtain a signed
-     * internal-message BoC, then submit it via `send`.
+     * internal-message BoC, then submit it via `sendTransaction`.
      *
-     * @param params Estimation parameters (wallet identity, fee jetton, messages)
+     * @param params Quote parameters (wallet identity, fee jetton, messages)
      * @param providerId Provider identifier (optional, uses default if not specified)
      */
-    estimate(params: GaslessEstimateParams, providerId?: string): Promise<GaslessEstimateResult>;
+    getQuote(params: GaslessQuoteParams, providerId?: string): Promise<GaslessQuote>;
 
     /**
      * Submit a signed transaction BoC to the relayer for on-chain execution.
@@ -40,7 +40,7 @@ export interface GaslessAPI extends DefiManagerAPI<GaslessProviderInterface> {
      * @param params Signed message and wallet public key
      * @param providerId Provider identifier (optional, uses default if not specified)
      */
-    send(params: GaslessSendParams, providerId?: string): Promise<void>;
+    sendTransaction(params: GaslessSendParams, providerId?: string): Promise<void>;
 }
 
 /**
@@ -60,12 +60,12 @@ export interface GaslessProviderInterface extends DefiProvider {
     getConfig(): Promise<GaslessConfig>;
 
     /**
-     * Estimate fees and return relayer-wrapped messages for signing.
+     * Quote fees and return relayer-wrapped messages for signing.
      */
-    estimate(params: GaslessEstimateParams): Promise<GaslessEstimateResult>;
+    getQuote(params: GaslessQuoteParams): Promise<GaslessQuote>;
 
     /**
      * Submit a signed transaction BoC to the relayer.
      */
-    send(params: GaslessSendParams): Promise<void>;
+    sendTransaction(params: GaslessSendParams): Promise<void>;
 }
