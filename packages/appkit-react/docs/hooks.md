@@ -843,15 +843,15 @@ Gasless lets a dApp submit on-chain transactions without the user holding TON fo
 
 ### `useGaslessConfig`
 
-Hook to fetch the relayer config (supported jettons + relay address).
+Hook to fetch the relayer config (supported fee assets + relay address).
 
 ```tsx
 const { data: config, isLoading } = useGaslessConfig();
 return (
     <select>
-        {config?.supportedGasJettons.map((j) => (
-            <option key={j.jettonMaster} value={j.jettonMaster}>
-                {j.jettonMaster}
+        {config?.supportedAssets.map((asset) => (
+            <option key={asset.address} value={asset.address}>
+                {asset.address}
             </option>
         ))}
     </select>
@@ -860,11 +860,11 @@ return (
 
 ### `useGaslessQuote`
 
-Hook to fetch a gasless quote. Auto-refetches as inputs change; cached results become stale after ~2 minutes (matches the relayer `validUntil` window).
+Hook to fetch a gasless quote. Auto-refetches as inputs change; cached results become stale after ~2 minutes (matches the relayer `validUntil` window). Omit `feeAsset` for free / sponsored providers — jetton-fee providers throw `GaslessError(UNSUPPORTED_OPERATION)` in that case.
 
 ```tsx
 const { data: quote, isFetching } = useGaslessQuote({
-    feeJettonMaster: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs', // USDT
+    feeAsset: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs', // USDT
     messages: [
         {
             address: 'EQ...jetton_wallet_address',
@@ -896,13 +896,13 @@ Throws:
 - `GaslessError(TOO_MANY_MESSAGES)` if the quote carries more messages than the wallet's `maxMessages` cap.
 
 ```tsx
-const { data: quote } = useGaslessQuote({ feeJettonMaster, messages });
+const { data: quote } = useGaslessQuote({ feeAsset, messages });
 const { mutateAsync: sendGasless, isPending } = useSendGaslessTransaction();
 
 const handleSend = async () => {
     if (!quote) return;
-    const { internalBoc, fee } = await sendGasless({ quote });
-    console.log('Submitted. Fee:', fee, 'BoC:', internalBoc);
+    const { normalizedHash, internalBoc } = await sendGasless({ quote });
+    console.log('Submitted. Hash:', normalizedHash, 'BoC:', internalBoc);
 };
 
 return (

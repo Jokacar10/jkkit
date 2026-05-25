@@ -18,7 +18,7 @@ import {
     useSendGaslessTransaction,
 } from '@ton/appkit-react';
 import { asBase64, compareAddress, createJettonTransferPayload, GaslessError, parseUnits } from '@ton/appkit';
-import type { GaslessGasJetton, TransactionRequestMessage } from '@ton/appkit';
+import type { GaslessSupportedAsset, TransactionRequestMessage } from '@ton/appkit';
 import { toast } from 'sonner';
 
 import { Layout } from '@/core/components';
@@ -55,20 +55,20 @@ export const GaslessPage: FC = () => {
 
     const [recipient, setRecipient] = useState('');
     const [amount, setAmount] = useState('0.1');
-    const [feeJettonMaster, setFeeJettonMaster] = useState<string | null>(null);
+    const [feeAsset, setFeeAsset] = useState<string | null>(null);
 
     useEffect(() => {
         if (address && !recipient) setRecipient(address);
     }, [address, recipient]);
 
     useEffect(() => {
-        if (!feeJettonMaster && gaslessConfig?.supportedGasJettons.length) {
-            const preferred = gaslessConfig.supportedGasJettons.find((j: GaslessGasJetton) =>
-                compareAddress(j.jettonMaster, USDT_MASTER_MAINNET),
+        if (!feeAsset && gaslessConfig?.supportedAssets.length) {
+            const preferred = gaslessConfig.supportedAssets.find((j: GaslessSupportedAsset) =>
+                compareAddress(j.address, USDT_MASTER_MAINNET),
             );
-            setFeeJettonMaster(preferred?.jettonMaster ?? gaslessConfig.supportedGasJettons[0].jettonMaster);
+            setFeeAsset(preferred?.address ?? gaslessConfig.supportedAssets[0].address);
         }
-    }, [feeJettonMaster, gaslessConfig]);
+    }, [feeAsset, gaslessConfig]);
 
     const { data: usdtBalance } = useJettonBalanceByAddress({
         jettonAddress: USDT_MASTER_MAINNET,
@@ -112,9 +112,9 @@ export const GaslessPage: FC = () => {
         isFetching: isQuoting,
         error: quoteError,
     } = useGaslessQuote({
-        feeJettonMaster: feeJettonMaster ?? undefined,
+        feeAsset: feeAsset ?? undefined,
         messages: messages ?? undefined,
-        query: { enabled: Boolean(address && feeJettonMaster && messages) },
+        query: { enabled: Boolean(address && feeAsset && messages) },
     });
 
     const now = useNow();
@@ -193,16 +193,16 @@ export const GaslessPage: FC = () => {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Fee jetton</label>
+                            <label className="text-sm font-medium">Fee asset</label>
                             <select
                                 className="w-full p-2 bg-secondary rounded-md border border-border"
-                                value={feeJettonMaster ?? ''}
-                                onChange={(e) => setFeeJettonMaster(e.target.value)}
-                                disabled={isConfigLoading || !gaslessConfig?.supportedGasJettons.length}
+                                value={feeAsset ?? ''}
+                                onChange={(e) => setFeeAsset(e.target.value)}
+                                disabled={isConfigLoading || !gaslessConfig?.supportedAssets.length}
                             >
-                                {gaslessConfig?.supportedGasJettons.map((j) => (
-                                    <option key={j.jettonMaster} value={j.jettonMaster}>
-                                        {j.jettonMaster.slice(0, 6)}…{j.jettonMaster.slice(-4)}
+                                {gaslessConfig?.supportedAssets.map((asset) => (
+                                    <option key={asset.address} value={asset.address}>
+                                        {asset.address.slice(0, 6)}…{asset.address.slice(-4)}
                                     </option>
                                 ))}
                             </select>

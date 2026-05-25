@@ -32,7 +32,7 @@ const makeProvider = (providerId: string): GaslessProviderInterface => ({
     getSupportedNetworks: () => [Network.mainnet()],
     getConfig: vi.fn<(n: Network) => Promise<GaslessConfig>>().mockResolvedValue({
         relayAddress: TEST_ADDRESS,
-        supportedGasJettons: [{ jettonMaster: TEST_ADDRESS }],
+        supportedAssets: [{ address: TEST_ADDRESS }],
     }),
     getQuote: vi.fn<(p: GaslessQuoteParams) => Promise<GaslessQuote>>().mockResolvedValue({
         network: Network.mainnet(),
@@ -139,7 +139,7 @@ describe('GaslessManager delegation', () => {
         await manager.getQuote(
             {
                 network: Network.mainnet(),
-                feeJettonMaster: TEST_ADDRESS,
+                feeAsset: TEST_ADDRESS,
                 walletAddress: TEST_ADDRESS,
                 walletPublicKey: '0xabc',
                 messages: [{ address: TEST_ADDRESS, amount: '0' }],
@@ -175,7 +175,7 @@ describe('GaslessManager delegation', () => {
         await expect(
             manager.getQuote({
                 network: Network.mainnet(),
-                feeJettonMaster: TEST_ADDRESS,
+                feeAsset: TEST_ADDRESS,
                 walletAddress: TEST_ADDRESS,
                 walletPublicKey: '0xabc',
                 messages: [{ address: TEST_ADDRESS, amount: '0' }],

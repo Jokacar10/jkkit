@@ -14,7 +14,7 @@ import { useGaslessQuote, useSendGaslessTransaction } from '@ton/appkit-react';
 export const UseSendGaslessTransactionExample = () => {
     // SAMPLE_START: USE_SEND_GASLESS_TRANSACTION
     const { data: quote } = useGaslessQuote({
-        feeJettonMaster: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
+        feeAsset: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
         messages: [
             {
                 address: 'EQ...jetton_wallet_address',

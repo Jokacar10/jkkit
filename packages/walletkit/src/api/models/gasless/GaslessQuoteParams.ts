@@ -19,8 +19,17 @@ import type { TransactionRequestMessage } from '../transactions/TransactionReque
 export interface GaslessQuoteParams {
     /** Network the gasless transaction should run on */
     network: Network;
-    /** Master address of the jetton used to pay the relayer's fee */
-    feeJettonMaster: UserFriendlyAddress;
+    /**
+     * Asset address used to pay the relayer's fee. Today this is the master
+     * address of a jetton (the only mode TonAPI supports), but the field is
+     * intentionally generic — future providers may accept NFT items or other
+     * assets and the provider decides at runtime which is supported.
+     *
+     * Omit (`undefined`) for free / sponsored providers that do not charge a
+     * per-transaction fee. Jetton-only providers (e.g. TonAPI) throw
+     * `GaslessError(UnsupportedOperation)` in that case.
+     */
+    feeAsset?: UserFriendlyAddress;
     /** Sender wallet address */
     walletAddress: UserFriendlyAddress;
     /** Sender wallet public key */

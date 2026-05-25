@@ -36,7 +36,7 @@ describe('Gasless Actions Examples', () => {
 
         mockGetConfig = vi.fn().mockResolvedValue({
             relayAddress: TEST_ADDRESS,
-            supportedGasJettons: [{ jettonMaster: TEST_ADDRESS }],
+            supportedAssets: [{ address: TEST_ADDRESS }],
         });
         mockGetQuote = vi.fn().mockResolvedValue({
             messages: [{ address: TEST_ADDRESS, amount: '60000000' }],

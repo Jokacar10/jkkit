@@ -12,7 +12,7 @@ import type { TonApiGaslessConfig } from '../types/config';
 
 export const mapGaslessConfig = (raw: TonApiGaslessConfig): GaslessConfig => ({
     relayAddress: asAddressFriendly(raw.relay_address),
-    supportedGasJettons: raw.gas_jettons.map((jetton) => ({
-        jettonMaster: asAddressFriendly(jetton.master_id),
+    supportedAssets: raw.gas_jettons.map((jetton) => ({
+        address: asAddressFriendly(jetton.master_id),
     })),
 });

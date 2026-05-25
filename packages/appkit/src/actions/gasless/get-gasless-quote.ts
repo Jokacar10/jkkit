@@ -14,8 +14,13 @@ import type { AppKit } from '../../core/app-kit';
 import { getSelectedWallet } from '../wallets/get-selected-wallet';
 
 export interface GetGaslessQuoteOptions {
-    /** Master address of the jetton used to pay the relayer's fee */
-    feeJettonMaster: string;
+    /**
+     * Asset address used to pay the relayer's fee (currently a jetton master
+     * for TonAPI; future providers may accept NFT items or other assets).
+     * Omit for free / sponsored providers — jetton-only providers will throw
+     * `GaslessError(UnsupportedOperation)` in that case.
+     */
+    feeAsset?: string;
     /** User's messages to include in the gasless transaction */
     messages: TransactionRequestMessage[];
     /** Network to quote on. Defaults to the selected wallet's network. */
@@ -47,7 +52,7 @@ export const getGaslessQuote = async (appKit: AppKit, options: GetGaslessQuoteOp
     return appKit.gaslessManager.getQuote(
         {
             network: options.network ?? wallet.getNetwork(),
-            feeJettonMaster: options.feeJettonMaster,
+            feeAsset: options.feeAsset,
             walletAddress: wallet.getAddress(),
             walletPublicKey: wallet.getPublicKey(),
             messages: options.messages,

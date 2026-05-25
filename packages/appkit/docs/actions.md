@@ -690,22 +690,22 @@ unsubscribe();
 
 ### `getGaslessConfig`
 
-Fetch relayer configuration (supported jettons + relay address).
+Fetch relayer configuration (supported fee assets + relay address).
 
 ```ts
 const config = await getGaslessConfig(appKit);
-const feeJetton = config.supportedGasJettons[0].jettonMaster;
+const feeAsset = config.supportedAssets[0].address;
 ```
 
 ### `getGaslessQuote`
 
-Ask the relayer for a gasless transaction quote. Returns relayer-wrapped messages, the fee charged in the fee jetton, and the bundle validity window (`validUntil`).
+Ask the relayer for a gasless transaction quote. Returns relayer-wrapped messages, the fee charged in the chosen `feeAsset`, and the bundle validity window (`validUntil`). Omit `feeAsset` for free / sponsored providers — jetton-fee providers (like TonAPI) throw `GaslessError(UNSUPPORTED_OPERATION)` in that case.
 
 The quote is intended to be passed verbatim to `sendGaslessTransaction`. Quotes are typically valid for ~2 minutes.
 
 ```ts
 const quote = await getGaslessQuote(appKit, {
-    feeJettonMaster: feeJetton,
+    feeAsset,
     messages: [
         {
             address: 'EQ...jetton_wallet_address',

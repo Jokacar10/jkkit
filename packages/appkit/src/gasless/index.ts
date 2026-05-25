@@ -12,7 +12,7 @@ export type {
     GaslessAPI,
     GaslessProviderInterface,
     GaslessConfig,
-    GaslessGasJetton,
+    GaslessSupportedAsset,
     GaslessQuoteParams,
     GaslessQuote,
     GaslessSendParams,

@@ -38,18 +38,13 @@ export const getGaslessQuoteQueryOptions = <selectData = GetGaslessQuoteData>(
     return {
         staleTime: GASLESS_QUOTE_STALE_TIME_MS,
         ...options.query,
-        enabled: Boolean(
-            options.feeJettonMaster &&
-            options.messages &&
-            options.messages.length > 0 &&
-            (options.query?.enabled ?? true),
-        ),
+        // `feeAsset` is intentionally not part of the gate: free / sponsored
+        // providers accept an undefined asset, and jetton-only providers throw
+        // a typed error themselves. We only require messages to send.
+        enabled: Boolean(options.messages && options.messages.length > 0 && (options.query?.enabled ?? true)),
         queryFn: async (context) => {
             const [, parameters] = context.queryKey as [string, GetGaslessQuoteOptions];
 
-            if (!parameters.feeJettonMaster) {
-                throw new Error('feeJettonMaster is required');
-            }
             if (!parameters.messages || parameters.messages.length === 0) {
                 throw new Error('messages is required');
             }

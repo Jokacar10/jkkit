@@ -12,7 +12,7 @@ import { useGaslessQuote } from '@ton/appkit-react';
 export const UseGaslessQuoteExample = () => {
     // SAMPLE_START: USE_GASLESS_QUOTE
     const { data: quote, isFetching } = useGaslessQuote({
-        feeJettonMaster: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs', // USDT
+        feeAsset: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs', // USDT
         messages: [
             {
                 address: 'EQ...jetton_wallet_address',

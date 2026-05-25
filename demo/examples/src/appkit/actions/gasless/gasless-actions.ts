@@ -48,13 +48,13 @@ export const gaslessExample = async (appKit: AppKit) => {
 
     // SAMPLE_START: GET_GASLESS_CONFIG
     const config = await getGaslessConfig(appKit);
-    const feeJetton = config.supportedGasJettons[0].jettonMaster;
+    const feeAsset = config.supportedAssets[0].address;
     console.log('Relay address:', config.relayAddress);
     // SAMPLE_END: GET_GASLESS_CONFIG
 
     // SAMPLE_START: GET_GASLESS_QUOTE
     const quote = await getGaslessQuote(appKit, {
-        feeJettonMaster: feeJetton,
+        feeAsset,
         messages: [
             {
                 address: 'EQ...jetton_wallet_address',

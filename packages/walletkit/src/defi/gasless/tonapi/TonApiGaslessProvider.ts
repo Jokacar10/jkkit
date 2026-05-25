@@ -133,7 +133,15 @@ export class TonApiGaslessProvider extends GaslessProvider {
     }
 
     async getQuote(params: GaslessQuoteParams): Promise<GaslessQuote> {
-        const masterId = Address.parse(params.feeJettonMaster).toRawString();
+        if (!params.feeAsset) {
+            throw new GaslessError(
+                'TonAPI gasless requires `feeAsset` (jetton master). Free / sponsored modes are not supported by this provider.',
+                GaslessErrorCode.UnsupportedOperation,
+                { network: params.network.chainId },
+            );
+        }
+
+        const masterId = Address.parse(params.feeAsset).toRawString();
         const body = buildGaslessQuoteRequest(params);
 
         try {

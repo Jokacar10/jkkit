@@ -130,7 +130,7 @@ describe('TonApiGaslessProvider.getConfig', () => {
         const cfg = await provider.getConfig(Network.mainnet());
 
         expect(cfg.relayAddress).toBe(Address.parse(TEST_ADDRESS).toString({ bounceable: true }));
-        expect(cfg.supportedGasJettons).toHaveLength(1);
+        expect(cfg.supportedAssets).toHaveLength(1);
     });
 
     it('hits /v2/gasless/config on the mainnet endpoint when called for mainnet', async () => {
@@ -207,7 +207,7 @@ describe('TonApiGaslessProvider.getQuote', () => {
 
     const baseQuoteParams = {
         network: Network.mainnet(),
-        feeJettonMaster: TEST_ADDRESS,
+        feeAsset: TEST_ADDRESS,
         walletAddress: TEST_ADDRESS,
         walletPublicKey: TEST_PUBKEY,
         messages: [{ address: TEST_ADDRESS, amount: '0' }],
@@ -280,6 +280,25 @@ describe('TonApiGaslessProvider.getQuote', () => {
             code: GaslessErrorCode.UnsupportedFeeJetton,
             message: 'Jetton is not supported.',
         });
+    });
+
+    it('throws GaslessError(UnsupportedOperation) when feeAsset is omitted', async () => {
+        const fetchApi = makeFetch();
+        const provider = makeProvider(fetchApi);
+
+        await expect(
+            provider.getQuote({
+                network: Network.mainnet(),
+                feeAsset: undefined,
+                walletAddress: TEST_ADDRESS,
+                walletPublicKey: TEST_PUBKEY,
+                messages: [{ address: TEST_ADDRESS, amount: '0' }],
+            }),
+        ).rejects.toMatchObject({
+            name: 'GaslessError',
+            code: GaslessErrorCode.UnsupportedOperation,
+        });
+        expect(fetchApi).not.toHaveBeenCalled();
     });
 });
 

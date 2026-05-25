@@ -16,9 +16,9 @@ export const UseGaslessConfigExample = () => {
 
     return (
         <select>
-            {config?.supportedGasJettons.map((j) => (
-                <option key={j.jettonMaster} value={j.jettonMaster}>
-                    {j.jettonMaster}
+            {config?.supportedAssets.map((asset) => (
+                <option key={asset.address} value={asset.address}>
+                    {asset.address}
                 </option>
             ))}
         </select>

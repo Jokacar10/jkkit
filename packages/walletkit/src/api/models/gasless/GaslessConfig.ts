@@ -7,17 +7,21 @@
  */
 
 import type { UserFriendlyAddress } from '../core/Primitives';
-import type { GaslessGasJetton } from './GaslessGasJetton';
+import type { GaslessSupportedAsset } from './GaslessSupportedAsset';
 
 /**
  * Relayer configuration for gasless transactions.
  *
- * Reports which jettons the relayer accepts as fee payment and the address
- * where the relayer fee is routed.
+ * Reports which assets the relayer accepts as fee payment and the address
+ * where the relayer fee is routed. `supportedAssets` may be empty for
+ * free / sponsored providers that do not charge a per-transaction fee.
  */
 export interface GaslessConfig {
     /** Address where the relayer expects to receive the fee */
     relayAddress: UserFriendlyAddress;
-    /** Jettons supported by the relayer for paying the fee */
-    supportedGasJettons: GaslessGasJetton[];
+    /**
+     * Assets the relayer accepts as fee payment. Currently jetton masters
+     * for TonAPI; future providers may advertise NFT items or other assets.
+     */
+    supportedAssets: GaslessSupportedAsset[];
 }

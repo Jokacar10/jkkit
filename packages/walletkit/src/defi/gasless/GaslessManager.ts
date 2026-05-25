@@ -62,7 +62,7 @@ export class GaslessManager extends DefiManager<GaslessProviderInterface> implem
         log.debug('Quoting gasless transaction', {
             network: params.network.chainId,
             walletAddress: params.walletAddress,
-            feeJettonMaster: params.feeJettonMaster,
+            feeAsset: params.feeAsset,
             messagesCount: params.messages.length,
             providerId: providerId ?? this.defaultProviderId,
         });
