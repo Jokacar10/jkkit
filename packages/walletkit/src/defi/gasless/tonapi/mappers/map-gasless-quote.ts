@@ -8,7 +8,7 @@
 
 import { Address } from '@ton/core';
 
-import type { GaslessQuote, GaslessQuoteParams } from '../../../../api/models';
+import type { GaslessQuote, GaslessQuoteParams, Network } from '../../../../api/models';
 import { asAddressFriendly } from '../../../../utils/address';
 import { HexToBase64 } from '../../../../utils/base64';
 import { asHex } from '../../../../utils/hex';
@@ -40,9 +40,11 @@ export const buildGaslessQuoteRequest = (params: GaslessQuoteParams): TonApiGasl
 /**
  * Wire → domain: map the TonAPI estimate response to `GaslessQuote`.
  *
- * Hex BoCs in `payload` / `state_init` are converted back to base64.
+ * Hex BoCs in `payload` / `state_init` are converted back to base64. `network`
+ * is threaded in from the request — the relayer does not echo it.
  */
-export const mapGaslessQuote = (raw: TonApiGaslessEstimateResponse): GaslessQuote => ({
+export const mapGaslessQuote = (raw: TonApiGaslessEstimateResponse, network: Network): GaslessQuote => ({
+    network,
     messages: raw.messages.map((message) => ({
         address: asAddressFriendly(message.address),
         amount: message.amount,

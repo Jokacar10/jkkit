@@ -55,10 +55,6 @@ export const appKit = new AppKit({
         createTonstakersProvider(),
         createTonCenterStreamingProvider({ network: Network.mainnet(), apiKey: ENV_TON_API_KEY_MAINNET }),
         createTonCenterStreamingProvider({ network: Network.testnet(), apiKey: ENV_TON_API_KEY_TESTNET }),
-        // Note: `apiKey` is intentionally omitted. ENV_TON_API_KEY_MAINNET is a Toncenter v3 key
-        // (hex format) — TonAPI uses a different base32 token format, so passing the Toncenter
-        // key as Bearer here triggers a 401 "illegal base32 data" from TonAPI. The gasless
-        // config endpoint is public; supply a real TonAPI key here if you need higher rate limits.
-        createTonApiGaslessProvider({ network: Network.mainnet() }),
+        createTonApiGaslessProvider(),
     ],
 });

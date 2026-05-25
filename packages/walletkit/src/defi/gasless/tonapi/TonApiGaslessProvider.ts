@@ -8,67 +8,24 @@
 
 import { Address } from '@ton/core';
 
-import type { GaslessConfig, GaslessQuote, GaslessQuoteParams, GaslessSendParams } from '../../../api/models';
-import { Network } from '../../../api/models';
-import { BaseApiClient } from '../../../clients/BaseApiClient';
+import type { GaslessConfig, GaslessQuote, GaslessQuoteParams, GaslessSendParams, Network } from '../../../api/models';
+import { ApiClientTonApi } from '../../../clients/tonapi/ApiClientTonApi';
 import { globalLogger } from '../../../core/Logger';
 import type { ProviderFactoryContext } from '../../../types/factory';
-import { CallForSuccess } from '../../../utils/retry';
-import { GaslessErrorCode } from '../errors';
+import { delay } from '../../../utils/delay';
+import { GaslessError, GaslessErrorCode } from '../errors';
 import { GaslessProvider } from '../GaslessProvider';
+import { DEFAULT_PROVIDER_ID, DEFAULT_SEND_RETRIES, DEFAULT_SEND_RETRY_DELAY_MS } from './constants';
+import { isTransientError, networkFromChainId } from './helpers';
 import { mapGaslessConfig } from './mappers/map-gasless-config';
 import { mapTonApiGaslessError } from './mappers/map-gasless-error';
 import { buildGaslessQuoteRequest, mapGaslessQuote } from './mappers/map-gasless-quote';
 import { buildGaslessSendRequest } from './mappers/map-gasless-send';
+import type { TonApiGaslessChainConfig, TonApiGaslessProviderConfig } from './models';
 import type { TonApiGaslessConfig } from './types/config';
 import type { TonApiGaslessEstimateResponse } from './types/estimate';
 
 const log = globalLogger.createChild('TonApiGaslessProvider');
-
-const DEFAULT_SEND_RETRIES = 5;
-const DEFAULT_SEND_RETRY_DELAY_MS = 2000;
-
-const defaultEndpoint = (network: Network): string => {
-    switch (network.chainId) {
-        case Network.mainnet().chainId:
-            return 'https://tonapi.io';
-        case Network.tetra().chainId:
-            return 'https://tetra.tonapi.io';
-        default:
-            return 'https://testnet.tonapi.io';
-    }
-};
-
-class TonApiHttpClient extends BaseApiClient {
-    protected appendAuthHeaders(headers: Headers): void {
-        if (this.apiKey) {
-            headers.set('Authorization', `Bearer ${this.apiKey}`);
-        }
-    }
-}
-
-/**
- * Configuration for `TonApiGaslessProvider`.
- *
- * Shape mirrors `TonApiStreamingProviderConfig` — one provider instance per
- * network. To support both mainnet and testnet, register two providers.
- */
-export interface TonApiGaslessProviderConfig {
-    /** Network this provider operates on. Determines the default endpoint. */
-    network: Network;
-    /** Optional TonAPI REST endpoint override. */
-    endpoint?: string;
-    /** Optional bearer token for TonAPI. */
-    apiKey?: string;
-    /** Optional fetch implementation override (testing / SSR). */
-    fetchApi?: typeof fetch;
-    /** Optional provider id override. Defaults to `tonapi-${network.chainId}`. */
-    providerId?: string;
-    /** Number of send retries on transient errors. Defaults to 5. */
-    sendRetries?: number;
-    /** Delay between send retries in ms. Defaults to 2000. */
-    sendRetryDelayMs?: number;
-}
 
 /**
  * Gasless provider implementation backed by the public TonAPI REST API.
@@ -81,8 +38,9 @@ export interface TonApiGaslessProviderConfig {
  * import { createTonApiGaslessProvider } from '@ton/walletkit/gasless/tonapi';
  *
  * const provider = createTonApiGaslessProvider({
- *     network: Network.mainnet(),
- *     apiKey: process.env.TON_API_KEY,
+ *     chains: {
+ *         [Network.mainnet().chainId]: { apiKey: process.env.TON_API_KEY },
+ *     },
  * });
  *
  * kit.gasless.registerProvider(provider);
@@ -91,38 +49,77 @@ export interface TonApiGaslessProviderConfig {
 export class TonApiGaslessProvider extends GaslessProvider {
     readonly providerId: string;
 
-    private readonly network: Network;
-    private readonly http: TonApiHttpClient;
+    private readonly chainConfig: Record<string, TonApiGaslessChainConfig>;
+    private readonly fetchApi?: typeof fetch;
+    private readonly clients: Record<string, ApiClientTonApi> = {};
     private readonly sendRetries: number;
     private readonly sendRetryDelayMs: number;
 
-    constructor(config: TonApiGaslessProviderConfig) {
+    /**
+     * @internal Use {@link createTonApiGaslessProvider} (AppKit) or {@link TonApiGaslessProvider.createFromContext}.
+     */
+    private constructor(chainConfig: Record<string, TonApiGaslessChainConfig>, options: TonApiGaslessProviderConfig) {
         super();
-        this.network = config.network;
-        this.providerId = config.providerId ?? `tonapi-${config.network.chainId}`;
-        this.sendRetries = config.sendRetries ?? DEFAULT_SEND_RETRIES;
-        this.sendRetryDelayMs = config.sendRetryDelayMs ?? DEFAULT_SEND_RETRY_DELAY_MS;
-        this.http = new TonApiHttpClient(
-            {
-                endpoint: config.endpoint,
-                apiKey: config.apiKey,
-                fetchApi: config.fetchApi,
-                network: config.network,
-            },
-            defaultEndpoint(config.network),
-        );
+        this.chainConfig = chainConfig;
+        this.fetchApi = options.fetchApi;
+        this.providerId = options.providerId ?? DEFAULT_PROVIDER_ID;
+        this.sendRetries = options.sendRetries ?? DEFAULT_SEND_RETRIES;
+        this.sendRetryDelayMs = options.sendRetryDelayMs ?? DEFAULT_SEND_RETRY_DELAY_MS;
+
+        log.info('TonApiGaslessProvider initialized', {
+            providerId: this.providerId,
+            chains: Object.keys(this.chainConfig),
+        });
+    }
+
+    /**
+     * Build a provider that serves every network the kit was configured with.
+     *
+     * If `config.chains` is provided, only those chains are registered (and they
+     * must intersect with the kit's configured networks). Otherwise every
+     * configured network gets a default TonAPI client.
+     */
+    static createFromContext(
+        ctx: ProviderFactoryContext,
+        config: TonApiGaslessProviderConfig = {},
+    ): TonApiGaslessProvider {
+        const configuredChains = new Set(ctx.networkManager.getConfiguredNetworks().map((n) => n.chainId));
+        const chainConfig: Record<string, TonApiGaslessChainConfig> = {};
+
+        if (config.chains) {
+            for (const [chainId, perChain] of Object.entries(config.chains)) {
+                if (!configuredChains.has(chainId)) {
+                    log.warn('Skipping TonApi gasless chain not configured in the kit', { chainId });
+                    continue;
+                }
+                chainConfig[chainId] = perChain;
+            }
+        } else {
+            for (const chainId of configuredChains) {
+                chainConfig[chainId] = {};
+            }
+        }
+
+        if (Object.keys(chainConfig).length === 0) {
+            throw new Error(
+                'createTonApiGaslessProvider: no eligible networks (configure at least one network in the kit, or pass `chains` matching a configured network)',
+            );
+        }
+
+        return new TonApiGaslessProvider(chainConfig, config);
     }
 
     getSupportedNetworks(): Network[] {
-        return [this.network];
+        return Object.keys(this.chainConfig).map(networkFromChainId);
     }
 
-    async getConfig(): Promise<GaslessConfig> {
+    async getConfig(network: Network): Promise<GaslessConfig> {
         try {
-            const raw = await this.http.getJson<TonApiGaslessConfig>('/v2/gasless/config');
+            const http = this.getClient(network);
+            const raw = await http.getJson<TonApiGaslessConfig>('/v2/gasless/config');
             return mapGaslessConfig(raw);
         } catch (error) {
-            log.error('Failed to fetch gasless config', { error });
+            log.error('Failed to fetch gasless config', { error, chainId: network.chainId });
             throw mapTonApiGaslessError(error, GaslessErrorCode.ConfigFailed, 'Failed to fetch gasless config');
         }
     }
@@ -132,11 +129,9 @@ export class TonApiGaslessProvider extends GaslessProvider {
         const body = buildGaslessQuoteRequest(params);
 
         try {
-            const raw = await this.http.postJson<TonApiGaslessEstimateResponse>(
-                `/v2/gasless/estimate/${masterId}`,
-                body,
-            );
-            return mapGaslessQuote(raw);
+            const http = this.getClient(params.network);
+            const raw = await http.postJson<TonApiGaslessEstimateResponse>(`/v2/gasless/estimate/${masterId}`, body);
+            return mapGaslessQuote(raw, params.network);
         } catch (error) {
             log.error('Failed to quote gasless transaction', { error, params });
             throw mapTonApiGaslessError(error, GaslessErrorCode.QuoteFailed, 'Failed to quote gasless transaction');
@@ -145,26 +140,68 @@ export class TonApiGaslessProvider extends GaslessProvider {
 
     async sendTransaction(params: GaslessSendParams): Promise<void> {
         const body = buildGaslessSendRequest(params);
+        const http = this.getClient(params.network);
 
-        try {
-            await CallForSuccess(
-                () => this.http.postJson('/v2/gasless/send', body),
-                this.sendRetries,
-                this.sendRetryDelayMs,
-            );
-        } catch (error) {
-            log.error('Failed to send gasless transaction', { error });
-            throw mapTonApiGaslessError(error, GaslessErrorCode.SendFailed, 'Failed to send gasless transaction');
+        // Exponential backoff, transient-only retry. The wallet's seqno guard
+        // protects against on-chain double-spend if a retry duplicates a BoC
+        // that was actually accepted; we still avoid hammering 4xx errors to
+        // keep relayer gas burn down and surface real failures fast.
+        const attemptsTotal = this.sendRetries + 1;
+        let attempt = 0;
+        let lastError: unknown;
+
+        while (attempt < attemptsTotal) {
+            try {
+                await http.postJson('/v2/gasless/send', body);
+                return;
+            } catch (error) {
+                lastError = error;
+
+                const lastAttempt = attempt === attemptsTotal - 1;
+                if (lastAttempt || !isTransientError(error)) {
+                    break;
+                }
+
+                await delay(this.sendRetryDelayMs * 2 ** attempt);
+                attempt++;
+            }
         }
+
+        log.error('Failed to send gasless transaction', { error: lastError, chainId: params.network.chainId });
+        throw mapTonApiGaslessError(lastError, GaslessErrorCode.SendFailed, 'Failed to send gasless transaction');
+    }
+
+    private getClient(network: Network): ApiClientTonApi {
+        const chainId = network.chainId;
+        const perChain = this.chainConfig[chainId];
+
+        if (!perChain) {
+            throw new GaslessError(
+                `TonApi gasless not configured for chain ${chainId}`,
+                GaslessErrorCode.UnsupportedOperation,
+                { chainId, configured: Object.keys(this.chainConfig) },
+            );
+        }
+
+        if (!this.clients[chainId]) {
+            this.clients[chainId] = new ApiClientTonApi({
+                network,
+                endpoint: perChain.endpoint,
+                apiKey: perChain.apiKey,
+                fetchApi: this.fetchApi,
+            });
+        }
+
+        return this.clients[chainId];
     }
 }
 
 /**
- * Factory for `TonApiGaslessProvider` matching the `(ctx) => Provider` shape
- * expected by `AppKit.registerProvider`.
+ * Returns an AppKit / `ProviderInput` factory: pass to `providers: [createTonApiGaslessProvider(config)]`.
+ * At kit init, the factory receives context and builds the provider using `ctx.networkManager`.
  */
 export const createTonApiGaslessProvider = (
-    config: TonApiGaslessProviderConfig,
+    config: TonApiGaslessProviderConfig = {},
 ): ((ctx: ProviderFactoryContext) => TonApiGaslessProvider) => {
-    return () => new TonApiGaslessProvider(config);
+    return (ctx: ProviderFactoryContext) => TonApiGaslessProvider.createFromContext(ctx, config);
 };

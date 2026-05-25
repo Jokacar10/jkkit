@@ -6,7 +6,7 @@
  *
  */
 
-import type { GaslessConfig, GaslessQuote, GaslessQuoteParams, GaslessSendParams } from '../models';
+import type { GaslessConfig, GaslessQuote, GaslessQuoteParams, GaslessSendParams, Network } from '../models';
 import type { DefiManagerAPI } from './DefiManagerAPI';
 import type { DefiProvider } from './DefiProvider';
 
@@ -19,9 +19,10 @@ import type { DefiProvider } from './DefiProvider';
 export interface GaslessAPI extends DefiManagerAPI<GaslessProviderInterface> {
     /**
      * Fetch relayer configuration (supported jettons and relay address).
+     * @param network Network to query (optional, falls back to the provider's first supported network)
      * @param providerId Provider identifier (optional, uses default if not specified)
      */
-    getConfig(providerId?: string): Promise<GaslessConfig>;
+    getConfig(network?: Network, providerId?: string): Promise<GaslessConfig>;
 
     /**
      * Quote fees and obtain relayer-wrapped messages for signing.
@@ -29,7 +30,7 @@ export interface GaslessAPI extends DefiManagerAPI<GaslessProviderInterface> {
      * Pass the returned `messages` to `wallet.signMessage` to obtain a signed
      * internal-message BoC, then submit it via `sendTransaction`.
      *
-     * @param params Quote parameters (wallet identity, fee jetton, messages)
+     * @param params Quote parameters (network, wallet identity, fee jetton, messages)
      * @param providerId Provider identifier (optional, uses default if not specified)
      */
     getQuote(params: GaslessQuoteParams, providerId?: string): Promise<GaslessQuote>;
@@ -37,7 +38,7 @@ export interface GaslessAPI extends DefiManagerAPI<GaslessProviderInterface> {
     /**
      * Submit a signed transaction BoC to the relayer for on-chain execution.
      *
-     * @param params Signed message and wallet public key
+     * @param params Signed message bundle (network, wallet public key, internal BoC)
      * @param providerId Provider identifier (optional, uses default if not specified)
      */
     sendTransaction(params: GaslessSendParams, providerId?: string): Promise<void>;
@@ -55,9 +56,9 @@ export interface GaslessProviderInterface extends DefiProvider {
     readonly providerId: string;
 
     /**
-     * Fetch relayer configuration (supported jettons and relay address).
+     * Fetch relayer configuration (supported jettons and relay address) for the requested network.
      */
-    getConfig(): Promise<GaslessConfig>;
+    getConfig(network: Network): Promise<GaslessConfig>;
 
     /**
      * Quote fees and return relayer-wrapped messages for signing.

@@ -6,6 +6,7 @@
  *
  */
 
+import type { Network } from '../core/Network';
 import type { UserFriendlyAddress } from '../core/Primitives';
 import type { TokenAmount } from '../core/TokenAmount';
 import type { TransactionRequestMessage } from '../transactions/TransactionRequest';
@@ -18,6 +19,8 @@ import type { TransactionRequestMessage } from '../transactions/TransactionReque
  * will deduct and the timestamp after which the bundle expires.
  */
 export interface GaslessQuote {
+    /** Network the quote is bound to (mirrors the request `network`) */
+    network: Network;
     /** Relayer-wrapped messages ready to be signed */
     messages: TransactionRequestMessage[];
     /** Relayer fee in fee-jetton nanounits */

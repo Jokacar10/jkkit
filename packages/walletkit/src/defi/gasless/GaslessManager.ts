@@ -7,7 +7,7 @@
  */
 
 import type { GaslessAPI, GaslessProviderInterface } from '../../api/interfaces';
-import type { GaslessConfig, GaslessQuote, GaslessQuoteParams, GaslessSendParams } from '../../api/models';
+import type { GaslessConfig, GaslessQuote, GaslessQuoteParams, GaslessSendParams, Network } from '../../api/models';
 import { globalLogger } from '../../core/Logger';
 import type { ProviderFactoryContext } from '../../types/factory';
 import { DefiManager } from '../DefiManager';
@@ -29,12 +29,19 @@ export class GaslessManager extends DefiManager<GaslessProviderInterface> implem
 
     /**
      * Fetch relayer configuration (supported jettons and relay address).
+     *
+     * `network` defaults to the provider's first supported network.
      */
-    async getConfig(providerId?: string): Promise<GaslessConfig> {
-        log.debug('Getting gasless config', { providerId: providerId ?? this.defaultProviderId });
+    async getConfig(network?: Network, providerId?: string): Promise<GaslessConfig> {
+        const provider = this.getProvider(providerId ?? this.defaultProviderId);
+        const targetNetwork = network ?? provider.getSupportedNetworks()[0];
+        log.debug('Getting gasless config', {
+            network: targetNetwork?.chainId,
+            providerId: providerId ?? this.defaultProviderId,
+        });
 
         try {
-            return await this.getProvider(providerId ?? this.defaultProviderId).getConfig();
+            return await provider.getConfig(targetNetwork);
         } catch (error) {
             log.error('Failed to get gasless config', { error });
             throw error;
@@ -46,6 +53,7 @@ export class GaslessManager extends DefiManager<GaslessProviderInterface> implem
      */
     async getQuote(params: GaslessQuoteParams, providerId?: string): Promise<GaslessQuote> {
         log.debug('Quoting gasless transaction', {
+            network: params.network.chainId,
             walletAddress: params.walletAddress,
             feeJettonMaster: params.feeJettonMaster,
             messagesCount: params.messages.length,
@@ -64,7 +72,10 @@ export class GaslessManager extends DefiManager<GaslessProviderInterface> implem
      * Submit a signed transaction BoC to the relayer.
      */
     async sendTransaction(params: GaslessSendParams, providerId?: string): Promise<void> {
-        log.debug('Sending gasless transaction', { providerId: providerId ?? this.defaultProviderId });
+        log.debug('Sending gasless transaction', {
+            network: params.network.chainId,
+            providerId: providerId ?? this.defaultProviderId,
+        });
 
         try {
             await this.getProvider(providerId ?? this.defaultProviderId).sendTransaction(params);

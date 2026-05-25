@@ -6,6 +6,7 @@
  *
  */
 
+import type { Network } from '../core/Network';
 import type { Hex, UserFriendlyAddress } from '../core/Primitives';
 import type { TransactionRequestMessage } from '../transactions/TransactionRequest';
 
@@ -16,6 +17,8 @@ import type { TransactionRequestMessage } from '../transactions/TransactionReque
  * returns a new set of messages that the wallet should sign via `signMessage`.
  */
 export interface GaslessQuoteParams {
+    /** Network the gasless transaction should run on */
+    network: Network;
     /** Master address of the jetton used to pay the relayer's fee */
     feeJettonMaster: UserFriendlyAddress;
     /** Sender wallet address */

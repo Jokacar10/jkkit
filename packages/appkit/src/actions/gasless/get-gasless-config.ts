@@ -9,8 +9,12 @@
 import type { GaslessConfig } from '@ton/walletkit';
 
 import type { AppKit } from '../../core/app-kit';
+import type { Network } from '../../types/network';
+import { getSelectedWallet } from '../wallets/get-selected-wallet';
 
 export interface GetGaslessConfigOptions {
+    /** Network to query. Defaults to the selected wallet's network, then provider's first supported. */
+    network?: Network;
     /** Gasless provider id. Uses the default provider when omitted. */
     providerId?: string;
 }
@@ -28,5 +32,6 @@ export const getGaslessConfig = async (
     appKit: AppKit,
     options: GetGaslessConfigOptions = {},
 ): GetGaslessConfigReturnType => {
-    return appKit.gaslessManager.getConfig(options.providerId);
+    const network = options.network ?? getSelectedWallet(appKit)?.getNetwork();
+    return appKit.gaslessManager.getConfig(network, options.providerId);
 };

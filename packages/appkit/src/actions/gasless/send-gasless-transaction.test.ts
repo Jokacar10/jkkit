@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { GaslessErrorCode } from '@ton/walletkit';
+import { GaslessErrorCode, Network } from '@ton/walletkit';
 import type { Feature, GaslessQuote } from '@ton/walletkit';
 
 import type { AppKit } from '../../core/app-kit';
@@ -19,6 +19,7 @@ const TEST_ADDRESS = 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs';
 const FAKE_INTERNAL_BOC = 'te6cckEBAQEAAgAAAA==' as Base64String;
 
 const makeQuote = (overrides: Partial<GaslessQuote> = {}): GaslessQuote => ({
+    network: Network.mainnet(),
     messages: [{ address: TEST_ADDRESS, amount: '60000000' }],
     fee: '1234',
     validUntil: Math.floor(Date.now() / 1000) + 60,
@@ -73,7 +74,7 @@ describe('sendGaslessTransaction', () => {
             validUntil: quote.validUntil,
         });
         expect(sendTransaction).toHaveBeenCalledWith(
-            { walletPublicKey: '0xabc', internalBoc: FAKE_INTERNAL_BOC },
+            { network: quote.network, walletPublicKey: '0xabc', internalBoc: FAKE_INTERNAL_BOC },
             undefined,
         );
         expect(result.internalBoc).toBe(FAKE_INTERNAL_BOC);

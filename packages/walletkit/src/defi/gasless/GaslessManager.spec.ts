@@ -22,11 +22,12 @@ const makeProvider = (providerId: string): GaslessProviderInterface => ({
     type: 'gasless',
     providerId,
     getSupportedNetworks: () => [Network.mainnet()],
-    getConfig: vi.fn<() => Promise<GaslessConfig>>().mockResolvedValue({
+    getConfig: vi.fn<(n: Network) => Promise<GaslessConfig>>().mockResolvedValue({
         relayAddress: TEST_ADDRESS,
         supportedGasJettons: [{ jettonMaster: TEST_ADDRESS }],
     }),
     getQuote: vi.fn<(p: GaslessQuoteParams) => Promise<GaslessQuote>>().mockResolvedValue({
+        network: Network.mainnet(),
         messages: [],
         fee: '0',
         validUntil: 0,
@@ -124,6 +125,7 @@ describe('GaslessManager delegation', () => {
 
         await manager.getQuote(
             {
+                network: Network.mainnet(),
                 feeJettonMaster: TEST_ADDRESS,
                 walletAddress: TEST_ADDRESS,
                 walletPublicKey: '0xabc',
@@ -141,7 +143,11 @@ describe('GaslessManager delegation', () => {
         const provider = makeProvider('one');
         manager.registerProvider(provider);
 
-        await manager.sendTransaction({ walletPublicKey: '0xabc', internalBoc: 'AAA=' as never });
+        await manager.sendTransaction({
+            network: Network.mainnet(),
+            walletPublicKey: '0xabc',
+            internalBoc: 'AAA=' as never,
+        });
 
         expect(provider.sendTransaction).toHaveBeenCalledTimes(1);
     });
@@ -155,6 +161,7 @@ describe('GaslessManager delegation', () => {
 
         await expect(
             manager.getQuote({
+                network: Network.mainnet(),
                 feeJettonMaster: TEST_ADDRESS,
                 walletAddress: TEST_ADDRESS,
                 walletPublicKey: '0xabc',

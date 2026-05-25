@@ -8,6 +8,7 @@
 
 import type { GaslessQuote } from '@ton/walletkit';
 
+import type { Network } from '../../types/network';
 import type { TransactionRequestMessage } from '../../types/transaction';
 import type { AppKit } from '../../core/app-kit';
 import { getSelectedWallet } from '../wallets/get-selected-wallet';
@@ -17,6 +18,8 @@ export interface GetGaslessQuoteOptions {
     feeJettonMaster: string;
     /** User's messages to include in the gasless transaction */
     messages: TransactionRequestMessage[];
+    /** Network to quote on. Defaults to the selected wallet's network. */
+    network?: Network;
     /** Gasless provider id. Uses the default provider when omitted. */
     providerId?: string;
 }
@@ -43,6 +46,7 @@ export const getGaslessQuote = async (appKit: AppKit, options: GetGaslessQuoteOp
 
     return appKit.gaslessManager.getQuote(
         {
+            network: options.network ?? wallet.getNetwork(),
             feeJettonMaster: options.feeJettonMaster,
             walletAddress: wallet.getAddress(),
             walletPublicKey: wallet.getPublicKey(),

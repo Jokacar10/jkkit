@@ -33,6 +33,12 @@ export const mapTonApiGaslessError = (
     fallbackCode: GaslessErrorCode,
     fallbackMessage: string,
 ): GaslessError => {
+    // Pre-classified `GaslessError`s (e.g. thrown from `getClient` for a
+    // non-configured chain) pass through unchanged.
+    if (error instanceof GaslessError) {
+        return error;
+    }
+
     if (error instanceof TonClientError) {
         const body = error.details as TonApiErrorBody | undefined;
 

@@ -20,7 +20,7 @@ import type { GaslessConfig, GaslessQuote, GaslessQuoteParams, GaslessSendParams
  * class MyGaslessProvider extends GaslessProvider {
  *   readonly providerId = 'my-relayer';
  *
- *   async getConfig(): Promise<GaslessConfig> { ... }
+ *   async getConfig(network: Network): Promise<GaslessConfig> { ... }
  *   async getQuote(params): Promise<GaslessQuote> { ... }
  *   async sendTransaction(params): Promise<void> { ... }
  * }
@@ -31,7 +31,7 @@ export abstract class GaslessProvider implements GaslessProviderInterface {
     abstract readonly providerId: string;
 
     abstract getSupportedNetworks(): Network[];
-    abstract getConfig(): Promise<GaslessConfig>;
+    abstract getConfig(network: Network): Promise<GaslessConfig>;
     abstract getQuote(params: GaslessQuoteParams): Promise<GaslessQuote>;
     abstract sendTransaction(params: GaslessSendParams): Promise<void>;
 }

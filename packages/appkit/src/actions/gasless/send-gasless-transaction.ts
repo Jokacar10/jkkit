@@ -81,6 +81,7 @@ export const sendGaslessTransaction = async (
 
     await appKit.gaslessManager.sendTransaction(
         {
+            network: quote.network,
             walletPublicKey: wallet.getPublicKey(),
             internalBoc,
         },

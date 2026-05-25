@@ -11,6 +11,7 @@ import { Address, beginCell, Cell, internal, storeMessageRelaxed } from '@ton/co
 
 import type { Base64String } from '../../../api/models';
 import { Network } from '../../../api/models';
+import type { ProviderFactoryContext } from '../../../types/factory';
 import { GaslessErrorCode } from '../errors';
 import { TonApiGaslessProvider, createTonApiGaslessProvider } from './TonApiGaslessProvider';
 
@@ -37,23 +38,30 @@ const jsonResponse = (body: unknown, init: { status?: number } = {}): Response =
 
 const makeFetch = () => vi.fn<typeof fetch>();
 
+const ctxWith = (networks: Network[]): ProviderFactoryContext =>
+    ({
+        networkManager: {
+            getConfiguredNetworks: () => networks,
+        },
+    }) as unknown as ProviderFactoryContext;
+
 const makeProvider = (
     fetchApi: ReturnType<typeof makeFetch>,
-    overrides: Partial<Parameters<typeof createTonApiGaslessProvider>[0]> = {},
+    options: Partial<Parameters<typeof createTonApiGaslessProvider>[0]> & { networks?: Network[] } = {},
 ): TonApiGaslessProvider => {
-    return new TonApiGaslessProvider({
-        network: Network.mainnet(),
+    const { networks = [Network.mainnet()], ...config } = options;
+    return TonApiGaslessProvider.createFromContext(ctxWith(networks), {
         fetchApi,
         sendRetries: 1,
         sendRetryDelayMs: 0,
-        ...overrides,
+        ...config,
     });
 };
 
 describe('TonApiGaslessProvider configuration', () => {
-    it('defaults providerId to tonapi-${network.chainId}', () => {
+    it('defaults providerId to "tonapi"', () => {
         const provider = makeProvider(makeFetch());
-        expect(provider.providerId).toBe(`tonapi-${Network.mainnet().chainId}`);
+        expect(provider.providerId).toBe('tonapi');
     });
 
     it('respects providerId override', () => {
@@ -61,9 +69,29 @@ describe('TonApiGaslessProvider configuration', () => {
         expect(provider.providerId).toBe('custom');
     });
 
-    it('reports the configured network in getSupportedNetworks', () => {
-        const provider = makeProvider(makeFetch(), { network: Network.testnet() });
-        expect(provider.getSupportedNetworks()).toEqual([Network.testnet()]);
+    it('auto-registers all configured networks when chains is omitted', () => {
+        const provider = makeProvider(makeFetch(), { networks: [Network.mainnet(), Network.testnet()] });
+        expect(
+            provider
+                .getSupportedNetworks()
+                .map((n) => n.chainId)
+                .sort(),
+        ).toEqual([Network.mainnet().chainId, Network.testnet().chainId].sort());
+    });
+
+    it('only registers chains that intersect with kit-configured networks', () => {
+        const provider = makeProvider(makeFetch(), {
+            networks: [Network.mainnet()],
+            chains: {
+                [Network.mainnet().chainId]: { apiKey: 'k1' },
+                [Network.testnet().chainId]: { apiKey: 'k2' }, // not configured
+            },
+        });
+        expect(provider.getSupportedNetworks()).toEqual([Network.mainnet()]);
+    });
+
+    it('throws when no networks are configured and no chains are passed', () => {
+        expect(() => TonApiGaslessProvider.createFromContext(ctxWith([]), {})).toThrow(/no eligible networks/);
     });
 
     it('exposes "gasless" provider type', () => {
@@ -74,8 +102,8 @@ describe('TonApiGaslessProvider configuration', () => {
 
 describe('createTonApiGaslessProvider', () => {
     it('returns a factory producing a TonApiGaslessProvider', () => {
-        const factory = createTonApiGaslessProvider({ network: Network.mainnet() });
-        const provider = factory({} as never);
+        const factory = createTonApiGaslessProvider({});
+        const provider = factory(ctxWith([Network.mainnet()]));
         expect(provider).toBeInstanceOf(TonApiGaslessProvider);
     });
 });
@@ -86,7 +114,7 @@ describe('TonApiGaslessProvider.getConfig', () => {
 
     beforeEach(() => {
         fetchApi = makeFetch();
-        provider = makeProvider(fetchApi);
+        provider = makeProvider(fetchApi, { networks: [Network.mainnet(), Network.testnet()] });
     });
 
     const rawConfig = (overrides: Record<string, unknown> = {}) => ({
@@ -98,48 +126,54 @@ describe('TonApiGaslessProvider.getConfig', () => {
     it('maps the TonApi response to GaslessConfig', async () => {
         fetchApi.mockResolvedValueOnce(jsonResponse(rawConfig()));
 
-        const cfg = await provider.getConfig();
+        const cfg = await provider.getConfig(Network.mainnet());
 
         expect(cfg.relayAddress).toBe(Address.parse(TEST_ADDRESS).toString({ bounceable: true }));
         expect(cfg.supportedGasJettons).toHaveLength(1);
-        expect(cfg.supportedGasJettons[0].jettonMaster).toBe(
-            Address.parse(TEST_ADDRESS).toString({ bounceable: true }),
-        );
     });
 
-    it('hits /v2/gasless/config on the network endpoint', async () => {
+    it('hits /v2/gasless/config on the mainnet endpoint when called for mainnet', async () => {
         fetchApi.mockResolvedValueOnce(jsonResponse(rawConfig({ gas_jettons: [] })));
 
-        await provider.getConfig();
+        await provider.getConfig(Network.mainnet());
 
-        const url = (fetchApi.mock.calls[0][0] as URL).toString();
-        expect(url).toBe('https://tonapi.io/v2/gasless/config');
+        expect((fetchApi.mock.calls[0][0] as URL).toString()).toBe('https://tonapi.io/v2/gasless/config');
     });
 
-    it('uses the testnet endpoint for testnet provider', async () => {
-        const testnetProvider = makeProvider(fetchApi, { network: Network.testnet() });
+    it('uses the testnet endpoint when called for testnet', async () => {
         fetchApi.mockResolvedValueOnce(jsonResponse(rawConfig({ gas_jettons: [] })));
 
-        await testnetProvider.getConfig();
+        await provider.getConfig(Network.testnet());
 
         expect((fetchApi.mock.calls[0][0] as URL).origin).toBe('https://testnet.tonapi.io');
     });
 
-    it('sends Bearer authorization when apiKey is provided', async () => {
-        const authedProvider = makeProvider(fetchApi, { apiKey: 'sk_test_123' });
+    it('sends Bearer authorization when apiKey is configured for the chain', async () => {
+        const authedProvider = makeProvider(fetchApi, {
+            chains: { [Network.mainnet().chainId]: { apiKey: 'sk_test_123' } },
+        });
         fetchApi.mockResolvedValueOnce(jsonResponse(rawConfig({ gas_jettons: [] })));
 
-        await authedProvider.getConfig();
+        await authedProvider.getConfig(Network.mainnet());
 
         const init = fetchApi.mock.calls[0][1] as RequestInit;
         const headers = init.headers as Headers;
         expect(headers.get('Authorization')).toBe('Bearer sk_test_123');
     });
 
+    it('throws GaslessError(UNSUPPORTED_OPERATION) when called for a non-configured chain', async () => {
+        const mainnetOnly = makeProvider(fetchApi, { networks: [Network.mainnet()] });
+
+        await expect(mainnetOnly.getConfig(Network.testnet())).rejects.toMatchObject({
+            name: 'GaslessError',
+            code: GaslessErrorCode.UnsupportedOperation,
+        });
+    });
+
     it('wraps fetch errors in GaslessError(CONFIG_FAILED)', async () => {
         fetchApi.mockResolvedValueOnce(new Response('boom', { status: 500 }));
 
-        await expect(provider.getConfig()).rejects.toMatchObject({
+        await expect(provider.getConfig(Network.mainnet())).rejects.toMatchObject({
             name: 'GaslessError',
             code: GaslessErrorCode.ConfigFailed,
         });
@@ -170,33 +204,30 @@ describe('TonApiGaslessProvider.getQuote', () => {
         ...overrides,
     });
 
-    it('maps relayer response to GaslessQuote', async () => {
+    const baseQuoteParams = {
+        network: Network.mainnet(),
+        feeJettonMaster: TEST_ADDRESS,
+        walletAddress: TEST_ADDRESS,
+        walletPublicKey: TEST_PUBKEY,
+        messages: [{ address: TEST_ADDRESS, amount: '0' }],
+    };
+
+    it('maps relayer response to GaslessQuote and threads network through', async () => {
         fetchApi.mockResolvedValueOnce(jsonResponse(makeRawQuote()));
 
-        const result = await provider.getQuote({
-            feeJettonMaster: TEST_ADDRESS,
-            walletAddress: TEST_ADDRESS,
-            walletPublicKey: TEST_PUBKEY,
-            messages: [{ address: TEST_ADDRESS, amount: '0' }],
-        });
+        const result = await provider.getQuote(baseQuoteParams);
 
+        expect(result.network).toEqual(Network.mainnet());
         expect(result.fee).toBe('1234');
         expect(result.validUntil).toBe(999999);
         expect(result.messages).toHaveLength(1);
-        expect(result.messages[0].payload).toBeDefined();
-        // Returned payload must be a valid base64 BoC
         expect(() => Cell.fromBase64(result.messages[0].payload as string)).not.toThrow();
     });
 
     it('strips 0x prefix from walletPublicKey and serializes BoCs as hex', async () => {
         fetchApi.mockResolvedValueOnce(jsonResponse(makeRawQuote({ messages: [], commission: '0', valid_until: 0 })));
 
-        await provider.getQuote({
-            feeJettonMaster: TEST_ADDRESS,
-            walletAddress: TEST_ADDRESS,
-            walletPublicKey: TEST_PUBKEY,
-            messages: [{ address: TEST_ADDRESS, amount: '0' }],
-        });
+        await provider.getQuote(baseQuoteParams);
 
         const init = fetchApi.mock.calls[0][1] as RequestInit;
         const body = JSON.parse(init.body as string);
@@ -206,15 +237,19 @@ describe('TonApiGaslessProvider.getQuote', () => {
         expect(body.messages[0].boc).toMatch(/^[0-9a-f]+$/);
     });
 
+    it('routes to the chain-specific endpoint based on params.network', async () => {
+        const multiChain = makeProvider(fetchApi, { networks: [Network.mainnet(), Network.testnet()] });
+        fetchApi.mockResolvedValueOnce(jsonResponse(makeRawQuote({ messages: [], commission: '0', valid_until: 0 })));
+
+        await multiChain.getQuote({ ...baseQuoteParams, network: Network.testnet() });
+
+        expect((fetchApi.mock.calls[0][0] as URL).origin).toBe('https://testnet.tonapi.io');
+    });
+
     it('posts to /v2/gasless/estimate/{master_id}', async () => {
         fetchApi.mockResolvedValueOnce(jsonResponse(makeRawQuote({ messages: [], commission: '0', valid_until: 0 })));
 
-        await provider.getQuote({
-            feeJettonMaster: TEST_ADDRESS,
-            walletAddress: TEST_ADDRESS,
-            walletPublicKey: TEST_PUBKEY,
-            messages: [{ address: TEST_ADDRESS, amount: '0' }],
-        });
+        await provider.getQuote(baseQuoteParams);
 
         const url = (fetchApi.mock.calls[0][0] as URL).toString();
         expect(url).toContain('/v2/gasless/estimate/');
@@ -225,14 +260,7 @@ describe('TonApiGaslessProvider.getQuote', () => {
     it('wraps fetch errors in GaslessError(QUOTE_FAILED)', async () => {
         fetchApi.mockResolvedValueOnce(new Response('relayer down', { status: 502 }));
 
-        await expect(
-            provider.getQuote({
-                feeJettonMaster: TEST_ADDRESS,
-                walletAddress: TEST_ADDRESS,
-                walletPublicKey: TEST_PUBKEY,
-                messages: [{ address: TEST_ADDRESS, amount: '0' }],
-            }),
-        ).rejects.toMatchObject({
+        await expect(provider.getQuote(baseQuoteParams)).rejects.toMatchObject({
             name: 'GaslessError',
             code: GaslessErrorCode.QuoteFailed,
         });
@@ -246,14 +274,7 @@ describe('TonApiGaslessProvider.getQuote', () => {
             }),
         );
 
-        await expect(
-            provider.getQuote({
-                feeJettonMaster: TEST_ADDRESS,
-                walletAddress: TEST_ADDRESS,
-                walletPublicKey: TEST_PUBKEY,
-                messages: [{ address: TEST_ADDRESS, amount: '0' }],
-            }),
-        ).rejects.toMatchObject({
+        await expect(provider.getQuote(baseQuoteParams)).rejects.toMatchObject({
             name: 'GaslessError',
             code: GaslessErrorCode.UnsupportedFeeJetton,
             message: 'Jetton is not supported.',
@@ -262,12 +283,18 @@ describe('TonApiGaslessProvider.getQuote', () => {
 });
 
 describe('TonApiGaslessProvider.sendTransaction', () => {
+    const baseSendParams = {
+        network: Network.mainnet(),
+        walletPublicKey: TEST_PUBKEY,
+        internalBoc: buildSignedInternalBoc(),
+    };
+
     it('forwards a parsed external BoC (hex) to the relayer', async () => {
         const fetchApi = makeFetch();
         const provider = makeProvider(fetchApi);
         fetchApi.mockResolvedValueOnce(jsonResponse({}));
 
-        await provider.sendTransaction({ walletPublicKey: TEST_PUBKEY, internalBoc: buildSignedInternalBoc() });
+        await provider.sendTransaction(baseSendParams);
 
         expect(fetchApi).toHaveBeenCalledTimes(1);
         const init = fetchApi.mock.calls[0][1] as RequestInit;
@@ -276,28 +303,53 @@ describe('TonApiGaslessProvider.sendTransaction', () => {
         expect(body.boc).toMatch(/^[0-9a-f]+$/);
     });
 
-    it('retries on transient failure up to sendRetries', async () => {
+    it('routes to the chain-specific endpoint based on params.network', async () => {
         const fetchApi = makeFetch();
-        const provider = makeProvider(fetchApi, { sendRetries: 3 });
+        const provider = makeProvider(fetchApi, { networks: [Network.mainnet(), Network.testnet()] });
+        fetchApi.mockResolvedValueOnce(jsonResponse({}));
+
+        await provider.sendTransaction({ ...baseSendParams, network: Network.testnet() });
+
+        expect((fetchApi.mock.calls[0][0] as URL).origin).toBe('https://testnet.tonapi.io');
+    });
+
+    it('retries on transient 5xx failures up to sendRetries', async () => {
+        const fetchApi = makeFetch();
+        const provider = makeProvider(fetchApi, { sendRetries: 2 });
 
         fetchApi
             .mockResolvedValueOnce(new Response('transient', { status: 500 }))
-            .mockResolvedValueOnce(new Response('transient', { status: 500 }))
+            .mockResolvedValueOnce(new Response('transient', { status: 503 }))
             .mockResolvedValueOnce(jsonResponse({}));
 
-        await provider.sendTransaction({ walletPublicKey: TEST_PUBKEY, internalBoc: buildSignedInternalBoc() });
+        await provider.sendTransaction(baseSendParams);
 
         expect(fetchApi).toHaveBeenCalledTimes(3);
     });
 
-    it('wraps persistent send errors in GaslessError(SEND_FAILED)', async () => {
+    it('does NOT retry on 4xx client errors', async () => {
+        const fetchApi = makeFetch();
+        const provider = makeProvider(fetchApi, { sendRetries: 3 });
+        fetchApi.mockResolvedValueOnce(
+            new Response(JSON.stringify({ error: 'invalid signature' }), {
+                status: 400,
+                headers: { 'content-type': 'application/json' },
+            }),
+        );
+
+        await expect(provider.sendTransaction(baseSendParams)).rejects.toMatchObject({
+            name: 'GaslessError',
+            code: GaslessErrorCode.SendFailed,
+        });
+        expect(fetchApi).toHaveBeenCalledTimes(1);
+    });
+
+    it('wraps persistent 5xx errors in GaslessError(SEND_FAILED) after exhausting retries', async () => {
         const fetchApi = makeFetch();
         const provider = makeProvider(fetchApi);
         fetchApi.mockResolvedValue(new Response('boom', { status: 500 }));
 
-        await expect(
-            provider.sendTransaction({ walletPublicKey: TEST_PUBKEY, internalBoc: buildSignedInternalBoc() }),
-        ).rejects.toMatchObject({
+        await expect(provider.sendTransaction(baseSendParams)).rejects.toMatchObject({
             name: 'GaslessError',
             code: GaslessErrorCode.SendFailed,
         });
