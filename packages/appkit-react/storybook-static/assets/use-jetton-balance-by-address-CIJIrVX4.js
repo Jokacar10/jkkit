@@ -1,1 +1,0 @@
-import{i as e}from"./preload-helper-xPQekRTU.js";import{A as t,P as n}from"./iframe-CbKJG4TV.js";import{M as r,h as i,m as a,p as o,r as s,t as c}from"./network-4FlTyTqu.js";var l,u=e((()=>{i(),t(),o(),c(),l=(e={})=>{let t=n(),i=s();return a(r(t,{...e,network:e.network??i}))}}));export{l as n,u as t};
