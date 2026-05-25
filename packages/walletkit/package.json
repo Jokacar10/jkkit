@@ -92,6 +92,7 @@
     "lint:fix": "eslint . --max-warnings 0 --fix",
     "clean": "git clean -xdf dist node_modules .turbo coverage",
     "generate-openapi-spec": "src/api/scripts/generate-openapi-spec.sh",
+    "generate-openapi-spec-fixtures": "src/api/scripts/generate-openapi-spec-fixtures.sh",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [
