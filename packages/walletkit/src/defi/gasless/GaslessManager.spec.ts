@@ -9,7 +9,15 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import type { GaslessProviderInterface } from '../../api/interfaces';
-import type { GaslessConfig, GaslessQuote, GaslessQuoteParams, GaslessSendParams } from '../../api/models';
+import type {
+    Base64String,
+    GaslessConfig,
+    GaslessQuote,
+    GaslessQuoteParams,
+    GaslessSendParams,
+    GaslessSendResponse,
+    Hex,
+} from '../../api/models';
 import { Network } from '../../api/models';
 import { EventEmitter } from '../../core/EventEmitter';
 import type { ProviderFactoryContext } from '../../types/factory';
@@ -34,7 +42,12 @@ const makeProvider = (providerId: string): GaslessProviderInterface => ({
         relayAddress: TEST_ADDRESS,
         from: TEST_ADDRESS,
     }),
-    sendTransaction: vi.fn<(p: GaslessSendParams) => Promise<void>>().mockResolvedValue(undefined),
+    sendTransaction: vi.fn<(p: GaslessSendParams) => Promise<GaslessSendResponse>>().mockResolvedValue({
+        boc: 'AAA=' as Base64String,
+        normalizedBoc: 'AAA=' as Base64String,
+        normalizedHash: ('0x' + 'a'.repeat(64)) as Hex,
+        internalBoc: 'AAA=' as Base64String,
+    }),
 });
 
 const makeManager = (): { manager: GaslessManager; emitter: EventEmitter<never> } => {

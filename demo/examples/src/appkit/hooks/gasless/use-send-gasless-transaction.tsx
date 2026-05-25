@@ -28,8 +28,8 @@ export const UseSendGaslessTransactionExample = () => {
     const handleSend = async () => {
         if (!quote) return;
         try {
-            const { internalBoc, fee } = await sendGasless({ quote });
-            console.log('Submitted. Fee:', fee, 'BoC:', internalBoc);
+            const { internalBoc, normalizedHash } = await sendGasless({ quote });
+            console.log('Submitted. Hash:', normalizedHash, 'BoC:', internalBoc);
         } catch (e) {
             console.error(e);
         }

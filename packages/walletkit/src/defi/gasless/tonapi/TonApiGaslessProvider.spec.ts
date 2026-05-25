@@ -14,6 +14,7 @@ import { Network } from '../../../api/models';
 import type { ProviderFactoryContext } from '../../../types/factory';
 import { GaslessErrorCode } from '../errors';
 import { TonApiGaslessProvider, createTonApiGaslessProvider } from './TonApiGaslessProvider';
+import { internalBocToExternalMessageBoc } from './utils';
 
 const TEST_ADDRESS = 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs';
 const TEST_PUBKEY = '0x' + 'a'.repeat(64);
@@ -289,10 +290,15 @@ describe('TonApiGaslessProvider.sendTransaction', () => {
         internalBoc: buildSignedInternalBoc(),
     };
 
+    // TonAPI's `external` is the hex BoC of the broadcasted external-in message.
+    // The provider expects it to be present; build a valid one once and reuse.
+    const validExternalHex = internalBocToExternalMessageBoc(buildSignedInternalBoc()).toBoc().toString('hex');
+    const successfulSendResponse = () => jsonResponse({ protocol_name: 'tonapi', external: validExternalHex });
+
     it('forwards a parsed external BoC (hex) to the relayer', async () => {
         const fetchApi = makeFetch();
         const provider = makeProvider(fetchApi);
-        fetchApi.mockResolvedValueOnce(jsonResponse({}));
+        fetchApi.mockResolvedValueOnce(successfulSendResponse());
 
         await provider.sendTransaction(baseSendParams);
 
@@ -303,10 +309,42 @@ describe('TonApiGaslessProvider.sendTransaction', () => {
         expect(body.boc).toMatch(/^[0-9a-f]+$/);
     });
 
+    it('parses the relayer-broadcast external BoC and returns a GaslessSendResponse', async () => {
+        const fetchApi = makeFetch();
+        const provider = makeProvider(fetchApi);
+        // TonAPI's `external` is the hex-encoded BoC of the broadcast external-in message
+        // (NOT a hash, despite the OpenAPI description). Reuse our helper to construct
+        // one matching the wire format.
+        const externalCell = internalBocToExternalMessageBoc(buildSignedInternalBoc());
+        const externalHex = externalCell.toBoc().toString('hex');
+        fetchApi.mockResolvedValueOnce(jsonResponse({ protocol_name: 'tonapi', external: externalHex }));
+
+        const result = await provider.sendTransaction(baseSendParams);
+
+        // All three SendTransactionResponse fields populated
+        expect(result.boc).toBe(externalCell.toBoc().toString('base64'));
+        expect(result.normalizedBoc).toBeDefined();
+        expect(() => Cell.fromBase64(result.normalizedBoc)).not.toThrow();
+        expect(result.normalizedHash).toMatch(/^0x[0-9a-f]{64}$/);
+        // Plus the gasless-specific internalBoc echoed back from params
+        expect(result.internalBoc).toBe(baseSendParams.internalBoc);
+    });
+
+    it('throws GaslessError(SEND_FAILED) when the relayer omits the external field', async () => {
+        const fetchApi = makeFetch();
+        const provider = makeProvider(fetchApi);
+        fetchApi.mockResolvedValueOnce(jsonResponse({ protocol_name: 'tonapi' }));
+
+        await expect(provider.sendTransaction(baseSendParams)).rejects.toMatchObject({
+            name: 'GaslessError',
+            code: GaslessErrorCode.SendFailed,
+        });
+    });
+
     it('routes to the chain-specific endpoint based on params.network', async () => {
         const fetchApi = makeFetch();
         const provider = makeProvider(fetchApi, { networks: [Network.mainnet(), Network.testnet()] });
-        fetchApi.mockResolvedValueOnce(jsonResponse({}));
+        fetchApi.mockResolvedValueOnce(successfulSendResponse());
 
         await provider.sendTransaction({ ...baseSendParams, network: Network.testnet() });
 
@@ -320,7 +358,7 @@ describe('TonApiGaslessProvider.sendTransaction', () => {
         fetchApi
             .mockResolvedValueOnce(new Response('transient', { status: 500 }))
             .mockResolvedValueOnce(new Response('transient', { status: 503 }))
-            .mockResolvedValueOnce(jsonResponse({}));
+            .mockResolvedValueOnce(successfulSendResponse());
 
         await provider.sendTransaction(baseSendParams);
 

@@ -6,7 +6,14 @@
  *
  */
 
-import type { GaslessConfig, GaslessQuote, GaslessQuoteParams, GaslessSendParams, Network } from '../models';
+import type {
+    GaslessConfig,
+    GaslessQuote,
+    GaslessQuoteParams,
+    GaslessSendParams,
+    GaslessSendResponse,
+    Network,
+} from '../models';
 import type { DefiManagerAPI } from './DefiManagerAPI';
 import type { DefiProvider } from './DefiProvider';
 
@@ -38,10 +45,14 @@ export interface GaslessAPI extends DefiManagerAPI<GaslessProviderInterface> {
     /**
      * Submit a signed transaction BoC to the relayer for on-chain execution.
      *
+     * Returns `GaslessSendResponse` — a strict superset of `SendTransactionResponse`
+     * adding the signed `internalBoc` — so gasless and regular sends share the same
+     * `{ boc, normalizedBoc, normalizedHash }` triple for explorer / status lookup.
+     *
      * @param params Signed message bundle (network, wallet public key, internal BoC)
      * @param providerId Provider identifier (optional, uses default if not specified)
      */
-    sendTransaction(params: GaslessSendParams, providerId?: string): Promise<void>;
+    sendTransaction(params: GaslessSendParams, providerId?: string): Promise<GaslessSendResponse>;
 }
 
 /**
@@ -68,5 +79,5 @@ export interface GaslessProviderInterface extends DefiProvider {
     /**
      * Submit a signed transaction BoC to the relayer.
      */
-    sendTransaction(params: GaslessSendParams): Promise<void>;
+    sendTransaction(params: GaslessSendParams): Promise<GaslessSendResponse>;
 }

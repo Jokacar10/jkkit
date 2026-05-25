@@ -7,7 +7,14 @@
  */
 
 import type { GaslessAPI, GaslessProviderInterface } from '../../api/interfaces';
-import type { GaslessConfig, GaslessQuote, GaslessQuoteParams, GaslessSendParams, Network } from '../../api/models';
+import type {
+    GaslessConfig,
+    GaslessQuote,
+    GaslessQuoteParams,
+    GaslessSendParams,
+    GaslessSendResponse,
+    Network,
+} from '../../api/models';
 import { globalLogger } from '../../core/Logger';
 import type { ProviderFactoryContext } from '../../types/factory';
 import { DefiManager } from '../DefiManager';
@@ -71,14 +78,14 @@ export class GaslessManager extends DefiManager<GaslessProviderInterface> implem
     /**
      * Submit a signed transaction BoC to the relayer.
      */
-    async sendTransaction(params: GaslessSendParams, providerId?: string): Promise<void> {
+    async sendTransaction(params: GaslessSendParams, providerId?: string): Promise<GaslessSendResponse> {
         log.debug('Sending gasless transaction', {
             network: params.network.chainId,
             providerId: providerId ?? this.defaultProviderId,
         });
 
         try {
-            await this.getProvider(providerId ?? this.defaultProviderId).sendTransaction(params);
+            return await this.getProvider(providerId ?? this.defaultProviderId).sendTransaction(params);
         } catch (error) {
             log.error('Failed to send gasless transaction', { error });
             throw error;

@@ -45,7 +45,12 @@ describe('Gasless Actions Examples', () => {
             relayAddress: TEST_ADDRESS,
             from: TEST_ADDRESS,
         });
-        mockSend = vi.fn().mockResolvedValue(undefined);
+        mockSend = vi.fn().mockResolvedValue({
+            boc: 'AAA=',
+            normalizedBoc: 'AAA=',
+            normalizedHash: '0x' + 'a'.repeat(64),
+            internalBoc: 'AAAA',
+        });
         mockSignMessage = vi.fn().mockResolvedValue({ internalBoc: 'AAAA' });
 
         // @ts-expect-error - internal mock access

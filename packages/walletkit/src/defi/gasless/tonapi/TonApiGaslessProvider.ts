@@ -8,7 +8,14 @@
 
 import { Address } from '@ton/core';
 
-import type { GaslessConfig, GaslessQuote, GaslessQuoteParams, GaslessSendParams, Network } from '../../../api/models';
+import type {
+    GaslessConfig,
+    GaslessQuote,
+    GaslessQuoteParams,
+    GaslessSendParams,
+    GaslessSendResponse,
+    Network,
+} from '../../../api/models';
 import { ApiClientTonApi } from '../../../clients/tonapi/ApiClientTonApi';
 import { globalLogger } from '../../../core/Logger';
 import type { ProviderFactoryContext } from '../../../types/factory';
@@ -20,10 +27,11 @@ import { isTransientError, networkFromChainId } from './helpers';
 import { mapGaslessConfig } from './mappers/map-gasless-config';
 import { mapTonApiGaslessError } from './mappers/map-gasless-error';
 import { buildGaslessQuoteRequest, mapGaslessQuote } from './mappers/map-gasless-quote';
-import { buildGaslessSendRequest } from './mappers/map-gasless-send';
+import { buildGaslessSendRequest, mapGaslessSend } from './mappers/map-gasless-send';
 import type { TonApiGaslessChainConfig, TonApiGaslessProviderConfig } from './models';
 import type { TonApiGaslessConfig } from './types/config';
 import type { TonApiGaslessEstimateResponse } from './types/estimate';
+import type { TonApiGaslessSendResponse } from './types/send';
 
 const log = globalLogger.createChild('TonApiGaslessProvider');
 
@@ -138,7 +146,7 @@ export class TonApiGaslessProvider extends GaslessProvider {
         }
     }
 
-    async sendTransaction(params: GaslessSendParams): Promise<void> {
+    async sendTransaction(params: GaslessSendParams): Promise<GaslessSendResponse> {
         const body = buildGaslessSendRequest(params);
         const http = this.getClient(params.network);
 
@@ -152,8 +160,8 @@ export class TonApiGaslessProvider extends GaslessProvider {
 
         while (attempt < attemptsTotal) {
             try {
-                await http.postJson('/v2/gasless/send', body);
-                return;
+                const raw = await http.postJson<TonApiGaslessSendResponse>('/v2/gasless/send', body);
+                return { ...mapGaslessSend(raw), internalBoc: params.internalBoc };
             } catch (error) {
                 lastError = error;
 

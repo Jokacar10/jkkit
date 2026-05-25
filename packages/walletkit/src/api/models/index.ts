@@ -143,6 +143,7 @@ export type { GaslessGasJetton } from './gasless/GaslessGasJetton';
 export type { GaslessQuoteParams } from './gasless/GaslessQuoteParams';
 export type { GaslessQuote } from './gasless/GaslessQuote';
 export type { GaslessSendParams } from './gasless/GaslessSendParams';
+export type { GaslessSendResponse } from './gasless/GaslessSendResponse';
 
 // Transaction models
 export * from './transactions/Transaction';

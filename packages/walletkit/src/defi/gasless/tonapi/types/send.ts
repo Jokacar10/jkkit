@@ -14,3 +14,14 @@ export interface TonApiGaslessSendRequest {
     wallet_public_key: string;
     boc: string;
 }
+
+/**
+ * Wire-format response from `POST /v2/gasless/send` (TonAPI `GaslessTx`).
+ *
+ * `external` is the TEP-467 normalized hash of the external message the relayer
+ * broadcasted. Optional in the schema; required field is `protocol_name`.
+ */
+export interface TonApiGaslessSendResponse {
+    external?: string;
+    protocol_name: string;
+}

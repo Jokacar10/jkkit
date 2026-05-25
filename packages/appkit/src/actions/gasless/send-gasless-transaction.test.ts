@@ -45,8 +45,17 @@ const makeWallet = (overrides: Partial<WalletInterface> = {}): WalletInterface =
     } as WalletInterface;
 };
 
+type MockSendResult = { boc: string; normalizedBoc: string; normalizedHash: string; internalBoc: string };
+
+const DEFAULT_SEND_RESULT: MockSendResult = {
+    boc: 'external_boc_b64',
+    normalizedBoc: 'normalized_b64',
+    normalizedHash: '0xabcdef',
+    internalBoc: FAKE_INTERNAL_BOC,
+};
+
 const makeAppKit = (wallet: WalletInterface | null) => {
-    const sendTransaction = vi.fn<() => Promise<void>>().mockResolvedValue(undefined);
+    const sendTransaction = vi.fn<() => Promise<MockSendResult>>().mockResolvedValue({ ...DEFAULT_SEND_RESULT });
 
     const appKit = {
         walletsManager: { selectedWallet: wallet },
@@ -63,7 +72,7 @@ describe('sendGaslessTransaction', () => {
         wallet = makeWallet();
     });
 
-    it('signs the quote and submits the resulting BoC to the relayer', async () => {
+    it('signs the quote and forwards SendTransactionResponse-shaped fields from the relayer', async () => {
         const { appKit, sendTransaction } = makeAppKit(wallet);
         const quote = makeQuote();
 
@@ -78,7 +87,9 @@ describe('sendGaslessTransaction', () => {
             undefined,
         );
         expect(result.internalBoc).toBe(FAKE_INTERNAL_BOC);
-        expect(result.fee).toBe(quote.fee);
+        expect(result.boc).toBe(DEFAULT_SEND_RESULT.boc);
+        expect(result.normalizedBoc).toBe(DEFAULT_SEND_RESULT.normalizedBoc);
+        expect(result.normalizedHash).toBe(DEFAULT_SEND_RESULT.normalizedHash);
     });
 
     it('forwards providerId to gaslessManager.sendTransaction', async () => {

@@ -16,4 +16,5 @@ export type {
     GaslessQuoteParams,
     GaslessQuote,
     GaslessSendParams,
+    GaslessSendResponse,
 } from '@ton/walletkit';

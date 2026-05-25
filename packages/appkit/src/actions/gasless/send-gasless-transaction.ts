@@ -6,10 +6,9 @@
  *
  */
 
-import type { GaslessQuote, TokenAmount } from '@ton/walletkit';
+import type { GaslessQuote, GaslessSendResponse } from '@ton/walletkit';
 
 import { GaslessError, GaslessErrorCode } from '../../gasless';
-import type { Base64String } from '../../types/primitives';
 import type { AppKit } from '../../core/app-kit';
 import { getSelectedWallet } from '../wallets/get-selected-wallet';
 
@@ -20,12 +19,13 @@ export interface SendGaslessTransactionParameters {
     providerId?: string;
 }
 
-export interface SendGaslessTransactionReturnType {
-    /** Signed internal BoC that was submitted to the relayer */
-    internalBoc: Base64String;
-    /** Relayer fee in fee-jetton nanounits (mirrors the quote) */
-    fee: TokenAmount;
-}
+/**
+ * Return type is `GaslessSendResponse` — `SendTransactionResponse` plus
+ * `internalBoc`. Consumers can drop `result.boc` straight into
+ * `getTransactionStatus({ boc })` or build explorer links from
+ * `result.normalizedHash` the same way as regular `sendTransaction`.
+ */
+export type SendGaslessTransactionReturnType = GaslessSendResponse;
 
 export type SendGaslessTransactionErrorType = Error;
 
@@ -42,6 +42,8 @@ export type SendGaslessTransactionErrorType = Error;
  *         advertise the `SignMessage` feature.
  * @throws GaslessError(TOO_MANY_MESSAGES) when the quote carries more
  *         messages than the wallet's advertised `maxMessages` cap.
+ * @throws GaslessError(SEND_FAILED) when the relayer accepts the BoC but
+ *         omits the broadcasted external message in its response.
  */
 export const sendGaslessTransaction = async (
     appKit: AppKit,
@@ -79,7 +81,7 @@ export const sendGaslessTransaction = async (
         validUntil: quote.validUntil,
     });
 
-    await appKit.gaslessManager.sendTransaction(
+    return appKit.gaslessManager.sendTransaction(
         {
             network: quote.network,
             walletPublicKey: wallet.getPublicKey(),
@@ -87,9 +89,4 @@ export const sendGaslessTransaction = async (
         },
         providerId,
     );
-
-    return {
-        internalBoc,
-        fee: quote.fee,
-    };
 };

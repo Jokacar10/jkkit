@@ -139,14 +139,19 @@ export const GaslessPage: FC = () => {
 
         try {
             const result = await sendGasless({ quote });
-            const explorerUrl = `https://tonviewer.com/transaction/${result.internalBoc}`;
-            toast.success('Gasless transaction submitted!', {
-                description: 'View internal BoC on explorer',
-                action: {
-                    label: 'Open',
-                    onClick: () => window.open(explorerUrl, '_blank'),
-                },
-            });
+            const txHash = result.normalizedHash;
+            if (txHash) {
+                const explorerUrl = `https://tonviewer.com/transaction/${txHash}`;
+                toast.success('Gasless transaction submitted!', {
+                    description: txHash.slice(0, 10) + '…',
+                    action: {
+                        label: 'Explorer',
+                        onClick: () => window.open(explorerUrl, '_blank'),
+                    },
+                });
+            } else {
+                toast.success('Gasless transaction submitted!');
+            }
         } catch (error) {
             if (error instanceof GaslessError) {
                 toast.error(`${error.code}: ${error.message}`);

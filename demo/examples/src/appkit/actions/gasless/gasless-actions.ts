@@ -67,8 +67,8 @@ export const gaslessExample = async (appKit: AppKit) => {
     // SAMPLE_END: GET_GASLESS_QUOTE
 
     // SAMPLE_START: SEND_GASLESS_TRANSACTION
-    const { internalBoc, fee } = await sendGaslessTransaction(appKit, { quote });
-    console.log('Submitted gasless transaction. Fee:', fee, 'BoC:', internalBoc);
+    const result = await sendGaslessTransaction(appKit, { quote });
+    console.log('Submitted gasless transaction. Hash:', result.normalizedHash, 'BoC:', result.internalBoc);
     // SAMPLE_END: SEND_GASLESS_TRANSACTION
 
     return { gaslessManager, provider, config, quote };
