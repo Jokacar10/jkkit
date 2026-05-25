@@ -22,7 +22,7 @@
     "@tonconnect/bridge-sdk": "^0.2.4",
     "@tonconnect/protocol": "catalog:",
     "buffer": "^6.0.3",
-    "uuid": "^13.0.2"
+    "uuid": "^14.0.0"
   },
   "peerDependencies": {
     "@ton/core": "catalog:"

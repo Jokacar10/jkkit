@@ -15,7 +15,7 @@
     "@ton/walletkit": "workspace:*",
     "buffer": "^6.0.3",
     "url-polyfill": "^1.1.13",
-    "whatwg-url": "^14.2.0"
+    "whatwg-url": "^16.0.1"
   },
   "peerDependencies": {
     "@ton/crypto": "^3.3.0",
