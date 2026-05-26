@@ -27,7 +27,8 @@
     "changeset": "changeset",
     "version-packages": "changeset version",
     "release": "pnpm build && changeset publish",
-    "generate-openapi-spec": "turbo generate-openapi-spec"
+    "generate-openapi-spec": "turbo generate-openapi-spec",
+    "generate-openapi-spec-fixtures": "turbo generate-openapi-spec-fixtures"
   },
   "prettier": "@ton/toolchain/prettier",
   "keywords": [],
