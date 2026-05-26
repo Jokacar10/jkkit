@@ -8,7 +8,7 @@
 
 import type { CryptoOnrampDestinationCurrency, CryptoOnrampStatus } from '../../../api/models';
 import { Caip2ByNetwork } from '../caip2';
-import { CryptoOnrampErrorCode } from '../errors';
+import { CryptoOnrampError, CryptoOnrampErrorCode } from '../errors';
 import type { LayerswapErrorResponse, LayerswapSwapStatus } from './types';
 
 export const LAYERSWAP_DESTINATION_NETWORK = 'TON_MAINNET';
@@ -136,7 +136,10 @@ export const mapStatus = (status: LayerswapSwapStatus | string): CryptoOnrampSta
  */
 export const formatBaseUnits = (base: string, decimals: number): string => {
     if (!/^\d+$/.test(base)) {
-        throw new Error(`formatBaseUnits: not a non-negative integer string: "${base}"`);
+        throw new CryptoOnrampError(
+            `formatBaseUnits: not a non-negative integer string: "${base}"`,
+            CryptoOnrampErrorCode.InvalidParams,
+        );
     }
     if (decimals === 0) return base;
     const padded = base.padStart(decimals + 1, '0');
@@ -152,7 +155,10 @@ export const formatBaseUnits = (base: string, decimals: number): string => {
 export const parseBaseUnits = (value: number | string, decimals: number): string => {
     const str = typeof value === 'number' ? value.toString() : value;
     if (!/^\d+(\.\d+)?$/.test(str)) {
-        throw new Error(`parseBaseUnits: not a non-negative decimal: "${str}"`);
+        throw new CryptoOnrampError(
+            `parseBaseUnits: not a non-negative decimal: "${str}"`,
+            CryptoOnrampErrorCode.ProviderError,
+        );
     }
     const [whole, frac = ''] = str.split('.');
     const truncated = frac.slice(0, decimals).padEnd(decimals, '0');

@@ -320,8 +320,10 @@ export class LayerswapCryptoOnrampProvider extends CryptoOnrampProvider<undefine
         );
 
         const sourceMap = new Map<string, CryptoOnrampSourceCurrency>();
+        let anyFulfilled = false;
         for (const result of results) {
             if (result.status !== 'fulfilled') continue;
+            anyFulfilled = true;
             for (const network of result.value) {
                 const caip2 = slugToCaip2[network.name];
                 if (!caip2) continue;
@@ -332,6 +334,17 @@ export class LayerswapCryptoOnrampProvider extends CryptoOnrampProvider<undefine
                     if (!sourceMap.has(key)) sourceMap.set(key, mapped);
                 }
             }
+        }
+
+        if (!anyFulfilled && results.length > 0) {
+            const firstRejection = results.find(
+                (result): result is PromiseRejectedResult => result.status === 'rejected',
+            );
+            throw new CryptoOnrampError(
+                'Layerswap: failed to fetch supported sources for all destinations',
+                CryptoOnrampErrorCode.ProviderError,
+                firstRejection?.reason,
+            );
         }
 
         return { source: Array.from(sourceMap.values()), destination };

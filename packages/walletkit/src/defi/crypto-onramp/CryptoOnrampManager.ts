@@ -17,8 +17,7 @@ import type {
     CryptoOnrampStatusParams,
     CryptoOnrampSupportedCurrencies,
 } from '../../api/models';
-import type { CryptoOnrampErrorCode } from './errors';
-import { CryptoOnrampError } from './errors';
+import { CryptoOnrampError, CryptoOnrampErrorCode } from './errors';
 import { globalLogger } from '../../core/Logger';
 import { DefiManager } from '../DefiManager';
 
@@ -113,7 +112,12 @@ export class CryptoOnrampManager extends DefiManager<CryptoOnrampProviderInterfa
             return deposit;
         } catch (error) {
             log.error('Failed to create crypto onramp deposit', { error, params });
-            throw error;
+            if (error instanceof CryptoOnrampError) throw error;
+            throw this.createError(
+                'Failed to create crypto onramp deposit',
+                CryptoOnrampErrorCode.DepositFailed,
+                error,
+            );
         }
     }
 
