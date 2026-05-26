@@ -44,6 +44,7 @@ export const api = {
     getWallets: wallets.getWallets,
     getWallet: wallets.getWalletById,
     getWalletAddress: wallets.getWalletAddress,
+    getWalletNetwork: wallets.getWalletNetwork,
     removeWallet: wallets.removeWallet,
     getBalance: wallets.getBalance,
 

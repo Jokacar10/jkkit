@@ -95,7 +95,6 @@ export async function registerSwapProvider(args: { providerId: string }): Promis
 
 export async function removeSwapProvider(args: { providerId: string }): Promise<void> {
     const swap = await getSwap();
-    if (!swap.hasProvider(args.providerId)) return;
     swap.removeProvider(swap.getProvider(args.providerId));
 }
 

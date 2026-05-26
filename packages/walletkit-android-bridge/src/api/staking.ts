@@ -102,7 +102,6 @@ export async function registerStakingProvider(args: { providerId: string }) {
 
 export async function removeStakingProvider(args: { providerId: string }): Promise<void> {
     const instance = await getKit();
-    if (!instance.staking.hasProvider(args.providerId)) return;
     instance.staking.removeProvider(instance.staking.getProvider(args.providerId));
 }
 
