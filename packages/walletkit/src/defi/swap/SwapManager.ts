@@ -11,6 +11,7 @@ import type { SwapAPI, SwapProviderInterface } from '../../api/interfaces';
 import type { SwapQuoteParams, SwapQuote, SwapParams } from '../../api/models';
 import type { SwapErrorCode } from './errors';
 import { SwapError } from './errors';
+import type { DefiErrorCode } from '../errors';
 import { globalLogger } from '../../core/Logger';
 import { DefiManager } from '../DefiManager';
 import type { ProviderFactoryContext } from '../../types/factory';
@@ -23,7 +24,7 @@ const log = globalLogger.createChild('SwapManager');
  * Allows registration of multiple swap providers and provides a unified API
  * for swap operations. Providers can be switched dynamically.
  */
-export class SwapManager extends DefiManager<SwapProviderInterface> implements SwapAPI {
+export class SwapManager extends DefiManager<SwapProviderInterface, SwapError, SwapErrorCode> implements SwapAPI {
     constructor(createFactoryContext: () => ProviderFactoryContext) {
         super(createFactoryContext);
     }
@@ -89,7 +90,7 @@ export class SwapManager extends DefiManager<SwapProviderInterface> implements S
         }
     }
 
-    protected createError(message: string, code: string, details?: unknown): SwapError {
-        return new SwapError(message, code as SwapErrorCode, details);
+    protected createError(message: string, code: SwapErrorCode | DefiErrorCode, details?: unknown): SwapError {
+        return new SwapError(message, code, details);
     }
 }

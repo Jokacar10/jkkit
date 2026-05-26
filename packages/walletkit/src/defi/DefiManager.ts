@@ -18,13 +18,15 @@ import type { EventEmitter } from '../core/EventEmitter';
 
 export abstract class DefiManager<
     T extends DefiProvider,
+    TError extends DefiError = DefiError,
+    TErrorCode extends string = string,
     E extends SharedKitEvents = SharedKitEvents,
 > implements DefiManagerAPI<T> {
     public createFactoryContext: () => ProviderFactoryContext<E>;
 
     protected providers: T[] = [];
     protected defaultProviderId?: string;
-    protected abstract createError(message: string, code: string, details?: unknown): DefiError;
+    protected abstract createError(message: string, code: TErrorCode | DefiErrorCode, details?: unknown): TError;
     protected eventEmitter: EventEmitter<E>;
 
     constructor(createFactoryContext: () => ProviderFactoryContext<E>) {

@@ -6,6 +6,7 @@
  *
  */
 
+import type { DefiErrorCode } from '../errors';
 import { DefiError } from '../errors';
 
 export enum CryptoOnrampErrorCode {
@@ -25,9 +26,9 @@ export enum CryptoOnrampErrorCode {
 }
 
 export class CryptoOnrampError extends DefiError {
-    public readonly code: CryptoOnrampErrorCode;
+    public readonly code: CryptoOnrampErrorCode | DefiErrorCode;
 
-    constructor(message: string, code: CryptoOnrampErrorCode, details?: unknown) {
+    constructor(message: string, code: CryptoOnrampErrorCode | DefiErrorCode, details?: unknown) {
         super(message, code, details);
         this.name = 'CryptoOnrampError';
         this.code = code;

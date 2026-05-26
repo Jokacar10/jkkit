@@ -6,6 +6,7 @@
  *
  */
 
+import type { DefiErrorCode } from '../errors';
 import { DefiError } from '../errors';
 
 export enum StakingErrorCode {
@@ -14,9 +15,9 @@ export enum StakingErrorCode {
 }
 
 export class StakingError extends DefiError {
-    public readonly code: StakingErrorCode;
+    public readonly code: StakingErrorCode | DefiErrorCode;
 
-    constructor(message: string, code: StakingErrorCode, details?: unknown) {
+    constructor(message: string, code: StakingErrorCode | DefiErrorCode, details?: unknown) {
         super(message, code, details);
         this.name = 'StakingError';
         this.code = code;

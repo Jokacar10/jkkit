@@ -6,6 +6,7 @@
  *
  */
 
+import type { DefiErrorCode } from '../errors';
 import { DefiError } from '../errors';
 
 export enum SwapErrorCode {
@@ -17,9 +18,9 @@ export enum SwapErrorCode {
 }
 
 export class SwapError extends DefiError {
-    public readonly code: SwapErrorCode;
+    public readonly code: SwapErrorCode | DefiErrorCode;
 
-    constructor(message: string, code: SwapErrorCode, details?: unknown) {
+    constructor(message: string, code: SwapErrorCode | DefiErrorCode, details?: unknown) {
         super(message, code, details);
         this.name = 'SwapError';
         this.code = code;

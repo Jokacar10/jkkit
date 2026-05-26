@@ -17,6 +17,7 @@ import type {
 } from '../../api/models';
 import type { StakingAPI, StakingProviderInterface } from '../../api/interfaces';
 import { StakingError, StakingErrorCode } from './errors';
+import type { DefiErrorCode } from '../errors';
 import { globalLogger } from '../../core/Logger';
 import { DefiManager } from '../DefiManager';
 import type { ProviderFactoryContext } from '../../types/factory';
@@ -29,7 +30,10 @@ const log = globalLogger.createChild('StakingManager');
  * Allows registration of multiple staking providers and provides a unified API
  * for staking operations. Providers can be switched dynamically.
  */
-export class StakingManager extends DefiManager<StakingProviderInterface> implements StakingAPI {
+export class StakingManager
+    extends DefiManager<StakingProviderInterface, StakingError, StakingErrorCode>
+    implements StakingAPI
+{
     constructor(createFactoryContext: () => ProviderFactoryContext) {
         super(createFactoryContext);
     }
@@ -134,11 +138,8 @@ export class StakingManager extends DefiManager<StakingProviderInterface> implem
         }
     }
 
-    protected createError(message: string, code: string, details?: unknown): StakingError {
-        const errorCode = Object.values(StakingErrorCode).includes(code as StakingErrorCode)
-            ? (code as StakingErrorCode)
-            : StakingErrorCode.InvalidParams;
+    protected createError(message: string, code: StakingErrorCode | DefiErrorCode, details?: unknown): StakingError {
         log.error(message, { code, details });
-        return new StakingError(message, errorCode, details);
+        return new StakingError(message, code, details);
     }
 }
