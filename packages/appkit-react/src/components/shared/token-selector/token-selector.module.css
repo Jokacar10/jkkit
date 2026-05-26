@@ -11,6 +11,8 @@
 }
 
 .symbol {
+  display: flex;
+  align-items: center;
   padding-right: 2px;
   margin-right: auto;
 }
@@ -18,4 +20,8 @@
 .chevron {
   opacity: 0.5;
   margin-left: auto;
+}
+
+.iconSkeleton {
+  border-radius: 50%;
 }

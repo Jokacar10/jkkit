@@ -71,6 +71,21 @@ export {
     type GetCryptoOnrampStatusOptions,
     type GetCryptoOnrampStatusReturnType,
 } from './crypto-onramp/get-crypto-onramp-status';
+export {
+    setDefaultCryptoOnrampProvider,
+    type SetDefaultCryptoOnrampProviderParameters,
+    type SetDefaultCryptoOnrampProviderReturnType,
+} from './crypto-onramp/set-default-crypto-onramp-provider';
+export {
+    getCryptoOnrampSupportedCurrencies,
+    type GetCryptoOnrampSupportedCurrenciesOptions,
+    type GetCryptoOnrampSupportedCurrenciesReturnType,
+} from './crypto-onramp/get-crypto-onramp-supported-currencies';
+export {
+    getCryptoOnrampProviderMetadata,
+    type GetCryptoOnrampProviderMetadataOptions,
+    type GetCryptoOnrampProviderMetadataReturnType,
+} from './crypto-onramp/get-crypto-onramp-provider-metadata';
 
 // Jettons
 export { getJettonInfo, type GetJettonInfoOptions, type GetJettonInfoReturnType } from './jettons/get-jetton-info';

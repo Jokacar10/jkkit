@@ -18,8 +18,9 @@ import type {
     TokenAmount,
     TransactionsResponse,
     JettonsResponse,
-    FullAccountState,
-    ToncenterEmulationResult,
+    AccountState,
+    AccountStates,
+    EmulationResult,
     ToncenterResponseJettonMasters,
     ToncenterTracesResponse,
     TransactionsByAddressRequest,
@@ -71,6 +72,10 @@ export class AndroidAPIClientAdapter implements ApiClient {
         }
         this.androidBridge = androidWindow.WalletKitNative;
         this.network = network;
+    }
+
+    getNetwork(): Network {
+        return this.network;
     }
 
     /**
@@ -139,12 +144,16 @@ export class AndroidAPIClientAdapter implements ApiClient {
         throw new Error('nftItemsByOwner is not implemented yet');
     }
 
-    async fetchEmulation(_messageBoc: Base64String, _ignoreSignature?: boolean): Promise<ToncenterEmulationResult> {
+    async fetchEmulation(_messageBoc: Base64String, _ignoreSignature?: boolean): Promise<EmulationResult> {
         throw new Error('fetchEmulation is not implemented yet');
     }
 
-    async getAccountState(_address: UserFriendlyAddress, _seqno?: number): Promise<FullAccountState> {
+    async getAccountState(_address: UserFriendlyAddress, _seqno?: number): Promise<AccountState> {
         throw new Error('getAccountState is not implemented yet');
+    }
+
+    async getAccountStates(_addresses: UserFriendlyAddress[]): Promise<AccountStates> {
+        throw new Error('getAccountStates is not implemented yet');
     }
 
     async getBalance(address: UserFriendlyAddress, seqno?: number): Promise<TokenAmount> {
@@ -179,11 +188,11 @@ export class AndroidAPIClientAdapter implements ApiClient {
         throw new Error('getPendingTrace is not implemented yet');
     }
 
-    async resolveDnsWallet(_domain: string): Promise<string | null> {
+    async resolveDnsWallet(_domain: string): Promise<string | undefined> {
         throw new Error('resolveDnsWallet is not implemented yet');
     }
 
-    async backResolveDnsWallet(_address: UserFriendlyAddress): Promise<string | null> {
+    async backResolveDnsWallet(_address: UserFriendlyAddress): Promise<string | undefined> {
         throw new Error('backResolveDnsWallet is not implemented yet');
     }
 

@@ -11,8 +11,8 @@ import type {
     ProviderInput,
     SwapProviderInterface,
     StakingProviderInterface,
-    OnrampProviderInterface,
     CryptoOnrampProviderInterface,
+    StreamingProvider,
 } from '@ton/walletkit';
 
 import type { AppKitConfig } from '../types/config';
@@ -25,6 +25,9 @@ import type { WalletInterface } from '../../../types/wallet';
 import { WalletsManager } from '../../wallets-manager';
 import { AppKitNetworkManager } from '../../network';
 import { Network } from '../../../types/network';
+import type { AppKitCache } from '../../cache';
+import { LruAppKitCache } from '../../cache';
+import type { AppKitProvider } from '../../../types/provider';
 
 /**
  * Central hub for wallet management.
@@ -42,9 +45,11 @@ export class AppKit {
     readonly networkManager: AppKitNetworkManager;
     readonly streamingManager: StreamingManager;
     readonly config: AppKitConfig;
+    readonly cache: AppKitCache;
 
     constructor(config: AppKitConfig) {
         this.config = config;
+        this.cache = config.cache ?? new LruAppKitCache();
 
         this.emitter = new EventEmitter<AppKitEvents>();
         this.emitter.on(CONNECTOR_EVENTS.WALLETS_UPDATED, this.updateWalletsFromConnectors.bind(this));
@@ -77,7 +82,7 @@ export class AppKit {
     }
 
     createFactoryContext(): ConnectorFactoryContext {
-        return { eventEmitter: this.emitter, networkManager: this.networkManager, ssr: this.config?.ssr };
+        return { eventEmitter: this.emitter, networkManager: this.networkManager };
     }
 
     /**
@@ -119,7 +124,7 @@ export class AppKit {
     /**
      * Add a provider
      */
-    registerProvider(input: ProviderInput): void {
+    registerProvider(input: ProviderInput<AppKitProvider>): void {
         const provider = typeof input === 'function' ? input(this.createFactoryContext()) : input;
         switch (provider.type) {
             case 'swap':
@@ -128,11 +133,11 @@ export class AppKit {
             case 'staking':
                 this.stakingManager.registerProvider(provider as StakingProviderInterface);
                 break;
-            case 'onramp':
-                this.onrampManager.registerProvider(provider as OnrampProviderInterface);
-                break;
             case 'crypto-onramp':
                 this.cryptoOnrampManager.registerProvider(provider as CryptoOnrampProviderInterface);
+                break;
+            case 'streaming':
+                this.streamingManager.registerProvider(provider as StreamingProvider);
                 break;
             default:
                 throw new Error('Unknown provider type');

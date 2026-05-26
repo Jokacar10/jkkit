@@ -18,8 +18,9 @@ import { createDeDustProvider } from '@ton/appkit/swap/dedust';
 import { createOmnistonProvider } from '@ton/appkit/swap/omniston';
 import { createTonstakersProvider } from '@ton/appkit/staking/tonstakers';
 import { createLayerswapProvider } from '@ton/appkit/crypto-onramp/layerswap';
+import { createDecentProvider } from '@ton/appkit/crypto-onramp/decent';
 
-import { ENV_TON_API_KEY_TESTNET, ENV_TON_API_KEY_MAINNET } from '@/core/configs/env';
+import { ENV_TON_API_KEY_TESTNET, ENV_TON_API_KEY_MAINNET, ENV_DECENT_API_KEY } from '@/core/configs/env';
 
 const mainnetApiClient = new ApiClientToncenter({
     network: Network.mainnet(),
@@ -54,14 +55,8 @@ export const appKit = new AppKit({
         createDeDustProvider(),
         createTonstakersProvider(),
         createLayerswapProvider(),
+        createDecentProvider({ apiKey: ENV_DECENT_API_KEY }),
+        createTonCenterStreamingProvider({ network: Network.mainnet(), apiKey: ENV_TON_API_KEY_MAINNET }),
+        createTonCenterStreamingProvider({ network: Network.testnet(), apiKey: ENV_TON_API_KEY_TESTNET }),
     ],
 });
-
-// TODO: replace in normal config
-appKit.streamingManager.registerProvider(
-    createTonCenterStreamingProvider({ network: Network.mainnet(), apiKey: ENV_TON_API_KEY_MAINNET }),
-);
-
-appKit.streamingManager.registerProvider(
-    createTonCenterStreamingProvider({ network: Network.testnet(), apiKey: ENV_TON_API_KEY_TESTNET }),
-);

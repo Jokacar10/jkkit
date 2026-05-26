@@ -10,10 +10,12 @@ import type { CryptoOnrampAPI, CryptoOnrampProviderInterface } from '../../api/i
 import type {
     CryptoOnrampDeposit,
     CryptoOnrampDepositParams,
+    CryptoOnrampProviderMetadata,
     CryptoOnrampQuote,
     CryptoOnrampQuoteParams,
     CryptoOnrampStatus,
     CryptoOnrampStatusParams,
+    CryptoOnrampSupportedCurrencies,
 } from '../../api/models';
 import type { CryptoOnrampErrorCode } from './errors';
 import { CryptoOnrampError } from './errors';
@@ -30,6 +32,22 @@ const log = globalLogger.createChild('CryptoOnrampManager');
  */
 export class CryptoOnrampManager extends DefiManager<CryptoOnrampProviderInterface> implements CryptoOnrampAPI {
     /**
+     * Get static metadata for a crypto onramp provider
+     * @param providerId - Optional provider id to use
+     */
+    async getMetadata(providerId?: string): Promise<CryptoOnrampProviderMetadata> {
+        const selectedProviderId = providerId || this.defaultProviderId;
+        log.debug('Getting crypto onramp metadata', { providerId: selectedProviderId });
+
+        try {
+            return await this.getProvider(selectedProviderId).getMetadata();
+        } catch (error) {
+            log.error('Failed to get crypto onramp metadata', { error });
+            throw error;
+        }
+    }
+
+    /**
      * Get a quote for onramping from another crypto asset into a TON asset
      * @param params - Quote parameters
      * @param providerId - Optional provider name to use
@@ -41,9 +59,9 @@ export class CryptoOnrampManager extends DefiManager<CryptoOnrampProviderInterfa
     ): Promise<CryptoOnrampQuote> {
         const selectedProviderId = providerId || this.defaultProviderId;
         log.debug('Getting crypto onramp quote', {
-            sourceCurrencyAddress: params.sourceCurrencyAddress,
-            sourceChain: params.sourceChain,
-            targetCurrencyAddress: params.targetCurrencyAddress,
+            sourceChain: params.sourceCurrency.chain,
+            sourceAddress: params.sourceCurrency.address,
+            targetAddress: params.targetCurrency.address,
             amount: params.amount,
             isSourceAmount: params.isSourceAmount,
             providerId: selectedProviderId,
@@ -88,8 +106,8 @@ export class CryptoOnrampManager extends DefiManager<CryptoOnrampProviderInterfa
             log.debug('Created crypto onramp deposit', {
                 address: deposit.address,
                 amount: deposit.amount,
-                sourceCurrencyAddress: deposit.sourceCurrencyAddress,
-                sourceChain: deposit.sourceChain,
+                sourceChain: deposit.sourceCurrency.chain,
+                sourceAddress: deposit.sourceCurrency.address,
             });
 
             return deposit;
@@ -123,6 +141,22 @@ export class CryptoOnrampManager extends DefiManager<CryptoOnrampProviderInterfa
             return status;
         } catch (error) {
             log.error('Failed to get crypto onramp deposit status', { error, params });
+            throw error;
+        }
+    }
+
+    /**
+     * Discover supported source/destination currencies for a provider.
+     * @param providerId Optional provider name to use
+     */
+    async getSupportedCurrencies(providerId?: string): Promise<CryptoOnrampSupportedCurrencies> {
+        const selectedProviderId = providerId || this.defaultProviderId;
+        log.debug('Discovering crypto onramp supported currencies', { providerId: selectedProviderId });
+
+        try {
+            return await this.getProvider(selectedProviderId).getSupportedCurrencies();
+        } catch (error) {
+            log.error('Failed to discover crypto onramp supported currencies', { error });
             throw error;
         }
     }

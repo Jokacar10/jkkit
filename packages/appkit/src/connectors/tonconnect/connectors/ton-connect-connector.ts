@@ -11,14 +11,13 @@ import type { TonConnectUiCreateOptions } from '@tonconnect/ui';
 
 import { TonConnectWalletAdapter } from '../adapters/ton-connect-wallet-adapter';
 import { CONNECTOR_EVENTS, NETWORKS_EVENTS } from '../../../core/app-kit';
-import type { Connector, ConnectorMetadata } from '../../../types/connector';
+import type { Connector } from '../../../types/connector';
 import type { WalletInterface } from '../../../types/wallet';
 import { TONCONNECT_DEFAULT_CONNECTOR_ID } from '../constants/id';
 import { createConnector } from '../../../types/connector';
 
 export interface TonConnectConnectorConfig {
     id?: string;
-    metadata?: ConnectorMetadata;
     tonConnectOptions?: TonConnectUiCreateOptions;
     tonConnectUI?: TonConnectUI;
 }
@@ -29,7 +28,7 @@ export type TonConnectConnector = Connector & {
 };
 
 export const createTonConnectConnector = (config: TonConnectConnectorConfig) => {
-    return createConnector(({ eventEmitter, networkManager, ssr }): TonConnectConnector => {
+    return createConnector(({ eventEmitter, networkManager }): TonConnectConnector => {
         let originalTonConnectUI: TonConnectUI | null = null;
         let unsubscribeTonConnect: (() => void) | null = null;
         let unsubscribeDefaultNetwork: (() => void) | null = null;
@@ -46,7 +45,7 @@ export const createTonConnectConnector = (config: TonConnectConnectorConfig) => 
                 return originalTonConnectUI;
             }
 
-            if (ssr && typeof window === 'undefined') {
+            if (typeof window === 'undefined') {
                 return null;
             }
 
@@ -110,11 +109,6 @@ export const createTonConnectConnector = (config: TonConnectConnectorConfig) => 
         return {
             id,
             type: 'tonconnect',
-            metadata: {
-                name: 'TonConnect',
-                iconUrl: 'https://avatars.githubusercontent.com/u/113980577',
-                ...config.metadata,
-            },
 
             get tonConnectUI() {
                 return getTonConnectUI();

@@ -22,7 +22,7 @@
 }
 
 .button:disabled {
-  opacity: 0.35;
+  opacity: 0.55;
   cursor: not-allowed;
 }
 
@@ -44,6 +44,12 @@
 .s {
   composes: labelSemibold from "../../../styles/typography.module.css";
   padding: 9px 12px;
+}
+
+.icon {
+  composes: labelSemibold from "../../../styles/typography.module.css";
+  aspect-ratio: 1;
+  padding: 6px;
 }
 
 /* Border radius */

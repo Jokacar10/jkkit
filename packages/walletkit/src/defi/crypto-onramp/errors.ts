@@ -15,6 +15,12 @@ export enum CryptoOnrampErrorCode {
     RefundAddressRequired = 'REFUND_ADDRESS_REQUIRED',
     InvalidRefundAddress = 'INVALID_REFUND_ADDRESS',
     ReversedAmountNotSupported = 'REVERSED_AMOUNT_NOT_SUPPORTED',
+    UnsupportedSourceChain = 'UNSUPPORTED_SOURCE_CHAIN',
+    UnsupportedSourceToken = 'UNSUPPORTED_SOURCE_TOKEN',
+    UnsupportedDestinationToken = 'UNSUPPORTED_DESTINATION_TOKEN',
+    RouteNotFound = 'ROUTE_NOT_FOUND',
+    AmountTooLarge = 'AMOUNT_TOO_LARGE',
+    AmountTooSmall = 'AMOUNT_TOO_SMALL',
     InvalidParams = 'INVALID_PARAMS',
 }
 

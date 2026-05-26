@@ -41,6 +41,8 @@ export interface CryptoOnrampDepositModalProps {
     depositStatus: CryptoOnrampStatus | null;
     /** Optional memo / tag / comment */
     memo?: string;
+    /** Optional refund address the user provided on the source network */
+    refundAddress?: string;
     /** URL of the token logo to embed in the QR code center */
     tokenLogo?: string;
     /** Optional chain-specific warning message */
@@ -73,6 +75,7 @@ export const CryptoOnrampDepositModal: FC<CryptoOnrampDepositModalProps> = ({
     amount,
     symbol,
     memo,
+    refundAddress,
     tokenLogo,
     chainWarning,
     depositStatus,
@@ -144,7 +147,7 @@ export const CryptoOnrampDepositModal: FC<CryptoOnrampDepositModalProps> = ({
                             <span className={styles.infoValue}>
                                 {amount} {symbol}
                             </span>
-                            <CopyButton value={`${amount} ${symbol}`} aria-label="Copy amount" />
+                            <CopyButton value={amount} aria-label="Copy amount" />
                         </div>
                     </div>
 
@@ -157,6 +160,19 @@ export const CryptoOnrampDepositModal: FC<CryptoOnrampDepositModalProps> = ({
                             <CopyButton value={address} aria-label="Copy address" />
                         </div>
                     </div>
+
+                    {refundAddress && (
+                        <>
+                            <div className={styles.divider} />
+                            <div className={styles.infoRow}>
+                                <span className={styles.infoLabel}>{t('cryptoOnramp.refundAddress')}</span>
+                                <div className={styles.infoValueRow}>
+                                    <span className={styles.infoValue}>{truncateAddress(refundAddress)}</span>
+                                    <CopyButton value={refundAddress} aria-label="Copy refund address" />
+                                </div>
+                            </div>
+                        </>
+                    )}
 
                     {memo && (
                         <>

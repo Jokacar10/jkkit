@@ -1600,7 +1600,7 @@ function postProcessDiscriminatedUnions(schema) {
             // The template will override the type to use the nested enum name
             Object.keys(propDef).forEach((k) => delete propDef[k]);
             propDef.type = 'object';
-            propDef['x-interface-union'] = true;
+            propDef['x-inline-interface-union'] = true;
         }
     }
 }
@@ -1668,6 +1668,106 @@ function postProcessStripDefaults(schema) {
     }
 }
 
+/**
+ * Post-process schema to detect unions of string literals + a single ref to a
+ * primitive string type, e.g. `type X = 'a' | 'b' | UserFriendlyAddress`.
+ *
+ * ts-json-schema-generator hoists each string literal into its own synthetic
+ * single-value enum definition (named e.g. `<CAPS_LITERAL><ParentName>`) and
+ * emits the union as `anyOf` of `$ref`s. We detect that shape and rewrite it
+ * into a Swift-friendly vendor extension that the template turns into:
+ *
+ *     enum X { case a; case b; case userFriendlyAddress(UserFriendlyAddress) }
+ *
+ * Detection: definition has `anyOf` where every entry is a `$ref`, each
+ * referenced definition is either a single-value string enum (literal case) or
+ * a plain `{type:"string"}` (ref case), with >=1 literal and exactly 1 ref.
+ */
+function postProcessStringLiteralUnions(schema) {
+    const definitions = schema.definitions || {};
+
+    // Classify an anyOf entry. Returns {kind: 'literal', rawValue} or
+    // {kind: 'ref', targetName, synthetic} or null.
+    const classifyEntry = (entry) => {
+        if (!entry || typeof entry !== 'object') return null;
+
+        // Inline string literal: { type: "string", const: "..." } or enum of one
+        if (entry.type === 'string' && !entry.$ref) {
+            if (typeof entry.const === 'string') return { kind: 'literal', rawValue: entry.const };
+            if (Array.isArray(entry.enum) && entry.enum.length === 1) {
+                return { kind: 'literal', rawValue: String(entry.enum[0]) };
+            }
+        }
+
+        // $ref: classify based on the referenced definition
+        if (typeof entry.$ref === 'string' && Object.keys(entry).length === 1) {
+            const targetName = typeNameFromRef(entry.$ref);
+            const target = definitions[targetName];
+            if (!target) return null;
+            if (target.type === 'string' && !target.$ref) {
+                if (Array.isArray(target.enum) && target.enum.length === 1 && typeof target.enum[0] === 'string') {
+                    return { kind: 'literal', rawValue: target.enum[0], synthetic: targetName };
+                }
+                if (!target.enum && typeof target.const !== 'string') {
+                    return { kind: 'ref', targetName };
+                }
+            }
+        }
+
+        return null;
+    };
+
+    const synthLiteralsToDelete = new Set();
+
+    for (const [, typeDef] of Object.entries(definitions)) {
+        if (!Array.isArray(typeDef.anyOf) || typeDef.anyOf.length < 2) continue;
+
+        const classified = typeDef.anyOf.map(classifyEntry);
+        if (classified.some((c) => c === null)) continue;
+
+        const literalCases = classified.filter((c) => c.kind === 'literal');
+        const refCases = classified.filter((c) => c.kind === 'ref');
+        if (literalCases.length < 1 || refCases.length !== 1) continue;
+
+        for (const { synthetic } of literalCases) {
+            if (synthetic) synthLiteralsToDelete.add(synthetic);
+        }
+
+        const refCase = refCases[0];
+        Object.keys(typeDef).forEach((k) => delete typeDef[k]);
+        typeDef.type = 'object';
+        typeDef.properties = { _placeholder: { type: 'string' } };
+        typeDef['x-string-literal-union'] = true;
+        typeDef['x-literal-cases'] = literalCases.map(({ rawValue }) => ({
+            name: toCamelCase(rawValue),
+            rawValue,
+        }));
+        typeDef['x-ref-case'] = {
+            name: toCamelCase(refCase.targetName),
+            typeRef: refCase.targetName,
+        };
+    }
+
+    if (synthLiteralsToDelete.size === 0) return;
+
+    // Ensure the synthetic literal definitions aren't still referenced elsewhere
+    // before deleting them.
+    const stillReferenced = new Set();
+    const visit = (obj) => {
+        if (obj === null || typeof obj !== 'object') return;
+        if (typeof obj.$ref === 'string') {
+            const name = typeNameFromRef(obj.$ref);
+            if (synthLiteralsToDelete.has(name)) stillReferenced.add(name);
+        }
+        for (const value of Object.values(obj)) visit(value);
+    };
+    visit(definitions);
+
+    for (const name of synthLiteralsToDelete) {
+        if (!stillReferenced.has(name)) delete definitions[name];
+    }
+}
+
 function postProcessTypeAliases(schema) {
     const definitions = schema.definitions || {};
 
@@ -1726,6 +1826,67 @@ function updateRefs(obj, refMap) {
     }
 }
 
+/**
+ * Convert SCREAMING_SNAKE_CASE / snake_case names to PascalCase.
+ * `FOO_BAR_BAZ` → `FooBarBaz`, `foo_bar` → `FooBar`. Names without an
+ * underscore are not snake_case — left as-is so acronyms like `NFT`, `URL`,
+ * `OK` keep their canonical form.
+ */
+function toPascalCase(str) {
+    if (typeof str !== 'string' || str.length === 0) return str;
+    if (str.includes('_')) {
+        return str
+            .toLowerCase()
+            .split('_')
+            .filter(Boolean)
+            .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+            .join('');
+    }
+    return str;
+}
+
+/**
+ * Rename schema definitions whose name is snake_case or SCREAMING_SNAKE_CASE
+ * to PascalCase, and update every `$ref` accordingly. Names without an
+ * underscore are not considered snake_case and are left alone (so acronyms
+ * like `NFT`, `URL` keep their canonical form).
+ *
+ * Runs early so the rest of the post-processing pipeline sees the final names
+ * when it materialises type references into vendor extensions.
+ */
+function postProcessTypeNameCasing(schema) {
+    const definitions = schema.definitions || {};
+    const renames = {};
+
+    for (const name of Object.keys(definitions)) {
+        if (!name.includes('_')) continue;
+
+        const newName = toPascalCase(name);
+        if (newName !== name) renames[name] = newName;
+    }
+
+    if (Object.keys(renames).length === 0) return;
+
+    for (const [oldName, newName] of Object.entries(renames)) {
+        if (newName !== oldName && newName in definitions) {
+            console.warn(
+                `[type-name-casing] cannot rename ${oldName} -> ${newName}: collides with existing definition`,
+            );
+            delete renames[oldName];
+            continue;
+        }
+        definitions[newName] = definitions[oldName];
+        delete definitions[oldName];
+    }
+
+    const refMap = {};
+    for (const [oldName, newName] of Object.entries(renames)) {
+        refMap[`#/definitions/${oldName}`] = `#/definitions/${newName}`;
+        refMap[`#/components/schemas/${oldName}`] = `#/components/schemas/${newName}`;
+    }
+    updateRefs(definitions, refMap);
+}
+
 // ============================================================================
 // Main
 // ============================================================================
@@ -1776,6 +1937,12 @@ try {
     // Post-process: rename definitions with x-definition-name
     postProcessDefinitionNames(schema);
 
+    // Post-process: rewrite SCREAMING_SNAKE_CASE / snake_case definition names
+    // to PascalCase so the Swift generator produces ConnectEventErrorCodes,
+    // not CONNECTEVENTERRORCODES. Runs before any step that materialises type
+    // names into vendor extensions so those see the final name.
+    postProcessTypeNameCasing(schema);
+
     // Post-process: transform @discriminator annotated unions into discriminated union schemas
     postProcessDiscriminatedUnions(schema);
 
@@ -1784,6 +1951,9 @@ try {
 
     // Post-process: strip @default values (documentation-only, not for codegen)
     postProcessStripDefaults(schema);
+
+    // Post-process: detect string-literal + ref unions and rewrite to x-string-literal-union
+    postProcessStringLiteralUnions(schema);
 
     // Post-process: convert pure $ref definitions (type aliases) to x-type-alias
     postProcessTypeAliases(schema);

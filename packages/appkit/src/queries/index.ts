@@ -63,6 +63,25 @@ export {
     type CreateCryptoOnrampDepositErrorType,
     type CreateCryptoOnrampDepositVariables,
 } from './crypto-onramp/create-crypto-onramp-deposit';
+export {
+    getCryptoOnrampSupportedCurrenciesQueryOptions,
+    type GetCryptoOnrampSupportedCurrenciesQueryConfig,
+    type GetCryptoOnrampSupportedCurrenciesQueryOptions,
+    type GetCryptoOnrampSupportedCurrenciesData,
+    type GetCryptoOnrampSupportedCurrenciesErrorType,
+    type GetCryptoOnrampSupportedCurrenciesQueryFnData,
+    type GetCryptoOnrampSupportedCurrenciesQueryKey,
+} from './crypto-onramp/get-crypto-onramp-supported-currencies';
+export {
+    getCryptoOnrampProviderMetadataQueryOptions,
+    getCryptoOnrampProviderMetadataQueryKey,
+    type GetCryptoOnrampProviderMetadataQueryConfig,
+    type GetCryptoOnrampProviderMetadataQueryOptions,
+    type GetCryptoOnrampProviderMetadataData,
+    type GetCryptoOnrampProviderMetadataErrorType,
+    type GetCryptoOnrampProviderMetadataQueryFnData,
+    type GetCryptoOnrampProviderMetadataQueryKey,
+} from './crypto-onramp/get-crypto-onramp-provider-metadata';
 
 // Jettons
 export {

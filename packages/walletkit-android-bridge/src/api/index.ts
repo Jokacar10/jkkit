@@ -59,6 +59,8 @@ export const api = {
     rejectTransactionRequest: requests.rejectTransactionRequest,
     approveSignDataRequest: requests.approveSignDataRequest,
     rejectSignDataRequest: requests.rejectSignDataRequest,
+    approveSignMessageRequest: requests.approveSignMessageRequest,
+    rejectSignMessageRequest: requests.rejectSignMessageRequest,
 
     handleTonConnectUrl: tonconnect.handleTonConnectUrl,
     connectionEventFromUrl: tonconnect.connectionEventFromUrl,
@@ -103,7 +105,8 @@ export const api = {
     buildStakeTransaction: staking.buildStakeTransaction,
     getStakedBalance: staking.getStakedBalance,
     getStakingProviderInfo: staking.getStakingProviderInfo,
-    getSupportedUnstakeModes: staking.getSupportedUnstakeModes,
+    getStakingProviderMetadata: staking.getStakingProviderMetadata,
+    registerKotlinStakingProvider: staking.registerKotlinStakingProvider,
 
     createOmnistonSwapProvider: swap.createOmnistonSwapProvider,
     createDeDustSwapProvider: swap.createDeDustSwapProvider,
@@ -113,4 +116,5 @@ export const api = {
     hasSwapProvider: swap.hasSwapProvider,
     getSwapQuote: swap.getSwapQuote,
     buildSwapTransaction: swap.buildSwapTransaction,
+    registerKotlinSwapProvider: swap.registerKotlinSwapProvider,
 } as unknown as WalletKitBridgeApi;
