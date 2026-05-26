@@ -17,7 +17,6 @@ import type {
 } from '../../api/models';
 import type { StakingAPI, StakingProviderInterface } from '../../api/interfaces';
 import { StakingError, StakingErrorCode } from './errors';
-import type { DefiErrorCode } from '../errors';
 import { globalLogger } from '../../core/Logger';
 import { DefiManager } from '../DefiManager';
 import type { ProviderFactoryContext } from '../../types/factory';
@@ -30,10 +29,7 @@ const log = globalLogger.createChild('StakingManager');
  * Allows registration of multiple staking providers and provides a unified API
  * for staking operations. Providers can be switched dynamically.
  */
-export class StakingManager
-    extends DefiManager<StakingProviderInterface, StakingError, StakingErrorCode>
-    implements StakingAPI
-{
+export class StakingManager extends DefiManager<StakingProviderInterface> implements StakingAPI {
     constructor(createFactoryContext: () => ProviderFactoryContext) {
         super(createFactoryContext);
     }
@@ -50,7 +46,7 @@ export class StakingManager
             log.debug('Received staking quote', quote);
             return quote;
         } catch (error) {
-            throw this.createError('Failed to get staking quote', StakingErrorCode.InvalidParams, { error, params });
+            throw new StakingError('Failed to get staking quote', StakingErrorCode.InvalidParams, { error, params });
         }
     }
 
@@ -64,7 +60,7 @@ export class StakingManager
         try {
             return await this.getProvider(providerId).buildStakeTransaction(params);
         } catch (error) {
-            throw this.createError('Failed to build staking transaction', StakingErrorCode.InvalidParams, {
+            throw new StakingError('Failed to build staking transaction', StakingErrorCode.InvalidParams, {
                 error,
                 params,
             });
@@ -91,7 +87,7 @@ export class StakingManager
         try {
             return await this.getProvider(providerId).getStakedBalance(userAddress, network);
         } catch (error) {
-            throw this.createError('Failed to get staking balance', StakingErrorCode.InvalidParams, {
+            throw new StakingError('Failed to get staking balance', StakingErrorCode.InvalidParams, {
                 error,
                 userAddress,
                 network,
@@ -113,7 +109,7 @@ export class StakingManager
         try {
             return await this.getProvider(providerId).getStakingProviderInfo(network);
         } catch (error) {
-            throw this.createError('Failed to get staking info', StakingErrorCode.InvalidParams, { error, network });
+            throw new StakingError('Failed to get staking info', StakingErrorCode.InvalidParams, { error, network });
         }
     }
 
@@ -131,15 +127,10 @@ export class StakingManager
         try {
             return this.getProvider(providerId).getStakingProviderMetadata(network);
         } catch (error) {
-            throw this.createError('Failed to get staking metadata', StakingErrorCode.InvalidParams, {
+            throw new StakingError('Failed to get staking metadata', StakingErrorCode.InvalidParams, {
                 error,
                 network,
             });
         }
-    }
-
-    protected createError(message: string, code: StakingErrorCode | DefiErrorCode, details?: unknown): StakingError {
-        log.error(message, { code, details });
-        return new StakingError(message, code, details);
     }
 }

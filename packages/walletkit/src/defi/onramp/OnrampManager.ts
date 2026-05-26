@@ -8,9 +8,6 @@
 
 import type { OnrampAPI, OnrampProviderInterface } from '../../api/interfaces';
 import type { OnrampParams, OnrampQuote, OnrampQuoteParams } from '../../api/models';
-import type { OnrampErrorCode } from './errors';
-import { OnrampError } from './errors';
-import type { DefiErrorCode } from '../errors';
 import { globalLogger } from '../../core/Logger';
 import { DefiManager } from '../DefiManager';
 
@@ -22,10 +19,7 @@ const log = globalLogger.createChild('OnrampManager');
  * Allows registration of multiple onramp providers and provides a unified API
  * for fiat-to-crypto onramp operations. Providers can be switched dynamically.
  */
-export class OnrampManager
-    extends DefiManager<OnrampProviderInterface, OnrampError, OnrampErrorCode>
-    implements OnrampAPI
-{
+export class OnrampManager extends DefiManager<OnrampProviderInterface> implements OnrampAPI {
     /**
      * Get a quote for onramping fiat to crypto
      * @param params - Quote parameters
@@ -128,9 +122,5 @@ export class OnrampManager
             log.error('Failed to build onramp URL', { error, params });
             throw error;
         }
-    }
-
-    protected createError(message: string, code: OnrampErrorCode | DefiErrorCode, details?: unknown): OnrampError {
-        return new OnrampError(message, code, details);
     }
 }

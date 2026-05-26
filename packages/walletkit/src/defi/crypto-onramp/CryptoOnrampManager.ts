@@ -18,7 +18,6 @@ import type {
     CryptoOnrampSupportedCurrencies,
 } from '../../api/models';
 import { CryptoOnrampError, CryptoOnrampErrorCode } from './errors';
-import type { DefiErrorCode } from '../errors';
 import { globalLogger } from '../../core/Logger';
 import { DefiManager } from '../DefiManager';
 
@@ -30,10 +29,7 @@ const log = globalLogger.createChild('CryptoOnrampManager');
  * Allows registration of multiple crypto onramp providers and provides a unified API
  * for crypto-to-TON onramp operations. Providers can be switched dynamically.
  */
-export class CryptoOnrampManager
-    extends DefiManager<CryptoOnrampProviderInterface, CryptoOnrampError, CryptoOnrampErrorCode>
-    implements CryptoOnrampAPI
-{
+export class CryptoOnrampManager extends DefiManager<CryptoOnrampProviderInterface> implements CryptoOnrampAPI {
     /**
      * Get static metadata for a crypto onramp provider
      * @param providerId - Optional provider id to use
@@ -117,7 +113,7 @@ export class CryptoOnrampManager
         } catch (error) {
             log.error('Failed to create crypto onramp deposit', { error, params });
             if (error instanceof CryptoOnrampError) throw error;
-            throw this.createError(
+            throw new CryptoOnrampError(
                 'Failed to create crypto onramp deposit',
                 CryptoOnrampErrorCode.DepositFailed,
                 error,
@@ -167,13 +163,5 @@ export class CryptoOnrampManager
             log.error('Failed to discover crypto onramp supported currencies', { error });
             throw error;
         }
-    }
-
-    protected createError(
-        message: string,
-        code: CryptoOnrampErrorCode | DefiErrorCode,
-        details?: unknown,
-    ): CryptoOnrampError {
-        return new CryptoOnrampError(message, code, details);
     }
 }
