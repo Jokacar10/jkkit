@@ -1,9 +1,18 @@
+/**
+ * Copyright (c) TonTech.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
 // ----------------------------------------------------------------------------
 // Case 1: Basic TypeScript enum (numeric values)
 // ----------------------------------------------------------------------------
 // Exercises EnumNodeParserWithNames + EnumTypeFormatterWithVarnames.
 // Member names are camelCased into x-enum-varnames.
 
+/** Case 1 — basic numeric enum without @format. */
 export enum BasicNumericEnum {
     Foo = 0,
     Bar = 1,
@@ -330,8 +339,10 @@ export type PureStringLiteralUnion = 'alpha' | 'beta' | 'gamma';
 // ----------------------------------------------------------------------------
 // Edge case: openapi-generator typically collapses these into `AnyCodable`
 // or a free-form object. Snapshot the current behaviour so a future template
-// change is caught.
+// change is caught. An empty interface is intentional here — the rule
+// triggered by it is what we're explicitly testing the generator on.
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface EmptyCase {}
 
 // ----------------------------------------------------------------------------

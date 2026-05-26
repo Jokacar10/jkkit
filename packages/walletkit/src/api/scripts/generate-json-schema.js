@@ -764,35 +764,14 @@ class DiscriminatedUnionTypeFormatter {
     }
 
     supportsType(type) {
-        if (type instanceof DiscriminatedUnionType) {
-            return true;
-        }
-        // Defer every other UnionType (including inline anonymous unions
-        // like `{type:'a'; ...} | {type:'b'; ...}` inside a property) to the
-        // default UnionTypeFormatter. That path produces the canonical
-        // `allOf + if/then` shape which `postProcessDiscriminatedUnions`
-        // (Case A or Case B) then reshapes — preserving every variant
-        // field instead of collapsing on `value`.
-        return false;
-        if (!(type instanceof tsj.UnionType) || type.getTypes().length < 2) {
-            return false;
-        }
-        // If the union has a discriminator set (from @discriminator annotation),
-        // let the default UnionTypeFormatter handle it — it produces allOf/if/then
-        // which postProcessDiscriminatedUnions() transforms into x-interface-union.
-        if (type.getDiscriminator?.()) {
-            return false;
-        }
-        const isDiscriminated = type.getTypes().every((variant) => this.getDiscriminatorValue(variant) !== null);
-        if (!isDiscriminated) {
-            return false;
-        }
-        // Skip types with recursive references (e.g., RawStackItem with value: RawStackItem[])
-        // These cause issues with Swift code generators
-        if (this.hasRecursiveReference(type)) {
-            return false;
-        }
-        return true;
+        // Only claim DiscriminatedUnionType (the wrapped form we synthesise
+        // ourselves). Inline anonymous unions like
+        // `{type:'a'; ...} | {type:'b'; ...}` inside a property are deferred
+        // to the default UnionTypeFormatter, which produces the canonical
+        // `allOf + if/then` shape. `postProcessDiscriminatedUnions` then
+        // reshapes them while preserving every variant field instead of
+        // collapsing on `value`.
+        return type instanceof DiscriminatedUnionType;
     }
 
     /**
@@ -1138,9 +1117,7 @@ class InlineTypeLiteralAnnotationParser {
             const rawType = this.childNodeParser.createType(member.type, context);
 
             const format = this.extractFormat(member);
-            const propType = format
-                ? new tsj.AnnotatedType(rawType, { format }, false)
-                : rawType;
+            const propType = format ? new tsj.AnnotatedType(rawType, { format }, false) : rawType;
             properties.push(new tsj.ObjectProperty(propName, propType, !isOptional));
         }
         return new tsj.ObjectType(`inline-literal-${node.pos}`, [], properties, false);
@@ -1698,7 +1675,11 @@ function getInlineVariantDiscriminator(variant) {
             if (typeof fieldSchema.const === 'string') {
                 return { field: fieldName, value: fieldSchema.const };
             }
-            if (Array.isArray(fieldSchema.enum) && fieldSchema.enum.length === 1 && typeof fieldSchema.enum[0] === 'string') {
+            if (
+                Array.isArray(fieldSchema.enum) &&
+                fieldSchema.enum.length === 1 &&
+                typeof fieldSchema.enum[0] === 'string'
+            ) {
                 return { field: fieldName, value: fieldSchema.enum[0] };
             }
         }
@@ -1905,55 +1886,6 @@ function valueSchemaShape(caseProp) {
         shape['x-value-type-boolean'] = true;
     } else if (caseProp.type === 'array') {
         shape['x-value-type-array'] = true;
-    }
-    return shape;
-}
-
-/**
- * Flatten an OpenAPI schema fragment into a set of boolean flags + raw
- * values that mustache templates can dispatch on without needing string
- * equality operators. Language-neutral.
- *
- * Output flags (prefix `value-`):
- *   value-type-string / -integer / -number / -boolean / -ref / -array / -object
- *   value-format          (e.g. "int32")
- *   value-ref-name        (without TON prefix)
- *   value-array-items-...  (recursive for arrays-of)
- */
-function schemaTypeShape(schema) {
-    const shape = {};
-    if (!schema || typeof schema !== 'object') return shape;
-
-    if (schema.$ref) {
-        shape['value-type-ref'] = true;
-        shape['value-ref-name'] = typeNameFromRef(schema.$ref);
-        return shape;
-    }
-    if (schema.allOf && schema.allOf.length === 1 && schema.allOf[0].$ref) {
-        shape['value-type-ref'] = true;
-        shape['value-ref-name'] = typeNameFromRef(schema.allOf[0].$ref);
-        return shape;
-    }
-    if (schema.type === 'string') {
-        shape['value-type-string'] = true;
-    } else if (schema.type === 'integer') {
-        shape['value-type-integer'] = true;
-        if (schema.format) shape['value-format'] = schema.format;
-    } else if (schema.type === 'number') {
-        shape['value-type-number'] = true;
-        if (schema.format) shape['value-format'] = schema.format;
-    } else if (schema.type === 'boolean') {
-        shape['value-type-boolean'] = true;
-    } else if (schema.type === 'array') {
-        shape['value-type-array'] = true;
-        if (schema.items) {
-            const itemsShape = schemaTypeShape(schema.items);
-            for (const [k, v] of Object.entries(itemsShape)) {
-                shape[k.replace(/^value-/, 'value-items-')] = v;
-            }
-        }
-    } else if (schema.type === 'object') {
-        shape['value-type-object'] = true;
     }
     return shape;
 }
