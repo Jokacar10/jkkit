@@ -272,11 +272,25 @@ Hook to fetch a gasless quote. Auto-refetches as inputs change; cached results b
 
 %%demo/examples/src/appkit/hooks/gasless#USE_GASLESS_QUOTE%%
 
+### `useGaslessJettonTransferQuote`
+
+Hook to fetch a gasless quote for a jetton transfer from semantic params (`jettonAddress`, `recipientAddress`, `amount`, `feeAsset`) — no manual message building. Auto-refetches as inputs change and on wallet/network switch.
+
+%%demo/examples/src/appkit/hooks/gasless#USE_GASLESS_JETTON_TRANSFER_QUOTE%%
+
+### `useGaslessTonTransferQuote`
+
+Hook to fetch a gasless quote for a TON transfer from `recipientAddress`, `amount`, `feeAsset`. Auto-refetches as inputs change and on wallet/network switch.
+
+%%demo/examples/src/appkit/hooks/gasless#USE_GASLESS_TON_TRANSFER_QUOTE%%
+
 ### `useSendGaslessTransaction`
 
 Hook to sign a previously computed quote and submit the resulting BoC to the relayer. Returns a `GaslessSendResponse` (`{ boc, normalizedBoc, normalizedHash, internalBoc }`).
 
 Throws:
+- `GaslessError(QUOTE_EXPIRED)` if the quote's `validUntil` window has passed (checked before signing).
+- `GaslessError(WALLET_MISMATCH)` if the quote was issued for a different address than the selected wallet.
 - `GaslessError(SIGN_MESSAGE_NOT_SUPPORTED)` if the wallet does not advertise `SignMessage`.
 - `GaslessError(TOO_MANY_MESSAGES)` if the quote carries more messages than the wallet's `maxMessages` cap.
 

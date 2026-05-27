@@ -10,6 +10,7 @@ import { GaslessError, GaslessErrorCode } from '../../gasless';
 import type { GaslessQuote, GaslessSendResponse } from '../../gasless';
 import type { AppKit } from '../../core/app-kit';
 import { getSelectedWallet } from '../wallets/get-selected-wallet';
+import { compareAddress } from '../../utils';
 
 export interface SendGaslessTransactionParameters {
     /** Pre-computed quote obtained via `getGaslessQuote` */
@@ -37,6 +38,12 @@ export type SendGaslessTransactionErrorType = Error;
  * stale quote is submitted anyway, the relayer rejects it and the error
  * surfaces through `gaslessManager.sendTransaction`.
  *
+ * @throws GaslessError(QUOTE_EXPIRED) when the quote's relayer-provided
+ *         `validUntil` window has already passed. Checked before signing so the
+ *         wallet is never prompted for a quote the relayer would reject anyway.
+ * @throws GaslessError(WALLET_MISMATCH) when the quote was issued for a
+ *         different address than the currently selected wallet (e.g. the active
+ *         wallet was switched after the quote was fetched).
  * @throws GaslessError(SIGN_MESSAGE_NOT_SUPPORTED) when the wallet does not
  *         advertise the `SignMessage` feature.
  * @throws GaslessError(TOO_MANY_MESSAGES) when the quote carries more
@@ -54,6 +61,30 @@ export const sendGaslessTransaction = async (
 
     if (!wallet) {
         throw new Error('Wallet not connected');
+    }
+
+    // Fail fast on a dead quote before prompting the wallet to sign: the relayer
+    // owns `validUntil`, so a passed deadline means the relayer would reject the
+    // send anyway. Cheaper to surface a typed error here than to round-trip a
+    // signature the relayer discards.
+    if (Math.floor(Date.now() / 1000) > quote.validUntil) {
+        throw new GaslessError(
+            'Gasless quote has expired. Fetch a fresh quote before sending.',
+            GaslessErrorCode.QuoteExpired,
+            { validUntil: quote.validUntil },
+        );
+    }
+
+    // Guard against the active wallet being switched between quote and send: the
+    // quote is bound to the `from` the relayer echoed, and signing with a
+    // different wallet would produce a BoC the relayer rejects. Skip when a
+    // provider does not echo `from` (treat absence as "no claim", not mismatch).
+    if (quote.from && !compareAddress(quote.from, wallet.getAddress())) {
+        throw new GaslessError(
+            'Gasless quote was issued for a different wallet than the selected one.',
+            GaslessErrorCode.WalletMismatch,
+            { quoteFrom: quote.from, wallet: wallet.getAddress() },
+        );
     }
 
     const features = wallet.getSupportedFeatures();

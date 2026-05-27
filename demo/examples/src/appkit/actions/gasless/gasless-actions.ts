@@ -8,12 +8,14 @@
 
 import type { AppKit } from '@ton/appkit';
 import {
+    getGaslessJettonTransferQuote,
     getGaslessManager,
     getGaslessProvider,
     getGaslessProviderMetadata,
     getGaslessProviders,
     getGaslessQuote,
     getGaslessSupportedAssets,
+    getGaslessTonTransferQuote,
     sendGaslessTransaction,
     setDefaultGaslessProvider,
     watchGaslessProviders,
@@ -71,6 +73,26 @@ export const gaslessExample = async (appKit: AppKit) => {
     });
     console.log('Relayer fee:', quote.fee, 'valid until:', quote.validUntil);
     // SAMPLE_END: GET_GASLESS_QUOTE
+
+    // SAMPLE_START: GET_GASLESS_JETTON_TRANSFER_QUOTE
+    // Convenience wrapper: builds the jetton transfer messages for you, then quotes.
+    const jettonQuote = await getGaslessJettonTransferQuote(appKit, {
+        jettonAddress: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
+        recipientAddress: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+        amount: '100',
+        feeAsset, // pay the relayer fee in this jetton (here: USDT)
+    });
+    await sendGaslessTransaction(appKit, { quote: jettonQuote });
+    // SAMPLE_END: GET_GASLESS_JETTON_TRANSFER_QUOTE
+
+    // SAMPLE_START: GET_GASLESS_TON_TRANSFER_QUOTE
+    const tonQuote = await getGaslessTonTransferQuote(appKit, {
+        recipientAddress: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+        amount: '1.5',
+        feeAsset, // gas covered by the relayer, fee paid in this jetton
+    });
+    await sendGaslessTransaction(appKit, { quote: tonQuote });
+    // SAMPLE_END: GET_GASLESS_TON_TRANSFER_QUOTE
 
     // SAMPLE_START: SEND_GASLESS_TRANSACTION
     const result = await sendGaslessTransaction(appKit, { quote });

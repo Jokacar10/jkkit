@@ -725,11 +725,41 @@ const quote = await getGaslessQuote(appKit, {
 console.log('Relayer fee:', quote.fee, 'valid until:', quote.validUntil);
 ```
 
+### `getGaslessJettonTransferQuote`
+
+Convenience wrapper that builds a jetton transfer's messages (resolving the jetton wallet address, decimals and payload) and quotes them in one call. Takes semantic params (`jettonAddress`, `recipientAddress`, `amount`, `feeAsset`) instead of pre-built `messages`. Returns a `GaslessQuote` to pass to `sendGaslessTransaction`.
+
+```ts
+// Convenience wrapper: builds the jetton transfer messages for you, then quotes.
+const jettonQuote = await getGaslessJettonTransferQuote(appKit, {
+    jettonAddress: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
+    recipientAddress: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+    amount: '100',
+    feeAsset, // pay the relayer fee in this jetton (here: USDT)
+});
+await sendGaslessTransaction(appKit, { quote: jettonQuote });
+```
+
+### `getGaslessTonTransferQuote`
+
+Convenience wrapper that builds a TON transfer's message and quotes it in one call. Takes `recipientAddress`, `amount`, `feeAsset` instead of pre-built `messages`. Returns a `GaslessQuote` to pass to `sendGaslessTransaction`.
+
+```ts
+const tonQuote = await getGaslessTonTransferQuote(appKit, {
+    recipientAddress: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+    amount: '1.5',
+    feeAsset, // gas covered by the relayer, fee paid in this jetton
+});
+await sendGaslessTransaction(appKit, { quote: tonQuote });
+```
+
 ### `sendGaslessTransaction`
 
 Sign a previously computed gasless quote and submit the resulting BoC to the relayer. Returns a `GaslessSendResponse` — a strict superset of `SendTransactionResponse` (`{ boc, normalizedBoc, normalizedHash, internalBoc }`).
 
 Throws:
+- `GaslessError(QUOTE_EXPIRED)` if the quote's `validUntil` window has passed (checked before signing).
+- `GaslessError(WALLET_MISMATCH)` if the quote was issued for a different address than the selected wallet.
 - `GaslessError(SIGN_MESSAGE_NOT_SUPPORTED)` if the connected wallet does not advertise the `SignMessage` feature.
 - `GaslessError(TOO_MANY_MESSAGES)` if the quote carries more messages than the wallet's `maxMessages` cap.
 

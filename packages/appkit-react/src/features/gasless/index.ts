@@ -21,6 +21,16 @@ export {
     type UseGaslessQuoteParameters,
     type UseGaslessQuoteReturnType,
 } from './hooks/use-gasless-quote';
+export {
+    useGaslessJettonTransferQuote,
+    type UseGaslessJettonTransferQuoteParameters,
+    type UseGaslessJettonTransferQuoteReturnType,
+} from './hooks/use-gasless-jetton-transfer-quote';
+export {
+    useGaslessTonTransferQuote,
+    type UseGaslessTonTransferQuoteParameters,
+    type UseGaslessTonTransferQuoteReturnType,
+} from './hooks/use-gasless-ton-transfer-quote';
 export { useGaslessProvider, type UseGaslessProviderReturnType } from './hooks/use-gasless-provider';
 export { useGaslessProviders, type UseGaslessProvidersReturnType } from './hooks/use-gasless-providers';
 export {

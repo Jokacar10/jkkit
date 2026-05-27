@@ -106,6 +106,30 @@ describe('sendGaslessTransaction', () => {
         await expect(sendGaslessTransaction(appKit, { quote: makeQuote() })).rejects.toThrow('Wallet not connected');
     });
 
+    it('throws GaslessError(QUOTE_EXPIRED) before signing when the quote validUntil has passed', async () => {
+        const { appKit, sendTransaction } = makeAppKit(wallet);
+        const expiredQuote = makeQuote({ validUntil: Math.floor(Date.now() / 1000) - 1 });
+
+        await expect(sendGaslessTransaction(appKit, { quote: expiredQuote })).rejects.toMatchObject({
+            name: 'GaslessError',
+            code: GaslessErrorCode.QuoteExpired,
+        });
+        expect(wallet.signMessage).not.toHaveBeenCalled();
+        expect(sendTransaction).not.toHaveBeenCalled();
+    });
+
+    it('throws GaslessError(WALLET_MISMATCH) before signing when the quote was issued for another wallet', async () => {
+        const { appKit, sendTransaction } = makeAppKit(wallet);
+        const otherWalletQuote = makeQuote({ from: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c' });
+
+        await expect(sendGaslessTransaction(appKit, { quote: otherWalletQuote })).rejects.toMatchObject({
+            name: 'GaslessError',
+            code: GaslessErrorCode.WalletMismatch,
+        });
+        expect(wallet.signMessage).not.toHaveBeenCalled();
+        expect(sendTransaction).not.toHaveBeenCalled();
+    });
+
     it('throws GaslessError(SIGN_MESSAGE_NOT_SUPPORTED) when wallet lacks SignMessage feature', async () => {
         const walletWithoutFeature = makeWallet({
             getSupportedFeatures: () => [{ name: 'SignData' } as never],

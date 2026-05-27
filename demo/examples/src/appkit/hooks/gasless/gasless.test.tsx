@@ -6,8 +6,8 @@
  *
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
 import * as AppKitReact from '@ton/appkit-react';
 
 import { UseGaslessProvidersExample } from './use-gasless-providers';
@@ -15,6 +15,8 @@ import { UseGaslessProviderExample } from './use-gasless-provider';
 import { UseGaslessProviderMetadataExample } from './use-gasless-provider-metadata';
 import { UseGaslessSupportedAssetsExample } from './use-gasless-supported-assets';
 import { UseGaslessQuoteExample } from './use-gasless-quote';
+import { UseGaslessJettonTransferQuoteExample } from './use-gasless-jetton-transfer-quote';
+import { UseGaslessTonTransferQuoteExample } from './use-gasless-ton-transfer-quote';
 import { UseSendGaslessTransactionExample } from './use-send-gasless-transaction';
 
 vi.mock('@ton/appkit-react', async () => {
@@ -26,6 +28,8 @@ vi.mock('@ton/appkit-react', async () => {
         useGaslessProviderMetadata: vi.fn(),
         useGaslessSupportedAssets: vi.fn(),
         useGaslessQuote: vi.fn(),
+        useGaslessJettonTransferQuote: vi.fn(),
+        useGaslessTonTransferQuote: vi.fn(),
         useSendGaslessTransaction: vi.fn(),
     };
 });
@@ -35,6 +39,10 @@ const TEST_ADDRESS = 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs';
 describe('Gasless Hooks Examples', () => {
     beforeEach(() => {
         vi.clearAllMocks();
+    });
+
+    afterEach(() => {
+        cleanup();
     });
 
     describe('UseGaslessProvidersExample', () => {
@@ -131,6 +139,58 @@ describe('Gasless Hooks Examples', () => {
 
             render(<UseGaslessQuoteExample />);
             expect(screen.getByText('Fee: 1234')).toBeDefined();
+        });
+    });
+
+    describe('UseGaslessJettonTransferQuoteExample', () => {
+        it('renders the quote fee and sends on click', async () => {
+            const mockQuote = { fee: '1234', validUntil: 1735680000 };
+            const mockSend = vi.fn().mockResolvedValue({});
+
+            // @ts-expect-error - mock
+            vi.mocked(AppKitReact.useGaslessJettonTransferQuote).mockReturnValue({
+                data: mockQuote,
+                isFetching: false,
+            });
+            // @ts-expect-error - mock
+            vi.mocked(AppKitReact.useSendGaslessTransaction).mockReturnValue({
+                mutateAsync: mockSend,
+                isPending: false,
+            });
+
+            const { getByText } = render(<UseGaslessJettonTransferQuoteExample />);
+            expect(getByText('Fee: 1234')).toBeDefined();
+
+            fireEvent.click(getByText('Send'));
+            await waitFor(() => {
+                expect(mockSend).toHaveBeenCalledWith({ quote: mockQuote });
+            });
+        });
+    });
+
+    describe('UseGaslessTonTransferQuoteExample', () => {
+        it('renders the quote fee and sends on click', async () => {
+            const mockQuote = { fee: '5678', validUntil: 1735680000 };
+            const mockSend = vi.fn().mockResolvedValue({});
+
+            // @ts-expect-error - mock
+            vi.mocked(AppKitReact.useGaslessTonTransferQuote).mockReturnValue({
+                data: mockQuote,
+                isFetching: false,
+            });
+            // @ts-expect-error - mock
+            vi.mocked(AppKitReact.useSendGaslessTransaction).mockReturnValue({
+                mutateAsync: mockSend,
+                isPending: false,
+            });
+
+            const { getByText } = render(<UseGaslessTonTransferQuoteExample />);
+            expect(getByText('Fee: 5678')).toBeDefined();
+
+            fireEvent.click(getByText('Send'));
+            await waitFor(() => {
+                expect(mockSend).toHaveBeenCalledWith({ quote: mockQuote });
+            });
         });
     });
 

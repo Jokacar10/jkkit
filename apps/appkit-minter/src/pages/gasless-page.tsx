@@ -13,6 +13,7 @@ import {
     useGaslessSupportedAssets,
     useGaslessQuote,
     useJettonBalanceByAddress,
+    useJettonInfo,
     useJettonWalletAddress,
     useSelectedWallet,
     useSendGaslessTransaction,
@@ -88,6 +89,14 @@ export const GaslessPage: FC = () => {
         ownerAddress: address,
     });
 
+    // The relayer fee is denominated in the selected fee asset, so resolve its
+    // decimals/symbol instead of assuming USDT — picking another asset would
+    // otherwise format the fee with the wrong scale.
+    const { data: feeAssetInfo } = useJettonInfo({
+        address: feeAsset ?? undefined,
+        query: { enabled: Boolean(feeAsset) },
+    });
+
     const supportsSignMessage = useMemo(() => {
         const features = selectedWallet?.getSupportedFeatures();
         if (features === undefined) return true;
@@ -132,11 +141,13 @@ export const GaslessPage: FC = () => {
         return formatRelativeTimeFromNow(quote.validUntil);
     }, [quote, now]);
 
+    const feeDecimals = feeAssetInfo?.decimals ?? USDT_DECIMALS;
+    const feeSymbol = feeAssetInfo?.symbol || 'USDT';
     const formattedFee = useMemo(() => {
         if (!quote) return null;
-        const feeWhole = Number(quote.fee) / 10 ** USDT_DECIMALS;
-        return feeWhole.toFixed(USDT_DECIMALS);
-    }, [quote]);
+        const feeWhole = Number(quote.fee) / 10 ** feeDecimals;
+        return feeWhole.toFixed(feeDecimals);
+    }, [quote, feeDecimals]);
 
     const handleSend = async () => {
         if (!quote) {
@@ -213,6 +224,21 @@ export const GaslessPage: FC = () => {
                                     </option>
                                 ))}
                             </select>
+
+                            {feeAssetInfo && (
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                    {feeAssetInfo.image && (
+                                        <img
+                                            src={feeAssetInfo.image}
+                                            alt={feeSymbol}
+                                            className="w-4 h-4 rounded-full"
+                                        />
+                                    )}
+                                    <span className="font-medium text-foreground">{feeSymbol}</span>
+                                    {feeAssetInfo.name && <span>· {feeAssetInfo.name}</span>}
+                                    <span>· {feeDecimals} decimals</span>
+                                </div>
+                            )}
                         </div>
 
                         <div className="space-y-2">
@@ -240,7 +266,9 @@ export const GaslessPage: FC = () => {
                         {quote && (
                             <div className="grid grid-cols-2 gap-2 text-xs">
                                 <div className="text-muted-foreground">Relayer fee</div>
-                                <div className="text-right font-mono">{formattedFee} USDT</div>
+                                <div className="text-right font-mono">
+                                    {formattedFee} {feeSymbol}
+                                </div>
                                 <div className="text-muted-foreground">Valid for</div>
                                 <div className="text-right font-mono">{validUntilText}</div>
                             </div>

@@ -16,6 +16,8 @@ export enum GaslessErrorCode {
     SupportedAssetsFailed = 'SUPPORTED_ASSETS_FAILED',
     SignMessageNotSupported = 'SIGN_MESSAGE_NOT_SUPPORTED',
     TooManyMessages = 'TOO_MANY_MESSAGES',
+    QuoteExpired = 'QUOTE_EXPIRED',
+    WalletMismatch = 'WALLET_MISMATCH',
 }
 
 export class GaslessError extends DefiError {

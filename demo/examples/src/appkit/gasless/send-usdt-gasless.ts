@@ -7,45 +7,26 @@
  */
 
 import type { AppKit } from '@ton/appkit';
-import {
-    asBase64,
-    createJettonTransferPayload,
-    getGaslessQuote,
-    getJettonWalletAddress,
-    getSelectedWallet,
-    parseUnits,
-    sendGaslessTransaction,
-} from '@ton/appkit';
+import { createTransferJettonTransaction, getGaslessQuote, sendGaslessTransaction } from '@ton/appkit';
 
 const USDT_MASTER = 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs';
 const USDT_DECIMALS = 6;
 
 export const sendUsdtGaslessExample = async (appKit: AppKit, recipient: string, amount: string) => {
     // SAMPLE_START: SEND_USDT_GASLESS
-    const wallet = getSelectedWallet(appKit);
-    if (!wallet) throw new Error('No wallet connected');
-    const ownerAddress = wallet.getAddress();
-
-    const usdtWallet = await getJettonWalletAddress(appKit, {
+    // Reuse the same builder as a regular jetton transfer: it resolves the
+    // jetton wallet address, builds the payload and attaches the network gas
+    // (which the relayer ends up covering) for us.
+    const { messages } = await createTransferJettonTransaction(appKit, {
         jettonAddress: USDT_MASTER,
-        ownerAddress,
+        recipientAddress: recipient,
+        amount,
+        jettonDecimals: USDT_DECIMALS,
     });
 
-    const payload = createJettonTransferPayload({
-        amount: parseUnits(amount, USDT_DECIMALS),
-        destination: recipient,
-        responseDestination: ownerAddress,
-    });
-
-    const messages = [
-        {
-            address: usdtWallet,
-            amount: parseUnits('0.06', 9).toString(), // 0.06 TON for gas
-            payload: asBase64(payload.toBoc().toString('base64')),
-        },
-    ];
-
-    const quote = await getGaslessQuote(appKit, { messages });
+    // Pay the relayer's fee in USDT. Quote first so the fee and validity window
+    // can be reviewed before the wallet signs.
+    const quote = await getGaslessQuote(appKit, { messages, feeAsset: USDT_MASTER });
     await sendGaslessTransaction(appKit, { quote });
     // SAMPLE_END: SEND_USDT_GASLESS
 };

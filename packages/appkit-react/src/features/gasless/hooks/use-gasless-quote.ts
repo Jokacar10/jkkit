@@ -14,6 +14,7 @@ import type { GetGaslessQuoteData, GetGaslessQuoteErrorType, GetGaslessQuoteQuer
 import { useAppKit } from '../../settings';
 import { useQuery } from '../../../libs/query';
 import type { UseQueryReturnType } from '../../../libs/query';
+import { useNetwork } from '../../network';
 
 export type UseGaslessQuoteParameters<selectData = GetGaslessQuoteData> = GetGaslessQuoteQueryConfig<selectData>;
 
@@ -27,11 +28,22 @@ export type UseGaslessQuoteReturnType<selectData = GetGaslessQuoteData> = UseQue
  *
  * The quote carries a relayer-provided `validUntil` window; cached results
  * become stale after `GASLESS_QUOTE_STALE_TIME_MS` (2 minutes).
+ *
+ * `useNetwork` subscribes the hook to the selected wallet, so switching wallet
+ * (or network) re-renders and recomputes the query key — which is bound to the
+ * wallet address — refetching a quote for the new wallet instead of reusing one
+ * issued for the previous one.
  */
 export const useGaslessQuote = <selectData = GetGaslessQuoteData>(
     parameters: UseGaslessQuoteParameters<selectData> = {},
 ): UseGaslessQuoteReturnType<selectData> => {
     const appKit = useAppKit();
+    const network = useNetwork();
 
-    return useQuery(getGaslessQuoteQueryOptions(appKit, parameters));
+    return useQuery(
+        getGaslessQuoteQueryOptions(appKit, {
+            ...parameters,
+            network: parameters.network ?? network,
+        }),
+    );
 };

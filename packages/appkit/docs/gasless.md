@@ -54,61 +54,37 @@ Both flows produce the same on-chain outcome — a USDT jetton transfer from the
 ### Regular jetton transfer (user pays TON gas)
 
 ```ts
-const wallet = getSelectedWallet(appKit);
-if (!wallet) throw new Error('No wallet connected');
-const ownerAddress = wallet.getAddress();
-
-const usdtWallet = await getJettonWalletAddress(appKit, {
+const { messages } = await createTransferJettonTransaction(appKit, {
     jettonAddress: USDT_MASTER,
-    ownerAddress,
+    recipientAddress: recipient,
+    amount,
+    jettonDecimals: USDT_DECIMALS,
 });
-
-const payload = createJettonTransferPayload({
-    amount: parseUnits(amount, USDT_DECIMALS),
-    destination: recipient,
-    responseDestination: ownerAddress,
-});
-
-const messages = [
-    {
-        address: usdtWallet,
-        amount: parseUnits('0.06', 9).toString(), // 0.06 TON for gas
-        payload: asBase64(payload.toBoc().toString('base64')),
-    },
-];
 
 await sendTransaction(appKit, { messages });
 ```
 
-Cost: the user spends **~0.06 TON** on gas (whatever is unused is refunded). Wallet needs the `SendTransaction` feature (almost all do).
+Cost: the user spends **~0.05 TON** on gas (whatever is unused is refunded). Wallet needs the `SendTransaction` feature (almost all do).
 
 ### Gasless jetton transfer (user pays only the jetton fee)
 
 ```ts
-const wallet = getSelectedWallet(appKit);
-if (!wallet) throw new Error('No wallet connected');
-const ownerAddress = wallet.getAddress();
-
-const usdtWallet = await getJettonWalletAddress(appKit, {
+// Reuse the same builder as a regular jetton transfer: it resolves the
+// jetton wallet address, builds the payload and attaches the network gas
+// (which the relayer ends up covering) for us.
+const { messages } = await createTransferJettonTransaction(appKit, {
     jettonAddress: USDT_MASTER,
-    ownerAddress,
+    recipientAddress: recipient,
+    amount,
+    jettonDecimals: USDT_DECIMALS,
 });
 
-const payload = createJettonTransferPayload({
-    amount: parseUnits(amount, USDT_DECIMALS),
-    destination: recipient,
-    responseDestination: ownerAddress,
+// Pay the relayer's fee in USDT. Quote first so the fee and validity window
+// can be reviewed before the wallet signs.
+const quote = await getGaslessQuote(appKit, {
+    messages,
+    feeAsset: USDT_MASTER,
 });
-
-const messages = [
-    {
-        address: usdtWallet,
-        amount: parseUnits('0.06', 9).toString(), // 0.06 TON for gas
-        payload: asBase64(payload.toBoc().toString('base64')),
-    },
-];
-
-const quote = await getGaslessQuote(appKit, { messages });
 await sendGaslessTransaction(appKit, { quote });
 ```
 
@@ -116,9 +92,9 @@ Cost: the user spends **0 TON** and a small amount of USDT (the relayer fee, sho
 
 ## Migration recipe
 
-The jetton-transfer payload and the `messages` array are unchanged — the relayer wraps your messages on its end and adds the fee transfer. The only difference between the two snippets above: replace `sendTransaction(appKit, { messages })` with `getGaslessQuote(appKit, { messages })` followed by `sendGaslessTransaction(appKit, { quote })`.
+The `messages` array is built the same way for both flows — the relayer wraps your messages on its end and adds the fee transfer. The only difference between the two snippets above: replace `sendTransaction(appKit, { messages })` with `getGaslessQuote(appKit, { messages, feeAsset })` followed by `sendGaslessTransaction(appKit, { quote })`.
 
-To pick a specific fee asset, pass `feeAsset` to `getGaslessQuote`. Discover the relayer-accepted assets with `getGaslessSupportedAssets(appKit)` — or hardcode the jetton master you want to charge in.
+`feeAsset` is the jetton master the relayer charges the fee in. The TonAPI provider requires it; discover the relayer-accepted assets with `getGaslessSupportedAssets(appKit)`, or hardcode the jetton master you want to charge in.
 
 For React projects, the same flow is available as hooks (`useSendTransaction` / `useGaslessQuote` + `useSendGaslessTransaction`).
 
@@ -133,6 +109,8 @@ For React projects, the same flow is available as hooks (`useSendTransaction` / 
 | `SUPPORTED_ASSETS_FAILED` | Failed to discover relayer-accepted fee assets. |
 | `SIGN_MESSAGE_NOT_SUPPORTED` | Connected wallet does not advertise the `SignMessage` feature. |
 | `TOO_MANY_MESSAGES` | Quote carries more messages than the wallet's `SignMessage.maxMessages` cap. |
+| `QUOTE_EXPIRED` | Quote's `validUntil` window has passed; checked before signing so the wallet is not prompted for a quote the relayer would reject. Fetch a fresh quote. |
+| `WALLET_MISMATCH` | Quote was issued for a different address than the selected wallet (e.g. the active wallet was switched after quoting). |
 
 <!--
 This file is auto-generated. Do not edit manually.

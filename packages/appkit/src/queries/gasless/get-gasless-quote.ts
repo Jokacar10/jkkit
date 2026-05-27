@@ -12,6 +12,7 @@ import type {
     GetGaslessQuoteOptions,
     GetGaslessQuoteReturnType,
 } from '../../actions/gasless/get-gasless-quote';
+import { getSelectedWallet } from '../../actions/wallets/get-selected-wallet';
 import type { AppKit } from '../../core/app-kit';
 import type { QueryOptions, QueryParameter } from '../../types/query';
 import type { Compute, ExactPartial } from '../../types/utils';
@@ -35,6 +36,14 @@ export const getGaslessQuoteQueryOptions = <selectData = GetGaslessQuoteData>(
     appKit: AppKit,
     options: GetGaslessQuoteQueryConfig<selectData> = {},
 ): GetGaslessQuoteQueryOptions<selectData> => {
+    // The quote is bound to the selected wallet's address and network, both of
+    // which `getGaslessQuote` resolves internally. Fold them into the key so a
+    // wallet/network switch produces a distinct cache entry and refetch instead
+    // of silently serving a quote issued for a different wallet.
+    const wallet = getSelectedWallet(appKit);
+    const walletAddress = wallet?.getAddress();
+    const resolvedOptions = { ...options, network: options.network ?? wallet?.getNetwork() };
+
     return {
         staleTime: GASLESS_QUOTE_STALE_TIME_MS,
         ...options.query,
@@ -43,7 +52,7 @@ export const getGaslessQuoteQueryOptions = <selectData = GetGaslessQuoteData>(
         // a typed error themselves. We only require messages to send.
         enabled: Boolean(options.messages && options.messages.length > 0 && (options.query?.enabled ?? true)),
         queryFn: async (context) => {
-            const [, parameters] = context.queryKey as [string, GetGaslessQuoteOptions];
+            const [, parameters] = context.queryKey as [string, GetGaslessQuoteOptions, string | undefined];
 
             if (!parameters.messages || parameters.messages.length === 0) {
                 throw new Error('messages is required');
@@ -51,7 +60,7 @@ export const getGaslessQuoteQueryOptions = <selectData = GetGaslessQuoteData>(
 
             return getGaslessQuote(appKit, parameters);
         },
-        queryKey: getGaslessQuoteQueryKey(options),
+        queryKey: getGaslessQuoteQueryKey(resolvedOptions, walletAddress),
     };
 };
 
@@ -61,11 +70,16 @@ export type GetGaslessQuoteData = GetGaslessQuoteQueryFnData;
 
 export const getGaslessQuoteQueryKey = (
     options: Compute<ExactPartial<GetGaslessQuoteOptions>> = {},
+    walletAddress?: string,
 ): GetGaslessQuoteQueryKey => {
-    return ['gaslessQuote', filterQueryOptions(options as unknown as Record<string, unknown>)] as const;
+    return ['gaslessQuote', filterQueryOptions(options as unknown as Record<string, unknown>), walletAddress] as const;
 };
 
-export type GetGaslessQuoteQueryKey = readonly ['gaslessQuote', Compute<ExactPartial<GetGaslessQuoteOptions>>];
+export type GetGaslessQuoteQueryKey = readonly [
+    'gaslessQuote',
+    Compute<ExactPartial<GetGaslessQuoteOptions>>,
+    string | undefined,
+];
 
 export type GetGaslessQuoteQueryOptions<selectData = GetGaslessQuoteData> = QueryOptions<
     GetGaslessQuoteQueryFnData,

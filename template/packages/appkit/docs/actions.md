@@ -375,11 +375,25 @@ Ask the relayer for a gasless transaction quote. Returns relayer-wrapped message
 
 %%demo/examples/src/appkit/actions/gasless#GET_GASLESS_QUOTE%%
 
+### `getGaslessJettonTransferQuote`
+
+Convenience wrapper that builds a jetton transfer's messages (resolving the jetton wallet address, decimals and payload) and quotes them in one call. Takes semantic params (`jettonAddress`, `recipientAddress`, `amount`, `feeAsset`) instead of pre-built `messages`. Returns a `GaslessQuote` to pass to `sendGaslessTransaction`.
+
+%%demo/examples/src/appkit/actions/gasless#GET_GASLESS_JETTON_TRANSFER_QUOTE%%
+
+### `getGaslessTonTransferQuote`
+
+Convenience wrapper that builds a TON transfer's message and quotes it in one call. Takes `recipientAddress`, `amount`, `feeAsset` instead of pre-built `messages`. Returns a `GaslessQuote` to pass to `sendGaslessTransaction`.
+
+%%demo/examples/src/appkit/actions/gasless#GET_GASLESS_TON_TRANSFER_QUOTE%%
+
 ### `sendGaslessTransaction`
 
 Sign a previously computed gasless quote and submit the resulting BoC to the relayer. Returns a `GaslessSendResponse` — a strict superset of `SendTransactionResponse` (`{ boc, normalizedBoc, normalizedHash, internalBoc }`).
 
 Throws:
+- `GaslessError(QUOTE_EXPIRED)` if the quote's `validUntil` window has passed (checked before signing).
+- `GaslessError(WALLET_MISMATCH)` if the quote was issued for a different address than the selected wallet.
 - `GaslessError(SIGN_MESSAGE_NOT_SUPPORTED)` if the connected wallet does not advertise the `SignMessage` feature.
 - `GaslessError(TOO_MANY_MESSAGES)` if the quote carries more messages than the wallet's `maxMessages` cap.
 

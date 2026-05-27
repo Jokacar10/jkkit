@@ -7,6 +7,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { Address, beginCell } from '@ton/core';
 import { AppKit } from '@ton/appkit';
 import type { WalletInterface } from '@ton/appkit';
 import { Network } from '@ton/walletkit';
@@ -14,7 +15,13 @@ import { Network } from '@ton/walletkit';
 import { gaslessExample } from './gasless-actions';
 
 const TEST_ADDRESS = 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs';
+const JETTON_WALLET_ADDRESS = 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c';
 const SIGN_MESSAGE_FEATURE = { name: 'SignMessage', maxMessages: 4 } as const;
+
+// Stack shape returned by TonCenter-style `runGetMethod` for an address result.
+const mockAddressStack = (address: string) => [
+    { type: 'cell', value: beginCell().storeAddress(Address.parse(address)).endCell().toBoc().toString('base64') },
+];
 
 describe('Gasless Actions Examples', () => {
     let appKit: AppKit;
@@ -65,6 +72,32 @@ describe('Gasless Actions Examples', () => {
         // @ts-expect-error - internal mock access
         vi.spyOn(appKit.gaslessManager, 'sendTransaction').mockImplementation(mockSend);
         vi.spyOn(appKit.gaslessManager, 'setDefaultProvider').mockImplementation(() => {});
+
+        // The jetton/ton transfer-quote samples build messages via the transfer
+        // builders, which resolve the jetton wallet address and decimals through
+        // the network client.
+        const mockClient = {
+            jettonsByAddress: vi.fn().mockImplementation((params: { address: string }) =>
+                Promise.resolve({
+                    jetton_masters: [{ address: params.address, jetton: params.address }],
+                    metadata: {
+                        [params.address]: {
+                            token_info: [
+                                { valid: true, type: 'jetton_masters', symbol: 'USDT', extra: { decimals: 6 } },
+                            ],
+                        },
+                    },
+                }),
+            ),
+            runGetMethod: vi.fn().mockImplementation((_addr: string, method: string) => {
+                if (method === 'get_wallet_address') {
+                    return Promise.resolve({ exitCode: 0, stack: mockAddressStack(JETTON_WALLET_ADDRESS) });
+                }
+                return Promise.reject(new Error(`Method ${method} not mocked`));
+            }),
+        };
+        // @ts-expect-error - exploiting internal access for testing
+        vi.spyOn(appKit.networkManager, 'getClient').mockReturnValue(mockClient);
     });
 
     afterEach(() => {

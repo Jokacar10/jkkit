@@ -195,6 +195,24 @@ export {
     type GetGaslessQuoteQueryOptions,
 } from './gasless/get-gasless-quote';
 export {
+    getGaslessJettonTransferQuoteQueryOptions,
+    getGaslessJettonTransferQuoteQueryKey,
+    type GetGaslessJettonTransferQuoteQueryConfig,
+    type GetGaslessJettonTransferQuoteData,
+    type GetGaslessJettonTransferQuoteErrorType,
+    type GetGaslessJettonTransferQuoteQueryKey,
+    type GetGaslessJettonTransferQuoteQueryOptions,
+} from './gasless/get-gasless-jetton-transfer-quote';
+export {
+    getGaslessTonTransferQuoteQueryOptions,
+    getGaslessTonTransferQuoteQueryKey,
+    type GetGaslessTonTransferQuoteQueryConfig,
+    type GetGaslessTonTransferQuoteData,
+    type GetGaslessTonTransferQuoteErrorType,
+    type GetGaslessTonTransferQuoteQueryKey,
+    type GetGaslessTonTransferQuoteQueryOptions,
+} from './gasless/get-gasless-ton-transfer-quote';
+export {
     sendGaslessTransactionMutationOptions,
     type SendGaslessTransactionMutationConfig,
     type SendGaslessTransactionData,

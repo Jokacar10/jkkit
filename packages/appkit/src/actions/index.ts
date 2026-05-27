@@ -145,6 +145,18 @@ export {
     type GetGaslessQuoteErrorType,
 } from './gasless/get-gasless-quote';
 export {
+    getGaslessJettonTransferQuote,
+    type GetGaslessJettonTransferQuoteOptions,
+    type GetGaslessJettonTransferQuoteReturnType,
+    type GetGaslessJettonTransferQuoteErrorType,
+} from './gasless/get-gasless-jetton-transfer-quote';
+export {
+    getGaslessTonTransferQuote,
+    type GetGaslessTonTransferQuoteOptions,
+    type GetGaslessTonTransferQuoteReturnType,
+    type GetGaslessTonTransferQuoteErrorType,
+} from './gasless/get-gasless-ton-transfer-quote';
+export {
     sendGaslessTransaction,
     type SendGaslessTransactionParameters,
     type SendGaslessTransactionReturnType,

@@ -937,11 +937,71 @@ return (
 );
 ```
 
+### `useGaslessJettonTransferQuote`
+
+Hook to fetch a gasless quote for a jetton transfer from semantic params (`jettonAddress`, `recipientAddress`, `amount`, `feeAsset`) — no manual message building. Auto-refetches as inputs change and on wallet/network switch.
+
+```tsx
+// No manual message building — pass the transfer intent, get a quote back.
+const { data: quote, isFetching } = useGaslessJettonTransferQuote({
+    jettonAddress: USDT_MASTER,
+    recipientAddress: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+    amount: '100',
+    feeAsset: asAddressFriendly(USDT_MASTER),
+});
+
+const { mutateAsync: sendGasless, isPending } = useSendGaslessTransaction();
+
+return (
+    <div>
+        {isFetching && <span>Quoting...</span>}
+        {quote && (
+            <>
+                <div>Fee: {quote.fee}</div>
+                <button disabled={isPending} onClick={() => sendGasless({ quote })}>
+                    Send
+                </button>
+            </>
+        )}
+    </div>
+);
+```
+
+### `useGaslessTonTransferQuote`
+
+Hook to fetch a gasless quote for a TON transfer from `recipientAddress`, `amount`, `feeAsset`. Auto-refetches as inputs change and on wallet/network switch.
+
+```tsx
+const { data: quote, isFetching } = useGaslessTonTransferQuote({
+    recipientAddress: 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c',
+    amount: '1.5',
+    feeAsset: asAddressFriendly('EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs'), // USDT
+});
+
+const { mutateAsync: sendGasless, isPending } = useSendGaslessTransaction();
+
+return (
+    <div>
+        {isFetching && <span>Quoting...</span>}
+        {quote && (
+            <>
+                <div>Fee: {quote.fee}</div>
+                <button disabled={isPending} onClick={() => sendGasless({ quote })}>
+                    Send
+                </button>
+            </>
+        )}
+    </div>
+);
+```
+
 ### `useSendGaslessTransaction`
 
 Hook to sign a previously computed quote and submit the resulting BoC to the relayer. Returns a `GaslessSendResponse` (`{ boc, normalizedBoc, normalizedHash, internalBoc }`).
 
 Throws:
+- `GaslessError(QUOTE_EXPIRED)` if the quote's `validUntil` window has passed (checked before signing).
+- `GaslessError(WALLET_MISMATCH)` if the quote was issued for a different address than the selected wallet.
 - `GaslessError(SIGN_MESSAGE_NOT_SUPPORTED)` if the wallet does not advertise `SignMessage`.
 - `GaslessError(TOO_MANY_MESSAGES)` if the quote carries more messages than the wallet's `maxMessages` cap.
 

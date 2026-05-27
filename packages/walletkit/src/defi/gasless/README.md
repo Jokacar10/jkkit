@@ -85,6 +85,8 @@ The `validUntil` timestamp is set by the relayer (typically ~2 minutes). In `@to
 | `SUPPORTED_ASSETS_FAILED` | Failed to discover relayer-accepted fee assets. |
 | `SIGN_MESSAGE_NOT_SUPPORTED` | Connected wallet does not implement the `SignMessage` feature. Surfaced by the higher-level `sendGaslessTransaction` action in `@ton/appkit`. |
 | `TOO_MANY_MESSAGES` | The quote carries more messages than the wallet's advertised `SignMessage.maxMessages` cap. Surfaced by `sendGaslessTransaction` in `@ton/appkit`. |
+| `QUOTE_EXPIRED` | The quote's `validUntil` window has already passed. Surfaced by `sendGaslessTransaction` in `@ton/appkit` before signing, so the wallet is not prompted for a quote the relayer would reject. |
+| `WALLET_MISMATCH` | The quote was issued for a different address than the selected wallet. Surfaced by `sendGaslessTransaction` in `@ton/appkit`. |
 
 ## Creating a Custom Gasless Provider
 
