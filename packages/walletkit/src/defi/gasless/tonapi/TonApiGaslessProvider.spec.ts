@@ -293,6 +293,23 @@ describe('TonApiGaslessProvider.getQuote', () => {
         });
     });
 
+    it('maps TonAPI error_code 40007 to GaslessError(FEE_ASSET_NOT_OWNED)', async () => {
+        fetchApi.mockResolvedValueOnce(
+            new Response(
+                JSON.stringify({
+                    error: 'failed to resolve jetton master for jetton wallet 0:7742502c809ab1decdfcb82cd292b92a50be6ef823e6675ea541fce61bd1c88d',
+                    error_code: 40007,
+                }),
+                { status: 400, headers: { 'content-type': 'application/json' } },
+            ),
+        );
+
+        await expect(provider.getQuote(baseQuoteParams)).rejects.toMatchObject({
+            name: 'GaslessError',
+            code: GaslessErrorCode.FeeAssetNotOwned,
+        });
+    });
+
     it('throws GaslessError(UnsupportedOperation) when feeAsset is omitted', async () => {
         const fetchApi = makeFetch();
         const provider = makeProvider(fetchApi);

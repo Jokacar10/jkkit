@@ -18,6 +18,7 @@ import { GaslessError, GaslessErrorCode } from '../../errors';
  * Wire shape observed in practice:
  *   `{ "error": "Jetton is not supported.", "error_code": 40000 }`
  *   `{ "error": "invalid public key size", "error_code": 40004 }`
+ *   `{ "error": "failed to resolve jetton master for jetton wallet 0:...", "error_code": 40007 }`
  *   `{ "error": "invalid wallet address" }`            (no `error_code`)
  *   `{ "Error": "operation Gasless...: decode ..." }`  (decoder failure, no `error_code`)
  */
@@ -27,6 +28,10 @@ interface TonApiErrorBody {
 }
 
 const TONAPI_UNSUPPORTED_FEE_ASSET_CODE = 40000;
+// The relayer derives the sender's jetton wallet for the chosen fee asset and
+// fails to resolve its master — the wallet is uninitialized because the user has
+// never held that jetton, so they cannot pay the fee in it.
+const TONAPI_FEE_JETTON_UNRESOLVED_CODE = 40007;
 
 export const mapTonApiGaslessError = (
     error: unknown,
@@ -46,6 +51,14 @@ export const mapTonApiGaslessError = (
             return new GaslessError(
                 body.error ?? 'Fee asset is not supported by the gasless relayer',
                 GaslessErrorCode.UnsupportedFeeAsset,
+                error,
+            );
+        }
+
+        if (body && typeof body === 'object' && body.error_code === TONAPI_FEE_JETTON_UNRESOLVED_CODE) {
+            return new GaslessError(
+                'You have never held the selected fee asset, so the relayer could not resolve its jetton wallet. Choose a fee asset you already own.',
+                GaslessErrorCode.FeeAssetNotOwned,
                 error,
             );
         }

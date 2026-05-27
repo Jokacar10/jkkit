@@ -78,8 +78,9 @@ The `validUntil` timestamp is set by the relayer (typically ~2 minutes). In `@to
 
 | Code | Meaning |
 |---|---|
-| `UNSUPPORTED_FEE_ASSET` | The relayer does not accept the chosen fee asset. The TonAPI provider surfaces this when the server replies with `error_code: 40000`. |
-| `UNSUPPORTED_OPERATION` | Provider does not implement the requested mode (e.g. TonAPI provider called without `feeAsset` — it only supports jetton-fee mode). |
+| `UNSUPPORTED_FEE_ASSET` | The relayer does not accept the chosen fee asset. |
+| `FEE_ASSET_NOT_OWNED` | The user has never held the chosen fee asset, so the relayer cannot resolve its (uninitialized) jetton wallet. |
+| `UNSUPPORTED_OPERATION` | The provider does not implement the requested mode (e.g. a jetton-fee-only provider called without `feeAsset`). |
 | `QUOTE_FAILED` | Relayer rejected the quote (insufficient liquidity, malformed messages, …). |
 | `SEND_FAILED` | Relayer rejected the signed BoC, or all retries were exhausted. |
 | `SUPPORTED_ASSETS_FAILED` | Failed to discover relayer-accepted fee assets. |

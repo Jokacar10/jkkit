@@ -18,6 +18,7 @@ export enum GaslessErrorCode {
     TooManyMessages = 'TOO_MANY_MESSAGES',
     QuoteExpired = 'QUOTE_EXPIRED',
     WalletMismatch = 'WALLET_MISMATCH',
+    FeeAssetNotOwned = 'FEE_ASSET_NOT_OWNED',
 }
 
 export class GaslessError extends DefiError {

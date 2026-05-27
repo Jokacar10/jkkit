@@ -43,6 +43,18 @@ TonAPI accepts and returns BoCs as hex strings; our domain types are base64 (`Ba
 
 The `send` response carries the broadcasted external message as hex; we run it through `getNormalizedExtMessageHash` (TEP-467) to derive `normalizedHash` for explorer / status lookup.
 
+## Error mapping
+
+TonAPI returns a numeric `error_code` in the error body. The provider maps the
+known ones to domain `GaslessErrorCode` values (see `mappers/map-gasless-error.ts`);
+any other code falls back to the call-site's code (`QUOTE_FAILED` / `SEND_FAILED` /
+`SUPPORTED_ASSETS_FAILED`).
+
+| TonAPI `error_code` | Domain `GaslessErrorCode` | Meaning |
+|---|---|---|
+| `40000` | `UNSUPPORTED_FEE_ASSET` | The chosen jetton is not accepted as a fee asset. |
+| `40007` | `FEE_ASSET_NOT_OWNED` | The sender's jetton wallet for the fee asset is uninitialized — they have never held it. |
+
 ## Resources
 
 - [TonAPI gasless REST API docs](https://docs.tonapi.io/tonapi/rest-api/gasless)
