@@ -78,6 +78,9 @@ export default {
         provider: 'Provider',
         save: 'Save',
         minReceived: 'Min Received',
+        confirmTitle: 'Confirm swap transaction',
+        confirm: 'Confirm',
+        sendFailed: 'Transaction failed',
     },
 
     // Low balance modal (shared between swap, staking, etc.)
@@ -118,5 +121,9 @@ export default {
         provider: 'Provider',
         settings: 'Staking settings',
         save: 'Save',
+        confirmStakingTitle: 'Confirm staking',
+        confirmUnstakingTitle: 'Confirm unstaking',
+        confirm: 'Confirm',
+        sendFailed: 'Transaction failed',
     },
 } as const;
