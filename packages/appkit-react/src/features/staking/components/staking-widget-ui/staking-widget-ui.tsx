@@ -80,13 +80,13 @@ export const StakingWidgetUI: FC<StakingWidgetRenderProps> = ({
         return direction === 'stake' ? t('staking.continue') : t('staking.unstake');
     }, [error, sendError, direction, t]);
 
-    // Modal stays open during send so a failure can surface inside it; closes only on success.
+    // Close the modal immediately; the build/send result (including errors) is surfaced
+    // back in the widget's main button via `sendError` from the provider.
     const handleConfirm = useCallback(() => {
-        sendTransaction()
-            .then(() => setIsConfirmOpen(false))
-            .catch(() => {
-                // Error is captured by the mutation; `sendError` from the provider drives the UI.
-            });
+        setIsConfirmOpen(false);
+        sendTransaction().catch(() => {
+            // Error is captured by the mutation; `sendError` drives the widget UI.
+        });
     }, [sendTransaction]);
 
     const handleOpenConfirm = useCallback(() => {
@@ -226,8 +226,6 @@ export const StakingWidgetUI: FC<StakingWidgetRenderProps> = ({
                 providerMetadata={providerMetadata}
                 isProviderInfoLoading={isProviderInfoLoading}
                 isQuoteLoading={isQuoteLoading}
-                isSendingTransaction={isSendingTransaction}
-                sendError={sendError}
             />
         </div>
     );

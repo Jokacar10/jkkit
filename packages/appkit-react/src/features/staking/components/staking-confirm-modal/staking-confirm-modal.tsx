@@ -38,9 +38,6 @@ export interface StakingConfirmModalProps {
     providerMetadata: StakingProviderMetadata | undefined;
     isProviderInfoLoading: boolean;
     isQuoteLoading: boolean;
-    isSendingTransaction?: boolean;
-    /** i18n key for the last build/send failure, shown on the Confirm button when set. */
-    sendError?: string | null;
 }
 
 /**
@@ -75,8 +72,6 @@ export const StakingConfirmModal: FC<StakingConfirmModalProps> = ({
     providerMetadata,
     isProviderInfoLoading,
     isQuoteLoading,
-    isSendingTransaction,
-    sendError,
 }) => {
     const { t } = useI18n();
 
@@ -118,15 +113,8 @@ export const StakingConfirmModal: FC<StakingConfirmModalProps> = ({
                 direction={direction}
             />
 
-            <Button
-                className={styles.confirmButton}
-                variant="fill"
-                size="l"
-                fullWidth
-                disabled={isSendingTransaction}
-                onClick={onConfirm}
-            >
-                {sendError ? t(sendError) : t('staking.confirm')}
+            <Button className={styles.confirmButton} variant="fill" size="l" fullWidth onClick={onConfirm}>
+                {t('staking.confirm')}
             </Button>
         </Modal>
     );

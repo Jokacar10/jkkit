@@ -30,9 +30,6 @@ export interface SwapConfirmModalProps {
     swapProvider?: SwapProvider;
     slippage: number;
     isQuoteLoading?: boolean;
-    isSendingTransaction?: boolean;
-    /** i18n key for the last build/send failure, shown on the Confirm button when set. */
-    sendError?: string | null;
 }
 
 export const SwapConfirmModal: FC<SwapConfirmModalProps> = ({
@@ -48,8 +45,6 @@ export const SwapConfirmModal: FC<SwapConfirmModalProps> = ({
     swapProvider,
     slippage,
     isQuoteLoading,
-    isSendingTransaction,
-    sendError,
 }) => {
     const { t } = useI18n();
 
@@ -72,15 +67,8 @@ export const SwapConfirmModal: FC<SwapConfirmModalProps> = ({
                 isQuoteLoading={isQuoteLoading}
             />
 
-            <Button
-                className={styles.confirmButton}
-                variant="fill"
-                size="l"
-                fullWidth
-                disabled={isSendingTransaction}
-                onClick={onConfirm}
-            >
-                {sendError ? t(sendError) : t('swap.confirm')}
+            <Button className={styles.confirmButton} variant="fill" size="l" fullWidth onClick={onConfirm}>
+                {t('swap.confirm')}
             </Button>
         </Modal>
     );

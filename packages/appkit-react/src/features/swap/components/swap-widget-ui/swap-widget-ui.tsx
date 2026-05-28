@@ -78,13 +78,13 @@ export const SwapWidgetUI: FC<SwapWidgetRenderProps> = ({
         onFlip();
     }, [onFlip]);
 
-    // Modal stays open during send so a failure can surface inside it; closes only on success.
+    // Close the modal immediately; the build/send result (including errors) is surfaced
+    // back in the widget's main button via `sendError` from the provider.
     const handleConfirm = useCallback(() => {
-        sendSwapTransaction()
-            .then(() => setIsConfirmOpen(false))
-            .catch(() => {
-                // Error is captured by the mutation; `sendError` from the provider drives the UI.
-            });
+        setIsConfirmOpen(false);
+        sendSwapTransaction().catch(() => {
+            // Error is captured by the mutation; `sendError` drives the widget UI.
+        });
     }, [sendSwapTransaction]);
 
     const handleOpenConfirm = useCallback(() => {
@@ -167,8 +167,6 @@ export const SwapWidgetUI: FC<SwapWidgetRenderProps> = ({
                 swapProvider={swapProvider}
                 slippage={slippage}
                 isQuoteLoading={isQuoteLoading}
-                isSendingTransaction={isSendingTransaction}
-                sendError={sendError}
             />
 
             <LowBalanceModal
