@@ -66,7 +66,6 @@ export class TonApiGaslessProvider extends GaslessProvider {
     readonly providerId: string;
 
     private readonly chainConfig: Record<string, TonApiGaslessChainConfig>;
-    private readonly fetchApi?: typeof fetch;
     private readonly clients: Record<string, ApiClientTonApi> = {};
     private readonly sendRetries: number;
     private readonly sendRetryDelayMs: number;
@@ -79,7 +78,6 @@ export class TonApiGaslessProvider extends GaslessProvider {
     private constructor(chainConfig: Record<string, TonApiGaslessChainConfig>, options: TonApiGaslessProviderConfig) {
         super();
         this.chainConfig = chainConfig;
-        this.fetchApi = options.fetchApi;
         this.providerId = options.providerId ?? DEFAULT_PROVIDER_ID;
         this.sendRetries = options.sendRetries ?? DEFAULT_SEND_RETRIES;
         this.sendRetryDelayMs = options.sendRetryDelayMs ?? DEFAULT_SEND_RETRY_DELAY_MS;
@@ -245,7 +243,6 @@ export class TonApiGaslessProvider extends GaslessProvider {
                 network,
                 endpoint: perChain.endpoint,
                 apiKey: perChain.apiKey,
-                fetchApi: this.fetchApi,
             });
         }
 

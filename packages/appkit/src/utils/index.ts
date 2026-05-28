@@ -14,6 +14,10 @@ export {
     asAddressFriendly,
     asBase64,
     asHex,
+    checkSignMessageSupport,
+    SupportError,
+    SupportErrorCode,
+    type CheckSignMessageSupportOptions,
 } from '@ton/walletkit';
 
 export * from './address/is-valid-address';

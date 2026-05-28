@@ -6,7 +6,7 @@
  *
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { Address, beginCell, Cell, internal, storeMessageRelaxed } from '@ton/core';
 
 import type { Base64String } from '../../../api/models';
@@ -51,13 +51,18 @@ const makeProvider = (
     options: Partial<Parameters<typeof createTonApiGaslessProvider>[0]> & { networks?: Network[] } = {},
 ): TonApiGaslessProvider => {
     const { networks = [Network.mainnet()], ...config } = options;
+    // BaseApiClient falls back to `globalThis.fetch` — install the mock there.
+    vi.stubGlobal('fetch', fetchApi);
     return TonApiGaslessProvider.createFromContext(ctxWith(networks), {
-        fetchApi,
         sendRetries: 1,
         sendRetryDelayMs: 0,
         ...config,
     });
 };
+
+afterEach(() => {
+    vi.unstubAllGlobals();
+});
 
 describe('TonApiGaslessProvider configuration', () => {
     it('defaults providerId to "tonapi"', () => {

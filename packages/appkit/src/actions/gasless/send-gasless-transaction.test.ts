@@ -174,14 +174,19 @@ describe('sendGaslessTransaction', () => {
         expect(walletWithCap.signMessage).not.toHaveBeenCalled();
     });
 
-    it('proceeds when wallet returns undefined features (unknown capabilities)', async () => {
+    it('throws GaslessError(SIGN_MESSAGE_NOT_SUPPORTED) when wallet does not advertise any features', async () => {
+        // Treat undefined features the same as missing SignMessage — gasless
+        // requires SignMessage, so unknown capabilities fail closed instead of
+        // attempting to sign and surfacing an uglier bridge-level error.
         const walletWithUnknown = makeWallet({ getSupportedFeatures: () => undefined });
         const { appKit, sendTransaction } = makeAppKit(walletWithUnknown);
 
-        await sendGaslessTransaction(appKit, { quote: makeQuote() });
-
-        expect(walletWithUnknown.signMessage).toHaveBeenCalled();
-        expect(sendTransaction).toHaveBeenCalled();
+        await expect(sendGaslessTransaction(appKit, { quote: makeQuote() })).rejects.toMatchObject({
+            name: 'GaslessError',
+            code: GaslessErrorCode.SignMessageNotSupported,
+        });
+        expect(walletWithUnknown.signMessage).not.toHaveBeenCalled();
+        expect(sendTransaction).not.toHaveBeenCalled();
     });
 
     it('propagates errors from gaslessManager.sendTransaction', async () => {
