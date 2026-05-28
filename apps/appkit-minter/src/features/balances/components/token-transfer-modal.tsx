@@ -184,14 +184,16 @@ export const TokenTransferModal: React.FC<TokenTransferModalProps> = ({
                             </Input.Field>
                         </Input>
 
-                        <GaslessControls
-                            enabled={gaslessEnabled}
-                            onEnabledChange={setGaslessEnabled}
-                            feeAsset={feeAsset}
-                            onFeeAssetChange={setFeeAsset}
-                            fee={gasless.fee}
-                            quoteError={gasless.quoteError}
-                        />
+                        {tokenType === 'JETTON' && (
+                            <GaslessControls
+                                enabled={gaslessEnabled}
+                                onEnabledChange={setGaslessEnabled}
+                                feeAsset={feeAsset}
+                                onFeeAssetChange={setFeeAsset}
+                                fee={gasless.fee}
+                                quoteError={gasless.quoteError}
+                            />
+                        )}
 
                         {transferError && (
                             <div className="p-3 bg-error/10 border border-error/30 rounded-lg">
