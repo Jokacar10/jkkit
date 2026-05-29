@@ -46,6 +46,10 @@ function getVercelDeploymentOrigin(): string {
     );
 }
 
+function getTonConnectManifestUrl(): string {
+    return `${getVercelDeploymentOrigin()}/${TONCONNECT_MANIFEST_FILE}`;
+}
+
 function tonConnectManifestPlugin(): Plugin {
     return {
         name: 'appkit-minter-tonconnect-manifest',
@@ -70,6 +74,9 @@ function tonConnectManifestPlugin(): Plugin {
 // https://vite.dev/config/
 export default defineConfig({
     plugins: [react(), tailwindcss(), tonConnectManifestPlugin(), process.env.ANALYZE === 'true' && analyzer()],
+    define: {
+        'import.meta.env.VITE_TONCONNECT_MANIFEST_URL': JSON.stringify(getTonConnectManifestUrl()),
+    },
     server: {
         port: 5174,
         allowedHosts: ['localhost', '127.0.0.1', 'local.dev'],
