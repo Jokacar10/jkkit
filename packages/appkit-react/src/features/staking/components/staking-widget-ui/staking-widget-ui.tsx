@@ -45,8 +45,6 @@ export const StakingWidgetUI: FC<StakingWidgetRenderProps> = ({
     quote,
     sendTransaction,
     isSendingTransaction,
-    sendError,
-    resetSendError,
     unstakeMode,
     setUnstakeMode,
     stakedBalance,
@@ -75,24 +73,19 @@ export const StakingWidgetUI: FC<StakingWidgetRenderProps> = ({
     const stakeToken = providerMetadata?.stakeToken;
 
     const buttonText = useMemo(() => {
+        if (isSendingTransaction || isQuoteLoading) return t('staking.loading');
         if (error) return t(error);
-        if (sendError) return t(sendError);
         return direction === 'stake' ? t('staking.continue') : t('staking.unstake');
-    }, [error, sendError, direction, t]);
+    }, [isSendingTransaction, isQuoteLoading, error, direction, t]);
 
     // Close the modal immediately; the build/send result (including errors) is surfaced
-    // back in the widget's main button via `sendError` from the provider.
+    // back in the widget's main button via the `error` from the provider.
     const handleConfirm = useCallback(() => {
         setIsConfirmOpen(false);
         sendTransaction().catch(() => {
-            // Error is captured by the mutation; `sendError` drives the widget UI.
+            // Error is captured by the mutation and shown through the validator's `error` output.
         });
     }, [sendTransaction]);
-
-    const handleOpenConfirm = useCallback(() => {
-        resetSendError();
-        setIsConfirmOpen(true);
-    }, [resetSendError]);
 
     const submitActions: ReactNode = (
         <div className={styles.actions}>
@@ -101,7 +94,7 @@ export const StakingWidgetUI: FC<StakingWidgetRenderProps> = ({
                 size="l"
                 fullWidth
                 disabled={!canSubmit || isQuoteLoading || isSendingTransaction}
-                onClick={handleOpenConfirm}
+                onClick={() => setIsConfirmOpen(true)}
             >
                 {buttonText}
             </ButtonWithConnect>

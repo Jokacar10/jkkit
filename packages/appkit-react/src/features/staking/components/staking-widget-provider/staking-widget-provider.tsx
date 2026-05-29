@@ -40,7 +40,6 @@ import { useBalance } from '../../../balances/hooks/use-balance';
 import { useJettonBalanceByAddress } from '../../../jettons/hooks/use-jetton-balance-by-address';
 import { useSendTransaction } from '../../../transaction/hooks/use-send-transaction';
 import { useDebounceValue } from '../../../../hooks/use-debounce-value';
-import { mapDefiError } from '../../../../utils/map-defi-error';
 import { useStakingValidation } from './use-staking-validation';
 
 /**
@@ -94,10 +93,6 @@ export interface StakingContextType {
     onChangeDirection: (direction: StakingQuoteDirection) => void;
     /** True while a transaction is being processed */
     isSendingTransaction: boolean;
-    /** i18n key for the last build/send failure; `null` once the inputs change or a retry succeeds. */
-    sendError: string | null;
-    /** Manually clear `sendError` (e.g. when reopening the confirm modal). */
-    resetSendError: () => void;
     /** True if the user is inputting the output amount ("I want to get X") */
     isReversed: boolean;
     /** Toggles between inputting from amount and output amount */
@@ -142,8 +137,6 @@ export const StakingContext = createContext<StakingContextType>({
     sendTransaction: () => Promise.resolve(),
     onChangeDirection: () => {},
     isSendingTransaction: false,
-    sendError: null,
-    resetSendError: () => {},
     isReversed: false,
     toggleReversed: () => {},
     reversedAmount: '0',
@@ -231,30 +224,39 @@ export const StakingWidgetProvider: FC<StakingProviderProps> = ({ children, netw
         query: { refetchInterval: 5000 },
     });
 
-    const { mutateAsync: buildTransaction, error: buildError, reset: resetBuild } = useBuildStakeTransaction();
+    const {
+        mutateAsync: buildTransaction,
+        isPending: isBuildingTransaction,
+        error: buildError,
+        reset: resetBuild,
+    } = useBuildStakeTransaction({ mutation: { networkMode: 'always' } });
     const {
         mutateAsync: sendTransaction,
-        isPending: isSendingTransaction,
+        isPending: isSendingPending,
         error: sendMutationError,
         reset: resetSend,
-    } = useSendTransaction();
-
-    // Surface the most recent build/send failure as an i18n key.
-    const sendError = useMemo<string | null>(() => {
-        const err = sendMutationError ?? buildError;
-        if (!err) return null;
-        return mapDefiError(err) ?? 'staking.sendFailed';
-    }, [sendMutationError, buildError]);
+    } = useSendTransaction({ mutation: { networkMode: 'always' } });
+    const isSendingTransaction = isBuildingTransaction || isSendingPending;
+    const sendError = sendMutationError ?? buildError;
 
     const resetSendError = useCallback(() => {
         resetBuild();
         resetSend();
     }, [resetBuild, resetSend]);
 
-    // Drop the previous send error when the user changes anything that invalidates it.
+    // Drop the previous send error when the user changes anything that invalidates it —
+    // the next attempt is conceptually a new stake, no need to keep the old message on screen.
     useEffect(() => {
         resetSendError();
     }, [direction, amount, isReversed, resetSendError]);
+
+    // Auto-clear the send error after a short delay so a stale failure doesn't linger in the
+    // submit button — the user is expected to act on it within seconds or move on.
+    useEffect(() => {
+        if (!sendError) return;
+        const id = setTimeout(resetSendError, 5000);
+        return () => clearTimeout(id);
+    }, [sendError, resetSendError]);
 
     const amountDecimals = useMemo(() => {
         const unstakeDecimals = isReversed
@@ -285,7 +287,10 @@ export const StakingWidgetProvider: FC<StakingProviderProps> = ({ children, netw
         data: quote,
         isFetching: isQuoteLoading,
         error: quoteError,
-    } = useStakingQuote({ ...quoteParamsDebounced, query: { enabled: isNetworkSupported } });
+    } = useStakingQuote({
+        ...quoteParamsDebounced,
+        query: { enabled: isNetworkSupported, networkMode: 'always', retry: false, gcTime: 0 },
+    });
 
     const reversedAmount = useMemo(() => {
         if (direction === 'unstake' && isReversed) return quote?.amountIn || '0';
@@ -366,6 +371,7 @@ export const StakingWidgetProvider: FC<StakingProviderProps> = ({ children, netw
         amountDebounced: quoteParamsDebounced.amount || '',
         balance,
         quoteError,
+        sendError,
         direction,
         stakedBalance: stakedBalanceData?.stakedBalance,
         quote,
@@ -398,8 +404,6 @@ export const StakingWidgetProvider: FC<StakingProviderProps> = ({ children, netw
             setUnstakeMode,
             sendTransaction: handleSendTransaction,
             isSendingTransaction,
-            sendError,
-            resetSendError,
             isReversed,
             toggleReversed,
             reversedAmount,
@@ -435,8 +439,6 @@ export const StakingWidgetProvider: FC<StakingProviderProps> = ({ children, netw
             setUnstakeMode,
             handleSendTransaction,
             isSendingTransaction,
-            sendError,
-            resetSendError,
             isReversed,
             toggleReversed,
             reversedAmount,

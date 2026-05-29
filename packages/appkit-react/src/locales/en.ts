@@ -126,5 +126,6 @@ export default {
         confirmUnstakingTitle: 'Confirm unstaking',
         confirm: 'Confirm',
         sendFailed: 'Transaction failed',
+        loading: 'Loading...',
     },
 } as const;
