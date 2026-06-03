@@ -20,7 +20,12 @@ import { createTonstakersProvider } from '@ton/appkit/staking/tonstakers';
 import { createLayerswapProvider } from '@ton/appkit/crypto-onramp/layerswap';
 import { createDecentProvider } from '@ton/appkit/crypto-onramp/decent';
 
-import { ENV_TON_API_KEY_TESTNET, ENV_TON_API_KEY_MAINNET, ENV_DECENT_API_KEY } from '@/core/configs/env';
+import {
+    ENV_TON_API_KEY_TESTNET,
+    ENV_TON_API_KEY_MAINNET,
+    ENV_DECENT_API_KEY,
+    ENV_TONCONNECT_MANIFEST_URL,
+} from '@/core/configs/env';
 
 const mainnetApiClient = new ApiClientToncenter({
     network: Network.mainnet(),
@@ -46,7 +51,7 @@ export const appKit = new AppKit({
     connectors: [
         createTonConnectConnector({
             tonConnectOptions: {
-                manifestUrl: 'https://tonconnect-sdk-demo-dapp.vercel.app/tonconnect-manifest.json',
+                manifestUrl: ENV_TONCONNECT_MANIFEST_URL,
             },
         }),
     ],
