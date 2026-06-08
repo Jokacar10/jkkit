@@ -102,6 +102,24 @@ export const SendTransaction: React.FC = () => {
         return selectedJettonInfo?.symbol || '';
     };
 
+    // Success toast with explorer links — for flows that return a broadcast hash
+    // immediately (gasless send, fast send).
+    const notifySent = (normalizedHash: string) => {
+        const { tonScan, tonViewer } = getTransactionExplorerUrls(normalizedHash, network);
+        toast.success('Transaction is sent to the network', {
+            description: (
+                <span className="flex gap-3 mt-1">
+                    <a href={tonScan} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                        TonScan
+                    </a>
+                    <a href={tonViewer} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                        TonViewer
+                    </a>
+                </span>
+            ),
+        });
+    };
+
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
@@ -123,11 +141,18 @@ export const SendTransaction: React.FC = () => {
             }
 
             // Build + submit, dispatching gasless vs regular inside the hook.
-            await sender.send();
+            const result = await sender.send();
 
-            navigate('/wallet', {
-                state: { message: `${getCurrentTokenSymbol()} sent successfully!` },
-            });
+            // Gasless relays immediately and returns a hash → toast with explorer
+            // links; the regular flow goes through the preview queue.
+            if (result?.normalizedHash) {
+                notifySent(result.normalizedHash);
+                navigate('/wallet');
+            } else {
+                navigate('/wallet', {
+                    state: { message: `${getCurrentTokenSymbol()} sent successfully!` },
+                });
+            }
         } catch (err) {
             log.error('Send transaction error:', err);
             setError(err instanceof Error ? err.message : 'Failed to send transaction');
@@ -178,29 +203,7 @@ export const SendTransaction: React.FC = () => {
                 result = await currentWallet.sendTransaction(jettonTransaction);
             }
             if (result?.normalizedHash) {
-                const { tonScan, tonViewer } = getTransactionExplorerUrls(result.normalizedHash, network);
-                toast.success('Transaction is sent to the network', {
-                    description: (
-                        <span className="flex gap-3 mt-1">
-                            <a
-                                href={tonScan}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 underline"
-                            >
-                                TonScan
-                            </a>
-                            <a
-                                href={tonViewer}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 underline"
-                            >
-                                TonViewer
-                            </a>
-                        </span>
-                    ),
-                });
+                notifySent(result.normalizedHash);
             }
         } catch (err) {
             log.error('Fast send error:', err);

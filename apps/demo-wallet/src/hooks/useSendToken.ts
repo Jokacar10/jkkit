@@ -7,7 +7,7 @@
  */
 
 import { useCallback } from 'react';
-import type { ITonWalletKit, Jetton, Wallet } from '@ton/walletkit';
+import type { ITonWalletKit, Jetton, SendTransactionResponse, Wallet } from '@ton/walletkit';
 
 import { parseUnits } from '@/utils/units';
 import { useGaslessJettonSend } from '@/hooks/useGaslessJettonSend';
@@ -26,8 +26,12 @@ interface UseSendTokenParams {
 }
 
 export interface UseSendTokenResult {
-    /** Send the transfer, dispatching to the gasless or the regular flow. */
-    send: () => Promise<void>;
+    /**
+     * Send the transfer, dispatching to the gasless or the regular flow. Returns
+     * the gasless relayer response (with `normalizedHash`) for the gasless flow,
+     * or `undefined` for the regular flow (which goes through the preview queue).
+     */
+    send: () => Promise<SendTransactionResponse | undefined>;
     /** Inputs aren't ready (no wallet/recipient/amount, or gasless quote pending). */
     isDisabled: boolean;
     /** Gasless sub-state for the UI (toggle, fee-asset selector, fee, errors). */
@@ -55,13 +59,12 @@ export const useSendToken = ({
         amount,
     });
 
-    const send = useCallback(async () => {
+    const send = useCallback(async (): Promise<SendTransactionResponse | undefined> => {
         if (!wallet) throw new Error('No wallet available');
 
         // Gasless jetton transfer: relay the already-fetched, locally-signed quote.
         if (gasless.effective && jetton) {
-            await gasless.send();
-            return;
+            return gasless.send();
         }
 
         if (tokenType === 'TON') {
@@ -70,7 +73,7 @@ export const useSendToken = ({
                 transferAmount: parseUnits(amount, TON_DECIMALS).toString(),
             });
             if (walletKit) await walletKit.handleNewTransaction(wallet, tx);
-            return;
+            return undefined;
         }
 
         if (jetton) {
@@ -84,6 +87,8 @@ export const useSendToken = ({
             });
             if (walletKit) await walletKit.handleNewTransaction(wallet, tx);
         }
+
+        return undefined;
     }, [wallet, walletKit, tokenType, jetton, recipient, amount, gasless.effective, gasless.send]);
 
     const isDisabled =
