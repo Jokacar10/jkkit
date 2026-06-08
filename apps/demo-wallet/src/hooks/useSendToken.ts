@@ -67,7 +67,7 @@ export const useSendToken = ({
         // without the kit it would silently no-op and the page would still report
         // success. Surface it instead of pretending the transfer went through.
         if (!walletKit) {
-            toast.error('Cannot send transaction', { description: 'Wallet is not initialized yet.' });
+            toast.error('Cannot send transaction', { description: 'WalletKit is not initialized yet.' });
             throw new Error('WalletKit is not initialized');
         }
 

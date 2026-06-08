@@ -21,7 +21,6 @@ import type {
 import { ApiClientTonApi } from '../../../clients/tonapi/ApiClientTonApi';
 import { globalLogger } from '../../../core/Logger';
 import type { ProviderFactoryContext } from '../../../types/factory';
-import { delay } from '../../../utils/delay';
 import { CallForSuccess } from '../../../utils/retry';
 import { GaslessError, GaslessErrorCode } from '../errors';
 import { GaslessProvider } from '../GaslessProvider';
@@ -217,33 +216,24 @@ export class TonApiGaslessProvider extends GaslessProvider {
         const body = buildGaslessSendRequest(params);
         const http = this.getClient(params.network);
 
-        // Exponential backoff, transient-only retry. The wallet's seqno guard
-        // protects against on-chain double-spend if a retry duplicates a BoC
-        // that was actually accepted; we still avoid hammering 4xx errors to
-        // keep relayer gas burn down and surface real failures fast.
-        const attemptsTotal = this.sendRetries + 1;
-        let attempt = 0;
-        let lastError: unknown;
-
-        while (attempt < attemptsTotal) {
-            try {
-                const raw = await http.postJson<TonApiGaslessSendResponse>('/v2/gasless/send', body);
-                return { ...mapGaslessSend(raw), internalBoc: params.internalBoc };
-            } catch (error) {
-                lastError = error;
-
-                const lastAttempt = attempt === attemptsTotal - 1;
-                if (lastAttempt || !isTransientError(error)) {
-                    break;
-                }
-
-                await delay(this.sendRetryDelayMs * 2 ** attempt);
-                attempt++;
-            }
+        // Retry transient failures (5xx / network) with a fixed delay. The wallet's
+        // seqno guard protects against on-chain double-spend if a retry duplicates a
+        // BoC that was actually accepted; 4xx are surfaced immediately (`isTransientError`)
+        // to keep relayer gas burn down and fail fast on requests that won't improve.
+        try {
+            return await CallForSuccess(
+                async () => {
+                    const raw = await http.postJson<TonApiGaslessSendResponse>('/v2/gasless/send', body);
+                    return { ...mapGaslessSend(raw), internalBoc: params.internalBoc };
+                },
+                this.sendRetries + 1,
+                this.sendRetryDelayMs,
+                isTransientError,
+            );
+        } catch (error) {
+            log.error('Failed to send gasless transaction', { error, chainId: params.network.chainId });
+            throw mapTonApiGaslessError(error, GaslessErrorCode.SendFailed, 'Failed to send gasless transaction');
         }
-
-        log.error('Failed to send gasless transaction', { error: lastError, chainId: params.network.chainId });
-        throw mapTonApiGaslessError(lastError, GaslessErrorCode.SendFailed, 'Failed to send gasless transaction');
     }
 
     private getClient(network: Network): ApiClientTonApi {
