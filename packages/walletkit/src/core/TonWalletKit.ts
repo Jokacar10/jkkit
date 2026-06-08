@@ -32,6 +32,7 @@ import type { JettonsAPI } from '../types/jettons';
 import { ConnectHandler } from '../handlers/ConnectHandler';
 import { SwapManager } from '../defi/swap';
 import { StakingManager } from '../defi/staking';
+import { GaslessManager } from '../defi/gasless';
 import type {
     RawBridgeEventConnect,
     RawBridgeEventRestoreConnection,
@@ -99,6 +100,7 @@ export class TonWalletKit implements ITonWalletKit {
     private swapManager: SwapManager;
     private streamingManager: StreamingManager;
     private stakingManager: StakingManager;
+    private gaslessManager: GaslessManager;
     private initializer: Initializer;
     private eventProcessor!: StorageEventProcessor;
     private bridgeManager!: BridgeManager;
@@ -143,6 +145,8 @@ export class TonWalletKit implements ITonWalletKit {
         this.swapManager = new SwapManager(() => this.createFactoryContext());
         // Initialize StakingManager
         this.stakingManager = new StakingManager(() => this.createFactoryContext());
+        // Initialize GaslessManager
+        this.gaslessManager = new GaslessManager(() => this.createFactoryContext());
 
         this.eventEmitter.on('restoreConnection', async ({ payload: event }) => {
             if (!event.domain) {
@@ -892,6 +896,13 @@ export class TonWalletKit implements ITonWalletKit {
      */
     get staking(): StakingManager {
         return this.stakingManager;
+    }
+
+    /**
+     * Gasless API access
+     */
+    get gasless(): GaslessManager {
+        return this.gaslessManager;
     }
 
     /**

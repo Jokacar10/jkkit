@@ -1,0 +1,97 @@
+/**
+ * Copyright (c) TonTech.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ */
+
+import { useCallback } from 'react';
+import type { ITonWalletKit, Jetton, Wallet } from '@ton/walletkit';
+
+import { parseUnits } from '@/utils/units';
+import { useGaslessJettonSend } from '@/hooks/useGaslessJettonSend';
+import type { UseGaslessJettonSendResult } from '@/hooks/useGaslessJettonSend';
+
+const TON_DECIMALS = 9;
+
+interface UseSendTokenParams {
+    wallet: Wallet | null | undefined;
+    walletKit: ITonWalletKit | null;
+    tokenType: 'TON' | 'JETTON';
+    /** Selected jetton when `tokenType === 'JETTON'`. */
+    jetton: Jetton | undefined;
+    recipient: string;
+    amount: string;
+}
+
+export interface UseSendTokenResult {
+    /** Send the transfer, dispatching to the gasless or the regular flow. */
+    send: () => Promise<void>;
+    /** Inputs aren't ready (no wallet/recipient/amount, or gasless quote pending). */
+    isDisabled: boolean;
+    /** Gasless sub-state for the UI (toggle, fee-asset selector, fee, errors). */
+    gasless: UseGaslessJettonSendResult;
+}
+
+/**
+ * Single entry point for the Send page, mirroring appkit-minter's `useMintNft`:
+ * `send()` builds and submits the transfer, picking the gasless flow when it's
+ * effective and falling back to the regular TON / jetton transfer otherwise.
+ * Balance validation stays in the page (gating mirrors the mint flow).
+ */
+export const useSendToken = ({
+    wallet,
+    walletKit,
+    tokenType,
+    jetton,
+    recipient,
+    amount,
+}: UseSendTokenParams): UseSendTokenResult => {
+    const gasless = useGaslessJettonSend({
+        wallet,
+        jetton: tokenType === 'JETTON' ? jetton : undefined,
+        recipient,
+        amount,
+    });
+
+    const send = useCallback(async () => {
+        if (!wallet) throw new Error('No wallet available');
+
+        // Gasless jetton transfer: relay the already-fetched, locally-signed quote.
+        if (gasless.effective && jetton) {
+            await gasless.send();
+            return;
+        }
+
+        if (tokenType === 'TON') {
+            const tx = await wallet.createTransferTonTransaction({
+                recipientAddress: recipient,
+                transferAmount: parseUnits(amount, TON_DECIMALS).toString(),
+            });
+            if (walletKit) await walletKit.handleNewTransaction(wallet, tx);
+            return;
+        }
+
+        if (jetton) {
+            const decimals = jetton.decimalsNumber;
+            if (!decimals) throw new Error('Jetton decimals not found');
+
+            const tx = await wallet.createTransferJettonTransaction({
+                recipientAddress: recipient,
+                jettonAddress: jetton.address,
+                transferAmount: parseUnits(amount, decimals).toString(),
+            });
+            if (walletKit) await walletKit.handleNewTransaction(wallet, tx);
+        }
+    }, [wallet, walletKit, tokenType, jetton, recipient, amount, gasless.effective, gasless.send]);
+
+    const isDisabled =
+        !wallet ||
+        !recipient ||
+        !amount ||
+        parseFloat(amount) <= 0 ||
+        (gasless.effective && (!gasless.hasQuote || gasless.isQuoting || gasless.isSending));
+
+    return { send, isDisabled, gasless };
+};
