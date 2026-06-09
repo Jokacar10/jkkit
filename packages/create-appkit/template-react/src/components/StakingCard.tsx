@@ -1,3 +1,5 @@
+// Staking widget — https://docs.ton.org/applications/appkit/howto/use-ui-widgets#staking-widget
+// Staking how-to — https://docs.ton.org/applications/appkit/howto/staking
 import { StakingWidget, Network } from '@ton/appkit-react';
 
 export function StakingCard() {

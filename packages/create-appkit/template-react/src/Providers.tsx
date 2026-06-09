@@ -1,3 +1,4 @@
+// AppKit setup — https://docs.ton.org/applications/appkit/howto/appkit
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AppKitProvider } from '@ton/appkit-react';
 import '@ton/appkit-react/styles.css';

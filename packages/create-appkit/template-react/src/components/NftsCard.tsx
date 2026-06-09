@@ -1,3 +1,4 @@
+// Manage NFTs — https://docs.ton.org/applications/appkit/howto/nfts
 import { useNfts, NftItem } from '@ton/appkit-react';
 
 export function NftsCard() {

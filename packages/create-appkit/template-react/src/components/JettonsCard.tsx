@@ -1,3 +1,5 @@
+// Read balances — https://docs.ton.org/applications/appkit/howto/read-balances#render-a-jetton-row
+// Send jettons — https://docs.ton.org/applications/appkit/howto/send-jettons
 import { useState } from 'react';
 import { useJettons } from '@ton/appkit-react';
 

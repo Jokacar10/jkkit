@@ -61,10 +61,12 @@ function emptyDir(dir: string): void {
 
 async function run(): Promise<void> {
     const argv = mri(process.argv.slice(2), {
-        alias: { h: 'help', t: 'template', o: 'overwrite' },
-        boolean: ['help', 'overwrite'],
-        string: ['template'],
+        alias: { h: 'help', t: 'template', o: 'overwrite', y: 'yes' },
+        boolean: ['help', 'overwrite', 'yes'],
+        string: ['template', 'app-url'],
     });
+
+    const useDefaults = argv.yes;
 
     if (argv.help) {
         console.log(`
@@ -76,7 +78,15 @@ async function run(): Promise<void> {
   ${styleText('bold', 'Options:')}
     -t, --template <name>   Template to use (default: react)
     -o, --overwrite         Overwrite existing directory
+    --app-url <url>         App URL for TonConnect manifest
+    -y, --yes               Accept all defaults (non-interactive)
     -h, --help              Show this help message
+
+  ${styleText('bold', 'Documentation:')}
+    Applications         https://docs.ton.org/applications/apps-overview
+    AppKit               https://docs.ton.org/applications/appkit/overview
+    How-to guides        https://docs.ton.org/applications/appkit/howto/howto
+    TonConnect           https://docs.ton.org/applications/ton-connect/overview
 `);
         return;
     }
@@ -86,19 +96,23 @@ async function run(): Promise<void> {
     // 1. Project name
     let targetDir = argv._[0] as string | undefined;
     if (!targetDir) {
-        const result = await prompts.text({
-            message: 'Project name',
-            placeholder: 'my-ton-app',
-            defaultValue: 'my-ton-app',
-            validate: (value) => {
-                if (!value?.trim()) return 'Project name is required';
-            },
-        });
-        if (prompts.isCancel(result)) {
-            prompts.cancel('Cancelled.');
-            process.exit(0);
+        if (useDefaults) {
+            targetDir = 'my-ton-app';
+        } else {
+            const result = await prompts.text({
+                message: 'Project name',
+                placeholder: 'my-ton-app',
+                defaultValue: 'my-ton-app',
+                validate: (value) => {
+                    if (!value?.trim()) return 'Project name is required';
+                },
+            });
+            if (prompts.isCancel(result)) {
+                prompts.cancel('Cancelled.');
+                process.exit(0);
+            }
+            targetDir = result;
         }
-        targetDir = result;
     }
 
     const projectName = path.basename(targetDir);
@@ -106,7 +120,7 @@ async function run(): Promise<void> {
 
     // 2. Handle existing directory
     if (fs.existsSync(root) && !isEmpty(root)) {
-        if (argv.overwrite) {
+        if (argv.overwrite || useDefaults) {
             emptyDir(root);
         } else {
             const overwrite = await prompts.confirm({
@@ -123,7 +137,7 @@ async function run(): Promise<void> {
     // 3. Template selection
     let template = argv.template;
     if (!template) {
-        if (TEMPLATES.length === 1) {
+        if (useDefaults || TEMPLATES.length === 1) {
             template = TEMPLATES[0].name;
         } else {
             const result = await prompts.select({
@@ -149,14 +163,23 @@ async function run(): Promise<void> {
     }
 
     // 4. App URL for TonConnect manifest
-    const appUrl = await prompts.text({
-        message: 'App URL (for TonConnect manifest)',
-        placeholder: 'https://your-app.example.com',
-        defaultValue: 'https://your-app.example.com',
-    });
-    if (prompts.isCancel(appUrl)) {
-        prompts.cancel('Cancelled.');
-        process.exit(0);
+    // See https://docs.ton.org/applications/appkit/howto/connect-to-a-wallet
+    let appUrl = argv['app-url'] as string | undefined;
+    if (!appUrl) {
+        if (useDefaults) {
+            appUrl = 'https://your-app.example.com';
+        } else {
+            const result = await prompts.text({
+                message: 'App URL (for TonConnect manifest)',
+                placeholder: 'https://your-app.example.com',
+                defaultValue: 'https://your-app.example.com',
+            });
+            if (prompts.isCancel(result)) {
+                prompts.cancel('Cancelled.');
+                process.exit(0);
+            }
+            appUrl = result;
+        }
     }
 
     // 5. Scaffold
@@ -197,7 +220,7 @@ async function run(): Promise<void> {
         'Next steps',
     );
 
-    prompts.outro('Done!');
+    prompts.outro('Done! Docs: https://docs.ton.org/applications/appkit/overview');
 }
 
 run().catch((err: unknown) => {

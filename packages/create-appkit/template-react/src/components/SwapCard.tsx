@@ -1,3 +1,5 @@
+// Swap widget — https://docs.ton.org/applications/appkit/howto/use-ui-widgets#swap-widget
+// Swap how-to — https://docs.ton.org/applications/appkit/howto/swaps
 import { useCallback, useState } from 'react';
 import { SwapWidget, SwapWidgetUI, Network } from '@ton/appkit-react';
 import type { AppkitUIToken, SwapWidgetRenderProps } from '@ton/appkit-react';

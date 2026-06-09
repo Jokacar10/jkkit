@@ -1,6 +1,9 @@
+// AppKit setup — https://docs.ton.org/applications/appkit/howto/appkit
 import { AppKit, Network, createTonCenterStreamingProvider, createTonConnectConnector } from '@ton/appkit';
+// Swap providers — https://docs.ton.org/applications/appkit/howto/providers#swaps
 import { createOmnistonProvider } from '@ton/appkit/swap/omniston';
 import { createDeDustProvider } from '@ton/appkit/swap/dedust';
+// Staking providers — https://docs.ton.org/applications/appkit/howto/providers#staking
 import { createTonstakersProvider } from '@ton/appkit/staking/tonstakers';
 
 const TONCENTER_API_KEY = import.meta.env.VITE_TONCENTER_API_KEY as string | undefined;
@@ -9,6 +12,7 @@ const TONCONNECT_MANIFEST_URL =
     (import.meta.env.VITE_TONCONNECT_MANIFEST_URL as string | undefined) ??
     `${window.location.origin}/tonconnect-manifest.json`;
 
+// Full guide: https://docs.ton.org/applications/appkit/get-started/get-started
 export const appKit = new AppKit({
     networks: {
         [Network.mainnet().chainId]: {
@@ -19,11 +23,13 @@ export const appKit = new AppKit({
         },
     },
     defaultNetwork: Network.mainnet(),
+    // Connectors — https://docs.ton.org/applications/appkit/howto/connect-to-a-wallet#drop-in-button
     connectors: [
         createTonConnectConnector({
             tonConnectOptions: { manifestUrl: TONCONNECT_MANIFEST_URL },
         }),
     ],
+    // Streaming & DeFi providers — https://docs.ton.org/applications/appkit/howto/providers#how-they-are-registered
     providers: [
         createTonCenterStreamingProvider({ network: Network.mainnet(), apiKey: TONCENTER_API_KEY }),
         createTonCenterStreamingProvider({ network: Network.testnet(), apiKey: TONCENTER_API_KEY }),

@@ -1,3 +1,6 @@
+// Read balances — https://docs.ton.org/applications/appkit/howto/read-balances
+// Live updates — https://docs.ton.org/applications/appkit/howto/streaming#watch-a-balance
+// Send Toncoin — https://docs.ton.org/applications/appkit/howto/send-toncoin
 import { useBalance, useWatchBalance, SendTonButton, useAddress } from '@ton/appkit-react';
 
 const amountFormatter = new Intl.NumberFormat('en-US', {
