@@ -138,7 +138,16 @@ export const CryptoOnrampDepositModal: FC<CryptoOnrampDepositModalProps> = ({
                     </div>
                 )}
 
-                <p className={styles.infoTitle}>{t('cryptoOnramp.sendExactAmount')}</p>
+                {networkName && symbol && (
+                    <div className={styles.warning}>
+                        <span className={styles.warningIcon}>
+                            <WarningIcon />
+                        </span>
+                        <p className={styles.warningText}>
+                            {t('cryptoOnramp.chainWarning', { symbol, network: networkName })}
+                        </p>
+                    </div>
+                )}
 
                 <div className={styles.infoCard}>
                     <div className={styles.infoRow}>
@@ -190,17 +199,6 @@ export const CryptoOnrampDepositModal: FC<CryptoOnrampDepositModalProps> = ({
                         </>
                     )}
                 </div>
-
-                {networkName && symbol && (
-                    <div className={styles.warning}>
-                        <span className={styles.warningIcon}>
-                            <WarningIcon />
-                        </span>
-                        <p className={styles.warningText}>
-                            {t('cryptoOnramp.chainWarning', { symbol, network: networkName })}
-                        </p>
-                    </div>
-                )}
 
                 {targetSymbol && (
                     <div className={styles.infoCard}>
