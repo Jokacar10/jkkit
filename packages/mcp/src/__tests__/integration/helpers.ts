@@ -7,6 +7,7 @@
  */
 
 import { Address } from '@ton/core';
+import type { EmulationAction } from '@ton/walletkit';
 import { afterAll, beforeAll, expect } from 'vitest';
 
 import { expectSuccessfulEmulation } from './emulating-client.js';
@@ -59,11 +60,20 @@ export async function sendEmulated(
     harness: IntegrationHarness,
     name: string,
     args: Record<string, unknown>,
-): Promise<{ payload: Record<string, unknown>; actionTypes: string[]; totalFees: bigint }> {
+): Promise<{ payload: Record<string, unknown>; actions: EmulationAction[]; totalFees: bigint }> {
     const before = harness.apiClient.interceptedSends.length;
     const payload = await callOk(harness, name, args);
     expect(harness.apiClient.interceptedSends.length).toBe(before + 1);
     return { payload, ...expectSuccessfulEmulation(harness.apiClient.lastIntercepted()) };
+}
+
+/** Returns the details of the emulated action of the given type, failing if absent. */
+export function actionDetails(actions: EmulationAction[], type: string): Record<string, unknown> {
+    const action = actions.find((entry) => entry.type === type);
+    if (!action) {
+        throw new Error(`No ${type} action emulated; got: ${actions.map((entry) => entry.type).join(', ')}`);
+    }
+    return action.details;
 }
 
 /** Calls a tool with invalid input, asserts it failed without signing anything. */

@@ -7,6 +7,7 @@
  */
 
 import { ApiClientToncenter, Network } from '@ton/walletkit';
+import type { EmulationAction } from '@ton/walletkit';
 
 import {
     createRateLimitedFetch,
@@ -52,13 +53,16 @@ export class EmulatingToncenterClient extends ApiClientToncenter {
 }
 
 export function expectSuccessfulEmulation(intercepted: InterceptedSend): {
-    actionTypes: string[];
+    actions: EmulationAction[];
     totalFees: bigint;
 } {
     if (intercepted.emulation.result !== 'success') {
         throw new Error(`Captured BOC failed to emulate: ${JSON.stringify(intercepted.emulation.emulationError)}`);
     }
-    const { actions, transactions } = intercepted.emulation.emulationResult;
+    const { actions, transactions, isIncomplete } = intercepted.emulation.emulationResult;
+    if (isIncomplete) {
+        throw new Error('Emulated trace is incomplete');
+    }
     const failedActions = actions.filter((action) => !action.isSuccess);
     if (failedActions.length > 0) {
         throw new Error(`Emulated actions failed: ${failedActions.map((action) => action.type).join(', ')}`);
@@ -67,5 +71,5 @@ export function expectSuccessfulEmulation(intercepted: InterceptedSend): {
     for (const transaction of Object.values(transactions)) {
         totalFees += BigInt(transaction.totalFees);
     }
-    return { actionTypes: actions.map((action) => action.type), totalFees };
+    return { actions, totalFees };
 }

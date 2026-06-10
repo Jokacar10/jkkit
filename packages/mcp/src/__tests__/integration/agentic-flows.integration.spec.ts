@@ -6,10 +6,9 @@
  *
  */
 
-import { Address } from '@ton/core';
 import { describe, expect, it } from 'vitest';
 
-import { callOk, isSameAddress, sendEmulated, useHarness } from './helpers.js';
+import { actionDetails, callOk, isSameAddress, sendEmulated, useHarness } from './helpers.js';
 import { getIntegrationMnemonic, TESTNET_FIXTURES } from './integration-env.js';
 
 const FIXTURES = TESTNET_FIXTURES;
@@ -34,23 +33,34 @@ describe.skipIf(!getIntegrationMnemonic())('MCP agentic wallet flows (testnet re
     });
 
     it('send_ton signed by the operator key passes contract validation in emulation', async () => {
-        const { actionTypes, totalFees } = await sendEmulated(getHarness(), 'send_ton', {
+        const { actions, totalFees } = await sendEmulated(getHarness(), 'send_ton', {
             toAddress: FIXTURES.walletAddress,
             amount: '0.01',
             comment: 'mcp agentic integration test',
         });
-        expect(actionTypes).toContain('ton_transfer');
+        const transfer = actionDetails(actions, 'ton_transfer');
+        expect(isSameAddress(transfer.source, FIXTURES.agenticWalletAddress)).toBe(true);
+        expect(isSameAddress(transfer.destination, FIXTURES.walletAddress)).toBe(true);
+        expect(transfer.value).toBe('10000000');
+        expect(transfer.comment).toBe('mcp agentic integration test');
         expect(totalFees > 0n).toBe(true);
     });
 
     it('agentic_deploy_subwallet emulates a child wallet deployment from the root', async () => {
-        const { payload, actionTypes } = await sendEmulated(getHarness(), 'agentic_deploy_subwallet', {
+        const { payload, actions } = await sendEmulated(getHarness(), 'agentic_deploy_subwallet', {
             operatorPublicKey: getHarness().signerPublicKey,
             metadata: { name: 'mcp-integration-test-subwallet' },
             amountTon: '0.05',
         });
-        const details = payload.details as { subwalletAddress: string };
-        expect(() => Address.parse(details.subwalletAddress)).not.toThrow();
-        expect(actionTypes).toContain('contract_deploy');
+        const { subwalletAddress } = payload.details as { subwalletAddress: string };
+        const deploy = actionDetails(actions, 'contract_deploy');
+        expect(isSameAddress(deploy.source, FIXTURES.agenticWalletAddress)).toBe(true);
+        expect(isSameAddress(deploy.destination, subwalletAddress)).toBe(true);
+        expect(deploy.value).toBe('50000000');
+        // The subwallet is minted as an NFT item of the agentic collection.
+        const mint = actionDetails(actions, 'nft_mint');
+        expect(isSameAddress(mint.nft_collection, FIXTURES.agenticCollectionAddress)).toBe(true);
+        expect(isSameAddress(mint.nft_item, subwalletAddress)).toBe(true);
+        expect(isSameAddress(mint.owner, FIXTURES.agenticWalletAddress)).toBe(true);
     });
 });
