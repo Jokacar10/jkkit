@@ -24,10 +24,12 @@ export * from './components/ui/logo-with-network';
 export * from './components/ui/modal';
 export * from './components/ui/select';
 export * from './components/ui/skeleton';
+export * from './components/ui/switch';
 export * from './components/ui/tabs';
 
 // Shared composites
 export * from './components/shared/amount-presets';
+export * from './components/shared/button-with-connect';
 export * from './components/shared/copy-button';
 export * from './components/shared/currency-item';
 export * from './components/shared/currency-select-modal';
@@ -48,5 +50,6 @@ export * from './features/swap';
 export * from './features/signing';
 export * from './features/staking';
 export * from './features/onramp';
+export * from './features/gasless';
 
 export * from './types/appkit-ui-token';

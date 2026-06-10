@@ -16,6 +16,7 @@ export type { SwapAPI, SwapProviderInterface } from './SwapAPI';
 export type { CryptoOnrampAPI, CryptoOnrampProviderInterface } from './CryptoOnrampAPI';
 export type { DefiProvider } from './DefiProvider';
 export type { StakingAPI, StakingProviderInterface } from './StakingAPI';
+export type { GaslessAPI, GaslessProviderInterface } from './GaslessAPI';
 
 export type { TONConnectSessionManager } from './TONConnectSessionManager';
 
