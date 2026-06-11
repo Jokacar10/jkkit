@@ -9,7 +9,7 @@
 import { Base64ToHex } from '@ton/walletkit';
 import type { Action, Event } from '@ton/walletkit';
 
-import { formatTonForDisplay, getTonviewerTxUrl, sameAddress } from '@/core/utils';
+import { formatLargeValue, formatUnits, getTonviewerTxUrl, sameAddress } from '@/core/utils';
 
 /** Network accepted by the explorer-url builder (mainnet/testnet/tetra). */
 type ExplorerNetwork = Parameters<typeof getTonviewerTxUrl>[0];
@@ -45,9 +45,13 @@ interface PendingLike {
     preview?: { type: 'send' | 'receive' | 'contract'; amount: string };
 }
 
-const TON_TRANSFER_DESC = /^Transferring (.+) TON$/;
-const TON_VALUE = /^(.+) TON$/;
-const JETTON_TRANSFER_DESC = /^Transferring (.+)$/;
+const TON_DECIMALS = 9;
+/** Cap on fractional digits shown for amounts (matches the appkit widget formatter). */
+const AMOUNT_DECIMALS = 4;
+
+/** Raw amount (nanoton / jetton base units) -> compact human string, e.g. "1M" / "1,234.5". */
+const formatAmount = (raw: bigint | string, decimals: number): string =>
+    formatLargeValue(formatUnits(raw, decimals), AMOUNT_DECIMALS);
 
 const truncateMiddle = (value: string): string => {
     const v = String(value);
@@ -77,25 +81,21 @@ const isOutgoingFromAction = (action: Action, myAddress: string): boolean => {
     return accounts != null && accounts.length > 0 && sameAddress(accounts[0].address, myAddress);
 };
 
-/** Title + bare value (no sign) for an action, mirroring the existing ActionCard mapping. */
+/** Title + bare value (no sign) for an action, derived from the typed amount fields. */
 const describeAction = (action: Action, isOutgoing: boolean): { title: string; value: string } => {
-    const { description, value } = action.simplePreview;
     const label = isOutgoing ? 'Sent' : 'Received';
 
-    const descMatch = description?.match(TON_TRANSFER_DESC);
-    const valueMatch = value?.match(TON_VALUE);
-    if (descMatch && valueMatch && action.type === 'TonTransfer') {
-        const amount = formatTonForDisplay(valueMatch[1]);
-        return { title: `${label} ${amount} TON`, value: `${amount} TON` };
+    if (action.type === 'TonTransfer' && 'TonTransfer' in action) {
+        const value = `${formatAmount(action.TonTransfer.amount, TON_DECIMALS)} TON`;
+        return { title: `${label} ${value}`, value };
     }
-    if (valueMatch && action.type === 'TonTransfer') {
-        return { title: description, value: `${formatTonForDisplay(valueMatch[1])} TON` };
+    if (action.type === 'JettonTransfer' && 'JettonTransfer' in action) {
+        const { amount, jetton } = action.JettonTransfer;
+        const value = `${formatAmount(amount, jetton.decimals)} ${jetton.symbol}`.trim();
+        return { title: `${label} ${value}`, value };
     }
-    const jettonMatch = description?.match(JETTON_TRANSFER_DESC);
-    if (jettonMatch && action.type === 'JettonTransfer') {
-        return { title: `${label} ${jettonMatch[1]}`, value: value ?? '' };
-    }
-    return { title: description, value };
+    // Other action types (swap, nft, contract): fall back to the API preview text.
+    return { title: action.simplePreview.description, value: action.simplePreview.value };
 };
 
 /** Picks the action that involves the current wallet, preferring the one where we are the sender. */
@@ -166,7 +166,7 @@ export const mapPendingToRow = (
     }
 
     const isOutgoing = pending.preview?.type === 'send';
-    const amount = pending.preview ? `${formatTonForDisplay(pending.preview.amount)} TON` : '';
-    const title = pending.preview ? `${isOutgoing ? 'Sent' : 'Received'} ${amount}` : 'Processing';
-    return { ...base, title, amount: signedAmount(amount, isOutgoing), isOutgoing };
+    const value = pending.preview ? `${formatAmount(pending.preview.amount, TON_DECIMALS)} TON` : '';
+    const title = pending.preview ? `${isOutgoing ? 'Sent' : 'Received'} ${value}` : 'Processing';
+    return { ...base, title, amount: signedAmount(value, isOutgoing), isOutgoing };
 };

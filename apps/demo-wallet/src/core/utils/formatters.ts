@@ -84,3 +84,37 @@ function toHexHash(hash: string): string {
 export function getTonviewerTxUrl(network: ExplorerNetwork, hash: string): string {
     return `https://${getTonviewerHost(network)}/transaction/${toHexHash(hash)}`;
 }
+
+/**
+ * Formats a human-readable amount for compact display, mirroring the appkit-react
+ * widget formatter (`formatLargeValue` from `@ton/appkit`): abbreviates large values
+ * (M/B/T) and otherwise truncates to `decimals` fractional digits with locale
+ * thousands separators. Expects a decimal amount, not nanoton.
+ */
+export const formatLargeValue = (amount: string, decimals: number = 2, minimumFractionDigits: number = 0): string => {
+    const cleanAmount = amount.toString().replace(/\s/g, '');
+    const intPart = cleanAmount.split('.')[0] || '0';
+
+    // > 100 000 000 000 000 => 100T
+    if (intPart.length > 12) {
+        return `${(Number(intPart.slice(0, -10)) / 100).toLocaleString('en-US')}T`;
+    }
+    // > 100 000 000 000 => 100B
+    if (intPart.length > 9) {
+        return `${(Number(intPart.slice(0, -7)) / 100).toLocaleString('en-US')}B`;
+    }
+    // > 10 000 000 => 10M
+    if (intPart.length > 6) {
+        return `${(Number(intPart.slice(0, -4)) / 100).toLocaleString('en-US')}M`;
+    }
+
+    const value = parseFloat(cleanAmount);
+    if (isNaN(value)) {
+        return '0';
+    }
+
+    const factor = Math.pow(10, decimals);
+    const truncated = Math.floor(value * factor) / factor;
+
+    return truncated.toLocaleString('en-US', { minimumFractionDigits, maximumFractionDigits: decimals });
+};
