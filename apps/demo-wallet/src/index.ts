@@ -6,8 +6,7 @@
  *
  */
 
-// Re-export main app components and utilities
-export * from './components';
+// Re-export shared utilities
 export * from '@/core/utils';
 
 // For convenience, also export the main App component
