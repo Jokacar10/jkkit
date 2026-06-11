@@ -91,10 +91,10 @@ jobs:
       - name: Generate Allure HTML report
         if: always()
         run: |
-          curl -fsSL https://github.com/allure-framework/allure2/releases/download/2.34.0/allure-commandline-2.34.0.tgz \
+          curl -fsSL https://github.com/allure-framework/allure2/releases/download/2.42.1/allure-commandline-2.42.1.tgz \
             -o /tmp/allure.tgz
           tar -xzf /tmp/allure.tgz -C /tmp
-          /tmp/allure-2.34.0/bin/allure generate apps/appkit-minter/allure-results \
+          /tmp/allure-2.42.1/bin/allure generate apps/appkit-minter/allure-results \
             -o apps/appkit-minter/allure-report --clean
 
       - name: Upload Allure HTML report
