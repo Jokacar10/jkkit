@@ -9,3 +9,5 @@
 export * from './components/staking-screen';
 export * from './components/staking-info';
 export * from './components/staking-interface';
+export * from './components/staking-settings';
+export * from './hooks/use-staking-providers';

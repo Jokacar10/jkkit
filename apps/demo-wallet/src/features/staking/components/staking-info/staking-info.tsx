@@ -9,47 +9,51 @@
 import type { FC } from 'react';
 import { useStaking } from '@demo/wallet-core';
 
-import { Card } from '@/core/components/ui/card';
+import { useStakingProviders } from '../../hooks/use-staking-providers';
 
-export const StakingInfo: FC = () => {
-    const { stakedBalance, providerInfo } = useStaking();
+import { formatLargeValue } from '@/core/utils';
+
+interface StakingInfoProps {
+    /** Ticker received from the current quote (stake → tsTON, unstake → GRAM). */
+    receiveTicker?: string;
+}
+
+/** Read-only pool summary: APY, provider, instant-unstake liquidity and the quoted output. */
+export const StakingInfo: FC<StakingInfoProps> = ({ receiveTicker }) => {
+    const { providerInfo, providerId, currentQuote } = useStaking();
+    const providers = useStakingProviders();
+    const providerName = providers.find((provider) => provider.id === providerId)?.name ?? 'Tonstakers';
 
     return (
-        <div className="space-y-6">
-            <Card title="Your Stake">
-                <div className="space-y-4">
-                    <div>
-                        <p className="text-sm text-gray-500 mb-1">Balance</p>
-                        <p className="text-2xl font-bold text-gray-900">
-                            {stakedBalance?.stakedBalance ? stakedBalance?.stakedBalance : '0.00'} tsTON
-                        </p>
-                    </div>
+        <div className="space-y-2 rounded-2xl bg-gray-100 p-4 text-sm">
+            <div className="flex items-center justify-between">
+                <span className="text-gray-500">APY</span>
+                <span className="font-semibold text-green-600">
+                    {providerInfo?.apy ? `${providerInfo.apy.toFixed(2)}%` : '—'}
+                </span>
+            </div>
+            <div className="flex items-center justify-between">
+                <span className="text-gray-500">Provider</span>
+                <span className="font-medium capitalize text-gray-900">{providerName}</span>
+            </div>
+            <div className="flex items-center justify-between">
+                <span className="text-gray-500">Instant unstake available</span>
+                <span className="font-medium text-gray-900 tabular-nums">
+                    {providerInfo?.instantUnstakeAvailable
+                        ? formatLargeValue(String(providerInfo.instantUnstakeAvailable), 4)
+                        : '0'}{' '}
+                    GRAM
+                </span>
+            </div>
+            {currentQuote && (
+                <div className="flex items-center justify-between">
+                    <span className="text-gray-500">You will receive</span>
+                    <span className="font-semibold text-gray-900 tabular-nums">
+                        {formatLargeValue(String(currentQuote.amountOut), 4)}
+                        {receiveTicker ? ` ${receiveTicker}` : ''}
+                    </span>
                 </div>
-            </Card>
-
-            <Card title="Pool Info">
-                <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-500">Provider</span>
-                        <span className="text-sm font-medium">Tonstakers</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-500">APY</span>
-                        <span className="text-sm font-bold text-green-600">
-                            {providerInfo?.apy ? `${providerInfo.apy.toFixed(2)}%` : '--'}
-                        </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-500">Instant Unstake Available</span>
-                        <span className="text-sm font-medium">
-                            {providerInfo?.instantUnstakeAvailable
-                                ? Number(providerInfo?.instantUnstakeAvailable).toFixed(4)
-                                : '0.00'}{' '}
-                            GRAM
-                        </span>
-                    </div>
-                </div>
-            </Card>
+            )}
         </div>
     );
 };

@@ -7,13 +7,13 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Settings2 } from 'lucide-react';
 
 import { useSwapProviders } from '../../hooks/use-swap-providers';
 
 import { Button } from '@/core/components/ui/button';
 import { Modal } from '@/core/components/ui/modal';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/core/components/ui/select';
+import { SettingsButton } from '@/core/components/shared/settings-button';
 import { cn } from '@/core/lib/utils';
 
 const PRESET_SLIPPAGES = [50, 100, 300, 500];
@@ -59,14 +59,7 @@ export const SwapSettings: React.FC<SwapSettingsProps> = ({
 
     return (
         <>
-            <button
-                type="button"
-                onClick={() => setOpen(true)}
-                aria-label="Swap settings"
-                className="flex size-13 shrink-0 items-center justify-center rounded-2xl bg-gray-100 text-gray-600 transition-colors hover:bg-gray-200"
-            >
-                <Settings2 className="h-5 w-5" />
-            </button>
+            <SettingsButton onClick={() => setOpen(true)} aria-label="Swap settings" />
 
             <Modal.Container isOpened={open} onOpenChange={setOpen}>
                 <Modal.Header onClose={() => setOpen(false)}>
