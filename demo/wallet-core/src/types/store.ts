@@ -278,6 +278,8 @@ export interface SwapState {
     error: string | null;
     slippageBps: number;
     isReverseSwap: boolean;
+    /** Selected swap provider id (e.g. 'omniston', 'dedust'); quotes are fetched from it. */
+    providerId: string;
 }
 
 // Staking slice interface
@@ -349,6 +351,7 @@ export interface SwapSlice {
     setDestinationAddress: (address: string) => void;
     setIsReverseSwap: (isReverseSwap: boolean) => void;
     setSlippageBps: (slippage: number) => void;
+    setSwapProviderId: (providerId: string) => void;
     swapTokens: () => void;
     getSwapQuote: () => Promise<void>;
     executeSwap: () => Promise<void>;

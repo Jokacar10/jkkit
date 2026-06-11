@@ -27,6 +27,7 @@ export const createSwapSlice: SwapSliceCreator = (set: SetState, get) => ({
         error: null,
         slippageBps: 100,
         isReverseSwap: false,
+        providerId: 'omniston',
     },
 
     setFromToken: (token: SwapToken) => {
@@ -71,6 +72,16 @@ export const createSwapSlice: SwapSliceCreator = (set: SetState, get) => ({
     setSlippageBps: (slippage: number) => {
         set((state) => {
             state.swap.slippageBps = slippage;
+        });
+    },
+
+    setSwapProviderId: (providerId: string) => {
+        set((state) => {
+            state.swap.providerId = providerId;
+            // The existing quote came from the previous provider — drop it so the
+            // next quote is fetched from the newly selected one.
+            state.swap.currentQuote = null;
+            state.swap.error = null;
         });
     },
 
@@ -157,7 +168,7 @@ export const createSwapSlice: SwapSliceCreator = (set: SetState, get) => ({
 
     getSwapQuote: async () => {
         const state = get();
-        const { fromToken, toToken, amount, isReverseSwap, slippageBps } = state.swap;
+        const { fromToken, toToken, amount, isReverseSwap, slippageBps, providerId } = state.swap;
 
         // Validate inputs
         const validationError = get().validateSwapInputs();
@@ -227,7 +238,7 @@ export const createSwapSlice: SwapSliceCreator = (set: SetState, get) => ({
                 };
             }
 
-            const quote = await state.walletCore.walletKit.swap.getQuote(quoteParams, 'omniston');
+            const quote = await state.walletCore.walletKit.swap.getQuote(quoteParams, providerId);
 
             // Update the opposite amount based on which one was specified
             set((state) => {
@@ -353,6 +364,7 @@ export const createSwapSlice: SwapSliceCreator = (set: SetState, get) => ({
             state.swap.error = null;
             state.swap.slippageBps = 100;
             state.swap.isReverseSwap = false;
+            state.swap.providerId = 'omniston';
         });
     },
 });

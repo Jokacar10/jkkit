@@ -6,24 +6,31 @@
  *
  */
 
-import type { FC } from 'react';
 import { useState } from 'react';
-import { useSwap } from '@demo/wallet-core';
+import type { FC } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowDownUp } from 'lucide-react';
+import { useJettons, useSwap, useWallet } from '@demo/wallet-core';
 import type { SwapToken } from '@ton/walletkit';
 
+import { SwapField } from '../swap-field';
+import { SwapInfo } from '../swap-info';
 import { SwapSettings } from '../swap-settings';
-import { TokenInput } from '../token-input';
 import { QuoteTimer } from '../quote-timer';
 
 import { Button } from '@/core/components/ui/button';
-import { Card } from '@/core/components/ui/card';
+import { Input } from '@/core/components/ui/input';
+import { getJettonsImage, getJettonsSymbol } from '@/features/jettons';
 import { cn } from '@/core/lib/utils';
+import { formatUnits } from '@/core/utils/units';
 
-function getPriceImpactColor(priceImpact: number): string {
-    if (priceImpact > 500) return 'text-destructive';
-    if (priceImpact > 200) return 'text-yellow-600';
-    return 'text-green-600';
+/** Reserved on a MAX TON swap, so the transaction still has gas to pay for itself. */
+const TON_GAS_RESERVE = 0.1;
+
+interface TokenView {
+    symbol: string;
+    icon?: string;
+    balance: string;
 }
 
 interface SwapInterfaceProps {
@@ -31,6 +38,9 @@ interface SwapInterfaceProps {
 }
 
 export const SwapInterface: FC<SwapInterfaceProps> = ({ className }) => {
+    const navigate = useNavigate();
+    const { balance } = useWallet();
+    const { userJettons } = useJettons();
     const {
         fromToken,
         toToken,
@@ -42,221 +52,176 @@ export const SwapInterface: FC<SwapInterfaceProps> = ({ className }) => {
         isSwapping,
         error,
         slippageBps,
-        setFromToken,
-        setToToken,
+        providerId,
         setSwapAmount: setAmount,
         setIsReverseSwap,
         setDestinationAddress,
         setSlippageBps,
+        setSwapProviderId,
         swapTokens,
-        getSwapQuote: getQuote,
+        getSwapQuote,
         executeSwap,
     } = useSwap();
 
-    const navigate = useNavigate();
-
-    const [showSlippageSettings, setShowSlippageSettings] = useState(false);
     const [useCustomDestination, setUseCustomDestination] = useState(false);
 
-    const getTokenSymbol = (token: SwapToken): string => {
-        if (token.symbol) return token.symbol;
-        if (token.address === 'ton') return 'TON';
-        return 'Unknown';
+    const getTokenView = (token: SwapToken): TokenView => {
+        if (token.address === 'ton') {
+            return {
+                symbol: token.symbol || 'TON',
+                icon: '/ton.svg',
+                balance: formatUnits(balance || '0', token.decimals),
+            };
+        }
+        const jetton = userJettons.find((j) => j.address === token.address);
+        return {
+            symbol: token.symbol || (jetton ? getJettonsSymbol(jetton) : undefined) || 'Token',
+            icon: token.image ?? (jetton ? getJettonsImage(jetton) : undefined),
+            balance: jetton?.balance ? formatUnits(jetton.balance, token.decimals) : '0',
+        };
     };
 
-    const fromSymbol = getTokenSymbol(fromToken);
-    const toSymbol = getTokenSymbol(toToken);
+    const fromView = getTokenView(fromToken);
+    const toView = getTokenView(toToken);
 
-    const handleGetQuote = async () => {
-        await getQuote();
+    const fromAmount = !isReverseSwap ? amount : currentQuote ? currentQuote.fromAmount : '';
+    const toAmount = isReverseSwap ? amount : currentQuote ? currentQuote.toAmount : '';
+
+    const handleFromAmountChange = (value: string) => {
+        setAmount(value);
+        setIsReverseSwap(false);
+    };
+
+    const handleToAmountChange = (value: string) => {
+        setAmount(value);
+        setIsReverseSwap(true);
+    };
+
+    const handleMaxFrom = () => {
+        const currentBalance = parseFloat(fromView.balance);
+        if (!(currentBalance > 0)) return;
+        if (fromToken.address === 'ton') {
+            const maxAmount = currentBalance - TON_GAS_RESERVE;
+            if (maxAmount > 0) handleFromAmountChange(maxAmount.toString());
+        } else {
+            handleFromAmountChange(fromView.balance);
+        }
     };
 
     const handleExecuteSwap = async () => {
         await executeSwap();
-
-        navigate('/wallet', {
-            state: { message: `${fromSymbol} sent successfully!` },
-        });
+        navigate('/wallet', { state: { message: `${fromView.symbol} sent successfully!` } });
     };
 
-    const handleFromAmountChange = (val: string) => {
-        setAmount(val);
-        setIsReverseSwap(false);
-    };
-
-    const handleToAmountChange = (val: string) => {
-        setAmount(val);
-        setIsReverseSwap(true);
-    };
-
-    const fromAmount = !isReverseSwap ? amount : currentQuote ? currentQuote.fromAmount : '';
-
-    const toAmount = isReverseSwap ? amount : currentQuote ? currentQuote.toAmount : '';
-
-    const getSwapButtonText = () => {
-        if (!fromToken || !toToken) return 'Select tokens';
+    const getSwapButtonText = (): string => {
         const hasFromAmount = fromAmount && parseFloat(fromAmount) > 0;
         const hasToAmount = toAmount && parseFloat(toAmount) > 0;
         if (!hasFromAmount && !hasToAmount) return 'Enter amount';
-        if (isLoadingQuote) return 'Getting quote...';
         if (error) return 'Error';
-        if (!currentQuote) return 'Get Quote';
-        return `Swap ${fromSymbol} for ${toSymbol}`;
+        return `Swap ${fromView.symbol} for ${toView.symbol}`;
     };
 
-    const isSwapDisabled = !!error || isLoadingQuote || isSwapping;
+    const isSwapDisabled = Boolean(error) || isLoadingQuote || isSwapping;
 
     return (
-        <Card className={cn('mx-auto w-full max-w-md', className)}>
-            <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900">Swap</h2>
+        <div className={cn('space-y-5', className)}>
+            <div className="relative">
+                <div className="space-y-1">
+                    <SwapField
+                        label="From"
+                        symbol={fromView.symbol}
+                        icon={fromView.icon}
+                        amount={fromAmount}
+                        balance={fromView.balance}
+                        onAmountChange={handleFromAmountChange}
+                        onMax={handleMaxFrom}
+                    />
+                    <SwapField
+                        label="To"
+                        symbol={toView.symbol}
+                        icon={toView.icon}
+                        amount={toAmount}
+                        balance={toView.balance}
+                        onAmountChange={handleToAmountChange}
+                    />
+                </div>
+
+                <button
+                    type="button"
+                    onClick={swapTokens}
+                    className="absolute left-1/2 top-1/2 z-10 flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-4 border-white bg-blue-600 text-white shadow-md transition-colors hover:bg-blue-700"
+                    aria-label="Swap direction"
+                >
+                    <ArrowDownUp className="h-4 w-4" />
+                </button>
+            </div>
+
+            {/* Optional custom recipient */}
+            <div className="space-y-2">
+                <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-700">
+                    <input
+                        type="checkbox"
+                        checked={useCustomDestination}
+                        onChange={(e) => {
+                            setUseCustomDestination(e.target.checked);
+                            if (!e.target.checked) setDestinationAddress('');
+                        }}
+                    />
+                    <span>Send to a different address</span>
+                </label>
+
+                {useCustomDestination && (
+                    <Input.Container>
+                        <Input.Field>
+                            <Input.Input
+                                value={destinationAddress}
+                                onChange={(e) => setDestinationAddress(e.target.value)}
+                                placeholder="Recipient address (EQ…)"
+                            />
+                        </Input.Field>
+                        <Input.Caption>Swapped tokens will be sent here instead of your wallet.</Input.Caption>
+                    </Input.Container>
+                )}
+            </div>
+
+            {currentQuote && (
+                <>
+                    <QuoteTimer expiresAt={currentQuote.expiresAt} onRefresh={getSwapQuote} loading={isLoadingQuote} />
+                    <SwapInfo quote={currentQuote} toSymbol={toView.symbol} slippageBps={slippageBps} />
+                </>
+            )}
+
+            {error && <p className="rounded-2xl bg-red-50 p-3 text-center text-sm text-red-500">{error}</p>}
+
+            <div className="flex items-center gap-2">
+                {!currentQuote ? (
+                    <Button
+                        type="button"
+                        fullWidth
+                        onClick={getSwapQuote}
+                        loading={isLoadingQuote}
+                        disabled={isSwapDisabled}
+                    >
+                        {isLoadingQuote ? 'Getting quote…' : 'Get Quote'}
+                    </Button>
+                ) : (
+                    <Button
+                        type="button"
+                        fullWidth
+                        onClick={handleExecuteSwap}
+                        loading={isSwapping}
+                        disabled={isSwapping}
+                    >
+                        {isSwapping ? 'Swapping…' : getSwapButtonText()}
+                    </Button>
+                )}
                 <SwapSettings
                     slippageBps={slippageBps}
                     setSlippageBps={setSlippageBps}
-                    showSettings={showSlippageSettings}
-                    setShowSettings={setShowSlippageSettings}
+                    providerId={providerId}
+                    setProviderId={setSwapProviderId}
                 />
             </div>
-
-            <div className="space-y-4">
-                <TokenInput
-                    amount={fromAmount}
-                    excludeToken={toToken}
-                    label="From"
-                    onAmountChange={handleFromAmountChange}
-                    onTokenSelect={setFromToken}
-                    token={fromToken}
-                />
-
-                <div className="w-full h-1 relative -mt-2">
-                    <button
-                        onClick={swapTokens}
-                        className="p-1 bg-blue-500 hover:bg-blue-600 border-4 border-white rounded-full shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-                    >
-                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
-                            />
-                        </svg>
-                    </button>
-                </div>
-
-                <TokenInput
-                    amount={toAmount}
-                    excludeToken={fromToken}
-                    label="To"
-                    onAmountChange={handleToAmountChange}
-                    onTokenSelect={setToToken}
-                    token={toToken}
-                    className="-mt-2"
-                />
-
-                {/* Destination Address */}
-                <div className="space-y-2">
-                    <label className="flex items-center space-x-2 cursor-pointer">
-                        <input
-                            type="checkbox"
-                            checked={useCustomDestination}
-                            onChange={(e) => {
-                                setUseCustomDestination(e.target.checked);
-                                if (!e.target.checked) {
-                                    setDestinationAddress('');
-                                }
-                            }}
-                            className="w-4 h-4 text-blue-600 border-gray-300 bg-white rounded focus:ring-blue-500"
-                        />
-                        <span className="text-sm text-gray-700">Use different recipient address</span>
-                    </label>
-
-                    {useCustomDestination && (
-                        <div className="space-y-1">
-                            <input
-                                type="text"
-                                value={destinationAddress}
-                                onChange={(e) => setDestinationAddress(e.target.value)}
-                                placeholder="Enter recipient address (EQ...)"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                            />
-                            <p className="text-xs text-gray-500">
-                                Swapped tokens will be sent to this address instead of your wallet
-                            </p>
-                        </div>
-                    )}
-                </div>
-
-                {currentQuote && (
-                    <>
-                        <QuoteTimer
-                            expiresAt={currentQuote.expiresAt}
-                            onRefresh={handleGetQuote}
-                            loading={isLoadingQuote}
-                        />
-
-                        <div className="border-t border-gray-200 my-6" />
-
-                        <div className="space-y-2 text-sm">
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Provider</span>
-                                <span className="font-medium capitalize">{currentQuote.providerId}</span>
-                            </div>
-
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Minimum Received</span>
-                                <span className="font-medium">
-                                    {Number(currentQuote.minReceived).toFixed(6)} {toSymbol}
-                                </span>
-                            </div>
-
-                            {currentQuote.priceImpact && (
-                                <div className="flex justify-between">
-                                    <span className="text-gray-500">Price Impact</span>
-                                    <span className={cn(getPriceImpactColor(currentQuote.priceImpact))}>
-                                        {(currentQuote.priceImpact / 100).toFixed(2)}%
-                                    </span>
-                                </div>
-                            )}
-
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Slippage</span>
-                                <span className="font-medium">{slippageBps / 100}%</span>
-                            </div>
-                        </div>
-                    </>
-                )}
-
-                {error && (
-                    <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-center text-red-600 text-sm">
-                        {error}
-                    </div>
-                )}
-            </div>
-
-            <div className="flex flex-col gap-3 mt-6">
-                {!currentQuote && (
-                    <Button
-                        disabled={isSwapDisabled}
-                        onClick={handleGetQuote}
-                        loading={isLoadingQuote}
-                        className="w-full"
-                    >
-                        {isLoadingQuote ? 'Getting Quote...' : 'Get Quote'}
-                    </Button>
-                )}
-
-                {currentQuote && (
-                    <Button
-                        disabled={!currentQuote || isSwapping}
-                        onClick={handleExecuteSwap}
-                        loading={isSwapping}
-                        className="w-full"
-                    >
-                        {isSwapping ? 'Swapping...' : getSwapButtonText()}
-                    </Button>
-                )}
-            </div>
-        </Card>
+        </div>
     );
 };

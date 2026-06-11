@@ -6,4 +6,4 @@
  *
  */
 
-export * from './token-input';
+export * from './swap-field';

@@ -6,4 +6,4 @@
  *
  */
 
-export * from './token-selector';
+export * from './swap-info';

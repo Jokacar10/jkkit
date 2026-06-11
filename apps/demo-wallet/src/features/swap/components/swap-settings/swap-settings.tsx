@@ -6,100 +6,128 @@
  *
  */
 
-import type { FC } from 'react';
-import { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Settings2 } from 'lucide-react';
+
+import { useSwapProviders } from '../../hooks/use-swap-providers';
 
 import { Button } from '@/core/components/ui/button';
 import { Modal } from '@/core/components/ui/modal';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/core/components/ui/select';
+import { cn } from '@/core/lib/utils';
+
+const PRESET_SLIPPAGES = [50, 100, 300, 500];
 
 interface SwapSettingsProps {
     slippageBps: number;
     setSlippageBps: (slippage: number) => void;
-    showSettings: boolean;
-    setShowSettings: (show: boolean) => void;
+    providerId: string;
+    setProviderId: (providerId: string) => void;
 }
 
-export const SwapSettings: FC<SwapSettingsProps> = ({ slippageBps, setSlippageBps }) => {
+/** Gear button that opens a modal to choose the slippage tolerance and swap provider. */
+export const SwapSettings: React.FC<SwapSettingsProps> = ({
+    slippageBps,
+    setSlippageBps,
+    providerId,
+    setProviderId,
+}) => {
+    const providers = useSwapProviders();
+
     const [open, setOpen] = useState(false);
     const [tempSlippageBps, setTempSlippageBps] = useState(slippageBps);
-
-    const presetSlippages = [50, 100, 300, 500];
+    const [tempProviderId, setTempProviderId] = useState(providerId);
 
     useEffect(() => {
-        setTempSlippageBps(slippageBps);
-    }, [slippageBps]);
+        if (open) {
+            setTempSlippageBps(slippageBps);
+            setTempProviderId(providerId);
+        }
+    }, [open, slippageBps, providerId]);
 
     const handleSave = () => {
         if (tempSlippageBps >= 10 && tempSlippageBps <= 5000) {
             setSlippageBps(tempSlippageBps);
         }
+        if (tempProviderId !== providerId) {
+            setProviderId(tempProviderId);
+        }
         setOpen(false);
     };
 
-    const handleCancel = () => {
-        setTempSlippageBps(slippageBps);
-        setOpen(false);
-    };
+    const selectedProviderName = providers.find((provider) => provider.id === tempProviderId)?.name;
 
     return (
         <>
             <button
-                className="w-8 h-8 p-0 flex items-center justify-center hover:bg-gray-100 rounded-md"
+                type="button"
                 onClick={() => setOpen(true)}
+                aria-label="Swap settings"
+                className="flex size-13 shrink-0 items-center justify-center rounded-2xl bg-gray-100 text-gray-600 transition-colors hover:bg-gray-200"
             >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                    />
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                </svg>
+                <Settings2 className="h-5 w-5" />
             </button>
 
-            <Modal.Container isOpened={open} onOpenChange={(value) => !value && handleCancel()}>
-                <Modal.Header onClose={handleCancel}>
-                    <Modal.Title>Swap Settings</Modal.Title>
+            <Modal.Container isOpened={open} onOpenChange={setOpen}>
+                <Modal.Header onClose={() => setOpen(false)}>
+                    <Modal.Title>Swap settings</Modal.Title>
                 </Modal.Header>
                 <Modal.Body className="gap-6">
                     <div className="space-y-3">
-                        <label className="block text-sm font-medium text-gray-700">Slippage Tolerance</label>
+                        <span className="block text-sm font-medium text-gray-700">Slippage tolerance</span>
                         <div className="grid grid-cols-4 gap-2">
-                            {presetSlippages.map((preset) => (
+                            {PRESET_SLIPPAGES.map((preset) => (
                                 <button
-                                    className={`flex-1 px-3 py-2 text-sm rounded-lg border ${
-                                        tempSlippageBps === preset
-                                            ? 'bg-blue-600 border-blue-600 text-white'
-                                            : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                                    }`}
                                     key={preset}
+                                    type="button"
                                     onClick={() => setTempSlippageBps(preset)}
+                                    className={cn(
+                                        'rounded-xl border-2 py-2 text-sm font-semibold transition-colors',
+                                        tempSlippageBps === preset
+                                            ? 'border-blue-500 bg-blue-50 text-blue-600'
+                                            : 'border-transparent bg-gray-100 text-gray-700 hover:bg-gray-200',
+                                    )}
                                 >
                                     {preset / 100}%
                                 </button>
                             ))}
                         </div>
-                        <p className="text-gray-500 text-xs">
+                        <p className="text-xs text-gray-500">
                             Your transaction will revert if the price changes unfavorably by more than this percentage.
                         </p>
                     </div>
+
+                    {providers.length > 0 && (
+                        <div className="space-y-2">
+                            <span className="block text-sm font-medium text-gray-700">Provider</span>
+                            <Select value={tempProviderId} onValueChange={setTempProviderId}>
+                                <SelectTrigger className="w-full rounded-2xl border-2 border-transparent bg-gray-100 p-3.5 text-base font-medium capitalize text-gray-900 hover:bg-gray-100 focus-visible:border-blue-500 focus-visible:ring-0 data-[state=open]:border-blue-500">
+                                    {selectedProviderName ? (
+                                        <span className="capitalize">{selectedProviderName}</span>
+                                    ) : (
+                                        <span className="text-gray-400">Select provider</span>
+                                    )}
+                                </SelectTrigger>
+                                <SelectContent className="rounded-xl">
+                                    {providers.map((provider) => (
+                                        <SelectItem
+                                            key={provider.id}
+                                            value={provider.id}
+                                            className="text-sm capitalize"
+                                        >
+                                            {provider.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    )}
                 </Modal.Body>
 
                 <Modal.Footer>
-                    <div className="flex gap-2">
-                        <Button className="flex-1" onClick={handleCancel} variant="secondary">
-                            Cancel
-                        </Button>
-                        <Button className="flex-1" onClick={handleSave}>
-                            Save
-                        </Button>
-                    </div>
+                    <Button fullWidth onClick={handleSave}>
+                        Save
+                    </Button>
                 </Modal.Footer>
             </Modal.Container>
         </>
