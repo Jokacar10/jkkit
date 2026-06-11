@@ -9,7 +9,7 @@
 import type { FC } from 'react';
 import { useEffect, useState } from 'react';
 
-import { Button } from '../Button';
+import { Button } from '@/components/Button';
 
 interface QuoteTimerProps {
     expiresAt?: number; // Unix timestamp in seconds

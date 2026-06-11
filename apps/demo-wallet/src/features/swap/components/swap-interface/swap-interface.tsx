@@ -12,11 +12,11 @@ import { useSwap } from '@demo/wallet-core';
 import { useNavigate } from 'react-router-dom';
 import type { SwapToken } from '@ton/walletkit';
 
-import { SwapSettings } from './SwapSettings';
-import { TokenInput } from './TokenInput';
-import { QuoteTimer } from './QuoteTimer';
-import { Button } from '../Button';
+import { SwapSettings } from '../swap-settings';
+import { TokenInput } from '../token-input';
+import { QuoteTimer } from '../quote-timer';
 
+import { Button } from '@/components/Button';
 import { Card } from '@/core/components/ui/card';
 import { cn } from '@/core/lib/utils';
 

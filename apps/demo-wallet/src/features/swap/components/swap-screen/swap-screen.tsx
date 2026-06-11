@@ -11,10 +11,10 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSwap } from '@demo/wallet-core';
 
-import { SwapInterface } from '../components/swap/SwapInterface';
+import { SwapInterface } from '../swap-interface';
+import { USDT_ADDRESS } from '../../constants/swap';
 
 import { Layout } from '@/core/components/shared/layout';
-import { USDT_ADDRESS } from '@/constants/swap';
 
 export const Swap: FC = () => {
     const navigate = useNavigate();

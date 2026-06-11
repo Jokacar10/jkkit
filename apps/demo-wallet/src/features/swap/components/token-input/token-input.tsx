@@ -10,9 +10,9 @@ import type { FC } from 'react';
 import { useJettons, useWallet, formatUnits } from '@demo/wallet-core';
 import type { SwapToken } from '@ton/walletkit';
 
-import { TokenSelector } from './TokenSelector';
-import { Button } from '../Button';
+import { TokenSelector } from '../token-selector';
 
+import { Button } from '@/components/Button';
 import { cn } from '@/core/lib/utils';
 
 interface Props {
