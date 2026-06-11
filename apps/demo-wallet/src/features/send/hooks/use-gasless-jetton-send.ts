@@ -82,33 +82,44 @@ export const useGaslessJettonSend = ({
         return () => gasless.clearGasless();
     }, [gasless.clearGasless]);
 
+    const jettonAddress = jetton?.address;
+    const jettonDecimals = jetton?.decimalsNumber;
+
     // Re-quote (debounced) as the inputs change. The prior quote is invalidated
     // synchronously first, so a stale quote can't be sent during the debounce
-    // window (the Send button gates on `hasQuote`).
+    // window (the Send button gates on `hasQuote`). The store sequences the actual
+    // requests, so a slow earlier response can't overwrite a newer quote.
     useEffect(() => {
         if (!effective) return;
         gasless.clearGaslessQuote();
 
         const inputAmount = parseFloat(amount);
-        const decimals = jetton?.decimalsNumber;
         if (
-            !jetton ||
+            !jettonAddress ||
             !recipient ||
             !isValidAddress(recipient) ||
             !(inputAmount > 0) ||
             !gasless.feeAsset ||
-            !decimals
+            !jettonDecimals
         ) {
             return;
         }
 
-        const transferAmount = parseUnits(amount, decimals).toString();
-        const jettonAddress = jetton.address;
+        const transferAmount = parseUnits(amount, jettonDecimals).toString();
         const id = setTimeout(() => {
             gasless.getGaslessQuote({ recipientAddress: recipient, jettonAddress, transferAmount });
         }, QUOTE_DEBOUNCE_MS);
         return () => clearTimeout(id);
-    }, [effective, recipient, amount, gasless.feeAsset, jetton, gasless.clearGaslessQuote, gasless.getGaslessQuote]);
+    }, [
+        effective,
+        recipient,
+        amount,
+        gasless.feeAsset,
+        jettonAddress,
+        jettonDecimals,
+        gasless.clearGaslessQuote,
+        gasless.getGaslessQuote,
+    ]);
 
     return {
         canUse,

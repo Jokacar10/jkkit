@@ -6,105 +6,61 @@
  *
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isValidAddress } from '@ton/walletkit';
-import type { Jetton, TONTransferRequest } from '@ton/walletkit';
-import { useWallet, useJettons, useWalletKit, useAuth, getTransactionExplorerUrls } from '@demo/wallet-core';
+import type { TONTransferRequest } from '@ton/walletkit';
+import { useAuth, useJettons, useWallet, useWalletKit, getTransactionExplorerUrls } from '@demo/wallet-core';
 import { toast } from 'sonner';
 
 import { useSendToken } from '../../hooks/use-send-token';
+import { useSendTokens } from '../../hooks/use-send-tokens';
+import { TokenSelectButton } from '../token-select-button';
+import { TokenSelectModal } from '../token-select-modal';
+import { AmountField } from '../amount-field';
+import { RecipientField } from '../recipient-field';
+import { GaslessOptions } from '../gasless-options';
+import type { TokenOption } from '../../types';
 
 import { Button } from '@/core/components/ui/button';
-import { AnimatedBalance } from '@/features/dashboard';
-import { WalletSwitcher } from '@/features/wallets';
+import { NewLayout } from '@/core/components/shared/new-layout';
+import { ScreenHeader } from '@/core/components/shared/screen-header';
 import { createComponentLogger } from '@/core/lib/logger';
-import { Layout } from '@/core/components/shared/layout';
-import { Input } from '@/core/components/ui/input';
-import { Card } from '@/core/components/ui/card';
-import { getFormattedJettonInfo } from '@/features/jettons';
-import { useFormattedJetton } from '@/features/jettons';
-import { useJettonInfo } from '@/features/jettons';
 
-// Create logger for send transaction
 const log = createComponentLogger('SendTransaction');
 
-interface SelectedToken {
-    type: 'TON' | 'JETTON';
-    data?: Jetton;
-}
-
-/** One fee-asset option — resolves the jetton ticker (falls back to a short address). */
-const FeeAssetOption: React.FC<{ address: string }> = ({ address }) => {
-    const info = useJettonInfo(address);
-    const label = info?.symbol || `${address.slice(0, 4)}…${address.slice(-4)}`;
-    return <option value={address}>{label}</option>;
-};
-
 export const SendTransaction: React.FC = () => {
+    const navigate = useNavigate();
     const walletKit = useWalletKit();
+    const { currentWallet, address, savedWallets, activeWalletId } = useWallet();
+    const { showFastSend } = useAuth();
+    const { loadUserJettons } = useJettons();
+    const network = savedWallets.find((w) => w.id === activeWalletId)?.network ?? 'testnet';
+
+    const [selectedId, setSelectedId] = useState('TON');
     const [recipient, setRecipient] = useState('');
     const [amount, setAmount] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [selectedToken, setSelectedToken] = useState<SelectedToken>({ type: 'TON' });
-    const [showTokenSelector, setShowTokenSelector] = useState(false);
-    const tokenSelectorRef = useRef<HTMLDivElement>(null);
+    const [showTokenModal, setShowTokenModal] = useState(false);
 
-    const { balance, currentWallet, address, savedWallets, activeWalletId, switchWallet, removeWallet, renameWallet } =
-        useWallet();
-    const { showFastSend } = useAuth();
-    const network = savedWallets.find((w) => w.id === activeWalletId)?.network ?? 'testnet';
-    const { userJettons, isLoadingJettons, loadUserJettons, formatJettonAmount } = useJettons();
-
-    const selectedJettonInfo = useFormattedJetton(selectedToken?.data);
-    const getJettonInfo = (jetton: Jetton) => getFormattedJettonInfo(formatJettonAmount)(jetton);
-
-    const navigate = useNavigate();
+    const options = useSendTokens();
+    const selected = options.find((option) => option.id === selectedId) ?? options[0];
 
     const sender = useSendToken({
         wallet: currentWallet,
         walletKit,
-        tokenType: selectedToken.type,
-        jetton: selectedToken.data,
+        tokenType: selected.token.type,
+        jetton: selected.token.data,
         recipient,
         amount,
     });
     const gasless = sender.gasless;
-    const canUseGasless = gasless.canUse;
     const effectiveGasless = gasless.effective;
-    const gaslessFeeFormatted = gasless.feeFormatted;
 
     useEffect(() => {
         loadUserJettons();
     }, [loadUserJettons]);
-
-    useEffect(() => {
-        const handleClickOutside = (e: MouseEvent) => {
-            if (showTokenSelector && tokenSelectorRef.current && !tokenSelectorRef.current.contains(e.target as Node)) {
-                setShowTokenSelector(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [showTokenSelector]);
-
-    const formatTonAmount = (amountStr: string): string => {
-        const tonAmount = parseFloat(amountStr || '0') / 1000000000;
-        return tonAmount.toFixed(4);
-    };
-
-    const getCurrentTokenBalance = (): string => {
-        if (selectedToken.type === 'TON') {
-            return formatTonAmount(balance || '0');
-        }
-        return selectedJettonInfo?.balance || '0';
-    };
-
-    const getCurrentTokenSymbol = (): string => {
-        if (selectedToken.type === 'TON') return 'TON';
-        return selectedJettonInfo?.symbol || '';
-    };
 
     // Success toast with explorer links — for flows that return a broadcast hash
     // immediately (gasless send, fast send).
@@ -124,6 +80,17 @@ export const SendTransaction: React.FC = () => {
         });
     };
 
+    const handleSelectToken = (option: TokenOption) => {
+        setSelectedId(option.id);
+        setAmount('');
+        setError('');
+        setShowTokenModal(false);
+    };
+
+    const handleSendToSelf = () => {
+        if (address) setRecipient(address);
+    };
+
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
@@ -135,27 +102,22 @@ export const SendTransaction: React.FC = () => {
             }
 
             const inputAmount = parseFloat(amount);
-            if (inputAmount <= 0) {
+            if (!(inputAmount > 0)) {
                 throw new Error('Amount must be greater than 0');
             }
-
-            const currentBalance = parseFloat(getCurrentTokenBalance());
-            if (inputAmount > currentBalance) {
+            if (inputAmount > selected.balance) {
                 throw new Error('Insufficient balance');
             }
 
-            // Build + submit, dispatching gasless vs regular inside the hook.
+            // Build + submit, dispatching gasless vs regular inside the hook. Gasless
+            // relays immediately and returns a hash → toast; the regular flow goes
+            // through the preview queue.
             const result = await sender.send();
-
-            // Gasless relays immediately and returns a hash → toast with explorer
-            // links; the regular flow goes through the preview queue.
             if (result?.normalizedHash) {
                 notifySent(result.normalizedHash);
                 navigate('/wallet');
             } else {
-                navigate('/wallet', {
-                    state: { message: `${getCurrentTokenSymbol()} sent successfully!` },
-                });
+                navigate('/wallet', { state: { message: `${selected.symbol} sent successfully!` } });
             }
         } catch (err) {
             log.error('Send transaction error:', err);
@@ -163,20 +125,6 @@ export const SendTransaction: React.FC = () => {
         } finally {
             setIsLoading(false);
         }
-    };
-
-    const handleMaxAmount = () => {
-        const currentBalance = parseFloat(getCurrentTokenBalance());
-        if (selectedToken.type === 'TON') {
-            const maxAmount = currentBalance - 0.01;
-            if (maxAmount > 0) setAmount(maxAmount.toString());
-        } else if (currentBalance > 0) {
-            setAmount(currentBalance.toString());
-        }
-    };
-
-    const handleSendToSelf = () => {
-        if (address) setRecipient(address);
     };
 
     const handleFastSend = async () => {
@@ -191,20 +139,17 @@ export const SendTransaction: React.FC = () => {
         setIsLoading(true);
         try {
             let result;
-            if (selectedToken.type === 'TON') {
-                const tonTransferParams: TONTransferRequest = {
-                    recipientAddress: recipientAddress,
-                    transferAmount: '1000000',
-                };
-                const tx = await currentWallet.createTransferTonTransaction(tonTransferParams);
+            if (selected.token.type === 'TON') {
+                const params: TONTransferRequest = { recipientAddress, transferAmount: '1000000' };
+                const tx = await currentWallet.createTransferTonTransaction(params);
                 result = await currentWallet.sendTransaction(tx);
-            } else if (selectedToken.data) {
-                const jettonTransaction = await currentWallet.createTransferJettonTransaction({
-                    recipientAddress: recipientAddress,
-                    jettonAddress: selectedToken.data.address,
+            } else if (selected.token.data) {
+                const tx = await currentWallet.createTransferJettonTransaction({
+                    recipientAddress,
+                    jettonAddress: selected.token.data.address,
                     transferAmount: '1',
                 });
-                result = await currentWallet.sendTransaction(jettonTransaction);
+                result = await currentWallet.sendTransaction(tx);
             }
             if (result?.normalizedHash) {
                 notifySent(result.normalizedHash);
@@ -217,417 +162,78 @@ export const SendTransaction: React.FC = () => {
         }
     };
 
-    const handleSwitchWallet = async (walletId: string) => {
-        try {
-            await switchWallet(walletId);
-        } catch (err) {
-            log.error('Failed to switch wallet:', err);
-        }
-    };
-
-    const handleRemoveWallet = (walletId: string) => {
-        try {
-            removeWallet(walletId);
-        } catch (err) {
-            log.error('Failed to remove wallet:', err);
-        }
-    };
-
-    const handleRenameWallet = (walletId: string, newName: string) => {
-        try {
-            renameWallet(walletId, newName);
-        } catch (err) {
-            log.error('Failed to rename wallet:', err);
-        }
-    };
-
-    const balanceForAnimated = selectedToken.type === 'TON' ? balance : undefined;
-    const isSendDisabled = sender.isDisabled;
+    const recipientError = recipient.length > 0 && !isValidAddress(recipient) ? 'Invalid address' : '';
+    const isSendDisabled = sender.isDisabled || Boolean(recipientError);
     const isSendFastDisabled = !currentWallet || !address;
 
     return (
-        <Layout title={`Send ${getCurrentTokenSymbol()}`} showLogout onBack={() => navigate('/wallet')}>
-            <div className="space-y-4">
-                <Card compact>
-                    <div className="space-y-3">
-                        {/* Row 1: Wallet selector */}
-                        <WalletSwitcher
-                            savedWallets={savedWallets}
-                            activeWalletId={activeWalletId}
-                            onSwitchWallet={handleSwitchWallet}
-                            onRemoveWallet={handleRemoveWallet}
-                            onRenameWallet={handleRenameWallet}
-                            compact
-                        />
+        <NewLayout header={<ScreenHeader title="Send" onBack={() => navigate('/wallet')} />}>
+            {!currentWallet ? (
+                <div className="py-10 text-center">
+                    <p className="mb-3 text-sm text-gray-500">Loading wallet…</p>
+                    <Button variant="secondary" size="sm" onClick={() => navigate('/wallet')}>
+                        Back to dashboard
+                    </Button>
+                </div>
+            ) : (
+                <form onSubmit={handleSend} className="space-y-6">
+                    <TokenSelectButton token={selected} onClick={() => setShowTokenModal(true)} />
 
-                        {!currentWallet ? (
-                            <div className="py-4 text-center">
-                                <p className="text-sm text-gray-600 mb-2">Loading wallet...</p>
-                                <Button variant="secondary" size="sm" onClick={() => navigate('/wallet')}>
-                                    Back to wallet
-                                </Button>
-                            </div>
-                        ) : (
-                            <>
-                                {/* Row 2: Token selector + balance */}
-                                <div ref={tokenSelectorRef} className="relative">
-                                    <div className="flex items-center justify-between gap-2">
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowTokenSelector(!showTokenSelector)}
-                                            className="flex items-center gap-2 min-w-0 flex-1 py-1 rounded hover:bg-gray-50 transition-colors"
-                                        >
-                                            <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden bg-blue-100">
-                                                {selectedToken.type === 'TON' ? (
-                                                    <span className="text-sm font-bold text-blue-600">T</span>
-                                                ) : selectedJettonInfo ? (
-                                                    selectedJettonInfo.image ? (
-                                                        <img
-                                                            src={selectedJettonInfo.image}
-                                                            alt=""
-                                                            className="w-6 h-6 rounded-full object-cover"
-                                                            onError={(e) => {
-                                                                const target = e.target as HTMLImageElement;
-                                                                target.style.display = 'none';
-                                                                const parent = target.parentElement;
-                                                                if (parent) {
-                                                                    parent.innerHTML =
-                                                                        selectedJettonInfo?.symbol
-                                                                            ?.slice(0, 2)
-                                                                            ?.toUpperCase() || '?';
-                                                                    parent.className =
-                                                                        'w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 text-xs font-bold text-white';
-                                                                }
-                                                            }}
-                                                        />
-                                                    ) : (
-                                                        <span className="text-xs font-bold text-white bg-gradient-to-br from-blue-500 to-purple-600 rounded-full w-6 h-6 flex items-center justify-center">
-                                                            {selectedJettonInfo.symbol?.slice(0, 2).toUpperCase() ||
-                                                                '?'}
-                                                        </span>
-                                                    )
-                                                ) : (
-                                                    <span className="text-xs font-bold text-gray-600">?</span>
-                                                )}
-                                            </div>
-                                            <span className="text-sm font-medium text-gray-900 truncate">
-                                                {selectedToken.type === 'TON'
-                                                    ? 'TON'
-                                                    : selectedJettonInfo
-                                                      ? selectedJettonInfo.name || selectedJettonInfo.symbol
-                                                      : '?'}
-                                            </span>
-                                            <svg
-                                                className={`w-4 h-4 text-gray-400 flex-shrink-0 transition-transform ${
-                                                    showTokenSelector ? 'rotate-180' : ''
-                                                }`}
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M19 9l-7 7-7-7"
-                                                />
-                                            </svg>
-                                        </button>
-                                        <p className="text-xl font-bold text-gray-900 truncate">
-                                            {selectedToken.type === 'TON' ? (
-                                                <AnimatedBalance balance={balanceForAnimated} />
-                                            ) : (
-                                                <>
-                                                    {getCurrentTokenBalance()} {getCurrentTokenSymbol()}
-                                                </>
-                                            )}
-                                        </p>
-                                    </div>
+                    <AmountField value={amount} onChange={setAmount} token={selected} />
 
-                                    {/* Absolute dropdown - does not affect layout */}
-                                    {showTokenSelector && (
-                                        <div className="absolute left-0 right-0 top-full mt-1 z-20 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    setSelectedToken({ type: 'TON' });
-                                                    setShowTokenSelector(false);
-                                                    setAmount('');
-                                                }}
-                                                className={`w-full flex items-center gap-3 px-3 py-2.5 text-left ${
-                                                    selectedToken.type === 'TON' ? 'bg-blue-50' : 'hover:bg-gray-50'
-                                                }`}
-                                            >
-                                                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                                    <span className="text-sm font-bold text-blue-600">T</span>
-                                                </div>
-                                                <div className="text-left min-w-0">
-                                                    <p className="text-sm font-medium text-gray-900">TON</p>
-                                                    <p className="text-xs text-gray-500">
-                                                        {formatTonAmount(balance || '0')} TON
-                                                    </p>
-                                                </div>
-                                            </button>
-                                            {userJettons.map((jetton) => {
-                                                const jettonInfo = getJettonInfo(jetton);
-                                                const isSelected =
-                                                    selectedToken.type === 'JETTON' &&
-                                                    selectedToken.data?.address === jetton.address;
-                                                return (
-                                                    <button
-                                                        key={jetton.address}
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setSelectedToken({ type: 'JETTON', data: jetton });
-                                                            setShowTokenSelector(false);
-                                                            setAmount('');
-                                                        }}
-                                                        className={`w-full flex items-center gap-3 px-3 py-2.5 text-left ${
-                                                            isSelected ? 'bg-blue-50' : 'hover:bg-gray-50'
-                                                        }`}
-                                                    >
-                                                        <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 bg-gray-100">
-                                                            {jettonInfo.image ? (
-                                                                <img
-                                                                    src={jettonInfo.image}
-                                                                    alt=""
-                                                                    className="w-6 h-6 rounded-full object-cover"
-                                                                    onError={(e) => {
-                                                                        const target = e.target as HTMLImageElement;
-                                                                        target.style.display = 'none';
-                                                                        const parent = target.parentElement;
-                                                                        if (parent) {
-                                                                            parent.innerHTML =
-                                                                                jettonInfo.symbol
-                                                                                    ?.slice(0, 2)
-                                                                                    ?.toUpperCase() || '?';
-                                                                            parent.className =
-                                                                                'w-8 h-8 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 bg-gradient-to-br from-blue-500 to-purple-600 text-xs font-bold text-white';
-                                                                        }
-                                                                    }}
-                                                                />
-                                                            ) : (
-                                                                <span className="text-xs font-bold text-white bg-gradient-to-br from-blue-500 to-purple-600 rounded-full w-6 h-6 flex items-center justify-center">
-                                                                    {jettonInfo.symbol?.slice(0, 2).toUpperCase() ||
-                                                                        '?'}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                        <div className="text-left min-w-0 flex-1">
-                                                            <p className="text-sm font-medium text-gray-900 truncate">
-                                                                {jettonInfo.name || jettonInfo.symbol}
-                                                            </p>
-                                                            <p className="text-xs text-gray-500">
-                                                                {jettonInfo.balance} {jettonInfo.symbol}
-                                                            </p>
-                                                        </div>
-                                                    </button>
-                                                );
-                                            })}
-                                            {userJettons.length === 0 && !isLoadingJettons && (
-                                                <div className="py-4 text-center text-gray-500 text-sm">
-                                                    No jettons found
-                                                </div>
-                                            )}
-                                            {isLoadingJettons && (
-                                                <div className="py-4 text-center text-gray-500 text-sm">
-                                                    Loading tokens...
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
+                    <RecipientField
+                        value={recipient}
+                        onChange={setRecipient}
+                        error={recipientError}
+                        onUseMyAddress={address ? handleSendToSelf : undefined}
+                    />
 
-                                <form onSubmit={handleSend} className="space-y-3">
-                                    {/* Row 3: Recipient */}
-                                    <div>
-                                        <div className="flex items-center justify-between mb-1">
-                                            <label className="block text-sm font-medium text-gray-700">
-                                                Recipient Address
-                                            </label>
-                                            {address && (
-                                                <button
-                                                    type="button"
-                                                    onClick={handleSendToSelf}
-                                                    className="text-xs text-blue-600 hover:text-blue-800 underline"
-                                                    data-testid="use-my-address"
-                                                >
-                                                    Use my address
-                                                </button>
-                                            )}
-                                        </div>
-                                        <Input
-                                            value={recipient}
-                                            onChange={(e) => setRecipient(e.target.value)}
-                                            placeholder="EQxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                                            required
-                                            data-testid="recipient-input"
-                                        />
-                                    </div>
+                    <GaslessOptions gasless={gasless} />
 
-                                    {/* Row 4: Amount + Max */}
-                                    <div>
-                                        <div className="flex items-center justify-between mb-1">
-                                            <label className="block text-sm font-medium text-gray-700">
-                                                Amount ({getCurrentTokenSymbol()})
-                                            </label>
-                                            <Button
-                                                type="button"
-                                                variant="secondary"
-                                                size="sm"
-                                                onClick={handleMaxAmount}
-                                            >
-                                                Max
-                                            </Button>
-                                        </div>
-                                        <Input
-                                            type="number"
-                                            step={selectedToken.type === 'TON' ? '0.000000001' : '0.000000001'}
-                                            min="0"
-                                            value={amount}
-                                            onChange={(e) => setAmount(e.target.value)}
-                                            placeholder="0.0000"
-                                            required
-                                            data-testid="amount-input"
-                                        />
-                                    </div>
+                    {error && <p className="text-center text-sm text-red-500">{error}</p>}
 
-                                    {/* Transaction summary */}
-                                    {recipient && amount && parseFloat(amount) > 0 && (
-                                        <div className="bg-gray-50 rounded-md p-3 space-y-1 text-sm">
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-500">To:</span>
-                                                <span className="font-mono">
-                                                    {recipient.slice(0, 6)}...{recipient.slice(-6)}
-                                                </span>
-                                            </div>
-                                            <div className="flex justify-between">
-                                                <span className="text-gray-500">Amount:</span>
-                                                <span>
-                                                    {amount} {getCurrentTokenSymbol()}
-                                                </span>
-                                            </div>
-                                            <div className="flex justify-between font-medium pt-1">
-                                                <span>You'll send:</span>
-                                                <span>
-                                                    {amount} {getCurrentTokenSymbol()}
-                                                </span>
-                                            </div>
-                                            {selectedToken.type === 'JETTON' && !effectiveGasless && (
-                                                <p className="text-xs text-blue-700 pt-1">
-                                                    TON fees will be deducted separately.
-                                                </p>
-                                            )}
-                                        </div>
-                                    )}
-
-                                    {/* Gasless: pay the fee in a jetton (jettons only, SignMessage wallets) */}
-                                    {canUseGasless && (
-                                        <div className="space-y-2 rounded-md border border-gray-200 p-3">
-                                            <label className="flex items-center gap-2 text-sm text-gray-700">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={gasless.enabled}
-                                                    onChange={(e) => gasless.setEnabled(e.target.checked)}
-                                                    data-testid="gasless-toggle"
-                                                />
-                                                <span>Gasless — pay the fee in a jetton</span>
-                                            </label>
-
-                                            {effectiveGasless && (
-                                                <>
-                                                    <div>
-                                                        <label className="block text-xs text-gray-500 mb-1">
-                                                            Fee asset
-                                                        </label>
-                                                        <select
-                                                            value={gasless.feeAsset ?? ''}
-                                                            onChange={(e) => gasless.setFeeAsset(e.target.value)}
-                                                            disabled={gasless.supportedAssets.length === 0}
-                                                            className="w-full border border-gray-200 rounded-md px-2 py-1.5 text-sm"
-                                                            data-testid="gasless-fee-asset"
-                                                        >
-                                                            {!gasless.feeAsset && (
-                                                                <option value="" disabled>
-                                                                    Select
-                                                                </option>
-                                                            )}
-                                                            {gasless.supportedAssets.map((asset) => (
-                                                                <FeeAssetOption
-                                                                    key={asset.address}
-                                                                    address={asset.address}
-                                                                />
-                                                            ))}
-                                                        </select>
-                                                    </div>
-                                                    <div className="flex justify-between text-sm">
-                                                        <span className="text-gray-500">Gas fee:</span>
-                                                        <span>
-                                                            {gasless.error
-                                                                ? '—'
-                                                                : gasless.isQuoting
-                                                                  ? 'Calculating…'
-                                                                  : (gaslessFeeFormatted ?? '—')}
-                                                        </span>
-                                                    </div>
-                                                    {gasless.error && (
-                                                        <p className="text-xs text-red-600" data-testid="gasless-error">
-                                                            {gasless.error}
-                                                        </p>
-                                                    )}
-                                                </>
-                                            )}
-                                        </div>
-                                    )}
-
-                                    {error && <div className="text-red-600 text-sm text-center">{error}</div>}
-
-                                    {/* Send buttons */}
-                                    <div className="flex gap-2">
-                                        {showFastSend && !effectiveGasless && (
-                                            <Button
-                                                type="button"
-                                                variant="secondary"
-                                                onClick={handleFastSend}
-                                                loading={isLoading}
-                                                disabled={isSendFastDisabled}
-                                                className="flex-1"
-                                                data-testid="send-fast"
-                                            >
-                                                Send Fast
-                                            </Button>
-                                        )}
-                                        <Button
-                                            type="submit"
-                                            loading={isLoading || gasless.isSending}
-                                            disabled={isSendDisabled}
-                                            className="flex-1"
-                                            data-testid="send-submit"
-                                        >
-                                            {effectiveGasless
-                                                ? gasless.isSending
-                                                    ? 'Sending…'
-                                                    : gasless.isQuoting
-                                                      ? 'Quoting…'
-                                                      : 'Send Gasless'
-                                                : isLoading
-                                                  ? `Sending...`
-                                                  : `Send ${getCurrentTokenSymbol()}`}
-                                        </Button>
-                                    </div>
-                                </form>
-                            </>
+                    <div className="space-y-2">
+                        <Button
+                            type="submit"
+                            fullWidth
+                            loading={isLoading || gasless.isSending}
+                            disabled={isSendDisabled}
+                            data-testid="send-submit"
+                        >
+                            {effectiveGasless
+                                ? gasless.isSending
+                                    ? 'Sending…'
+                                    : gasless.isQuoting
+                                      ? 'Quoting…'
+                                      : 'Send Gasless'
+                                : isLoading
+                                  ? 'Sending…'
+                                  : `Send ${selected.symbol}`}
+                        </Button>
+                        {showFastSend && !effectiveGasless && (
+                            <Button
+                                type="button"
+                                variant="secondary"
+                                fullWidth
+                                onClick={handleFastSend}
+                                loading={isLoading}
+                                disabled={isSendFastDisabled}
+                                data-testid="send-fast"
+                            >
+                                Send Fast
+                            </Button>
                         )}
                     </div>
-                </Card>
+                </form>
+            )}
 
-                {/* Warning - compact */}
-                <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3">
-                    <p className="text-sm text-yellow-800">
-                        Double-check the recipient address. Blockchain transactions are irreversible.
-                    </p>
-                </div>
-            </div>
-        </Layout>
+            <TokenSelectModal
+                isOpened={showTokenModal}
+                onOpenChange={setShowTokenModal}
+                options={options}
+                selectedId={selectedId}
+                onSelect={handleSelectToken}
+            />
+        </NewLayout>
     );
 };
