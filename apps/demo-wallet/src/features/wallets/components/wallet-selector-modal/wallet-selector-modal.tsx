@@ -11,7 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { useWallet } from '@demo/wallet-core';
 
-import { WalletRow } from './WalletRow';
+import { WalletRow } from '../wallet-row';
 
 import { Modal } from '@/core/components/ui/modal';
 import { AddWalletModal, WALLET_SETUP_ROUTE } from '@/features/wallet-setup';

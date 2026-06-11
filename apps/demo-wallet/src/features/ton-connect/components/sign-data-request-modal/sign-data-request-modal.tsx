@@ -14,7 +14,7 @@ import { useAuth } from '@demo/wallet-core';
 import { DAppInfo } from '../dapp-info';
 
 import { Button } from '@/components/Button';
-import { WalletPreview } from '@/components/WalletPreview';
+import { WalletPreview } from '@/features/wallets';
 import { HoldToSignButton } from '@/components/HoldToSignButton';
 import { createComponentLogger } from '@/core/lib/logger';
 import { Card } from '@/core/components/ui/card';

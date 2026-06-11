@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 import { DAppInfo } from '../dapp-info';
 
 import { Button } from '@/components/Button';
-import { WalletPreview } from '@/components/WalletPreview';
+import { WalletPreview } from '@/features/wallets';
 import { createComponentLogger } from '@/core/lib/logger';
 
 // Create logger for connect request modal

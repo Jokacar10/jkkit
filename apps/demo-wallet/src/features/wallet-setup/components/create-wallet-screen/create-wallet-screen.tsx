@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 
 import { CenteredScreen } from '@/core/components/shared/centered-screen';
 import { Button } from '@/core/components/ui/button';
-import { NetworkSelector } from '@/components/NetworkSelector';
+import { NetworkSelector } from '@/features/wallets';
 import { useTonWallet } from '@/hooks';
 
 /** Dedicated "Recovery phrase" screen for creating a new wallet. */

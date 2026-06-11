@@ -15,12 +15,7 @@ export { DashboardActionButton } from './DashboardActionButton';
 export { DashboardActions } from './DashboardActions';
 export { DashboardAssetRow, DashboardAssetRowSkeleton } from './DashboardAssetRow';
 export { DashboardAssets } from './DashboardAssets';
-export { WalletSelectorModal } from './WalletSelectorModal';
-export { WalletRow } from './WalletRow';
-export { ReceiveModal } from './ReceiveModal';
-export { MnemonicDisplay } from './MnemonicDisplay';
-export { NetworkSelector } from './NetworkSelector';
-export { WalletPreview } from './WalletPreview';
-export { WalletSwitcher } from './WalletSwitcher';
+export { WalletSelectorModal } from '@/features/wallets';
+export { ReceiveModal } from '@/features/wallets';
 
 // Transaction components

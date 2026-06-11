@@ -13,7 +13,7 @@ import { useAuth, useWallet } from '@demo/wallet-core';
 
 import { ToggleRow } from '../toggle-row';
 
-import { MnemonicDisplay } from '@/components/MnemonicDisplay';
+import { MnemonicDisplay } from '@/features/wallets';
 import { createComponentLogger } from '@/core/lib/logger';
 import { Modal } from '@/core/components/ui/modal';
 import { SettingsIcon } from '@/core/components/ui/icons';

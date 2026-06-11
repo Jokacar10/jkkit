@@ -15,14 +15,14 @@ import { CenteredScreen } from '@/core/components/shared/centered-screen';
 import { Button } from '@/core/components/ui/button';
 import { Segmented } from '@/core/components/ui/segmented';
 import type { SegmentedOption } from '@/core/components/ui/segmented';
-import { NetworkSelector } from '@/components/NetworkSelector';
+import { NetworkSelector } from '@/features/wallets';
 import { useTonWallet } from '@/hooks';
 import {
     applyMnemonicPaste,
     evaluateBip39Slots,
     extractMnemonicWordsFromPaste,
     isImportableBip39,
-} from '@/utils/bip39English';
+} from '@/features/wallets';
 
 type WalletVersion = 'v5r1' | 'v4r2';
 type WalletInterface = 'mnemonic' | 'signer';

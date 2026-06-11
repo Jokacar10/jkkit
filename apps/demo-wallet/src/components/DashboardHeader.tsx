@@ -10,8 +10,7 @@ import React, { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { useWallet } from '@demo/wallet-core';
 
-import { WalletSelectorModal } from './WalletSelectorModal';
-
+import { WalletSelectorModal } from '@/features/wallets';
 import { SettingsDropdown } from '@/features/settings';
 import { ConnectDappModal } from '@/features/ton-connect';
 import { ScanIcon } from '@/core/components/ui/icons';

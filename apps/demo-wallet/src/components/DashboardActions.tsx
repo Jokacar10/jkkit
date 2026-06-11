@@ -10,8 +10,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { DashboardActionButton } from './DashboardActionButton';
-import { ReceiveModal } from './ReceiveModal';
 
+import { ReceiveModal } from '@/features/wallets';
 import { SwapIcon, ReceiveIcon, SendIcon } from '@/core/components/ui/icons';
 
 export const DashboardActions: React.FC = () => {
