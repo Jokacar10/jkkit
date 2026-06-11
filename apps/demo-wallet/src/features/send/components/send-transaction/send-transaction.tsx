@@ -13,8 +13,9 @@ import type { Jetton, TONTransferRequest } from '@ton/walletkit';
 import { useWallet, useJettons, useWalletKit, useAuth, getTransactionExplorerUrls } from '@demo/wallet-core';
 import { toast } from 'sonner';
 
-import { Button, AnimatedBalance, WalletSwitcher } from '../components';
+import { useSendToken } from '../../hooks/use-send-token';
 
+import { Button, AnimatedBalance, WalletSwitcher } from '@/components';
 import { createComponentLogger } from '@/core/lib/logger';
 import { Layout } from '@/core/components/shared/layout';
 import { Input } from '@/core/components/ui/input';
@@ -22,7 +23,6 @@ import { Card } from '@/core/components/ui/card';
 import { getFormattedJettonInfo } from '@/features/jettons';
 import { useFormattedJetton } from '@/features/jettons';
 import { useJettonInfo } from '@/features/jettons';
-import { useSendToken } from '@/hooks/useSendToken';
 
 // Create logger for send transaction
 const log = createComponentLogger('SendTransaction');

@@ -10,9 +10,10 @@ import { useCallback } from 'react';
 import { toast } from 'sonner';
 import type { ITonWalletKit, Jetton, SendTransactionResponse, Wallet } from '@ton/walletkit';
 
+import { useGaslessJettonSend } from './use-gasless-jetton-send';
+import type { UseGaslessJettonSendResult } from './use-gasless-jetton-send';
+
 import { parseUnits } from '@/core/utils/units';
-import { useGaslessJettonSend } from '@/hooks/useGaslessJettonSend';
-import type { UseGaslessJettonSendResult } from '@/hooks/useGaslessJettonSend';
 
 const TON_DECIMALS = 9;
 
