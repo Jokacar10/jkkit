@@ -11,9 +11,9 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSwap } from '@demo/wallet-core';
 
-import { Layout } from '../components';
 import { SwapInterface } from '../components/swap/SwapInterface';
 
+import { Layout } from '@/core/components/shared/layout';
 import { USDT_ADDRESS } from '@/constants/swap';
 
 export const Swap: FC = () => {

@@ -11,9 +11,11 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStaking, useWallet } from '@demo/wallet-core';
 
-import { Layout, Button } from '../components';
+import { Button } from '../components';
 import { StakingInterface } from '../components/staking/StakingInterface';
 import { StakingInfo } from '../components/staking/StakingInfo';
+
+import { Layout } from '@/core/components/shared/layout';
 
 export const Staking: FC = () => {
     const navigate = useNavigate();

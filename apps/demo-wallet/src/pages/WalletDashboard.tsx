@@ -16,7 +16,6 @@ import {
 } from '@demo/wallet-core';
 
 import {
-    NewLayout,
     DashboardHeader,
     BalanceTotal,
     DashboardActions,
@@ -28,6 +27,7 @@ import {
     NftsCard,
 } from '../components';
 
+import { NewLayout } from '@/core/components/shared/new-layout';
 import { usePasteHandler } from '@/core/hooks/use-paste-handler';
 
 export const WalletDashboard: React.FC = () => {

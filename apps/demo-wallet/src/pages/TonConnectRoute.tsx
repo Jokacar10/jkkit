@@ -10,9 +10,10 @@ import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTonConnect } from '@demo/wallet-core';
 
-import { Layout } from '../components';
 import { LoaderCircle } from '../components/LoaderCircle';
 import { createComponentLogger } from '../utils/logger';
+
+import { Layout } from '@/core/components/shared/layout';
 
 const log = createComponentLogger('TonConnectRoute');
 
