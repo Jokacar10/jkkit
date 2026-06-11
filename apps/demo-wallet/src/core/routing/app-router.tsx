@@ -10,8 +10,9 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useWalletStore, useWallet } from '@demo/wallet-core';
 
-import { ProtectedRoute } from './ProtectedRoute';
-import { LoaderCircle } from './LoaderCircle';
+import { ProtectedRoute } from './protected-route';
+
+import { LoaderCircle } from '@/components/LoaderCircle';
 import {
     WalletDashboard,
     SendTransaction,
@@ -20,8 +21,7 @@ import {
     Swap,
     Staking,
     TonConnectRoute,
-} from '../pages';
-
+} from '@/pages';
 import { SetupPasswordScreen, UnlockScreen } from '@/features/auth';
 import { LedgerScreen } from '@/features/ledger';
 import { WelcomeScreen, CreateWalletScreen, ImportWalletScreen } from '@/features/wallet-setup';

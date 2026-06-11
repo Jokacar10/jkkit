@@ -10,8 +10,7 @@ import TransportWebHID from '@ledgerhq/hw-transport-webhid';
 import { WalletProvider } from '@demo/wallet-core';
 import type { WalletKitConfig } from '@demo/wallet-core';
 
-import { AppRouter } from './components';
-
+import { AppRouter } from '@/core/routing';
 import { Toaster } from '@/core/components/ui/sonner';
 import {
     DISABLE_AUTO_EMULATION,
