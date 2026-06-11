@@ -27,7 +27,8 @@ import {
     SignMessageRequestModal,
     NftsCard,
 } from '../components';
-import { usePasteHandler } from '../hooks/usePasteHandler';
+
+import { usePasteHandler } from '@/core/hooks/use-paste-handler';
 
 export const WalletDashboard: React.FC = () => {
     const { getAvailableWallets, savedWallets, getActiveWallet } = useWallet();

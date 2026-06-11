@@ -15,7 +15,7 @@ import { Drawer, DrawerContent, DrawerTitle } from '../drawer';
 
 import { Button } from '@/components/Button';
 import { cn } from '@/lib/utils';
-import { useIsMobile } from '@/hooks/useMediaQuery';
+import { useIsMobile } from '@/core/hooks/use-media-query';
 
 export interface ModalContainerProps extends ComponentProps<'div'> {
     isOpened: boolean;

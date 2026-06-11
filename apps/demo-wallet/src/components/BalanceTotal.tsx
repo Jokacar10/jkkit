@@ -11,7 +11,7 @@ import { Copy } from 'lucide-react';
 import { toast } from 'sonner';
 import { useWallet, useJettons, useRates } from '@demo/wallet-core';
 
-import { useCountUp } from '@/hooks/useCountUp';
+import { useCountUp } from '@/core/hooks/use-count-up';
 import { findRate, formatUsdParts, shortenAddress, toDecimal } from '@/utils';
 
 const TON_DECIMALS = 9;
