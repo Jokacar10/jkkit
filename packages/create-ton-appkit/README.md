@@ -5,15 +5,15 @@ Scaffold a TON AppKit project in seconds.
 ## Usage
 
 ```bash
-pnpm create appkit
+pnpm create ton-appkit
 ```
 
 Or with any other package manager:
 
 ```bash
-npm create appkit
+npm create ton-appkit
 npx create-ton-appkit
-yarn create appkit
+yarn create ton-appkit
 bunx create-ton-appkit
 ```
 
@@ -22,7 +22,7 @@ bunx create-ton-appkit
 Pass all options as flags to skip prompts entirely:
 
 ```bash
-pnpm create appkit my-app --template react --app-url https://example.com -y
+pnpm create ton-appkit my-app --template react --app-url https://example.com -y
 ```
 
 ## Options
