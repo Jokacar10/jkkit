@@ -303,8 +303,8 @@ export interface StakingSlice {
     setStakingProviderId: (providerId: string) => void;
     setUnstakeMode: (mode: UnstakeModes) => void;
     getStakingQuote: (params: Omit<StakingQuoteParams, 'network'>) => Promise<void>;
-    stake: (params: Omit<StakeParams, 'userAddress'>) => Promise<void>;
-    unstake: (params: Omit<StakeParams, 'userAddress'>) => Promise<void>;
+    stake: (params: Omit<StakeParams, 'userAddress'>) => Promise<boolean>;
+    unstake: (params: Omit<StakeParams, 'userAddress'>) => Promise<boolean>;
     loadStakingData: (userAddress: string) => Promise<void>;
     clearStaking: () => void;
     validateStakingInputs: () => string | null;
@@ -354,7 +354,7 @@ export interface SwapSlice {
     setSwapProviderId: (providerId: string) => void;
     swapTokens: () => void;
     getSwapQuote: () => Promise<void>;
-    executeSwap: () => Promise<void>;
+    executeSwap: () => Promise<boolean>;
     clearSwap: () => void;
     validateSwapInputs: () => string | null;
 }

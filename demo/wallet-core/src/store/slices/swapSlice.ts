@@ -15,6 +15,9 @@ import type { SetState, SwapSliceCreator } from '../../types/store';
 
 const log = createComponentLogger('SwapSlice');
 
+/** GRAM kept aside on a native-coin swap so the transaction still has gas to pay for itself (matches the Max button). */
+const NATIVE_GAS_RESERVE = '0.1';
+
 export const createSwapSlice: SwapSliceCreator = (set: SetState, get) => ({
     swap: {
         fromToken: { address: 'ton', decimals: 9, symbol: 'GRAM' },
@@ -147,6 +150,9 @@ export const createSwapSlice: SwapSliceCreator = (set: SetState, get) => ({
             if (amountBigInt > tonBalance) {
                 return 'Insufficient balance';
             }
+            if (amountBigInt > tonBalance - parseUnits(NATIVE_GAS_RESERVE, fromToken.decimals)) {
+                return `Keep ~${NATIVE_GAS_RESERVE} GRAM for network fees`;
+            }
         } else {
             // Check jetton balance
             const jetton = state.jettons.userJettons.find((j) => j.address === fromToken.address);
@@ -273,7 +279,7 @@ export const createSwapSlice: SwapSliceCreator = (set: SetState, get) => ({
             set((state) => {
                 state.swap.error = validationError;
             });
-            return;
+            return false;
         }
 
         if (!currentQuote) {
@@ -281,7 +287,7 @@ export const createSwapSlice: SwapSliceCreator = (set: SetState, get) => ({
             set((state) => {
                 state.swap.error = 'No quote available. Please get a quote first.';
             });
-            return;
+            return false;
         }
 
         if (!state.walletCore.walletKit) {
@@ -289,7 +295,7 @@ export const createSwapSlice: SwapSliceCreator = (set: SetState, get) => ({
             set((state) => {
                 state.swap.error = 'WalletKit not initialized';
             });
-            return;
+            return false;
         }
 
         if (!state.walletManagement.currentWallet) {
@@ -297,7 +303,7 @@ export const createSwapSlice: SwapSliceCreator = (set: SetState, get) => ({
             set((state) => {
                 state.swap.error = 'No active wallet';
             });
-            return;
+            return false;
         }
 
         if (!state.walletManagement.address) {
@@ -305,7 +311,7 @@ export const createSwapSlice: SwapSliceCreator = (set: SetState, get) => ({
             set((state) => {
                 state.swap.error = 'No wallet address';
             });
-            return;
+            return false;
         }
 
         set((state) => {
@@ -337,6 +343,7 @@ export const createSwapSlice: SwapSliceCreator = (set: SetState, get) => ({
             });
 
             log.info('Swap executed successfully');
+            return true;
         } catch (error) {
             log.error('Failed to execute swap:', error);
 
@@ -346,6 +353,7 @@ export const createSwapSlice: SwapSliceCreator = (set: SetState, get) => ({
                 state.swap.isSwapping = false;
                 state.swap.error = errorMessage;
             });
+            return false;
         }
     },
 

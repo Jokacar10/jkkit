@@ -109,8 +109,8 @@ export const SwapInterface: FC<SwapInterfaceProps> = ({ className }) => {
     };
 
     const handleExecuteSwap = async () => {
-        await executeSwap();
-        navigate('/wallet', { state: { message: `${fromView.symbol} sent successfully!` } });
+        const ok = await executeSwap();
+        if (ok) navigate('/wallet', { state: { message: `${fromView.symbol} sent successfully!` } });
     };
 
     const getSwapButtonText = (): string => {

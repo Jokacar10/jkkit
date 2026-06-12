@@ -89,12 +89,8 @@ export const StakingInterface: FC = () => {
 
     const handleAction = async () => {
         if (!currentQuote) return;
-        if (isStake) {
-            await stake({ quote: currentQuote });
-        } else {
-            await unstake({ quote: currentQuote });
-        }
-        navigate('/wallet', { state: { message: `${isStake ? 'Staked' : 'Unstaked'} successfully!` } });
+        const ok = isStake ? await stake({ quote: currentQuote }) : await unstake({ quote: currentQuote });
+        if (ok) navigate('/wallet', { state: { message: `${isStake ? 'Staked' : 'Unstaked'} successfully!` } });
     };
 
     const amountNumber = parseFloat(amount) || 0;
