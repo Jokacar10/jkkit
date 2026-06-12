@@ -27,6 +27,7 @@ export const CreateWalletScreen: React.FC = () => {
     const [mnemonic, setMnemonic] = useState<string[]>([]);
     const [network, setNetwork] = useState<NetworkType>('mainnet');
     const [revealed, setRevealed] = useState(false);
+    const [isSaved, setIsSaved] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -67,7 +68,7 @@ export const CreateWalletScreen: React.FC = () => {
     const columns = [0, 12];
 
     const footer = (
-        <Button fullWidth onClick={handleContinue} disabled={!revealed || isLoading}>
+        <Button fullWidth onClick={handleContinue} disabled={!isSaved || isLoading}>
             Continue
         </Button>
     );
@@ -121,6 +122,19 @@ export const CreateWalletScreen: React.FC = () => {
                         Copy phrase
                     </Button>
                 </div>
+
+                {revealed && (
+                    <label className="mt-6 flex cursor-pointer items-center justify-center gap-2.5">
+                        <input
+                            type="checkbox"
+                            data-testid="saved-checkbox"
+                            checked={isSaved}
+                            onChange={(e) => setIsSaved(e.target.checked)}
+                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm text-gray-700">I’ve saved my recovery phrase</span>
+                    </label>
+                )}
 
                 {error && <p className="mt-4 text-center text-sm text-red-500">{error}</p>}
             </div>
