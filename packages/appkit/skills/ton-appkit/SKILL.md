@@ -20,7 +20,7 @@ For contributing to the @ton/kit monorepo, use `kit-dev` instead. This skill is 
 
 | Task | Path |
 |---|---|
-| Set up a new app | Quick Setup below |
+| Set up a new app | `pnpm create ton-appkit` (scaffolds React+Vite project) or Quick Setup below |
 | Wallet connect/disconnect | `<TonConnectButton />` or `useConnect`/`useDisconnect` |
 | Show TON balance | `useBalance()` + optionally `useWatchBalance()` for live updates |
 | Send TON | `<SendTonButton />` or `useTransferTon()` |
@@ -31,7 +31,7 @@ For contributing to the @ton/kit monorepo, use `kit-dev` instead. This skill is 
 | Sign message | `useSignText` / `useSignBinary` / `useSignCell` |
 | Mainnet/testnet support | Configure both networks + `useDefaultNetwork()` + explicit `network` params |
 | Real-time updates | Register streaming provider + mount `useWatchBalance` / `useWatchTransactions` |
-| Fix Next.js hydration | `'use client'` providers + `ssr: true` + mount gate or dynamic import |
+| Fix Next.js hydration | `'use client'` providers + mount gate or dynamic import |
 | Refresh balance after send | `queryClient.invalidateQueries({ queryKey: ['balance'] })` |
 | Clear stale data on disconnect | `queryClient.removeQueries` for wallet-scoped keys |
 
@@ -356,5 +356,5 @@ But for most apps the right answer is **just use `<TonConnectButton />`** and re
 6. **iOS deep links need synchronous click** — call `connect()` directly in the handler, no `await` before it (see Wallet section above for the anti-pattern).
 7. **Telegram Mini App return** — configure `tonConnectOptions.actionsConfiguration.returnStrategy`.
 8. **React 19 / Next 15 hook errors** — check `@tonconnect/ui-react` version + run `pnpm why react` for duplicates.
-9. **`createTonstakersProvider()` polls TonCenter ~1×/sec on init** — once registered in `AppKit.providers`, the staking provider starts its own internal cache fill (`getPoolBalance` / `getPoolData` / APY endpoint) at roughly 1 request per second, regardless of TanStack `staleTime` or whether `<StakingWidget />` is even mounted. With a **keyless** `apiClient: { url: 'https://toncenter.com' }`, this exhausts the IP's anonymous TonCenter quota in 2–3 seconds and cascades HTTP 429s into otherwise-unrelated reads (`useBalance`, `useJettons`, `useNfts`). Symptom: balance/jettons/nfts hang or fail, staking widget itself stays empty. Fix: either set a real TonCenter `apiKey` on the apiClient (so the polling fits the keyed quota), or omit `createTonstakersProvider()` until you have a key.
+9. **`<StakingWidget />` + keyless TonCenter = HTTP 429 cascade** — while the widget is mounted, its internal queries poll with `refetchInterval: 5000` (three queries: provider info, staked/token balances, quote), and each refresh can hit several TonCenter endpoints (`getPoolBalance` / `getPoolData` / APY). The Tonstakers provider itself has NO internal timer — registering `createTonstakersProvider()` alone causes no traffic; it only adds a 30s-TTL cache around on-demand reads. With a **keyless** `apiClient: { url: 'https://toncenter.com' }`, the widget's polling quickly exhausts the IP's anonymous TonCenter quota and cascades HTTP 429s into otherwise-unrelated reads (`useBalance`, `useJettons`, `useNfts`). Symptom: balance/jettons/nfts hang or fail, staking widget itself stays empty. Fix: set a real TonCenter `apiKey` on the apiClient, or don't mount `<StakingWidget />` until you have one.
 10. **`<SwapWidget />` swallows build/send errors silently** — its `ctx.error` carries only client-side validation messages. Failures from `useBuildSwapTransaction` (e.g. Omniston returning `Internal server error: 5: [hash]`, an expired quote, no liquidity at execution time) and from `useSendTransaction` become **unhandled promise rejections**: the Continue button appears to do nothing, no toast, no in-widget error. Diagnose in DevTools Console (look for `Unhandled rejection: SwapError: …`). If you're composing your own UI via the render-prop, wrap `ctx.sendSwapTransaction()` in `try/catch` and surface the error yourself, or attach a `window.addEventListener('unhandledrejection', ...)` handler. For custom flows, the hooks (`useSwapQuote` → `useBuildSwapTransaction` → `useSendTransaction`) each expose their own `error` field — use them directly instead.

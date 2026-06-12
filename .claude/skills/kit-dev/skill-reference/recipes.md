@@ -33,9 +33,9 @@ Create `packages/appkit/src/actions/<domain>/watch-xxx.ts`:
 import type { AppKit } from '../../core/app-kit';
 
 import { getXxx } from './get-xxx';
-import type { GetXxxReturnType } from './get-xxx';
+import type { GetXxxOptions, GetXxxReturnType } from './get-xxx';
 
-export interface WatchXxxParameters {
+export interface WatchXxxParameters extends GetXxxOptions {
     onChange: (value: Awaited<GetXxxReturnType>) => void;
     onError?: (error: unknown) => void;
 }
@@ -43,11 +43,11 @@ export interface WatchXxxParameters {
 export type WatchXxxReturnType = () => void; // unsubscribe
 
 export const watchXxx = (appKit: AppKit, parameters: WatchXxxParameters): WatchXxxReturnType => {
-    const { onChange, onError } = parameters;
+    const { onChange, onError, ...options } = parameters;
     let cancelled = false;
 
     const refresh = (): void => {
-        getXxx(appKit)
+        getXxx(appKit, options)
             .then((value) => {
                 if (cancelled) return;
                 onChange(value);
@@ -70,7 +70,7 @@ export const watchXxx = (appKit: AppKit, parameters: WatchXxxParameters): WatchX
 };
 ```
 
-Watch actions skip the query layer entirely (no `*QueryOptions`, no `*QueryKey`).
+Watch actions skip the query layer entirely (no `*QueryOptions`, no `*QueryKey`). Resource inputs (`address`, `network`, `id`, …) come from `GetXxxOptions` and must flow through to `getXxx` so the watcher stays scoped — see `packages/appkit/src/actions/balances/watch-balance-by-address.ts`.
 
 ## Query template (get-actions only, watch actions skip to Hook)
 
@@ -202,21 +202,24 @@ import { useAppKit } from '../../settings';
 export type UseWatchXxxParameters = Partial<WatchXxxParameters>;
 
 export const useWatchXxx = (parameters: UseWatchXxxParameters = {}): void => {
-    const { onChange } = parameters;
+    const { onChange, onError, ...options } = parameters;
     const appKit = useAppKit();
     const queryClient = useQueryClient();
 
     useEffect(() => {
         return watchXxx(appKit, {
+            ...options,
+            onError,
             onChange: (value) => {
                 onChange?.(value);
-                // Invalidate so the paired `useXxx` re-reads the fresh value:
-                queryClient.invalidateQueries({ queryKey: getXxxQueryKey() });
-                // Or write straight into cache via a hand-written `handleXxxUpdate(queryClient, parameters, value)`
+                // Invalidate the scoped key so the paired `useXxx(options)` re-reads the fresh value:
+                queryClient.invalidateQueries({ queryKey: getXxxQueryKey(options) });
+                // Or write straight into cache via a hand-written `handleXxxUpdate(queryClient, options, value)`
                 // — see packages/appkit/src/queries/balances/get-balance-by-address.ts for an example.
             },
         });
-    }, [appKit, queryClient, onChange]);
+        // List each resource option (e.g. `address`, `network`) in the deps, not the `options` object itself.
+    }, [appKit, queryClient, onChange, onError]);
 };
 ```
 

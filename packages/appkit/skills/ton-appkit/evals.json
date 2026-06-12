@@ -252,7 +252,7 @@
     {
       "id": 25,
       "name": "eq-vs-uq-address-format",
-      "prompt": "I have addresses in two formats: `EQAg69D-buNwRdwwdmbQUkv2JLOQAuxJYJYM7VAR_BIxbnAm` and `UQAg69D-buNwRdwwdmbQUkv2JLOQAuxJYJYM7VAR_BIxbnAm`. They look almost identical. When I send TON to a fresh user wallet using the EQ form, Tonkeeper sometimes warns about an uninitialized contract. Which form should I use for what, and are they interchangeable?",
+      "prompt": "I have addresses in two formats: `EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c` and `UQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJKZ`. They look almost identical. When I send TON to a fresh user wallet using the EQ form, Tonkeeper sometimes warns about an uninitialized contract. Which form should I use for what, and are they interchangeable?",
       "assertions": [
         {"text": "explains_bounceable_vs_non_bounceable", "description": "Explains EQ-prefix is the bounceable form, UQ-prefix is the non-bounceable form"},
         {"text": "same_underlying_account", "description": "Notes both forms refer to the same on-chain account/hash — only the bounce-flag and checksum differ"},
@@ -339,9 +339,9 @@
       "name": "tonstakers-rate-limit-cascade",
       "prompt": "I added `createTonstakersProvider()` to my AppKit config alongside a keyless TonCenter API (`apiClient: { url: 'https://toncenter.com' }` with no key). Now `useBalance`, `useJettons`, and `useNfts` are all painfully slow or returning HTTP 429 errors. The staking widget itself shows nothing. What's happening?",
       "assertions": [
-        {"text": "explains_tonstakers_polls_aggressively", "description": "Explains that Tonstakers provider polls TonCenter (`getPoolBalance` / `getPoolData` / APY endpoint) on its own internal timer (~1 request per second) once registered, regardless of TanStack `staleTime`."},
-        {"text": "burns_keyless_quota", "description": "Says this exhausts the IP's keyless TonCenter quota in seconds and cascades HTTP 429s into unrelated reads (useBalance, useJettons, useNfts)."},
-        {"text": "fix_with_api_key_or_remove_provider", "description": "Recommends either adding a real TonCenter API key (so the polling fits inside the keyed quota) OR removing `createTonstakersProvider()` from `providers` when no key is available."}
+        {"text": "explains_staking_widget_polling", "description": "Explains the traffic source: while `<StakingWidget />` is mounted, its internal queries poll with `refetchInterval: 5000` (several queries, each refresh hitting TonCenter endpoints like getPoolBalance/getPoolData/APY). MUST FAIL if the answer claims the Tonstakers provider polls on its own internal timer merely by being registered — the provider has no timer, only a 30s-TTL cache around on-demand reads."},
+        {"text": "burns_keyless_quota", "description": "Says this quickly exhausts the IP's keyless TonCenter quota and cascades HTTP 429s into unrelated reads (useBalance, useJettons, useNfts)."},
+        {"text": "fix_with_api_key_or_remove_provider", "description": "Recommends either adding a real TonCenter API key OR not mounting `<StakingWidget />` (or removing `createTonstakersProvider()` from `providers`) when no key is available."}
       ]
     },
     {
@@ -371,7 +371,7 @@
       "assertions": [
         {"text": "identifies_upstream_omniston", "description": "Identifies that this is an upstream STON.fi / Omniston server error (gRPC status 5 = NOT_FOUND on the build step), not a bug in the user's code or AppKit."},
         {"text": "suggests_retry_or_different_route", "description": "Suggests retrying after a short wait, using a larger amount (close to a resolver's minimum quotes fail more often), or trying a different pair / a different swap provider."},
-        {"text": "fallback_provider", "description": "Mentions registering `createDeDustProvider()` as a fallback (DeDust uses direct pools, doesn't go through Omniston resolvers) and notes the user can switch providers from the SwapWidget settings gear."},
+        {"text": "fallback_provider", "description": "Mentions registering `createDeDustProvider()` as a fallback (it builds via the DeDust Router API, independent of Omniston's RFQ/resolver system — though the router itself aggregates several protocols including STON.fi pools) and notes the user can switch providers from the SwapWidget settings gear."},
         {"text": "widget_swallows_error", "description": "Notes that `<SwapWidget />` itself swallows this error (doesn't propagate it into `ctx.error`) — this is a kit-side UX bug, not the user's fault, and the diagnostic path is DevTools Console for unhandled rejections."}
       ]
     },
