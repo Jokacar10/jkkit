@@ -68,7 +68,7 @@ export const CreateWalletScreen: React.FC = () => {
     const columns = [0, 12];
 
     const footer = (
-        <Button fullWidth onClick={handleContinue} disabled={!isSaved || isLoading}>
+        <Button fullWidth onClick={handleContinue} disabled={!isSaved || isLoading} data-testid="create-wallet-confirm">
             Continue
         </Button>
     );
@@ -89,7 +89,7 @@ export const CreateWalletScreen: React.FC = () => {
 
                 <div className="relative mt-6">
                     <div className={revealed ? 'select-text' : 'blur-sm'}>
-                        <div className="flex gap-6">
+                        <div className="flex gap-6" data-testid="mnemonic-grid">
                             {columns.map((offset) => (
                                 <div key={offset} className="flex-1 space-y-4">
                                     {(ready ? mnemonic : Array.from({ length: 24 }).map(() => ''))
@@ -99,7 +99,12 @@ export const CreateWalletScreen: React.FC = () => {
                                             return (
                                                 <div key={n} className="flex items-baseline gap-3">
                                                     <span className="w-6 text-gray-400 tabular-nums">{n}</span>
-                                                    <span className="font-bold text-gray-900">{word || '—'}</span>
+                                                    <span
+                                                        className="font-bold text-gray-900"
+                                                        data-testid={`mnemonic-word-${n}`}
+                                                    >
+                                                        {word || '—'}
+                                                    </span>
                                                 </div>
                                             );
                                         })}
@@ -110,7 +115,13 @@ export const CreateWalletScreen: React.FC = () => {
 
                     {!revealed && (
                         <div className="absolute inset-0 flex items-center justify-center">
-                            <Button variant="primary" size="sm" onClick={() => setRevealed(true)} disabled={!ready}>
+                            <Button
+                                variant="primary"
+                                size="sm"
+                                onClick={() => setRevealed(true)}
+                                disabled={!ready}
+                                data-testid="reveal-mnemonic"
+                            >
                                 Click to reveal
                             </Button>
                         </div>
