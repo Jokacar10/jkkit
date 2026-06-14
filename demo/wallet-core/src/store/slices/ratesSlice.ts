@@ -17,7 +17,7 @@ const log = createComponentLogger('RatesSlice');
 // (asc returns zero-liquidity tokens with no price). TON itself is included
 // under the all-zero master address. This endpoint does not expose a 24h change.
 const RATES_ENDPOINT = 'https://api.dyor.io/v1/jettons?sort=liquidityUsd&order=desc&currency=ton&limit=100';
-const RAW_TON_ADDRESS = '0:0000000000000000000000000000000000000000000000000000000000000000';
+const RAW_GRAM_ADDRESS = '0:0000000000000000000000000000000000000000000000000000000000000000';
 
 // Skip a refresh if rates were updated within this window (clearRates resets the timer).
 const RATES_TTL_MS = 60_000;
@@ -98,8 +98,8 @@ export const createRatesSlice: RatesSliceCreator = (set: SetState, get) => ({
                 if (rate <= 0) continue;
 
                 const rawAddress = jetton.metadata.address;
-                if (rawAddress === RAW_TON_ADDRESS) {
-                    entries.TON = { rate, currency: 'USD' };
+                if (rawAddress === RAW_GRAM_ADDRESS) {
+                    entries.GRAM = { rate, currency: 'USD' };
                     continue;
                 }
 

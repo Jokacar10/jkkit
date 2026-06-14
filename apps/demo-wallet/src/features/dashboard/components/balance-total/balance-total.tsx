@@ -36,7 +36,7 @@ export const BalanceTotal: React.FC = () => {
         if (!ready) return 0;
 
         let total = 0;
-        const tonRate = rates['TON']?.rate;
+        const tonRate = rates['GRAM']?.rate;
         if (tonRate) {
             total += toDecimal(balance, GRAM_DECIMALS) * tonRate;
         }

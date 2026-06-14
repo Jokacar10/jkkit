@@ -36,7 +36,7 @@ export const useSendTokens = (): TokenOption[] => {
             decimals: GRAM_DECIMALS,
             balance: tonAmount,
             maxSendable: Math.max(0, tonAmount - TON_GAS_RESERVE),
-            rate: rates['TON']?.rate,
+            rate: rates['GRAM']?.rate,
         };
 
         const jettonOptions = userJettons.map((jetton): TokenOption => {

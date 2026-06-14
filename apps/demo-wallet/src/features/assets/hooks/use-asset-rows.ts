@@ -39,7 +39,7 @@ export const useAssetRows = (): AssetRows => {
 
     const tonRow = useMemo<AssetRowData | null>(() => {
         if (!assetsReady) return null;
-        const rateEntry = rates['TON'];
+        const rateEntry = rates['GRAM'];
         const amount = toDecimal(balance, GRAM_DECIMALS);
         return {
             id: 'TON',

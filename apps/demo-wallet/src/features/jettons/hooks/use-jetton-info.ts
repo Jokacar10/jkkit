@@ -52,6 +52,11 @@ export function useJettonInfo(tokenAddress: Address | string | null | undefined)
             return;
         }
 
+        if (typeof tokenAddress === 'string' && tokenAddress.toUpperCase() === 'TON') {
+            setTokenInfo(GRAM_INFO);
+            return;
+        }
+
         async function updateTokenInfo() {
             if (!tokenAddress) return;
             const info = await walletKit?.jettons?.getJettonInfo(tokenAddress.toString(), chainNetwork);
