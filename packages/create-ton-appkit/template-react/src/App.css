@@ -35,6 +35,33 @@
     color: var(--ta-color-text);
 }
 
+.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.tab-btn {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    border-radius: 10px;
+    padding: 0.5rem 0.875rem;
+    cursor: pointer;
+    font-size: var(--ta-footnote-size);
+    line-height: var(--ta-footnote-line-height);
+    color: var(--ta-color-text-secondary);
+}
+
+.tab-btn:hover {
+    color: var(--ta-color-text);
+}
+
+.tab-btn.active {
+    background: var(--ta-color-background-secondary);
+    color: var(--ta-color-text);
+}
+
 .card {
     background: var(--ta-color-background-secondary);
     border-radius: 16px;
@@ -124,60 +151,4 @@
 .jetton-balance {
     font-variant-numeric: tabular-nums;
     color: var(--ta-color-text);
-}
-
-.show-more-btn {
-    appearance: none;
-    background: transparent;
-    border: 0;
-    color: var(--ta-color-text-secondary);
-    font-size: var(--ta-footnote-size);
-    line-height: var(--ta-footnote-line-height);
-    padding: 0.5rem 0 0;
-    cursor: pointer;
-    text-align: center;
-    width: 100%;
-}
-
-.show-more-btn:hover {
-    color: var(--ta-color-text);
-}
-
-.swap-error {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 0.5rem;
-    margin-top: 0.75rem;
-    padding: 0.625rem 0.75rem;
-    border-radius: 8px;
-    background: color-mix(in srgb, var(--ta-color-accent-negative, #d33) 12%, transparent);
-    color: var(--ta-color-accent-negative, #d33);
-    font-size: var(--ta-footnote-size);
-    line-height: var(--ta-footnote-line-height);
-    overflow-wrap: anywhere;
-}
-
-.staking-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-}
-
-.staking-wrap > * {
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.swap-error-dismiss {
-    flex-shrink: 0;
-    appearance: none;
-    background: transparent;
-    border: 0;
-    color: inherit;
-    font-size: 16px;
-    line-height: 1;
-    padding: 0 0.25rem;
-    cursor: pointer;
 }

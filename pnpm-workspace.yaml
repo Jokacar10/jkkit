@@ -2,7 +2,6 @@ packages:
   - packages/*
   - apps/*
   - demo/*
-  - packages/create-ton-appkit/template-*
 
 allowBuilds:
   esbuild: false
@@ -38,9 +37,6 @@ minimumReleaseAgeExclude:
   - '@tonconnect/sdk@4.0.0'
   - '@tonconnect/ui-react@3.0.0'
   - '@tonconnect/ui@3.0.0'
-  - '@ton/appkit-react@1.0.0-alpha.4'
-  - '@ton/appkit@1.0.0-alpha.4'
-  - '@ton/walletkit@1.0.0-alpha.4'
 
 onlyBuiltDependencies:
   - node-hid

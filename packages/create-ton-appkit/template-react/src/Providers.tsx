@@ -16,11 +16,7 @@ const queryClient = new QueryClient({
     },
 });
 
-interface ProvidersProps {
-    children: ReactNode;
-}
-
-export function Providers({ children }: ProvidersProps) {
+export function Providers({ children }: { children: ReactNode }) {
     return (
         <QueryClientProvider client={queryClient}>
             <AppKitProvider appKit={appKit}>{children}</AppKitProvider>

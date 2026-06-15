@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - 'packages/create-ton-appkit/**'
-      - '.github/workflows/create-ton-appkit-test.yml'
+      - '.github/workflows/create_ton_appkit_test.yml'
   workflow_dispatch: {}
 
 jobs:

@@ -1,5 +1,5 @@
 // AppKit setup — https://docs.ton.org/applications/appkit/howto/appkit
-import { AppKit, Network, createTonCenterStreamingProvider, createTonConnectConnector } from '@ton/appkit';
+import { AppKit, Network, createTonConnectConnector } from '@ton/appkit';
 // Swap providers — https://docs.ton.org/applications/appkit/howto/providers#swaps
 import { createOmnistonProvider } from '@ton/appkit/swap/omniston';
 import { createDeDustProvider } from '@ton/appkit/swap/dedust';
@@ -14,12 +14,10 @@ const TONCONNECT_MANIFEST_URL =
 
 // Full guide: https://docs.ton.org/applications/appkit/get-started/get-started
 export const appKit = new AppKit({
+    // apiClient uses TonCenter here; AppKit also supports TonAPI as an alternative provider.
     networks: {
         [Network.mainnet().chainId]: {
             apiClient: { url: 'https://toncenter.com', key: TONCENTER_API_KEY },
-        },
-        [Network.testnet().chainId]: {
-            apiClient: { url: 'https://testnet.toncenter.com', key: TONCENTER_API_KEY },
         },
     },
     defaultNetwork: Network.mainnet(),
@@ -29,10 +27,8 @@ export const appKit = new AppKit({
             tonConnectOptions: { manifestUrl: TONCONNECT_MANIFEST_URL },
         }),
     ],
-    // Streaming & DeFi providers — https://docs.ton.org/applications/appkit/howto/providers#how-they-are-registered
+    // DeFi providers — https://docs.ton.org/applications/appkit/howto/providers#how-they-are-registered
     providers: [
-        createTonCenterStreamingProvider({ network: Network.mainnet(), apiKey: TONCENTER_API_KEY }),
-        createTonCenterStreamingProvider({ network: Network.testnet(), apiKey: TONCENTER_API_KEY }),
         createOmnistonProvider(),
         createDeDustProvider(),
         createTonstakersProvider(),
