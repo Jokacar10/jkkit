@@ -13,6 +13,8 @@ import { useAuth } from '@demo/wallet-core';
 import type { NetworkType } from '@demo/wallet-core';
 import { toast } from 'sonner';
 
+import { SavePhraseConfirmModal } from '../save-phrase-confirm-modal';
+
 import { CenteredScreen } from '@/core/components/shared/centered-screen';
 import { Button } from '@/core/components/ui/button';
 import { NetworkSelector } from '@/features/wallets';
@@ -27,7 +29,7 @@ export const CreateWalletScreen: React.FC = () => {
     const [mnemonic, setMnemonic] = useState<string[]>([]);
     const [network, setNetwork] = useState<NetworkType>('mainnet');
     const [revealed, setRevealed] = useState(false);
-    const [isSaved, setIsSaved] = useState(false);
+    const [confirmOpen, setConfirmOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -59,6 +61,7 @@ export const CreateWalletScreen: React.FC = () => {
             navigate('/wallet');
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Failed to create wallet');
+            setConfirmOpen(false);
         } finally {
             setIsLoading(false);
         }
@@ -68,7 +71,12 @@ export const CreateWalletScreen: React.FC = () => {
     const columns = [0, 12];
 
     const footer = (
-        <Button fullWidth onClick={handleContinue} disabled={!isSaved || isLoading} data-testid="create-wallet-confirm">
+        <Button
+            fullWidth
+            onClick={() => setConfirmOpen(true)}
+            disabled={!revealed || isLoading}
+            data-testid="create-wallet-confirm"
+        >
             Continue
         </Button>
     );
@@ -134,21 +142,15 @@ export const CreateWalletScreen: React.FC = () => {
                     </Button>
                 </div>
 
-                {revealed && (
-                    <label className="mt-6 flex cursor-pointer items-center justify-center gap-2.5">
-                        <input
-                            type="checkbox"
-                            data-testid="saved-checkbox"
-                            checked={isSaved}
-                            onChange={(e) => setIsSaved(e.target.checked)}
-                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span className="text-sm text-gray-700">I’ve saved my recovery phrase</span>
-                    </label>
-                )}
-
                 {error && <p className="mt-4 text-center text-sm text-red-500">{error}</p>}
             </div>
+
+            <SavePhraseConfirmModal
+                isOpen={confirmOpen}
+                loading={isLoading}
+                onClose={() => setConfirmOpen(false)}
+                onConfirm={handleContinue}
+            />
         </CenteredScreen>
     );
 };

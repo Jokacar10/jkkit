@@ -10,6 +10,7 @@ import { expect } from '@playwright/test';
 
 import { testWithUIFixture } from './UITestFixture';
 import { TEST_PASSWORD } from '../constants';
+import { SetupWalletPage } from '../pages';
 
 const test = testWithUIFixture();
 
@@ -24,6 +25,8 @@ test.describe('New Wallet Flow', () => {
     });
 
     test('Create new wallet on Mainnet', async ({ page }) => {
+        const setupWallet = new SetupWalletPage(page);
+
         // Mainnet is selected by default.
         await expect(page.getByTestId('network-select-mainnet')).toBeEnabled();
 
@@ -32,14 +35,16 @@ test.describe('New Wallet Flow', () => {
         await expect(page.getByTestId('mnemonic-grid')).toBeVisible();
         await expect(page.getByTestId('mnemonic-word-1')).toBeVisible();
 
-        await page.getByTestId('saved-checkbox').check();
-        await page.getByTestId('create-wallet-confirm').click();
+        // Continue → "Have you saved it?" modal → hold-to-continue.
+        await setupWallet.confirmAndCreate();
 
         // The settings button only exists on the wallet dashboard.
         await expect(page.getByTestId('wallet-menu')).toBeVisible();
     });
 
     test('Create new wallet on Testnet', async ({ page }) => {
+        const setupWallet = new SetupWalletPage(page);
+
         await page.getByTestId('network-select-testnet').click();
         await expect(page.getByTestId('network-select-testnet')).toBeEnabled();
 
@@ -48,20 +53,28 @@ test.describe('New Wallet Flow', () => {
         await expect(page.getByTestId('mnemonic-grid')).toBeVisible();
         await expect(page.getByTestId('mnemonic-word-1')).toBeVisible();
 
-        await page.getByTestId('saved-checkbox').check();
-        await page.getByTestId('create-wallet-confirm').click();
+        await setupWallet.confirmAndCreate();
 
         await expect(page.getByTestId('wallet-menu')).toBeVisible();
     });
 
     test('Cannot proceed without saving confirmation', async ({ page }) => {
+        const setupWallet = new SetupWalletPage(page);
+
+        // Continue is disabled until the recovery phrase has been revealed.
+        await expect(setupWallet.continueButton).toBeDisabled();
+
         await page.getByTestId('reveal-mnemonic').click();
 
-        // Continue is disabled until the "I've saved my recovery phrase" box is checked.
-        await expect(page.getByTestId('create-wallet-confirm')).toBeDisabled();
+        await expect(setupWallet.continueButton).toBeEnabled();
 
-        await page.getByTestId('saved-checkbox').check();
+        // Continue only opens the confirmation modal — it doesn't create the wallet.
+        await setupWallet.openConfirm();
+        await expect(setupWallet.holdToContinue).toBeVisible();
 
-        await expect(page.getByTestId('create-wallet-confirm')).toBeEnabled();
+        // A short tap is not enough; the gesture must be held to confirm.
+        await setupWallet.tapHold();
+        await expect(page.getByTestId('wallet-menu')).toBeHidden();
+        await expect(setupWallet.holdToContinue).toBeVisible();
     });
 });

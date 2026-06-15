@@ -14,6 +14,11 @@ interface HoldToSignButtonProps {
     loading?: boolean;
     holdDuration?: number; // Duration in milliseconds
     className?: string;
+    /** Label shown in the idle state (before holding). */
+    idleLabel?: string;
+    /** Label shown once the hold completes. */
+    completeLabel?: string;
+    testId?: string;
 }
 
 export const HoldToSignButton: React.FC<HoldToSignButtonProps> = ({
@@ -22,6 +27,9 @@ export const HoldToSignButton: React.FC<HoldToSignButtonProps> = ({
     loading = false,
     holdDuration = 3000,
     className = '',
+    idleLabel = 'Hold to Sign',
+    completeLabel = 'Signed!',
+    testId,
 }) => {
     const [isHolding, setIsHolding] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -118,6 +126,7 @@ export const HoldToSignButton: React.FC<HoldToSignButtonProps> = ({
     return (
         <button
             className={buttonClasses}
+            data-testid={testId}
             onMouseDown={handleHoldStart}
             onMouseUp={handleHoldEnd}
             onMouseLeave={handleHoldEnd}
@@ -201,7 +210,7 @@ export const HoldToSignButton: React.FC<HoldToSignButtonProps> = ({
                         <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                         </svg>
-                        <span className="inline-block min-w-[110px] text-center">Signed!</span>
+                        <span className="inline-block min-w-[110px] text-center">{completeLabel}</span>
                     </>
                 ) : (
                     <>
@@ -221,7 +230,7 @@ export const HoldToSignButton: React.FC<HoldToSignButtonProps> = ({
                         <span className="font-semibold inline-block min-w-[110px] text-center">
                             {isHolding
                                 ? `Hold (${Math.ceil((holdDuration - (progress * holdDuration) / 100) / 1000)}s)`
-                                : 'Hold to Sign'}
+                                : idleLabel}
                         </span>
                     </>
                 )}
