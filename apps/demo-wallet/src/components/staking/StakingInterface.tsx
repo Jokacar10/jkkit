@@ -113,7 +113,9 @@ export const StakingInterface: FC = () => {
                             className="block w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none text-lg font-medium"
                         />
                         <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center space-x-2">
-                            <span className="text-sm font-bold text-gray-500">{tab === 'stake' ? 'TON' : 'tsTON'}</span>
+                            <span className="text-sm font-bold text-gray-500">
+                                {tab === 'stake' ? 'GRAM' : 'tsTON'}
+                            </span>
                         </div>
                     </div>
                     {validationError && amount !== '' && <p className="mt-2 text-sm text-red-500">{validationError}</p>}

@@ -11,9 +11,9 @@
  */
 export enum AssetType {
     /**
-     * Native TON cryptocurrency
+     * Native GRAM cryptocurrency
      */
-    ton = 'ton',
+    gram = 'gram',
     /**
      * Jetton fungible token (TEP-74 standard)
      */

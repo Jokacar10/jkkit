@@ -109,7 +109,7 @@ describe('UI rendering functions', () => {
                     inputs: '0',
                     allJettonTransfers: [],
                     ourTransfers: [
-                        { assetType: AssetType.ton, amount: '-1000000000' },
+                        { assetType: AssetType.gram, amount: '-1000000000' },
                         { assetType: AssetType.jetton, amount: '500', tokenAddress: 'EQJetton123' },
                     ],
                 },
@@ -120,7 +120,7 @@ describe('UI rendering functions', () => {
             expect(result.kind).toBe('success');
             if (result.kind === 'success' && result.transfers) {
                 expect(result.transfers).toHaveLength(2);
-                expect(result.transfers[0].jettonAddress).toBe('TON');
+                expect(result.transfers[0].jettonAddress).toBe('GRAM');
                 expect(result.transfers[0].isIncoming).toBe(false);
                 expect(result.transfers[1].jettonAddress).toBe('EQJetton123');
                 expect(result.transfers[1].isIncoming).toBe(true);
@@ -149,7 +149,7 @@ describe('UI rendering functions', () => {
 
         it('should render money flow for transfers', () => {
             const transfers = [
-                { assetType: AssetType.ton, amount: '1000000000' },
+                { assetType: AssetType.gram, amount: '1000000000' },
                 { assetType: AssetType.jetton, amount: '-500', tokenAddress: 'EQJetton123' },
             ];
 
