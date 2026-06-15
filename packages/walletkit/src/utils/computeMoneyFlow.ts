@@ -189,7 +189,7 @@ export async function computeMoneyFlow(
         }),
     );
     selfTransfers.push({
-        assetType: AssetType.gram,
+        assetType: AssetType.ton,
         amount: (BigInt(inputs) - BigInt(outputs)).toString(),
     });
     selfTransfers.push(...ourJettonTransfers);
@@ -198,7 +198,7 @@ export async function computeMoneyFlow(
         outputs: outputs.toString(),
         inputs: inputs.toString(),
         allJettonTransfers: jettonTransfers,
-        ourTransfers: [{ assetType: AssetType.gram, amount: (inputs - outputs).toString() }, ...ourJettonTransfers],
+        ourTransfers: [{ assetType: AssetType.ton, amount: (inputs - outputs).toString() }, ...ourJettonTransfers],
         ourAddress,
     };
 }

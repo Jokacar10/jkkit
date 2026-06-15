@@ -209,7 +209,7 @@ describe('mapToncenterEmulationResponse', () => {
         expect(moneyFlow.outputs).toBe('1000000000');
         expect(moneyFlow.inputs).toBe('0');
         expect(moneyFlow.ourTransfers).toHaveLength(1);
-        expect(moneyFlow.ourTransfers[0].assetType).toBe('gram');
+        expect(moneyFlow.ourTransfers[0].assetType).toBe('ton');
     });
 
     it('maps out_msg value through', () => {

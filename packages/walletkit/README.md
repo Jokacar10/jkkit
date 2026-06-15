@@ -263,7 +263,7 @@ function summarizeTransaction(preview: TransactionEmulatedPreview) {
         kind: 'success' as const,
         transfers: transfers.map((transfer) => ({
             assetType: transfer.assetType,
-            jettonAddress: transfer.assetType === AssetType.gram ? 'GRAM' : (transfer.tokenAddress ?? ''),
+            jettonAddress: transfer.assetType === AssetType.ton ? 'GRAM' : (transfer.tokenAddress ?? ''),
             amount: transfer.amount, // string, can be positive or negative
             isIncoming: BigInt(transfer.amount) >= 0n,
         })),
@@ -285,7 +285,7 @@ function renderMoneyFlow(transfers: TransactionTraceMoneyFlowItem[]) {
     return transfers.map((transfer: TransactionTraceMoneyFlowItem) => {
         const amount = BigInt(transfer.amount);
         const isIncoming = amount >= 0n;
-        const jettonAddress = transfer.assetType === AssetType.gram ? 'GRAM' : (transfer.tokenAddress ?? '');
+        const jettonAddress = transfer.assetType === AssetType.ton ? 'GRAM' : (transfer.tokenAddress ?? '');
 
         return (
             <div key={jettonAddress}>

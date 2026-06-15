@@ -109,7 +109,7 @@ describe('UI rendering functions', () => {
                     inputs: '0',
                     allJettonTransfers: [],
                     ourTransfers: [
-                        { assetType: AssetType.gram, amount: '-1000000000' },
+                        { assetType: AssetType.ton, amount: '-1000000000' },
                         { assetType: AssetType.jetton, amount: '500', tokenAddress: 'EQJetton123' },
                     ],
                 },
@@ -149,7 +149,7 @@ describe('UI rendering functions', () => {
 
         it('should render money flow for transfers', () => {
             const transfers = [
-                { assetType: AssetType.gram, amount: '1000000000' },
+                { assetType: AssetType.ton, amount: '1000000000' },
                 { assetType: AssetType.jetton, amount: '-500', tokenAddress: 'EQJetton123' },
             ];
 
