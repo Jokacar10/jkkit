@@ -43,8 +43,20 @@ export async function registerGaslessProvider(args: { providerId: string }): Pro
     (await getGasless()).registerProvider(get(args.providerId) as GaslessProviderInterface);
 }
 
+export async function removeGaslessProvider(args: { providerId: string }): Promise<void> {
+    const gasless = await getGasless();
+    gasless.removeProvider(gasless.getProvider(args.providerId));
+}
+
 export async function setDefaultGaslessProvider(args: { providerId: string }): Promise<void> {
     (await getGasless()).setDefaultProvider(args.providerId);
+}
+
+export async function getGaslessProviderSupportedNetworks(args: {
+    providerId: string;
+}): Promise<{ networks: Network[] }> {
+    const networks = (await getGasless()).getProvider(args.providerId).getSupportedNetworks();
+    return { networks };
 }
 
 export async function getRegisteredGaslessProviders(): Promise<{ providerIds: string[] }> {

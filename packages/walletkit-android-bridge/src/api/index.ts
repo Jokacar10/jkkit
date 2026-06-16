@@ -136,9 +136,11 @@ export const api = {
 
     createTonApiGaslessProvider: gasless.createTonApiGaslessProvider,
     registerGaslessProvider: gasless.registerGaslessProvider,
+    removeGaslessProvider: gasless.removeGaslessProvider,
     setDefaultGaslessProvider: gasless.setDefaultGaslessProvider,
     getRegisteredGaslessProviders: gasless.getRegisteredGaslessProviders,
     hasGaslessProvider: gasless.hasGaslessProvider,
+    getGaslessProviderSupportedNetworks: gasless.getGaslessProviderSupportedNetworks,
     getGaslessMetadata: gasless.getGaslessMetadata,
     getGaslessConfig: gasless.getGaslessConfig,
     getGaslessQuote: gasless.getGaslessQuote,
