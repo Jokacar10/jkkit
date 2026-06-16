@@ -140,6 +140,40 @@ export async function getSignedSignMessage(args: { walletId: string; request: Tr
     return wallet(args.walletId, 'getSignedSignMessage', args.request);
 }
 
+export async function getWalletStateInit(args: { walletId: string }) {
+    return wallet(args.walletId, 'getStateInit');
+}
+
+export async function getSignedSendTransaction(args: {
+    walletId: string;
+    input: TransactionRequest;
+    fakeSignature?: boolean;
+}) {
+    return wallet(args.walletId, 'getSignedSendTransaction', args.input, {
+        fakeSignature: args.fakeSignature ?? false,
+    });
+}
+
+export async function getSignedSignData(args: {
+    walletId: string;
+    input: PreparedSignData;
+    fakeSignature?: boolean;
+}) {
+    return wallet(args.walletId, 'getSignedSignData', args.input, {
+        fakeSignature: args.fakeSignature ?? false,
+    });
+}
+
+export async function getSignedTonProof(args: {
+    walletId: string;
+    input: ProofMessage;
+    fakeSignature?: boolean;
+}) {
+    return wallet(args.walletId, 'getSignedTonProof', args.input, {
+        fakeSignature: args.fakeSignature ?? false,
+    });
+}
+
 export async function removeWallet(args: { walletId: string }) {
     return kit('removeWallet', args.walletId);
 }

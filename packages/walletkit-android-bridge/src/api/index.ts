@@ -47,7 +47,11 @@ export const api = {
     getWalletAddress: wallets.getWalletAddress,
     getWalletNetwork: wallets.getWalletNetwork,
     getWalletPublicKey: wallets.getWalletPublicKey,
+    getWalletStateInit: wallets.getWalletStateInit,
     getSignedSignMessage: wallets.getSignedSignMessage,
+    getSignedSendTransaction: wallets.getSignedSendTransaction,
+    getSignedSignData: wallets.getSignedSignData,
+    getSignedTonProof: wallets.getSignedTonProof,
     removeWallet: wallets.removeWallet,
     getBalance: wallets.getBalance,
 

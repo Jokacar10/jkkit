@@ -491,7 +491,23 @@ export interface WalletKitBridgeApi {
     getWallet(args: { walletId: string }): PromiseOrValue<{ walletId: string | undefined; wallet: Wallet } | null>;
     getWalletAddress(args: { walletId: string }): PromiseOrValue<TONUserFriendlyAddress | null>;
     getWalletPublicKey(args: { walletId: string }): PromiseOrValue<TONHex>;
+    getWalletStateInit(args: { walletId: string }): PromiseOrValue<unknown>;
     getSignedSignMessage(args: { walletId: string; request: Record<string, unknown> }): PromiseOrValue<unknown>;
+    getSignedSendTransaction(args: {
+        walletId: string;
+        input: Record<string, unknown>;
+        fakeSignature?: boolean;
+    }): PromiseOrValue<unknown>;
+    getSignedSignData(args: {
+        walletId: string;
+        input: Record<string, unknown>;
+        fakeSignature?: boolean;
+    }): PromiseOrValue<unknown>;
+    getSignedTonProof(args: {
+        walletId: string;
+        input: Record<string, unknown>;
+        fakeSignature?: boolean;
+    }): PromiseOrValue<unknown>;
     removeWallet(args: RemoveWalletArgs): PromiseOrValue<void>;
     getBalance(args: GetBalanceArgs): PromiseOrValue<string | undefined>;
     getRecentTransactions(args: GetRecentTransactionsArgs): PromiseOrValue<Transaction[]>;
