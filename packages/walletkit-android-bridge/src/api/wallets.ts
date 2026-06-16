@@ -154,21 +154,13 @@ export async function getSignedSendTransaction(args: {
     });
 }
 
-export async function getSignedSignData(args: {
-    walletId: string;
-    input: PreparedSignData;
-    fakeSignature?: boolean;
-}) {
+export async function getSignedSignData(args: { walletId: string; input: PreparedSignData; fakeSignature?: boolean }) {
     return wallet(args.walletId, 'getSignedSignData', args.input, {
         fakeSignature: args.fakeSignature ?? false,
     });
 }
 
-export async function getSignedTonProof(args: {
-    walletId: string;
-    input: ProofMessage;
-    fakeSignature?: boolean;
-}) {
+export async function getSignedTonProof(args: { walletId: string; input: ProofMessage; fakeSignature?: boolean }) {
     return wallet(args.walletId, 'getSignedTonProof', args.input, {
         fakeSignature: args.fakeSignature ?? false,
     });
