@@ -13,13 +13,16 @@
 export interface CryptoOnrampSourceCurrency {
     /** CAIP-2 source chain identifier, e.g. `'eip155:42161'`. */
     chain: string;
-    /** Token contract address on the source chain, or zero address for the native gas token. */
-    address: string;
+    /** Token contract address on the source chain, or `'native'` for the chain's native gas coin. */
+    address: 'native' | string;
     /** Token symbol, e.g. `'USDT0'`, `'ETH'`. */
     symbol: string;
     /** Full token name, e.g. `'Tether USD0'`. Optional. */
     name?: string;
-    /** Decimals used to convert between display and base units. */
+    /**
+     * Decimals used to convert between display and base units.
+     * @format int
+     * */
     decimals: number;
     /** Logo URL. */
     logo?: string;
@@ -29,14 +32,16 @@ export interface CryptoOnrampSourceCurrency {
  * A destination currency the user receives on TON. Chain is implicit (always TON).
  */
 export interface CryptoOnrampDestinationCurrency {
-    /** Address as the provider expects it (raw form, e.g. `'EQCx...'` for jettons,
-     * `'0x000...'` for native TON). */
-    address: string;
+    /** Jetton master address (e.g. `'EQCx...'`), or `'ton'` for native Toncoin. */
+    address: 'ton' | string;
     /** Token symbol, e.g. `'TON'`, `'USDT'`. */
     symbol: string;
     /** Full token name. */
     name?: string;
-    /** Decimals. */
+    /**
+     * Decimals
+     * @format int
+     * */
     decimals: number;
     /** Logo URL. */
     logo?: string;

@@ -16,9 +16,18 @@ const USDT_ON_TON: CryptoOnrampDestinationRef = {
     address: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
 };
 
+const NATIVE_TON: CryptoOnrampDestinationRef = {
+    address: 'ton',
+};
+
 const USDT0_ON_ARBITRUM: CryptoOnrampSourceRef = {
     chain: Caip2ByNetwork.ArbitrumMainnet,
     address: '0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9',
+};
+
+const NATIVE_ON_ARBITRUM: CryptoOnrampSourceRef = {
+    chain: Caip2ByNetwork.ArbitrumMainnet,
+    address: 'native',
 };
 
 const meta: Meta<typeof CryptoOnrampWidget> = {
@@ -29,12 +38,14 @@ const meta: Meta<typeof CryptoOnrampWidget> = {
         defaultDestination: {
             control: 'object',
             description:
-                'Optional default destination reference (`{ address }`), resolved against the loaded currency list.',
+                'Optional default destination reference (`{ address }`), resolved against the loaded currency list. ' +
+                "Use `{ address: 'ton' }` for native Toncoin.",
         },
         defaultSource: {
             control: 'object',
             description:
-                'Optional default source reference (`{ address, chain? }`), resolved against the loaded currency list.',
+                'Optional default source reference (`{ address, chain? }`), resolved against the loaded currency list. ' +
+                "Use `{ address: 'native', chain }` for a chain's native coin.",
         },
     },
 };
@@ -60,5 +71,17 @@ export const WithPresetCurrencies: Story = {
     args: {
         defaultDestination: USDT_ON_TON,
         defaultSource: USDT0_ON_ARBITRUM,
+    },
+};
+
+/**
+ * Native coins as defaults via aliases: `'ton'` for the destination (Toncoin) and `'native'` for
+ * the source (the selected chain's coin). Both are resolved against the loaded currency list,
+ * regardless of the raw markers the active provider uses.
+ */
+export const WithNativeDefaults: Story = {
+    args: {
+        defaultDestination: NATIVE_TON,
+        defaultSource: NATIVE_ON_ARBITRUM,
     },
 };

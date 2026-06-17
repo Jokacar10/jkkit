@@ -35,6 +35,11 @@ const DECENT_API_URL = 'https://api-v2.swaps.xyz/api';
 const TON_CHAIN_ID = 999000337;
 const DEFAULT_SLIPPAGE_BPS = 100;
 const DEFAULT_SENDER = '0x0000000000000000000000000000000000000000';
+/**
+ * Zero address Decent's API uses for a chain's native asset — an EVM gas coin (surfaced as
+ * `'native'`) on the source side, Toncoin (surfaced as `'ton'`) on the TON destination side.
+ */
+const DECENT_NATIVE_TOKEN_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 export interface DecentProviderConfig {
     /**
@@ -103,7 +108,7 @@ export class DecentCryptoOnrampProvider extends CryptoOnrampProvider<DecentQuote
         return [Network.mainnet()];
     }
 
-    async getMetadata() {
+    getMetadata() {
         return { name: 'Decent', url: 'https://decent.xyz', refundAddressMode: 'required' as const };
     }
 
@@ -148,13 +153,16 @@ export class DecentCryptoOnrampProvider extends CryptoOnrampProvider<DecentQuote
             );
         }
 
+        const srcToken = sourceCurrency.address === 'native' ? DECENT_NATIVE_TOKEN_ADDRESS : sourceCurrency.address;
+        const dstToken = targetCurrency.address === 'ton' ? DECENT_NATIVE_TOKEN_ADDRESS : targetCurrency.address;
+
         const url = new URL(`${this.apiUrl}/getAction`);
         url.searchParams.set('actionType', 'swap-action');
         url.searchParams.set('sender', sender);
         url.searchParams.set('srcChainId', String(srcChainId));
-        url.searchParams.set('srcToken', sourceCurrency.address);
+        url.searchParams.set('srcToken', srcToken);
         url.searchParams.set('dstChainId', String(TON_CHAIN_ID));
-        url.searchParams.set('dstToken', targetCurrency.address);
+        url.searchParams.set('dstToken', dstToken);
         url.searchParams.set('amount', params.amount);
         url.searchParams.set('swapDirection', swapDirection);
         url.searchParams.set('slippage', String(params.providerOptions?.slippageBps ?? DEFAULT_SLIPPAGE_BPS));

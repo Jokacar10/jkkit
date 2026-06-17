@@ -49,7 +49,7 @@ const METHODS: CryptoOnrampSourceCurrency[] = [
         name: 'Ethereum',
         chain: 'eip155:1',
         decimals: 18,
-        address: '0x0000000000000000000000000000000000000000',
+        address: 'native',
         logo: 'https://assets.coingecko.com/coins/images/279/standard/ethereum.png',
     },
 ];

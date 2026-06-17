@@ -750,9 +750,7 @@ return (
 Hook to get static metadata for a crypto-onramp provider (display name, logo, url).
 
 ```tsx
-const { data: metadata } = useCryptoOnrampProviderMetadata({
-    providerId: 'layerswap',
-});
+const metadata = useCryptoOnrampProviderMetadata({ providerId: 'layerswap' });
 return <div>Provider name: {metadata?.name}</div>;
 ```
 

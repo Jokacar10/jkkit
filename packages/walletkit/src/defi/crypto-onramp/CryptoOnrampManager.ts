@@ -35,12 +35,12 @@ export class CryptoOnrampManager extends DefiManager<CryptoOnrampProviderInterfa
      * Get static metadata for a crypto onramp provider
      * @param providerId - Optional provider id to use
      */
-    async getMetadata(providerId?: string): Promise<CryptoOnrampProviderMetadata> {
+    getMetadata(providerId?: string): CryptoOnrampProviderMetadata {
         const selectedProviderId = providerId || this.defaultProviderId;
         log.debug('Getting crypto onramp metadata', { providerId: selectedProviderId });
 
         try {
-            return await this.getProvider(selectedProviderId).getMetadata();
+            return this.getProvider(selectedProviderId).getMetadata();
         } catch (error) {
             log.error('Failed to get crypto onramp metadata', { error });
             throw error;

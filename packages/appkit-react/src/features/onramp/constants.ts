@@ -15,6 +15,4 @@ export const DEFAULT_ONRAMP_PRESETS: OnrampAmountPreset[] = [
     { amount: '1000', label: '1000' },
 ];
 
-export const NATIVE_TON_ADDRESS = '0x0000000000000000000000000000000000000000';
-
 export const ERROR_THRESHOLD = 10000000;

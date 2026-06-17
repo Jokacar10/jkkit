@@ -13,12 +13,12 @@ export interface GetCryptoOnrampProviderMetadataOptions {
     providerId?: string;
 }
 
-export type GetCryptoOnrampProviderMetadataReturnType = Promise<CryptoOnrampProviderMetadata>;
+export type GetCryptoOnrampProviderMetadataReturnType = CryptoOnrampProviderMetadata;
 
 /**
  * Get static metadata for a crypto-onramp provider (display name, logo, url).
  */
-export const getCryptoOnrampProviderMetadata = async (
+export const getCryptoOnrampProviderMetadata = (
     appKit: AppKit,
     options: GetCryptoOnrampProviderMetadataOptions = {},
 ): GetCryptoOnrampProviderMetadataReturnType => {

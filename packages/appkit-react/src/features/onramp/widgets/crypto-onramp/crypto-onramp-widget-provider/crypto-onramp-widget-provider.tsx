@@ -26,19 +26,21 @@ import { useCryptoOnrampValidation } from './use-crypto-onramp-validation';
 
 /**
  * Reference to a destination (TON-side) currency by its jetton-master address.
+ * Use `'ton'` for native Toncoin.
  * Compared via `compareAddress`, so EQ/UQ address forms are equivalent.
  */
 export interface CryptoOnrampDestinationRef {
-    address: string;
+    address: 'ton' | string;
 }
 
 /**
  * Reference to a source currency. Each provided field acts as a filter and the first
  * matching list entry wins. `address` is compared lowercase (source chains are non-TON);
- * an empty string matches the chain's native coin.
+ * use `'native'` for the chain's native coin — every provider returns native coins under that
+ * address. Pair it with `chain` to target a specific network.
  */
 export interface CryptoOnrampSourceRef {
-    address: string;
+    address: 'native' | string;
     /** Optional CAIP-2 chain id (e.g. `'eip155:42161'`) — narrows the match when the same address exists on several chains. */
     chain?: string;
 }

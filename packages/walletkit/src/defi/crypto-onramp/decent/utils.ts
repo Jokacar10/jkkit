@@ -51,7 +51,7 @@ export const DEFAULT_DECENT_SUPPORTED_CURRENCIES: CryptoOnrampSupportedCurrencie
         // Ethereum
         {
             chain: Caip2ByNetwork.EthereumMainnet,
-            address: '0x0000000000000000000000000000000000000000',
+            address: 'native',
             symbol: 'ETH',
             name: 'Ethereum',
             decimals: 18,
@@ -76,7 +76,7 @@ export const DEFAULT_DECENT_SUPPORTED_CURRENCIES: CryptoOnrampSupportedCurrencie
         // Optimism
         {
             chain: Caip2ByNetwork.OptimismMainnet,
-            address: '0x0000000000000000000000000000000000000000',
+            address: 'native',
             symbol: 'ETH',
             name: 'Ethereum',
             decimals: 18,
@@ -101,7 +101,7 @@ export const DEFAULT_DECENT_SUPPORTED_CURRENCIES: CryptoOnrampSupportedCurrencie
         // BSC
         {
             chain: Caip2ByNetwork.BscMainnet,
-            address: '0x0000000000000000000000000000000000000000',
+            address: 'native',
             symbol: 'BNB',
             name: 'BNB',
             decimals: 18,
@@ -126,7 +126,7 @@ export const DEFAULT_DECENT_SUPPORTED_CURRENCIES: CryptoOnrampSupportedCurrencie
         // Polygon
         {
             chain: Caip2ByNetwork.PolygonMainnet,
-            address: '0x0000000000000000000000000000000000000000',
+            address: 'native',
             symbol: 'POL',
             name: 'Polygon',
             decimals: 18,
@@ -151,7 +151,7 @@ export const DEFAULT_DECENT_SUPPORTED_CURRENCIES: CryptoOnrampSupportedCurrencie
         // Base
         {
             chain: Caip2ByNetwork.BaseMainnet,
-            address: '0x0000000000000000000000000000000000000000',
+            address: 'native',
             symbol: 'ETH',
             name: 'Ethereum',
             decimals: 18,
@@ -168,7 +168,7 @@ export const DEFAULT_DECENT_SUPPORTED_CURRENCIES: CryptoOnrampSupportedCurrencie
         // Arbitrum
         {
             chain: Caip2ByNetwork.ArbitrumMainnet,
-            address: '0x0000000000000000000000000000000000000000',
+            address: 'native',
             symbol: 'ETH',
             name: 'Ethereum',
             decimals: 18,
@@ -193,7 +193,7 @@ export const DEFAULT_DECENT_SUPPORTED_CURRENCIES: CryptoOnrampSupportedCurrencie
         // Avalanche
         {
             chain: Caip2ByNetwork.AvalancheMainnet,
-            address: '0x0000000000000000000000000000000000000000',
+            address: 'native',
             symbol: 'AVAX',
             name: 'Avalanche',
             decimals: 18,
@@ -218,11 +218,11 @@ export const DEFAULT_DECENT_SUPPORTED_CURRENCIES: CryptoOnrampSupportedCurrencie
     ],
     destination: [
         {
-            address: '0x0000000000000000000000000000000000000000',
-            symbol: 'TON',
-            name: 'Toncoin',
+            address: 'ton',
+            symbol: 'GRAM',
+            name: 'Gram',
             decimals: 9,
-            logo: 'https://cdn.layerswap.io/layerswap/networks/ton_mainnet.png',
+            logo: 'https://s2.coinmarketcap.com/static/img/coins/200x200/11419.png',
         },
         {
             address: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',

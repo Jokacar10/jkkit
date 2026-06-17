@@ -10,7 +10,7 @@ import { useCryptoOnrampProviderMetadata } from '@ton/appkit-react';
 
 export const UseCryptoOnrampProviderMetadataExample = () => {
     // SAMPLE_START: USE_CRYPTO_ONRAMP_PROVIDER_METADATA
-    const { data: metadata } = useCryptoOnrampProviderMetadata({ providerId: 'layerswap' });
+    const metadata = useCryptoOnrampProviderMetadata({ providerId: 'layerswap' });
     return <div>Provider name: {metadata?.name}</div>;
     // SAMPLE_END: USE_CRYPTO_ONRAMP_PROVIDER_METADATA
 };

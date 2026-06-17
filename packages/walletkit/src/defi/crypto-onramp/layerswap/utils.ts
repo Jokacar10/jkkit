@@ -65,13 +65,20 @@ export const LAYERSWAP_DESTINATION_TOKENS: CryptoOnrampDestinationCurrency[] = [
         logo: 'https://cdn.layerswap.io/layerswap/currencies/usdt.png',
     },
     {
-        address: '0x0000000000000000000000000000000000000000',
-        symbol: 'TON',
-        name: 'Toncoin',
+        address: 'ton',
+        symbol: 'GRAM',
+        name: 'Gram',
         decimals: 9,
-        logo: 'https://cdn.layerswap.io/layerswap/networks/ton_mainnet.png',
+        logo: 'https://s2.coinmarketcap.com/static/img/coins/200x200/11419.png',
     },
 ];
+
+/**
+ * The SDK surfaces native Toncoin as `'GRAM'`, but Layerswap identifies it by the `'TON'` token
+ * symbol in its API. Map the destination symbol back before sending it (`destination_token`,
+ * `/sources` discovery); any other symbol is returned unchanged.
+ */
+export const toLayerswapDestinationToken = (symbol: string): string => (symbol === 'GRAM' ? 'TON' : symbol);
 
 export const isErrorResponse = (body: unknown): body is LayerswapErrorResponse => {
     return (

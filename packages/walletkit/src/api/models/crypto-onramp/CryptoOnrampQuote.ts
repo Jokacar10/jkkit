@@ -25,11 +25,13 @@ export interface CryptoOnrampQuote<TMetadata = unknown> {
 
     /**
      * Amount of source crypto to send (in base units of `sourceCurrency.decimals`).
+     * @format int
      */
     sourceAmount: string;
 
     /**
      * Amount of target crypto to receive (in base units of `targetCurrency.decimals`).
+     * @format int
      */
     targetAmount: string;
 

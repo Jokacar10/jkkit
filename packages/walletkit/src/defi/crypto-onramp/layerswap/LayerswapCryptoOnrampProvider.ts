@@ -31,6 +31,7 @@ import {
     mapLayerswapErrorCode,
     mapStatus,
     parseBaseUnits,
+    toLayerswapDestinationToken,
 } from './utils';
 import type { LayerswapChainConfig } from './utils';
 
@@ -93,7 +94,7 @@ export class LayerswapCryptoOnrampProvider extends CryptoOnrampProvider<undefine
         return [Network.mainnet()];
     }
 
-    async getMetadata() {
+    getMetadata() {
         return {
             name: 'Layerswap',
             url: 'https://layerswap.io',
@@ -152,7 +153,7 @@ export class LayerswapCryptoOnrampProvider extends CryptoOnrampProvider<undefine
             source_network: chainConfig.slug,
             destination_network: LAYERSWAP_DESTINATION_NETWORK,
             source_token: sourceCurrency.symbol,
-            destination_token: targetCurrency.symbol,
+            destination_token: toLayerswapDestinationToken(targetCurrency.symbol),
             destination_address: recipientAddress,
             ...(refundAddress ? { source_address: refundAddress } : {}),
             refuel: false,
@@ -316,7 +317,9 @@ export class LayerswapCryptoOnrampProvider extends CryptoOnrampProvider<undefine
         const destination = this.destinationTokens;
 
         const results = await Promise.allSettled(
-            destination.map((dest) => this.fetchSources(LAYERSWAP_DESTINATION_NETWORK, dest.symbol)),
+            destination.map((dest) =>
+                this.fetchSources(LAYERSWAP_DESTINATION_NETWORK, toLayerswapDestinationToken(dest.symbol)),
+            ),
         );
 
         const sourceMap = new Map<string, CryptoOnrampSourceCurrency>();
@@ -402,7 +405,7 @@ const mapLayerswapTokenToSource = (
     caip2: string,
 ): CryptoOnrampSourceCurrency => ({
     chain: caip2,
-    address: token.contract ?? '',
+    address: token.contract ?? 'native',
     symbol: token.symbol,
     name: token.display_asset ?? token.symbol,
     decimals: token.decimals,

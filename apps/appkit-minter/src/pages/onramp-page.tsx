@@ -14,7 +14,7 @@ import { Caip2ByNetwork } from '@ton/appkit-react';
 import { Layout } from '@/core/components';
 
 const DEFAULT_DESTINATION: CryptoOnrampDestinationRef = {
-    address: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
+    address: 'ton',
 };
 
 const DEFAULT_SOURCE: CryptoOnrampSourceRef = {

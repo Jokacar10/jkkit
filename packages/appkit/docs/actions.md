@@ -457,7 +457,7 @@ console.log(
 Get static metadata for a crypto-onramp provider (display name, logo, url).
 
 ```ts
-const metadata = await getCryptoOnrampProviderMetadata(appKit, {
+const metadata = getCryptoOnrampProviderMetadata(appKit, {
     providerId: 'layerswap',
 });
 console.log('Crypto onramp provider metadata:', metadata);

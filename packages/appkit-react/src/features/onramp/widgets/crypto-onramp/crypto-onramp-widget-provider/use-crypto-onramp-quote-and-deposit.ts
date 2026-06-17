@@ -9,7 +9,6 @@
 import { useCallback, useMemo } from 'react';
 import { formatUnits, parseUnits } from '@ton/appkit';
 import type { CryptoOnrampDestinationCurrency, CryptoOnrampSourceCurrency } from '@ton/appkit';
-import { keepPreviousData } from '@tanstack/react-query';
 
 import { useCreateCryptoOnrampDeposit } from '../../../hooks/use-create-crypto-onramp-deposit';
 import { useCryptoOnrampProviderMetadata } from '../../../hooks/use-crypto-onramp-provider-metadata';
@@ -67,15 +66,20 @@ export const useCryptoOnrampQuoteAndDeposit = ({
                 !!userAddress &&
                 parseFloat(amountDebounced) > 0,
             retry: false,
-            placeholderData: keepPreviousData,
+            // Keep the previous quote across debounced amount changes (no flicker while typing),
+            // but drop it as soon as a currency changes so a stale quote/conversion never lingers.
+            placeholderData: (previousData) =>
+                previousData &&
+                previousData.sourceCurrency.address === selectedMethod?.address &&
+                previousData.sourceCurrency.chain === selectedMethod?.chain &&
+                previousData.targetCurrency.address === selectedToken?.address
+                    ? previousData
+                    : undefined,
             refetchOnWindowFocus: false,
         },
     });
 
-    const { data: selectedProviderMetadata } = useCryptoOnrampProviderMetadata({
-        providerId,
-        query: { enabled: !!providerId },
-    });
+    const selectedProviderMetadata = useCryptoOnrampProviderMetadata({ providerId });
     const refundAddressMode = selectedProviderMetadata?.refundAddressMode ?? 'off';
     const isReversedAmountSupported = selectedProviderMetadata?.isReversedAmountSupported ?? true;
 
@@ -90,7 +94,7 @@ export const useCryptoOnrampQuoteAndDeposit = ({
     });
 
     const convertedAmount = useMemo(() => {
-        // `keepPreviousData` keeps quoteQuery.data after the user clears the input, so we must
+        // The quote query keeps its previous result after the user clears the input, so we must
         // gate on the current amount to avoid showing a stale conversion.
         if (!quoteQuery.data || !(parseFloat(amount) > 0)) return '';
         const rawAmount = amountInputMode === 'token' ? quoteQuery.data.sourceAmount : quoteQuery.data.targetAmount;

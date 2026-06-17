@@ -10,7 +10,6 @@ import type { CryptoOnrampDestinationCurrency } from '@ton/appkit';
 
 import { useBalance } from '../../../../balances/hooks/use-balance';
 import { useJettonBalanceByAddress } from '../../../../jettons/hooks/use-jetton-balance-by-address';
-import { NATIVE_TON_ADDRESS } from '../../../constants';
 
 interface UseCryptoOnrampBalanceOptions {
     selectedToken: CryptoOnrampDestinationCurrency | null;
@@ -18,7 +17,7 @@ interface UseCryptoOnrampBalanceOptions {
 }
 
 export const useCryptoOnrampBalance = ({ selectedToken, userAddress }: UseCryptoOnrampBalanceOptions) => {
-    const isNativeTonTarget = selectedToken?.address === NATIVE_TON_ADDRESS;
+    const isNativeTonTarget = selectedToken?.address === 'ton';
 
     const { data: nativeBalanceData, isLoading: isNativeBalanceLoading } = useBalance({
         query: { enabled: isNativeTonTarget && !!userAddress, refetchInterval: 5000 },

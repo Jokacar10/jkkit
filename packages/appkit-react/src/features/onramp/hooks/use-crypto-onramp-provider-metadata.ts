@@ -8,29 +8,34 @@
 
 'use client';
 
-import { getCryptoOnrampProviderMetadataQueryOptions } from '@ton/appkit/queries';
-import type {
-    GetCryptoOnrampProviderMetadataData,
-    GetCryptoOnrampProviderMetadataErrorType,
-    GetCryptoOnrampProviderMetadataQueryConfig,
-} from '@ton/appkit/queries';
+import { useMemo } from 'react';
+import { getCryptoOnrampProviderMetadata } from '@ton/appkit';
+import type { GetCryptoOnrampProviderMetadataOptions, GetCryptoOnrampProviderMetadataReturnType } from '@ton/appkit';
 
 import { useAppKit } from '../../settings';
-import { useQuery } from '../../../libs/query';
-import type { UseQueryReturnType } from '../../../libs/query';
+import { useCryptoOnrampProviders } from './use-crypto-onramp-providers';
 
-export type UseCryptoOnrampProviderMetadataParameters<selectData = GetCryptoOnrampProviderMetadataData> =
-    GetCryptoOnrampProviderMetadataQueryConfig<selectData>;
+export type UseCryptoOnrampProviderMetadataParameters = GetCryptoOnrampProviderMetadataOptions;
 
-export type UseCryptoOnrampProviderMetadataReturnType<selectData = GetCryptoOnrampProviderMetadataData> =
-    UseQueryReturnType<selectData, GetCryptoOnrampProviderMetadataErrorType>;
+export type UseCryptoOnrampProviderMetadataReturnType = GetCryptoOnrampProviderMetadataReturnType | undefined;
 
 /**
  * Hook to get static metadata for a crypto-onramp provider (display name, logo, url).
+ *
+ * Metadata is static, so this resolves synchronously off the registered providers — no query.
+ * Returns `undefined` when no provider matches (e.g. before registration or for an unknown id);
+ * subscribing to the provider list keeps the value fresh as providers register or the default changes.
  */
-export const useCryptoOnrampProviderMetadata = <selectData = GetCryptoOnrampProviderMetadataData>(
-    parameters: UseCryptoOnrampProviderMetadataParameters<selectData> = {},
-): UseCryptoOnrampProviderMetadataReturnType<selectData> => {
+export const useCryptoOnrampProviderMetadata = (
+    parameters: UseCryptoOnrampProviderMetadataParameters = {},
+): UseCryptoOnrampProviderMetadataReturnType => {
     const appKit = useAppKit();
-    return useQuery(getCryptoOnrampProviderMetadataQueryOptions(appKit, parameters));
+    const providers = useCryptoOnrampProviders();
+    const { providerId } = parameters;
+
+    return useMemo(() => {
+        if (providers.length === 0) return undefined;
+        if (providerId && !providers.some((provider) => provider.providerId === providerId)) return undefined;
+        return getCryptoOnrampProviderMetadata(appKit, { providerId });
+    }, [appKit, providers, providerId]);
 };
