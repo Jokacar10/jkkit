@@ -22,6 +22,7 @@ import { Network } from '../../api/models';
 import { EventEmitter } from '../../core/EventEmitter';
 import type { ProviderFactoryContext } from '../../types/factory';
 import { GaslessError, GaslessErrorCode } from './errors';
+import { DefiError } from '../errors';
 import { GaslessManager } from './GaslessManager';
 
 const TEST_ADDRESS = 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs';
@@ -109,11 +110,11 @@ describe('GaslessManager.setDefaultProvider', () => {
         expect(manager.getProvider('first')).toBe(first);
     });
 
-    it('throws GaslessError when the providerId is not registered', () => {
+    it('throws DefiError when the providerId is not registered', () => {
         const { manager } = makeManager();
         manager.registerProvider(makeProvider('first'));
 
-        expect(() => manager.setDefaultProvider('missing')).toThrow(GaslessError);
+        expect(() => manager.setDefaultProvider('missing')).toThrow(DefiError);
     });
 });
 

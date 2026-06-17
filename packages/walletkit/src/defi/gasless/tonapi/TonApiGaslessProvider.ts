@@ -42,6 +42,7 @@ import type { TonApiGaslessChainConfig, TonApiGaslessProviderConfig } from './mo
 import type { TonApiGaslessConfig } from './types/config';
 import type { TonApiGaslessEstimateResponse } from './types/estimate';
 import type { TonApiGaslessSendResponse } from './types/send';
+import { DefiErrorCode, DefiError } from '../../errors';
 
 const log = globalLogger.createChild('TonApiGaslessProvider');
 
@@ -135,8 +136,9 @@ export class TonApiGaslessProvider extends GaslessProvider {
         }
 
         if (Object.keys(chainConfig).length === 0) {
-            throw new Error(
+            throw new DefiError(
                 'createTonApiGaslessProvider: no eligible networks (configure at least one network in the kit, or pass `chains` matching a configured network)',
+                DefiErrorCode.InvalidParams,
             );
         }
 

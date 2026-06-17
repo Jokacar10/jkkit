@@ -17,8 +17,7 @@ import type {
     CryptoOnrampStatusParams,
     CryptoOnrampSupportedCurrencies,
 } from '../../api/models';
-import type { CryptoOnrampErrorCode } from './errors';
-import { CryptoOnrampError } from './errors';
+import { toDefiError } from '../errors';
 import { globalLogger } from '../../core/Logger';
 import { DefiManager } from '../DefiManager';
 
@@ -43,7 +42,7 @@ export class CryptoOnrampManager extends DefiManager<CryptoOnrampProviderInterfa
             return this.getProvider(selectedProviderId).getMetadata();
         } catch (error) {
             log.error('Failed to get crypto onramp metadata', { error });
-            throw error;
+            throw toDefiError(error, 'Failed to get crypto onramp metadata');
         }
     }
 
@@ -79,7 +78,7 @@ export class CryptoOnrampManager extends DefiManager<CryptoOnrampProviderInterfa
             return quote;
         } catch (error) {
             log.error('Failed to get crypto onramp quote', { error, params });
-            throw error;
+            throw toDefiError(error, 'Failed to get crypto onramp quote');
         }
     }
 
@@ -113,7 +112,7 @@ export class CryptoOnrampManager extends DefiManager<CryptoOnrampProviderInterfa
             return deposit;
         } catch (error) {
             log.error('Failed to create crypto onramp deposit', { error, params });
-            throw error;
+            throw toDefiError(error, 'Failed to create crypto onramp deposit');
         }
     }
 
@@ -141,7 +140,7 @@ export class CryptoOnrampManager extends DefiManager<CryptoOnrampProviderInterfa
             return status;
         } catch (error) {
             log.error('Failed to get crypto onramp deposit status', { error, params });
-            throw error;
+            throw toDefiError(error, 'Failed to get crypto onramp deposit status');
         }
     }
 
@@ -157,11 +156,7 @@ export class CryptoOnrampManager extends DefiManager<CryptoOnrampProviderInterfa
             return await this.getProvider(selectedProviderId).getSupportedCurrencies();
         } catch (error) {
             log.error('Failed to discover crypto onramp supported currencies', { error });
-            throw error;
+            throw toDefiError(error, 'Failed to discover crypto onramp supported currencies');
         }
-    }
-
-    protected createError(message: string, code: CryptoOnrampErrorCode, details?: unknown): CryptoOnrampError {
-        return new CryptoOnrampError(message, code, details);
     }
 }

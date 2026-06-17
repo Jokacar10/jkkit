@@ -64,6 +64,7 @@ export default {
         noDefaultProvider: 'No provider configured',
         invalidProvider: 'Invalid provider',
         invalidParams: 'Invalid parameters',
+        genericError: 'Something went wrong',
     },
 
     // Swap
@@ -137,9 +138,9 @@ export default {
         selectMethod: 'Select payment method',
         searchMethod: 'Search',
         quoteError: 'Failed to get a quote',
+        depositFailed: 'Failed to create deposit',
         tooManyDecimals: 'Too many decimals',
         providerError: 'Provider error',
-        genericError: 'Something went wrong',
         addressTab: 'Address',
         memoTab: 'Memo',
         youGet: 'You get',

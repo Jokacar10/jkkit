@@ -19,8 +19,7 @@ import type {
 import { globalLogger } from '../../core/Logger';
 import type { ProviderFactoryContext } from '../../types/factory';
 import { DefiManager } from '../DefiManager';
-import type { GaslessErrorCode } from './errors';
-import { GaslessError } from './errors';
+import { toDefiError } from '../errors';
 
 const log = globalLogger.createChild('GaslessManager');
 
@@ -46,7 +45,7 @@ export class GaslessManager extends DefiManager<GaslessProviderInterface> implem
             return await this.getProvider(selectedProviderId).getMetadata();
         } catch (error) {
             log.error('Failed to get gasless provider metadata', { error });
-            throw error;
+            throw toDefiError(error, 'Failed to get gasless provider metadata');
         }
     }
 
@@ -67,7 +66,7 @@ export class GaslessManager extends DefiManager<GaslessProviderInterface> implem
             return await provider.getConfig(targetNetwork);
         } catch (error) {
             log.error('Failed to get gasless config', { error });
-            throw error;
+            throw toDefiError(error, 'Failed to get gasless config');
         }
     }
 
@@ -87,7 +86,7 @@ export class GaslessManager extends DefiManager<GaslessProviderInterface> implem
             return await this.getProvider(providerId ?? this.defaultProviderId).getQuote(params);
         } catch (error) {
             log.error('Failed to quote gasless transaction', { error, params });
-            throw error;
+            throw toDefiError(error, 'Failed to quote gasless transaction');
         }
     }
 
@@ -104,11 +103,7 @@ export class GaslessManager extends DefiManager<GaslessProviderInterface> implem
             return await this.getProvider(providerId ?? this.defaultProviderId).sendTransaction(params);
         } catch (error) {
             log.error('Failed to send gasless transaction', { error });
-            throw error;
+            throw toDefiError(error, 'Failed to send gasless transaction');
         }
-    }
-
-    protected createError(message: string, code: string, details?: unknown): GaslessError {
-        return new GaslessError(message, code as GaslessErrorCode, details);
     }
 }
