@@ -1,7 +1,7 @@
 ---
-"@ton/walletkit": patch
-"@ton/appkit": patch
-"@ton/appkit-react": patch
+"@ton/walletkit": minor
+"@ton/appkit": minor
+"@ton/appkit-react": minor
 ---
 
 Add support for custom providers — third-party providers (`type: 'custom'`) that expose their own methods rather than an SDK-defined API. Register one with `registerProvider`, then retrieve it by id; pass the expected type as a generic argument to narrow the result.

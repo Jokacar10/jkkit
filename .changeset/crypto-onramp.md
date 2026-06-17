@@ -1,7 +1,7 @@
 ---
-'@ton/walletkit': patch
-'@ton/appkit': patch
-'@ton/appkit-react': patch
+'@ton/walletkit': minor
+'@ton/appkit': minor
+'@ton/appkit-react': minor
 ---
 
 Add crypto-onramp support — bridging another chain's crypto into a TON-side asset (e.g. ETH on Arbitrum → USDT on TON) through pluggable providers.

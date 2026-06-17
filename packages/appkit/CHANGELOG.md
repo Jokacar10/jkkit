@@ -1,5 +1,65 @@
 # @ton/appkit
 
+## 1.1.0-beta.0
+
+### Minor Changes
+
+- 68f4abb: Add crypto-onramp support — bridging another chain's crypto into a TON-side asset (e.g. ETH on Arbitrum → USDT on TON) through pluggable providers.
+
+    **@ton/walletkit**
+
+    - `CryptoOnrampManager` — registers, switches and delegates to crypto-onramp providers with a unified API: `getQuote`, `createDeposit`, `getStatus`, `getSupportedCurrencies`, and synchronous `getMetadata`.
+    - `CryptoOnrampProvider` abstract base + `CryptoOnrampProviderInterface` for custom providers.
+    - Two built-in providers: **Layerswap** and **Decent** (formerly Swaps.xyz), each with configurable supported chains and currencies.
+    - Models: `CryptoOnrampQuote`, `CryptoOnrampDeposit`, `CryptoOnrampStatus`, `CryptoOnrampSourceCurrency` / `CryptoOnrampDestinationCurrency`, `CryptoOnrampSupportedCurrencies`, and `CryptoOnrampProviderMetadata` (carries `refundAddressMode` — `off` / `optional` / `required` — and `isReversedAmountSupported`). CAIP-2 chain identifiers via `Caip2ByNetwork`.
+    - Currency addresses are normalized to canonical sentinels — `'native'` for a source chain's native coin and `'ton'` for native Toncoin (surfaced as GRAM); each provider translates them to its own API form internally.
+    - Errors surface as `CryptoOnrampError` / `CryptoOnrampErrorCode`.
+
+    **@ton/appkit**
+
+    - Actions: `getCryptoOnrampProvider`, `getCryptoOnrampProviders`, `watchCryptoOnrampProviders`, `setDefaultCryptoOnrampProvider`, `getCryptoOnrampQuote`, `createCryptoOnrampDeposit`, `getCryptoOnrampStatus`, `getCryptoOnrampSupportedCurrencies`, `getCryptoOnrampProviderMetadata`.
+    - Matching TanStack Query helpers for quote, status and supported currencies, plus a deposit mutation.
+    - Built-in providers ship as tree-shakeable subpath imports: `@ton/appkit/crypto-onramp/layerswap` (`createLayerswapProvider`) and `@ton/appkit/crypto-onramp/decent` (`createDecentProvider`).
+
+    **@ton/appkit-react**
+
+    - `CryptoOnrampWidget` — a drop-in buy flow, with the headless `CryptoOnrampWidgetProvider` / context for fully custom UIs. Covers token + payment-method selection with network filters, amount input (with reversed/target-amount entry where the provider supports it), live quote, deposit address + status polling, a refund-address modal driven by the provider's `refundAddressMode`, a provider settings modal, and empty/loading states.
+    - Hooks: `useCryptoOnrampProviders`, `useCryptoOnrampProvider`, `useCryptoOnrampProviderById`, `useCryptoOnrampQuote`, `useCreateCryptoOnrampDeposit`, `useCryptoOnrampStatus`, `useCryptoOnrampSupportedCurrencies`, `useCryptoOnrampProviderMetadata`.
+
+- 438588e: Add support for custom providers — third-party providers (`type: 'custom'`) that expose their own methods rather than an SDK-defined API. Register one with `registerProvider`, then retrieve it by id; pass the expected type as a generic argument to narrow the result.
+
+    **@ton/walletkit**
+
+    - New `CustomProvidersManager` (keyed by `providerId`) and the `CustomProvider` interface, both exported from the package root.
+    - Custom providers are registered through the existing `registerProvider` flow and reachable via the `customProviders` getter on the kit.
+    - `getProvider<T extends CustomProvider>(id)` returns the registered provider (or `undefined`), narrowed to `T`.
+
+    **@ton/appkit**
+
+    - New `getCustomProvider(appKit, { id })` action, returning the provider narrowed to the generic type argument, and `watchCustomProviders(appKit, { onChange })` to react to registrations.
+    - Re-exports the `CustomProvider` type and exposes `customProvidersManager` on `AppKit`.
+
+    **@ton/appkit-react**
+
+    - New `useCustomProvider<T>(id)` hook — reads a custom provider by id and re-renders when custom providers are registered.
+
+- f04e34f: Expose advanced transfer parameters on the jetton, NFT and TON transfer actions (and their hooks `useTransferJetton` / `useTransferNft`).
+
+    - **Jetton transfer** (`transferJetton` / `createTransferJettonTransaction`): added `queryId`, `forwardAmount`, `forwardPayload`, `customPayload` and `gasAmount`. A raw `forwardPayload` takes priority over `comment`.
+    - **NFT transfer** (`transferNft` / `createTransferNftTransaction`): added `queryId`, `forwardAmount`, `forwardPayload`, `customPayload` and `responseDestination`, with the same `forwardPayload` / `comment` precedence.
+    - **TON transfer** (`createTransferTonTransaction`): added `extraCurrency`.
+
+    All new fields are optional — omitting them preserves the previous behaviour. Payload fields (`forwardPayload`, `customPayload`) are Base64-encoded cells; `queryId`, `forwardAmount` and `gasAmount` are nanoton / uint strings. `mode` is intentionally not exposed (it is not carried over TonConnect).
+
+    **BREAKING:** the NFT transfer `amount` field is renamed to `gasAmount` — the TON (in nanotons) attached for gas — to remove the ambiguity with a token quantity and to match the jetton transfer. Replace `{ amount }` with `{ gasAmount }` in `createTransferNftTransaction` / `transferNft` / `useTransferNft` calls.
+
+### Patch Changes
+
+- Updated dependencies [68f4abb]
+- Updated dependencies [438588e]
+- Updated dependencies [82fa071]
+    - @ton/walletkit@1.1.0-beta.0
+
 ## 1.0.0
 
 ### Major Changes
