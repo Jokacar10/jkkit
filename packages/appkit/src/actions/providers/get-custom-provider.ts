@@ -9,19 +9,19 @@
 import type { AppKit } from '../../core/app-kit';
 import type { CustomProvider } from '../../providers';
 
-export interface GetCustomProviderOptions<T extends CustomProvider = CustomProvider> {
+export interface GetCustomProviderOptions {
     id: string;
-    guard: (provider: CustomProvider) => provider is T;
 }
 
 export type GetCustomProviderReturnType<T extends CustomProvider = CustomProvider> = T | undefined;
 
 /**
- * Get a registered custom provider by id, verified and narrowed by the guard.
+ * Get a registered custom provider by id. Pass the expected type as a generic
+ * argument to narrow the returned provider.
  */
-export const getCustomProvider = <T extends CustomProvider>(
+export const getCustomProvider = <T extends CustomProvider = CustomProvider>(
     appKit: AppKit,
-    options: GetCustomProviderOptions<T>,
+    options: GetCustomProviderOptions,
 ): GetCustomProviderReturnType<T> => {
-    return appKit.customProvidersManager.getProvider(options.id, options.guard);
+    return appKit.customProvidersManager.getProvider<T>(options.id);
 };

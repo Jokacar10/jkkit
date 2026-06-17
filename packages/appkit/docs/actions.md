@@ -916,13 +916,9 @@ const unsubscribe = watchSignMessageSupport(appKit, {
 
 Get a registered custom provider by id.
 
-```ts
-const isMyCustomProvider = (provider: CustomProvider): provider is MyCustomProvider =>
-    typeof (provider as MyCustomProvider).customAction === 'function';
-
-const provider = getCustomProvider(appKit, {
+```tsx
+const provider = getCustomProvider<MyCustomProvider>(appKit, {
     id: 'my-provider',
-    guard: isMyCustomProvider,
 });
 
 if (provider) {

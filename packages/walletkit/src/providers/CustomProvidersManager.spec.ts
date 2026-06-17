@@ -18,9 +18,6 @@ interface TestProvider extends CustomProvider {
     customAction: () => Promise<void>;
 }
 
-const isTestProvider = (provider: CustomProvider): provider is TestProvider =>
-    typeof (provider as TestProvider).customAction === 'function';
-
 const makeManager = (): { manager: CustomProvidersManager; emitter: EventEmitter<SharedKitEvents> } => {
     const emitter = new EventEmitter<SharedKitEvents>();
     const ctx: ProviderFactoryContext = {
@@ -43,18 +40,13 @@ describe('CustomProvidersManager', () => {
         manager = makeManager().manager;
     });
 
-    it('registers and retrieves a provider by id and guard', () => {
+    it('registers and retrieves a provider by id', () => {
         manager.registerProvider(makeProvider('my'));
-        expect(manager.getProvider('my', isTestProvider)?.providerId).toBe('my');
+        expect(manager.getProvider<TestProvider>('my')?.providerId).toBe('my');
     });
 
     it('returns undefined for an unknown provider', () => {
-        expect(manager.getProvider('missing', isTestProvider)).toBeUndefined();
-    });
-
-    it('returns undefined when the guard rejects the registered provider', () => {
-        manager.registerProvider({ providerId: 'wrong', type: 'custom' as const });
-        expect(manager.getProvider('wrong', isTestProvider)).toBeUndefined();
+        expect(manager.getProvider('missing')).toBeUndefined();
     });
 
     it('resolves a provider factory using the factory context', () => {
@@ -69,7 +61,7 @@ describe('CustomProvidersManager', () => {
         const second = makeProvider('dup');
         manager.registerProvider(makeProvider('dup'));
         manager.registerProvider(second);
-        expect(manager.getProvider('dup', isTestProvider)).toBe(second);
+        expect(manager.getProvider('dup')).toBe(second);
         expect(manager.getRegisteredProviders()).toEqual(['dup']);
     });
 

@@ -17,9 +17,8 @@ import type { CustomProvider } from './CustomProvider';
  * Registry for custom providers (`type: 'custom'`), keyed by `providerId`.
  *
  * Unlike the defi managers, a custom provider exposes no SDK-defined API.
- * Consumers register their own implementation and retrieve it through a
- * caller-supplied type guard, which both narrows the type and verifies at
- * runtime that the registered provider really matches.
+ * Consumers register their own implementation and retrieve it by id, passing
+ * the expected type as a generic argument to narrow the returned provider.
  */
 export class CustomProvidersManager {
     public createFactoryContext: () => ProviderFactoryContext;
@@ -48,17 +47,12 @@ export class CustomProvidersManager {
     }
 
     /**
-     * Get a registered custom provider by id, verified and narrowed by the guard.
+     * Get a registered custom provider by id.
      * @param providerId - Id the provider was registered under
-     * @param guard - Type guard confirming the provider is of type `T`
-     * @returns The provider when present and the guard passes, otherwise undefined
+     * @returns The provider when present, otherwise undefined
      */
-    getProvider<T extends CustomProvider>(
-        providerId: string,
-        guard: (provider: CustomProvider) => provider is T,
-    ): T | undefined {
-        const provider = this.providers.get(providerId);
-        return provider && guard(provider) ? provider : undefined;
+    getProvider<T extends CustomProvider>(providerId: string): T | undefined {
+        return this.providers.get(providerId) as T | undefined;
     }
 
     /**

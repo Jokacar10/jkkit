@@ -13,13 +13,11 @@ import type { CustomProvider } from '@ton/appkit';
 import { useAppKit } from '../../settings/hooks/use-app-kit';
 
 /**
- * Hook to get a registered custom provider by id, verified and narrowed by the
- * guard. Reactive to custom provider registrations.
+ * Hook to get a registered custom provider by id. Pass the expected type as a
+ * generic argument to narrow the returned provider. Reactive to custom provider
+ * registrations.
  */
-export const useCustomProvider = <T extends CustomProvider>(
-    id: string,
-    guard: (provider: CustomProvider) => provider is T,
-): T | undefined => {
+export const useCustomProvider = <T extends CustomProvider = CustomProvider>(id: string): T | undefined => {
     const appKit = useAppKit();
 
     const subscribe = useCallback(
@@ -30,8 +28,8 @@ export const useCustomProvider = <T extends CustomProvider>(
     );
 
     const getSnapshot = useCallback(() => {
-        return getCustomProvider(appKit, { id, guard });
-    }, [appKit, id, guard]);
+        return getCustomProvider<T>(appKit, { id });
+    }, [appKit, id]);
 
     return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 };

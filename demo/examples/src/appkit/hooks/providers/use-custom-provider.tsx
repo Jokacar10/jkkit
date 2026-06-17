@@ -13,12 +13,9 @@ interface MyCustomProvider extends CustomProvider {
     customAction: (params: unknown) => Promise<void>;
 }
 
-const isMyCustomProvider = (provider: CustomProvider): provider is MyCustomProvider =>
-    typeof (provider as MyCustomProvider).customAction === 'function';
-
 export const UseCustomProviderExample = () => {
     // SAMPLE_START: USE_CUSTOM_PROVIDER
-    const provider = useCustomProvider('my-provider', isMyCustomProvider);
+    const provider = useCustomProvider<MyCustomProvider>('my-provider');
 
     if (!provider) {
         return <div>Custom provider not registered</div>;

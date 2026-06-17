@@ -15,10 +15,7 @@ interface MyCustomProvider extends CustomProvider {
 
 export const getCustomProviderExample = (appKit: AppKit) => {
     // SAMPLE_START: GET_CUSTOM_PROVIDER
-    const isMyCustomProvider = (provider: CustomProvider): provider is MyCustomProvider =>
-        typeof (provider as MyCustomProvider).customAction === 'function';
-
-    const provider = getCustomProvider(appKit, { id: 'my-provider', guard: isMyCustomProvider });
+    const provider = getCustomProvider<MyCustomProvider>(appKit, { id: 'my-provider' });
 
     if (provider) {
         console.log('Custom provider is available');

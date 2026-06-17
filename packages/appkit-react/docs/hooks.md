@@ -1350,7 +1350,7 @@ return <p>{hasSignMessageSupport ? 'Wallet supports SignMessage' : 'SignMessage 
 Hook to get a registered custom provider by id.
 
 ```tsx
-const provider = useCustomProvider('my-provider', isMyCustomProvider);
+const provider = useCustomProvider<MyCustomProvider>('my-provider');
 
 if (!provider) {
     return <div>Custom provider not registered</div>;
