@@ -8,7 +8,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { actionDetails, callOk, isSameAddress, sendEmulated, useHarness } from './helpers.js';
+import { actionDetails, buildThenSendEmulated, callOk, isSameAddress, sendEmulated, useHarness } from './helpers.js';
 import { getIntegrationMnemonic, TESTNET_FIXTURES } from './integration-env.js';
 
 const FIXTURES = TESTNET_FIXTURES;
@@ -18,7 +18,7 @@ describe.skipIf(!getIntegrationMnemonic())('MCP agentic wallet flows (testnet re
 
     it('exposes the agentic toolset including subwallet deployment', async () => {
         const names = await getHarness().listToolNames();
-        expect(names).toEqual(expect.arrayContaining(['agentic_deploy_subwallet', 'send_ton']));
+        expect(names).toEqual(expect.arrayContaining(['agentic_deploy_subwallet', 'build_ton_transfer']));
     });
 
     it('get_wallet returns the deployed agentic wallet', async () => {
@@ -32,8 +32,8 @@ describe.skipIf(!getIntegrationMnemonic())('MCP agentic wallet flows (testnet re
         expect(BigInt(payload.amountRaw as string) > 0n).toBe(true);
     });
 
-    it('send_ton signed by the operator key passes contract validation in emulation', async () => {
-        const { actions, totalFees } = await sendEmulated(getHarness(), 'send_ton', {
+    it('build_ton_transfer broadcast signed by the operator key passes contract validation in emulation', async () => {
+        const { actions, totalFees } = await buildThenSendEmulated(getHarness(), 'build_ton_transfer', {
             toAddress: FIXTURES.walletAddress,
             amount: '0.01',
             comment: 'mcp agentic integration test',

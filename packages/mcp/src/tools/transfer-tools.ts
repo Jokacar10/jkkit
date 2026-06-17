@@ -84,7 +84,7 @@ export function createMcpTransferTools(service: McpWalletService) {
     return {
         build_ton_transfer: {
             description:
-                'Prepare a TON transfer from the wallet to an address. Amount is in TON (e.g., "1.5" means 1.5 TON). Does NOT broadcast: returns ready-to-send transaction messages. Preview them with emulate_transaction, then broadcast with send_raw_transaction.',
+                'Prepare a GRAM transfer from the wallet to an address. Amount is in GRAM (e.g., "1.5" means 1.5 GRAM). Does NOT broadcast: returns ready-to-send transaction messages. Preview them with emulate_transaction, then broadcast with send_raw_transaction.',
             inputSchema: tonTransferSchema,
             handler: async (args: z.infer<typeof tonTransferSchema>): Promise<ToolResponse> => {
                 try {
@@ -105,7 +105,7 @@ export function createMcpTransferTools(service: McpWalletService) {
                                         success: true,
                                         details: {
                                             to: args.toAddress,
-                                            amount: `${args.amount} TON`,
+                                            amount: `${args.amount} GRAM`,
                                             comment: args.comment || null,
                                         },
                                         transaction,

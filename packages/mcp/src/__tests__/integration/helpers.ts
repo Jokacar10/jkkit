@@ -67,6 +67,32 @@ export async function sendEmulated(
     return { payload, ...expectSuccessfulEmulation(harness.apiClient.lastIntercepted()) };
 }
 
+/**
+ * Runs a `build_*` tool (which must not broadcast), then broadcasts the prepared
+ * transaction via `send_raw_transaction`, asserting exactly one BOC was intercepted
+ * and emulated successfully. Mirrors the build → emulate → send flow.
+ */
+export async function buildThenSendEmulated(
+    harness: IntegrationHarness,
+    buildName: string,
+    args: Record<string, unknown>,
+): Promise<{ payload: Record<string, unknown>; actions: EmulationAction[]; totalFees: bigint }> {
+    const before = harness.apiClient.interceptedSends.length;
+    const built = await callOk(harness, buildName, args);
+    expect(harness.apiClient.interceptedSends.length, `${buildName} must not broadcast`).toBe(before);
+
+    const transaction = built.transaction as {
+        messages: Array<Record<string, unknown>>;
+        validUntil?: number;
+        fromAddress?: string;
+    };
+    return sendEmulated(harness, 'send_raw_transaction', {
+        messages: transaction.messages,
+        validUntil: transaction.validUntil,
+        fromAddress: transaction.fromAddress,
+    });
+}
+
 /** Returns the details of the emulated action of the given type, failing if absent. */
 export function actionDetails(actions: EmulationAction[], type: string): Record<string, unknown> {
     const action = actions.find((entry) => entry.type === type);

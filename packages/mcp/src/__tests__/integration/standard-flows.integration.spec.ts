@@ -12,6 +12,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
     actionDetails,
+    buildThenSendEmulated,
     callOk,
     expectRejectedWithoutSend,
     fetchFixtureJetton,
@@ -29,8 +30,16 @@ describe.skipIf(!getIntegrationMnemonic())('MCP standard wallet flows (testnet r
     it('exposes the single-wallet toolset', async () => {
         const names = await getHarness().listToolNames();
         expect(names).toEqual(
-            expect.arrayContaining(['get_wallet', 'send_ton', 'send_jetton', 'send_nft', 'emulate_transaction']),
+            expect.arrayContaining([
+                'get_wallet',
+                'build_ton_transfer',
+                'build_jetton_transfer',
+                'build_nft_transfer',
+                'emulate_transaction',
+                'send_raw_transaction',
+            ]),
         );
+        expect(names).not.toContain('send_ton');
         expect(names).not.toContain('list_wallets');
         expect(names).not.toContain('agentic_deploy_subwallet');
     });
@@ -105,8 +114,8 @@ describe.skipIf(!getIntegrationMnemonic())('MCP standard wallet flows (testnet r
         expect(getHarness().apiClient.interceptedSends.length).toBe(before);
     });
 
-    it('send_ton: captured BOC emulates the requested transfer', async () => {
-        const { payload, actions, totalFees } = await sendEmulated(getHarness(), 'send_ton', {
+    it('build_ton_transfer + send_raw_transaction: captured BOC emulates the requested transfer', async () => {
+        const { payload, actions, totalFees } = await buildThenSendEmulated(getHarness(), 'build_ton_transfer', {
             toAddress: FIXTURES.agenticWalletAddress,
             amount: '0.01',
             comment: 'mcp integration test',
@@ -128,10 +137,10 @@ describe.skipIf(!getIntegrationMnemonic())('MCP standard wallet flows (testnet r
         expect(payload.pendingMessages).toBe(0);
     });
 
-    it('send_jetton: captured BOC emulates the requested jetton transfer', async () => {
+    it('build_jetton_transfer + send_raw_transaction: captured BOC emulates the requested jetton transfer', async () => {
         const jetton = await fetchFixtureJetton(getHarness());
         const amountRaw = jetton.amountRaw / 10n > 0n ? jetton.amountRaw / 10n : 1n;
-        const { actions } = await sendEmulated(getHarness(), 'send_jetton', {
+        const { actions } = await buildThenSendEmulated(getHarness(), 'build_jetton_transfer', {
             toAddress: FIXTURES.agenticWalletAddress,
             jettonAddress: jetton.address,
             amount: formatUnits(amountRaw.toString(), jetton.decimals),
@@ -145,8 +154,8 @@ describe.skipIf(!getIntegrationMnemonic())('MCP standard wallet flows (testnet r
         expect(transfer.comment).toBe('mcp integration test');
     });
 
-    it('send_nft: captured BOC emulates the requested ownership transfer', async () => {
-        const { actions } = await sendEmulated(getHarness(), 'send_nft', {
+    it('build_nft_transfer + send_raw_transaction: captured BOC emulates the requested ownership transfer', async () => {
+        const { actions } = await buildThenSendEmulated(getHarness(), 'build_nft_transfer', {
             nftAddress: FIXTURES.nftItemAddress,
             toAddress: FIXTURES.agenticWalletAddress,
             comment: 'mcp integration test',
@@ -178,12 +187,15 @@ describe.skipIf(!getIntegrationMnemonic())('MCP standard wallet flows (testnet r
         expect(getHarness().apiClient.interceptedSends.length).toBe(before);
     });
 
-    it('send_ton rejects a malformed recipient without signing', async () => {
-        await expectRejectedWithoutSend(getHarness(), 'send_ton', { toAddress: 'not-a-ton-address', amount: '0.01' });
+    it('build_ton_transfer rejects a malformed recipient without signing', async () => {
+        await expectRejectedWithoutSend(getHarness(), 'build_ton_transfer', {
+            toAddress: 'not-a-ton-address',
+            amount: '0.01',
+        });
     });
 
-    it('send_jetton rejects a jetton the wallet does not own without signing', async () => {
-        await expectRejectedWithoutSend(getHarness(), 'send_jetton', {
+    it('build_jetton_transfer rejects a jetton the wallet does not own without signing', async () => {
+        await expectRejectedWithoutSend(getHarness(), 'build_jetton_transfer', {
             toAddress: FIXTURES.agenticWalletAddress,
             jettonAddress: FIXTURES.agenticCollectionAddress,
             amount: '1',
