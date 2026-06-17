@@ -12,8 +12,8 @@ import { mapDefiError } from '../../../../../utils/map-defi-error';
 
 /**
  * Map a thrown crypto-onramp error to an i18n key. Tries crypto-onramp-specific codes first,
- * falls back to the shared {@link mapDefiError} for base DeFi codes, and finally to a generic
- * `cryptoOnramp.genericError`.
+ * falls back to the shared {@link mapDefiError} for base DeFi codes, and finally to the shared
+ * `defi.genericError`.
  */
 export const mapCryptoOnrampError = (error: unknown): string => {
     if (error instanceof CryptoOnrampError) {
@@ -45,5 +45,5 @@ export const mapCryptoOnrampError = (error: unknown): string => {
         }
     }
 
-    return mapDefiError(error) ?? 'cryptoOnramp.genericError';
+    return mapDefiError(error) ?? 'defi.genericError';
 };

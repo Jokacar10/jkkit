@@ -11,6 +11,7 @@ import type { SwapAPI, SwapProviderInterface } from '../../api/interfaces';
 import type { SwapQuoteParams, SwapQuote, SwapParams } from '../../api/models';
 import { globalLogger } from '../../core/Logger';
 import { DefiManager } from '../DefiManager';
+import { toDefiError } from '../errors';
 import type { ProviderFactoryContext } from '../../types/factory';
 
 const log = globalLogger.createChild('SwapManager');
@@ -56,7 +57,7 @@ export class SwapManager extends DefiManager<SwapProviderInterface> implements S
             return quote;
         } catch (error) {
             log.error('Failed to get swap quote', { error, params });
-            throw error;
+            throw toDefiError(error, 'Failed to get swap quote');
         }
     }
 
@@ -83,7 +84,7 @@ export class SwapManager extends DefiManager<SwapProviderInterface> implements S
             return transaction;
         } catch (error) {
             log.error('Failed to build swap transaction', { error, params });
-            throw error;
+            throw toDefiError(error, 'Failed to build swap transaction');
         }
     }
 }

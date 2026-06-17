@@ -20,6 +20,7 @@ import type {
 import { globalLogger } from '../../../core/Logger';
 import { StakingProvider } from '../StakingProvider';
 import { StakingError, StakingErrorCode } from '../errors';
+import { DefiError, DefiErrorCode } from '../../errors';
 import type { TonStakersChainConfig, TonStakersProviderConfig } from './models/TonStakersProviderConfig';
 import type { ProviderFactoryContext } from '../../../types/factory';
 import type { NetworkManager } from '../../../core/NetworkManager';
@@ -109,8 +110,9 @@ export class TonStakersStakingProvider extends StakingProvider {
         }
 
         if (Object.keys(chainConfig).length === 0) {
-            throw new Error(
+            throw new DefiError(
                 'createTonstakersProvider: no eligible networks (add mainnet/testnet or pass metadata.contractAddress in overrides)',
+                DefiErrorCode.InvalidParams,
             );
         }
 
@@ -485,7 +487,7 @@ export class TonStakersStakingProvider extends StakingProvider {
         const poolInfo = await client.getJson<{ pool: { apy: number } }>(`/v2/staking/pool/${address}`);
 
         if (!poolInfo?.pool?.apy) {
-            throw new Error('Invalid APY data from TonAPI');
+            throw new StakingError('Invalid APY data from TonAPI', StakingErrorCode.InvalidParams);
         }
 
         return Number(poolInfo.pool.apy);
