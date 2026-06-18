@@ -78,15 +78,15 @@ export const formatLargeValue = (amount: string, decimals: number = 2, minimumFr
     const cleanAmount = amount.toString().replace(/\s/g, '');
     const intPart = cleanAmount.split('.')[0] || '0';
 
-    // > 100 000 000 000 000 => 100T
+    // 13+ integer digits (>= 1e12) => trillions, e.g. "1.23T"
     if (intPart.length > 12) {
         return `${(Number(intPart.slice(0, -10)) / 100).toLocaleString('en-US')}T`;
     }
-    // > 100 000 000 000 => 100B
+    // 10+ integer digits (>= 1e9) => billions, e.g. "1.23B"
     if (intPart.length > 9) {
         return `${(Number(intPart.slice(0, -7)) / 100).toLocaleString('en-US')}B`;
     }
-    // > 10 000 000 => 10M
+    // 7+ integer digits (>= 1e6) => millions, e.g. "1.23M"
     if (intPart.length > 6) {
         return `${(Number(intPart.slice(0, -4)) / 100).toLocaleString('en-US')}M`;
     }

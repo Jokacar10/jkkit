@@ -49,9 +49,8 @@ export function evaluateBip39Slots(words24: readonly string[]): Bip39SlotValidat
 
 export function isImportableBip39(v: Bip39SlotValidation): boolean {
     const n = v.nonEmptyWords.length;
-    if (n === 24) return true;
-    if (n === 12) return v.invalidIndices.length === 0;
-    return false;
+    if (n !== 12 && n !== 24) return false;
+    return v.invalidIndices.length === 0;
 }
 
 export type MnemonicPasteResult = {
