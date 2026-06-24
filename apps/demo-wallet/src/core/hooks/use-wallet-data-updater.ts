@@ -10,7 +10,7 @@ import { useEffect } from 'react';
 import { useAuth, useJettons, useNfts, useRates, useWallet } from '@demo/wallet-core';
 
 export const useWalletDataUpdater = () => {
-    const { address, updateBalance, hasWallet, currentWallet, loadAllWallets } = useWallet();
+    const { address, activeWalletId, updateBalance, hasWallet, currentWallet, loadAllWallets } = useWallet();
     const { isUnlocked } = useAuth();
     const { loadUserJettons, clearJettons } = useJettons();
     const { loadUserNfts, clearNfts, refreshNfts } = useNfts();
@@ -23,7 +23,9 @@ export const useWalletDataUpdater = () => {
         }
     }, [hasWallet, isUnlocked, currentWallet, loadAllWallets]);
 
-    // Update on address change
+    // Update on wallet change. Keyed on activeWalletId, not address: same-key wallets on
+    // different networks (testnet/mainnet) share the same address string, so switching between
+    // them wouldn't re-run this effect and stale jettons/NFTs/rates would persist.
     useEffect(() => {
         if (!address) return;
 
@@ -35,7 +37,17 @@ export const useWalletDataUpdater = () => {
             await Promise.allSettled([updateBalance(), loadUserJettons(), loadUserNfts()]);
             await loadRates();
         })();
-    }, [address, updateBalance, loadUserJettons, loadUserNfts, loadRates, clearNfts, clearJettons, clearRates]);
+    }, [
+        activeWalletId,
+        address,
+        updateBalance,
+        loadUserJettons,
+        loadUserNfts,
+        loadRates,
+        clearNfts,
+        clearJettons,
+        clearRates,
+    ]);
 
     // Periodic refresh — sequential to avoid overloading the backend (ported from main):
     // balance → jettons → rates → NFTs, chained via setTimeout, every 20s. Rates self-throttle

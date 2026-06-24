@@ -11,7 +11,7 @@
 // eslint-disable-next-line no-console
 console.log('TON Wallet Demo extension background script loaded');
 
-import { Network, ExtensionStorageAdapter, TonWalletKit, fetchManifest } from '@ton/walletkit';
+import { Network, ExtensionStorageAdapter, TonWalletKit, fetchManifest, ApiClientTonApi } from '@ton/walletkit';
 import type { InjectedToExtensionBridgeRequestPayload } from '@ton/walletkit';
 import browser from 'webextension-polyfill';
 import { onMessage } from '@truecarry/webext-bridge/background';
@@ -49,7 +49,7 @@ async function initializeWalletKit() {
             networks: {
                 [Network.mainnet().chainId]: {
                     apiClient: {
-                        url: 'https:/toncenter.com',
+                        url: 'https://toncenter.com',
                         key: ENV_TON_API_KEY_MAINNET,
                     },
                 },
@@ -60,12 +60,13 @@ async function initializeWalletKit() {
                     },
                 },
 
-                // TODO: Update tetra api client
+                // Tetra is a TonAPI host, so it needs the TonAPI client (TonAPI
+                // paths + Bearer auth), not the default Toncenter client.
                 [Network.tetra().chainId]: {
-                    apiClient: {
-                        url: 'https://tetra.tonapi.io',
-                        key: ENV_TON_API_KEY_TETRA,
-                    },
+                    apiClient: new ApiClientTonApi({
+                        network: Network.tetra(),
+                        apiKey: ENV_TON_API_KEY_TETRA,
+                    }),
                 },
             },
 
