@@ -35,6 +35,6 @@
     "@ton/crypto-primitives": "^2.1.0",
     "@types/whatwg-url": "^13.0.0",
     "typescript": "catalog:",
-    "vite": "catalog:"
+    "vite": "8.0.16"
   }
 }
